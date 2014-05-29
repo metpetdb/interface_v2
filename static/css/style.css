@@ -1,0 +1,243 @@
+p, a, tr, td, div, small, h1, h2, h3, h4, h5, h6 
+{ 
+    font-family: 'Source Sans Pro', sans-serif;             
+}
+
+body
+{
+    background-color: #e4e6e5;
+}
+
+hr {
+clear: both;
+margin-bottom: 25px;
+border: none;
+border-top: 1px solid #B6B8B7;
+border-bottom: 1px solid white;
+}
+
+.dataTables_info
+{
+    font-weight:bold;
+}
+.paginate_disabled_previous
+{
+    padding:10px;
+    margin:5px;
+    font-weight:normal;
+}
+.paginate_enabled_previous
+{
+    font-weight:bold;
+    padding:10px;
+    margin:5px;
+}
+.paginate_disabled_next
+{
+    font-weight:normal;
+    padding:10px;
+    margin:5px;
+}
+.paginate_enabled_next
+{
+    padding:10px;
+    margin:5px;
+}
+
+.tabularView-body tbody tr td 
+{
+    border:none;
+    border-top: 1px solid #DDDDDD;
+    line-height: 25px;
+    vertical-align: middle;
+}
+.tabularView-body tbody tr:nth-child(odd) td 
+{
+    background-color: #F9F9F9;
+}
+
+#myMap
+{
+    position:relative;
+    width: 99%;
+    height:400px;
+    border: 3px solid #C7C6C6;
+}
+
+#search-panel
+{
+    
+}
+
+#sampleCount
+{
+    display:none;
+}
+
+/* Style for the display line at the top of search page*/
+
+#displayCount
+{
+    position: relative;
+    margin-top: 15px;
+    margin-left: 15px;
+    float:left;
+    font-size: 15px;
+    color: black;    
+    padding: 3px 7px 2px 7px;
+}   
+
+#s2s-search-panel
+{
+    vertical-align:top;
+    width: 25em;
+    float:left;
+    margin-top: 15px;
+}
+
+#s2s-result-panel
+{
+    width:890px;
+    float: right;
+    margin-top: 0px;
+    margin-bottom: 20px;
+    vertical-align: top;
+
+}
+
+#app_title
+{
+    color: #318B76;
+    padding-top: 15px;
+    padding-bottom: 10px;
+    margin-bottom: 8px;
+    font-weight: 400;
+    text-align: center;
+}
+
+#gridData_wrapper
+{
+    margin-left: 15px;
+   
+}
+
+#gridData_length
+{
+    margin-top: 20px;
+    
+    width: 400px;
+    float: left;
+}
+
+#gridData_filter
+{
+    width: 400px;
+
+    float: right;
+    margin-top: 20px;
+    text-align: right;
+}
+
+#gridData
+{
+    width: 900px;
+    clear: both;
+}
+
+#gridData thead tr
+{
+    border: 1px solid #409F89;
+    background-color: #409f89;
+    border-radius: 10px;
+}
+
+#gridData thead tr th
+{
+    font-size: 1em;
+    font-weight: normal;
+    text-align: left;
+    color: #FFFFFF;  
+    border: 0px solid black;  
+    padding: 3px 7px 2px 7px;
+
+}
+
+#gridData tbody tr.even
+{
+    background-color: rgba(255, 255, 255, 0.45);
+    
+}
+
+#gridData tbody tr td
+{
+    padding-left: 8px;
+
+    padding-right: 8px;
+}
+
+#gridData_info
+{
+    margin-top: 20px;
+
+}
+
+#gridData_paginate
+{
+    margin-top: 30px;
+    
+}
+
+#gridData_previous
+{
+    display: inline-block;
+    padding: 5px 14px;
+    font-weight: normal;
+    background-color: white;
+    color: #409f89;
+    border: 1px solid #DDD;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+}
+
+#gridData_previous:hover
+{
+    text-decoration: none;
+    cursor: pointer;
+    background-color: #409F89;
+    color: #F8F8F8;
+}
+
+#gridData_next
+{
+    display: inline-block;
+    padding: 5px 14px;
+    background-color: white;
+    color: #409F89;
+    border: 1px solid #DDD;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+    float: right;
+}
+
+#gridData_next:hover
+{
+    text-decoration: none;
+    cursor: pointer;
+    background-color: #409F89;
+    color: #F8F8F8;
+}
+
+div.widget-divider h3 a
+{
+    font-size:  1.2em !important;
+
+}
+
+div.widget-divider div.ui-accordion-content.ui-helper-reset.ui-widget-content.ui-corner-bottom.ui-accordion-content-active
+{
+    padding: 1em;
+}
+
+
