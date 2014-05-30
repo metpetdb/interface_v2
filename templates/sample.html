@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}
+  <h3>Sample {{sample.sample_id}}</h3>
+{% endblock %}
+
+{% block body %}
+
+  <table id="sampleview_table" class="table">
+
+    <tbody>
+      <tr>
+        <td class="sample_label">Owner</td>
+        <td class="sample_value">{{sample.user.name}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">IGSN</td>
+        <td class="sample_value">{{sample.number}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Aliases</td>
+        <td class="sample_value">{{ aliases }}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Date Collected</td>
+        <td class="sample_value">{{sample.collection_date}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Rock Type</td>
+        <td class="sample_value">{{sample.rock_type.rock_type}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Public</td>
+        <td class="sample_value">{{sample.public_data}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Longitude</td>
+        <td class="sample_value">{{location.1}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Latitude</td>
+        <td class="sample_value">{{location.0}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Country</td>
+        <td class="sample_value">{{sample.country}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Collector</td>
+        <td class="sample_value">{{sample.collector_name}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Present Sample Location</td>
+        <td class="sample_value">{{sample.location_text}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Region</td>
+        <td class="sample_value">{{ regions }}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Metamorphic Region</td>
+        <td class="sample_value">{{ metamorphic_regions }}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Metamorphic Grade</td>
+        <td class="sample_value">{{ metamorphic_grades }}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Publication References</td>
+        <td class="sample_value">{{ references }}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Abstracts</td>
+        <td class="sample_value">Don't know yet</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Minerals</td>
+        <td class="sample_value">{{ minerals }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <div id="map_canvas"></div>
+  <hr>
+
+  <!-- adding image link from metpetdbweb -->
+  <div id="sampleview_images">
+    <h4 id="s_images">Sample Images</h4>
+    <table id="image_canvas" class="table">
+      <thead>
+        <tr>
+          <th>Thumbnail</td>
+          <th>Type</td>
+        </tr>
+      </thead>
+      <tbody>
+        {% for image in sample.images%}
+        <tr id="thumb_row">
+          <td><!-- URLs pointing to the current petdb server where image files are located, cant make this generic -->
+            <a href="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_half}}" rel="lightbox"
+              title="Image type: {{ image.image_type }} <br>
+                File name: {{ image.filename }} <br>
+                <a href='http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum}}' target='_blank'>View Original</a>">
+              <img src="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_64x64}}"/>
+            </a>
+          </td>
+          <td>{{image.image_type}}</td>
+        </tr>
+        {%endfor%}
+      </tbody>
+    </table>
+  </div>
+
+
+  <hr>
+  <h4 id="subsampletable_header">Subsamples</h4>
+  <table id="subsampletable_canvas">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Public</th>
+        <th>Type</th>
+        <th>Image Count</th>
+        <th>Chemical Analysis Count</th>
+        <th>Owner</th>
+        <th>Image Map</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%for subsample in subsamples%}
+      <tr>
+        <!-- The link to subsample needs to be updated to named URL+ generic views type -->
+        <td id="img-popup"><a href="{{ url_for('subsample', id=subsample.subsample_id) }}" target="_blank">{{subsample.name}}</a></td>
+        <td>{{subsample.public_data}}</td>
+        <td>{{subsample.subsample_type.subsample_type}}</td>
+        <td>{{subsample.image_count}}</td>
+        <td>{{subsample.chem_analyses_count}}</td>
+        <td>{{ subsample.user.name }}</td>
+        <td> -- </td>
+      </tr>
+      {%endfor%}
+    </tbody>
+  </table>
+<br><br>
+
+<!-- JS for Page elements -->
+
+
+<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
+<script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript">
+  //images open in a pop up window on click
+
+
+  console.log({{location.1}}+','+{{location.0}});
+
+  $(document).ready(function() {
+    console.log('enter table code');
+      $('#subsampletable_canvas').dataTable();
+
+      $('#thumb_row td a').lightbox();   //lightbox code
+
+
+  } );
+
+  //google map api
+  map_lat = {{location.1}};
+  map_long = {{location.0}};
+  console.log(map_lat, map_long);
+
+  var myCenter=new google.maps.LatLng(map_lat, map_long);
+  function initialize()
+  {
+    var mapProp =
+    {
+      center:myCenter,
+      zoom:8,
+      mapTypeId:google.maps.MapTypeId.ROADMAP
+    };
+
+    var map=new google.maps.Map(document.getElementById("map_canvas"), mapProp);
+    var infowindow = new google.maps.InfoWindow();
+
+    var marker=new google.maps.Marker({
+     position:myCenter,
+    });
+
+    var content="latitude:"+map_lat+","+"longitude:"+map_long;
+    console.log(content);
+
+    makeInfoWindowEvent(map, infowindow, content, marker);
+
+
+    marker.setMap(map);
+
+    function makeInfoWindowEvent(map, infowindow, contentString, marker) {
+      google.maps.event.addListener(marker, 'click', function() {
+
+          infowindow.setContent(contentString);
+          infowindow.open(map, marker);
+          })};
+  }
+
+  google.maps.event.addDomListener(window, 'load', initialize);
+
+</script>
+
+{% endblock %}

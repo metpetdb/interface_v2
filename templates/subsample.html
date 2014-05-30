@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}
+  <h3>Subsample {{subsample.subsample_id}}</h3>
+{% endblock %}
+
+{% block body %}
+
+  <table id="subsampleview_table" class="table">
+    <tbody>
+      <tr>
+        <td class="subsample_label">Owner</td>
+        <td class="subsample_value">{{user.name}}</td>
+      </tr>
+      <tr>
+        <td class="subsample_label">Name</td>
+        <td class="subsample_value">{{subsample.name}}</td>
+      </tr>
+      <tr>
+        <td class="subsample_label">Public</td>
+        <td class="subsample_value">{{subsample.public_data}}</td>
+      </tr>
+      <tr>
+        <td class="subsample_label">Sample</td>
+        <td class="subsample_value"><a href="{{ url_for('sample', id=sample_id) }}" target="_blank">{{ sample_id }}</a></td>
+      </tr>
+    </tbody>
+  </table>
+  <hr>
+
+
+  <h4 id="ss_images">Subsample Images</h4>
+  <table id="subsampleviewimg_canvas">
+    <thead>
+      <tr>
+        <th>Thumbnail</th>
+        <th>filename</th>
+        <th>Image Type</th>
+        <th>Collector</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      {%for image in images%}
+      <tr id="thumb_row"><!-- images pointing to the file locations in the server, cant change this to generic as of now-->
+        <td><a href="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_half}}" rel="lightbox"
+          title="Image type: {{ image.image_type }} <br>
+            File name: {{ image.filename }} <br>
+            <a href='http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum}}' target='_blank'>View Original</a>"><img src="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_64x64}}"></a></td>
+        <td>{{image.filename}}</td>
+        <td>{{image.image_type}}</td>
+        <td>{{image.collector}}</td>
+      </tr>
+      {%endfor%}
+    </tbody>
+  </table>
+
+  <hr>
+  <h4 id="chemtable">Chemical Analyses</h4>
+  <table id="chemtable_canvas">
+    <thead>
+      <tr>
+        <th>Point Number</th>
+        <th>Public</th>
+        <th>Analysis Method</th>
+        <th>Analysis Material</th>
+        <th>Analysis Location</th>
+        <th>Analyst</th>
+        <th>Analysis Date</th>
+        <th>Reference X</th>
+        <th>Reference Y</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%for analysis in chemical_analyses%}
+      <tr><!-- URL needs to be changed to named url+ generic view type -->
+        <td><a href="{{ url_for('chemical_analysis', id=analysis.chemical_analysis_id) }}" target="_blank">{{analysis.spot_id}}</td>
+        <td>{{analysis.public_data}}</td>
+        <td>{{analysis.analysis_method}}</td>
+        <td>{{analysis.mineral.name}}</td>
+        <td>{{analysis.where_done}}</td>
+        <td>{{analysis.analyst}}</td>
+        <td>{{analysis.analysis_date}}</td>
+        <td>{{analysis.reference_x}}</td>
+        <td>{{analysis.reference_y}}</td>
+        <td>{{analysis.total}}</td>
+      </tr>
+      {%endfor%}
+    </tbody>
+  </table>
+
+
+<!-- JS for the page elements -->
+
+
+  <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
+  <script type="text/javascript">
+
+    $(document).ready(function() {
+        $('#chemtable_canvas').dataTable();
+        $('#subsampleviewimg_canvas').dataTable({
+          'fnDrawCallback': function() {$('#thumb_row td a').lightBox()}
+        });
+    } );
+  </script>
+
+{% endblock %}
+

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block body %}
+
+  <form action="" method="get">
+    <!-- Version: <input type="text" name="version"><br> -->
+    <!-- Sesar Number: <input type="text" name="sesar_number"><br><br> -->
+    <!-- Public Data: <input type="text" name="public_data"><br> -->
+    <!-- Collection Date: <input type="text" name="collection_date"><br> -->
+    <h3>Rock Types</h3>
+    <label for="rock_type__rock_type">Rock Types: </label><br>
+      {% for rock_type in rock_types %}
+        <input type="checkbox" name="rock_type__rock_type" value="{{rock_type.rock_type}}">{{ rock_type.rock_type }}
+      {% endfor %}
+
+        <br><br>
+
+    <h3>Metamorphic Grade</h3>
+    <label for="metamorphic_grades__name">Metamorphic Grade: </label><br>
+        {% for grade in metamorphic_grades %}
+          <input type="checkbox" name="metamorphic_grades__name__in" value="{{ grade }}">{{ grade }}
+        {% endfor %}
+
+
+    <h3>Location</h3>
+
+    <label for="regions__name">Regions: </label><br>
+    <select name="regions__name">
+        <option value="" selected="selected">Regions</option>
+        {% for region in regions %}
+            <option value="{{ region }}">{{ region }}</option>
+        {% endfor %}
+    </select>
+    <br>
+    <label for="metamophic_regions__name">Metamorphic Regions: </label><br>
+    <select name="metamorphic_regions__name">
+        <option value="" selected="selected">Metamorphic Regions</option>
+        {% for region in metamorphic_regions %}
+            <option value="{{ region }}">{{ region }}</option>
+        {% endfor %}
+    </select>
+    <h3>Provenance</h3>
+
+    <label for="collector">Collector: </label><br>
+    <select name="collector">
+        <option value="" selected="selected">Collector</option>
+        {% for col in provenenances %}
+            <option value="{{ col }}">{{ col }}</option>
+        {% endfor %}
+    </select><br>
+    <label for="reference__name">Reference: </label><br>
+    <select name="reference__name">
+        <option value="" selected="selected">Reference</option>
+        {% for ref in references %}
+            <option value="{{ ref }}">{{ ref }}</option>
+        {% endfor %}
+    </select><br>
+    Number: <input type="text" name="number"><br><br>
+            <input type="radio" name="resource" value="sample" checked>Sample<br>
+            <input type="radio" name="resource" value="chemicalanalysis">Chemical Analysis<br><br>
+            <input type="submit" value="Search">
+  </form>
+  {% if error %}
+      <p style="color: red;">Please submit a search term.</p>
+  {% endif %}
+
+{% endblock %}
+<!-- Rock Types
+
+Metamorphic Grade
+
+Location
+
+Minerals
+
+Chemistry
+
+Provenance -->

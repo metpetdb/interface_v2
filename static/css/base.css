@@ -1,0 +1,323 @@
+body
+{
+	font-family: 'Source Sans Pro', sans-serif;
+	background-color: #e4e6e5;
+}
+
+#page_title
+{
+    color: #318B76;
+    padding-top: 15px;
+    margin-bottom: 8px;
+    font-weight: 400;
+    text-align: center;
+}
+
+h3
+{
+	font-size: 22px;
+	font-weight: 400;
+}
+
+/* Style for dummy table which has the data to export to csv*/
+#dummy
+{
+    visibility: hidden;
+    height: 10px;
+    overflow: hidden;
+}
+
+#exportBtn
+{
+    float: right;
+    margin-top: 10px;
+    display: inline-block;
+    padding: 5px 14px;
+    font-weight: normal;
+    background-color: white;
+    color: #409f89;
+    border: 1px solid #DDD;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+}
+
+#exportBtn: hover
+{
+    text-decoration: none;
+    cursor: pointer;
+    background-color: #409F89;
+    color: #F8F8F8;
+}
+
+hr
+{
+    clear: both;
+    margin-bottom: 25px;
+    border: none;
+    border-top: 1px solid #B6B8B7;
+    border-bottom: 1px solid white;
+}
+
+.navbar .nav
+{
+    font-size: 16px;
+}
+.navbar .brand
+{
+    padding: 7px 30px 5px;
+}
+
+#heading
+{
+    color: rgb(29, 123, 101);
+    padding-top: 30px;
+    padding-bottom: 10px;
+}
+
+#first_para
+{
+  width: 670px;
+}
+
+#slices
+{
+    float: right;
+    border: 3px solid #C7C6C6;
+    border-radius: 5px
+}
+
+
+/*------------------ CSS for SampleView ------------------*/
+/* style for tables which are affected by s2s_demo.css which is a search.html dependency */
+#image_canvas.table thead tr th, #samplelist thead tr th, #chem_elements thead tr th
+{
+   border:0 solid #000000;
+}
+
+#image_canvas thead tr
+{
+	background-color: #318B76;
+	color:	white;
+}
+
+#map_canvas
+{
+	float: right;
+	height: 400px;
+	width: 500px;
+	border: 3px solid #C7C6C6;
+	border-radius: 5px
+
+}
+
+#sampleview_table
+{
+	background-color: rgb(235, 235, 235);
+	width: 650px;
+    margin-bottom: 50px;
+	float: left;
+}
+
+.sample_value
+{
+	font-size: 16px;
+    color: rgb(14, 15, 15);
+}
+
+#subsampletable_header
+{
+	padding-top: 10px;
+}
+
+#sampleview_images
+{
+	width: 650px;
+	clear: both;
+}
+
+#sampleview_images h4
+{
+	margin-bottom: 20px;
+}
+
+#subsampletable_canvas_wrapper, #subsampleviewimg_canvas_wrapper, #chemtable_canvas_wrapper
+{
+    margin-bottom: 50px;
+
+}
+
+#subsampletable_canvas_length, #subsampleviewimg_canvas_length,  #chemtable_canvas_length
+{
+    margin-top: 20px;
+
+    width: 400px;
+    float: left;
+}
+
+#subsampletable_canvas_filter, #subsampleviewimg_canvas_filter, #chemtable_canvas_filter
+{
+    width: 400px;
+
+    float: right;
+    margin-top: 20px;
+    text-align: right;
+}
+
+#subsampletable_canvas, #subsampleviewimg_canvas, #chemtable_canvas
+{
+	clear: both;
+	width: 100%;
+}
+
+#subsampletable_canvas thead tr, #subsampleviewimg_canvas thead tr, #chemtable_canvas thead tr
+{
+    border: 1px solid #318B76;
+    background-color: #318B76;
+    border-radius: 10px;
+    height: 36px;
+}
+
+#subsampletable_canvas thead tr th, #subsampleviewimg_canvas thead tr th, #chemtable_canvas thead tr th
+{
+    font-size: 1em;
+    font-weight: normal;
+    color: #FFFFFF;
+    border: 0px solid black;
+    padding: 3px 7px 2px 7px;
+
+}
+
+#subsampletable_canvas tbody tr.even, #subsampleviewimg_canvas tbody tr.even, #chemtable_canvas tbody tr.even
+{
+    background-color: rgba(255, 255, 255, 0.45);
+
+}
+
+#subsampletable_canvas tbody tr td, #subsampleviewimg_canvas tbody tr td, #chemtable_canvas tbody tr td
+{
+    padding-left: 8px;
+
+    padding-right: 8px;
+    text-align: center;
+}
+
+#subsampletable_canvas_info, #subsampleviewimg_canvas_info, #chemtable_canvas_info
+{
+    margin-top: 20px;
+
+}
+
+#subsampletable_canvas_paginate, #subsampleviewimg_canvas_paginate, #chemtable_canvas_paginate
+{
+    margin-top: 30px;
+
+}
+
+#subsampletable_canvas_previous, #subsampleviewimg_canvas_previous, #chemtable_canvas_previous
+{
+    display: inline-block;
+    padding: 5px 14px;
+    font-weight: normal;
+    background-color: white;
+    color: #318B76;
+    border: 1px solid #DDD;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+}
+
+#subsampletable_canvas_previous:hover, #subsampleviewimg_canvas_previous:hover, #chemtable_canvas_previous:hover
+{
+    text-decoration: none;
+    cursor: pointer;
+    background-color: #318B76;
+    color: #F8F8F8;
+}
+
+#subsampletable_canvas_next, #subsampleviewimg_canvas_next, #chemtable_canvas_next
+{
+    display: inline-block;
+    padding: 5px 14px;
+    background-color: white;
+    color: #318B76;
+    border: 1px solid #DDD;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+    float: right;
+}
+
+#subsampletable_canvas_next:hover, #subsampleviewimg_canvas_next:hover, #chemtable_canvas_next:hover
+{
+    text-decoration: none;
+    cursor: pointer;
+    background-color: #318B76;
+    color: #F8F8F8;
+}
+
+#jquery-overlay
+{
+	width: 100% !important;
+
+}
+
+
+/*------------------ CSS for SubsampleView ------------------*/
+
+#subsampleview_table
+{
+    background-color: rgb(235, 235, 235);
+    width: 650px;
+    margin-bottom: 50px;
+
+}
+
+.subsample_value
+{
+    color: rgb(14, 15, 15);
+}
+
+/*------------------ CSS for chemicalanalysisView ------------------*/
+
+#chemicalanalysisview_table{
+background-color: rgb(235, 235, 235);
+    width: 550px;
+    margin-bottom: 50px;
+    float: left;
+}
+
+#chem_elements
+{
+    width: 400px;
+    float: right;
+
+}
+
+#chem_elements h5
+{
+    margin-bottom: 20px;
+}
+
+.sample_mineral:hover .full_list {
+    display: block;
+    opacity: 1;
+}
+
+.full_list {
+    height: auto;
+    display: block;
+    background: #FFFFFF;
+    margin-left: 28px;
+    padding: 10px;
+    position: absolute;
+    z-index: 1000;
+    width: auto;
+    -webkit-transition: opacity 0.3s ease-out;
+    opacity: 0;
+    overflow: hidden;
+}
+
+.sample_mineral {
+    margin:100px;
+}
