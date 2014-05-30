@@ -13,6 +13,7 @@ from utilities import paginate_model
 
 app = Flask(__name__)
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -34,7 +35,6 @@ def search():
     elif request.args.get('resource') == 'chemicalanalysis':
         url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
         return redirect(url)
-
 
     api = MetpetAPI(None, None).api
 
@@ -146,6 +146,7 @@ def sample(id):
                                 subsamples=subsamples)
     else:
         return HttpResponse("Sample does not Exist")
+
 
 @app.route('/subsample/<int:id>')
 def subsample(id):
