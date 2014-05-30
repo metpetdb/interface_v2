@@ -52,8 +52,6 @@ def search():
     metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name'}).data['objects']
     metamorphic_grades = api.metamorphic_grade.get().data['objects']
 
-    print(metamorphic_grades)
-
     for region in regions:
         region_list.append(region['name'])
     for rock_type in rock_type_list:
