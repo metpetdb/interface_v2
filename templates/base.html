@@ -11,7 +11,11 @@
       <div class="navbar-inner">
         <a class="brand" href="{{ url_for('index') }}"><img src="/static/images/MPDBlogo_sml.png"/></a>
         <ul class="nav">
+          <li><a id="samples" href="{{ url_for('search') }}">Search Database</a></li>
           <li><a id="samples" href="{{ url_for('samples') }}">View Samples</a></li>
+          <li><a id="chemical_analyses" href="{{ url_for('chemical_analyses') }}">View Chemical Analyses</a></li>
+          <li><a id="about" href="#">About</a></li>
+          <li><a id="help" href="#">Help</a></li>
         </ul>
       </div>
     </div>

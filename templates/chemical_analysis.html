@@ -1,0 +1,88 @@
+
+{% extends "base.html" %}
+
+  <body>
+      {% block title %}
+        <h3> Chemical Analysis {{data.chemical_analysis.pointnumber}}</h3>
+      {% endblock %}
+
+      {% block body %}
+
+      <table id="chemicalanalysisview_table" class="table">
+        <tbody>
+          <tr>
+            <td class="sample_label">Owner</td>
+              <td class="sample_value">{{data.chemical_analysis.owner_name}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Point Number</td>
+              <td class="sample_value">{{data.chemical_analysis.pointnumber}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Public</td>
+              <td class="sample_value">{{data.chemical_analysis.public_data}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Image</td>
+              <td class="sample_value">No Image</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Analysis Method</td>
+              <td class="sample_value">{{data.chemical_analysis.analysis_method}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Analysis Location</td>
+              <td class="sample_value">{{data.chemical_analysis.analysis_location}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Analyst</td>
+              <td class="sample_value">{{data.chemical_analysis.analyst}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Description</td>
+              <td class="sample_value">{{data.chemical_analysis.description}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Analysis Material</td>
+              <td class="sample_value">{{data.chemical_analysis.analysis_material}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Total</td>
+              <td class="sample_value">{{data.chemical_analysis.analysis_material}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Stage X</td>
+              <td class="sample_value">{{data.chemical_analysis.stage_x}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Stage Y</td>
+              <td class="sample_value">{{data.chemical_analysis.stage_y}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Sample</td>
+              <td class="sample_value"><a href="{{ url_for('sample', id=data.sample_id) }}" target="_blank">{{ data.sample_id }}</a></td>
+          </tr>
+          <tr>
+            <td class="sample_label">Subsample</td>
+              <td class="sample_value"><a href="{{ url_for('subsample', id=data.subsample_id) }}" target="_blank">{{ data.subsample_id }}</a></td>
+          </tr>
+      </table>
+          <div id="chem_elements">
+            <h4>Elements</h4>
+            <table id="chem_elements_table" class="table">
+              <thead>
+                <tr>
+                  <th>wt%</th>
+                  <th>Oxide</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr> {%for oxide in data.chemical_analysis.oxides%}
+                  <td>{{oxide.wt_percentage}}</td>
+                  <td>{{oxide.name}}</td>
+                </tr>
+                  {%endfor%}
+              </tbody>
+            </table>
+          </div>
+      {% endblock %}

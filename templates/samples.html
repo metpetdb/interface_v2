@@ -21,7 +21,7 @@
       {% endif %}
       {% for sample in samples %}
       <tr>
-        <td class="sample_label">{{ sample.number }}</td>
+        <td class="sample_label"><a href="{{ url_for('sample', id=sample.sample_id) }}" target="_blank">{{ sample.number }}</td>
         <td td class="sample_value">{{ sample.public_data }}</td>
         <td td class="sample_value">{{ sample.subsample_count }}</td>
         <td td class="sample_value">{{ sample.chem_analyses_count }}</td>
