@@ -39,31 +39,44 @@ def search():
     api = MetpetAPI(None, None).api
 
     region_list = []
+    rock_type_list = []
     collector_list = []
     reference_list = []
     metamorphic_region_list = []
-    all_regions = api.region.get(params={'order_by': 'name'}).data['objects']
-    all_samples = api.sample.get().data['objects']
-    all_references = api.reference.get(params={'order_by': 'name'}).data['objects']
-    all_metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name'}).data['objects']
+    metamorphic_grade_list = []
 
-    for region in all_regions:
+    regions = api.region.get(params={'order_by': 'name'}).data['objects']
+    rock_types = api.rock_type.get(params={'order_by': 'rock_type'}).data['objects']
+    samples = api.sample.get().data['objects']
+    references = api.reference.get(params={'order_by': 'name'}).data['objects']
+    metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name'}).data['objects']
+    metamorphic_grades = api.metamorphic_grade.get().data['objects']
+
+    print(metamorphic_grades)
+
+    for region in regions:
         region_list.append(region['name'])
-    for sample in all_samples:
+    for rock_type in rock_type_list:
+        rock_type_list.append(rock_type['name'])
+    for sample in samples:
         if sample['collector'] and sample['collector'] not in collector_list:
             collector_list.append(unicode(sample['collector']))
-    for ref in all_references:
+    for ref in references:
         reference_list.append(ref['name'])
-    for mmr in all_metamorphic_regions:
+    for mmr in metamorphic_regions:
         metamorphic_region_list.append(mmr['name'])
+    for mmg in metamorphic_grades:
+        metamorphic_grade_list.append(mmg['name'])
 
     return render_template('search_form.html',
                             samples=[],
                             query='',
                             regions=region_list,
+                            rock_types=rock_types,
                             provencances=collector_list,
                             references=reference_list,
-                            mmrs=metamorphic_region_list)
+                            metamorphic_regions=metamorphic_region_list,
+                            metamorphic_grades=metamorphic_grade_list)
 
 
 @app.route('/samples/')

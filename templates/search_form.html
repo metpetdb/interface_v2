@@ -8,62 +8,19 @@
     <!-- Collection Date: <input type="text" name="collection_date"><br> -->
     <h3>Rock Types</h3>
     <label for="rock_type__rock_type">Rock Types: </label><br>
-        <input type="checkbox" name="rock_type__rock_type" value="Marble">Marble
-        <input type="checkbox" name="rock_type__rock_type" value="Amphibolite">Amphibolite
-        <input type="checkbox" name="rock_type__rock_type" value="Garnetite">Garnetite
-        <input type="checkbox" name="rock_type__rock_type" value="Metapelite">Metapelite
-        <input type="checkbox" name="rock_type__rock_type" value="Anatectite">Anatectite
-        <input type="checkbox" name="rock_type__rock_type" value="Glaucophanite">Glaucophanite
-        <input type="checkbox" name="rock_type__rock_type" value="Metaarkose">Metaarkose
-        <input type="checkbox" name="rock_type__rock_type" value="Serpentinite">Serpentinite
-        <input type="checkbox" name="rock_type__rock_type" value="Blueschist">Blueschist
-        <input type="checkbox" name="rock_type__rock_type" value="Gneiss">Gneiss
-        <input type="checkbox" name="rock_type__rock_type" value="Metabasite">Metabasite
-        <input type="checkbox" name="rock_type__rock_type" value="Migmatite">Migmatite
-        <input type="checkbox" name="rock_type__rock_type" value="Skarn">Skarn
-        <input type="checkbox" name="rock_type__rock_type" value="Calc-silicate">Calc-silicate
-        <input type="checkbox" name="rock_type__rock_type" value="Granofels">Granofels
-        <input type="checkbox" name="rock_type__rock_type" value="Metacarbonate">Metacarbonate
-        <input type="checkbox" name="rock_type__rock_type" value="Mylonite">Mylonite
-        <input type="checkbox" name="rock_type__rock_type" value="Slate">Slate
-        <input type="checkbox" name="rock_type__rock_type" value="Cataclasite">Cataclasite
-        <input type="checkbox" name="rock_type__rock_type" value="Greenschist">Greenschist
-        <input type="checkbox" name="rock_type__rock_type" value="Metagranite">Metagranite
-        <input type="checkbox" name="rock_type__rock_type" value="Phyllite">Phyllite
-        <input type="checkbox" name="rock_type__rock_type" value="Cordierite-Anthophyllite">Cordierite-Anthophyllite
-        <input type="checkbox" name="rock_type__rock_type" value="Hornfels">Hornfels
-        <input type="checkbox" name="rock_type__rock_type" value="Metagreywacke">Metagreywacke
-        <input type="checkbox" name="rock_type__rock_type" value="Pyroxenite">Pyroxenite
-        <input type="checkbox" name="rock_type__rock_type" value="Eclogite">Eclogite
-        <input type="checkbox" name="rock_type__rock_type" value="Jadeitite">Jadeitite
-        <input type="checkbox" name="rock_type__rock_type" value="Metaigneous">Metaigneous
-        <input type="checkbox" name="rock_type__rock_type" value="Quartzite">Quartzite
+      {% for rock_type in rock_types %}
+        <input type="checkbox" name="rock_type__rock_type" value="{{rock_type.rock_type}}">{{ rock_type.rock_type }}
+      {% endfor %}
+
         <br><br>
+
     <h3>Metamorphic Grade</h3>
     <label for="metamorphic_grades__name">Metamorphic Grade: </label><br>
-        <input type="checkbox" name="metamorphic_grades__name" value="Zeolite facies">Zeolite facies
-        <input type="checkbox" name="metamorphic_grades__name" value="Staurolite-kyanite zone">Staurolite-kyanite zone
-        <input type="checkbox" name="metamorphic_grades__name" value="Granulite facies">Granulite facies
-        <input type="checkbox" name="metamorphic_grades__name" value="Amphibolite facies">Amphibolite facies
-        <input type="checkbox" name="metamorphic_grades__name" value="temperature facies">temperature facies
-        <input type="checkbox" name="metamorphic_grades__name" value="Kyanite zone">Kyanite zone
-        <input type="checkbox" name="metamorphic_grades__name" value="Garnet zone">Garnet zone
-        <input type="checkbox" name="metamorphic_grades__name" value="Hornfels facies">Hornfels facies
-        <input type="checkbox" name="metamorphic_grades__name" value="Prehnite-pumpellyite facies">Prehnite-pumpellyite facies
-        <input type="checkbox" name="metamorphic_grades__name" value="Staurolite zone">Staurolite zone
-        <input type="checkbox" name="metamorphic_grades__name" value="Chlorite zone">Chlorite zone
-        <input type="checkbox" name="metamorphic_grades__name" value="Garnet-cordierite zone">Garnet-cordierite zone
-        <input type="checkbox" name="metamorphic_grades__name" value="Blueschist facies">Blueschist facies
-        <input type="checkbox" name="metamorphic_grades__name" value="Eclogite facies">Eclogite facies
-        <input type="checkbox" name="metamorphic_grades__name" value="Ultra high pressure facies">Ultra high pressure facies
-        <input type="checkbox" name="metamorphic_grades__name" value="Biotite zone">Biotite zone
-        <input type="checkbox" name="metamorphic_grades__name" value="Greenschist facies">Greenschist facies
-        <input type="checkbox" name="metamorphic_grades__name" value="Epidote amphibolite">Epidote amphibolite
-        <input type="checkbox" name="metamorphic_grades__name" value="Sillimanite-K">Sillimanite-K
-        <input type="checkbox" name="metamorphic_grades__name" value="feldspar zone">feldspar zone
-        <input type="checkbox" name="metamorphic_grades__name" value="Andalusite zone">Andalusite zone
-        <input type="checkbox" name="metamorphic_grades__name" value="Migmatite zone">Migmatite zone
-        <input type="checkbox" name="metamorphic_grades__name" value="Sillimanite zone">Sillimanite zone
+        {% for grade in metamorphic_grades %}
+          <input type="checkbox" name="metamorphic_grades__name__in" value="{{ grade }}">{{ grade }}
+        {% endfor %}
+
+
     <h3>Location</h3>
 
     <label for="regions__name">Regions: </label><br>
@@ -77,7 +34,7 @@
     <label for="metamophic_regions__name">Metamorphic Regions: </label><br>
     <select name="metamorphic_regions__name">
         <option value="" selected="selected">Metamorphic Regions</option>
-        {% for region in mmrs %}
+        {% for region in metamorphic_regions %}
             <option value="{{ region }}">{{ region }}</option>
         {% endfor %}
     </select>
