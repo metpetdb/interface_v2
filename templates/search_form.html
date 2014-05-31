@@ -2,14 +2,10 @@
 {% block body %}
 
   <form action="" method="get">
-    <!-- Version: <input type="text" name="version"><br> -->
-    <!-- Sesar Number: <input type="text" name="sesar_number"><br><br> -->
-    <!-- Public Data: <input type="text" name="public_data"><br> -->
-    <!-- Collection Date: <input type="text" name="collection_date"><br> -->
     <h3>Rock Types</h3>
     <label for="rock_type__rock_type">Rock Types: </label><br>
       {% for rock_type in rock_types %}
-        <input type="checkbox" name="rock_type__rock_type" value="{{rock_type.rock_type}}">{{ rock_type.rock_type }}
+        <input type="checkbox" name="rock_type__rock_type__in" value="{{rock_type.rock_type}}">{{ rock_type.rock_type }}
       {% endfor %}
 
         <br><br>
@@ -64,14 +60,3 @@
   {% endif %}
 
 {% endblock %}
-<!-- Rock Types
-
-Metamorphic Grade
-
-Location
-
-Minerals
-
-Chemistry
-
-Provenance -->
