@@ -1,17 +1,20 @@
 import ast
 from urllib import urlencode
-from requests import get
+from requests import get, post
 import json
-from flask import Flask, request, render_template, url_for, redirect
+from flask import Flask, request, render_template, url_for, redirect, flash, \
+                  session
 import dotenv
 from getenv import env
 import drest
 
 from api import MetpetAPI
+from forms import LoginForm
 from utilities import paginate_model
 
 
 app = Flask(__name__)
+app.config.from_object('config')
 
 
 @app.route('/')
@@ -36,7 +39,9 @@ def search():
         url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
         return redirect(url)
 
-    api = MetpetAPI(None, None).api
+    email = session.get('email', None)
+    api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
 
     region_list = []
     rock_type_list = []
@@ -47,7 +52,6 @@ def search():
 
     regions = api.region.get(params={'order_by': 'name'}).data['objects']
     rock_types = api.rock_type.get(params={'order_by': 'rock_type'}).data['objects']
-    samples = api.sample.get().data['objects']
     references = api.reference.get(params={'order_by': 'name'}).data['objects']
     metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name'}).data['objects']
     metamorphic_grades = api.metamorphic_grade.get().data['objects']
@@ -56,9 +60,6 @@ def search():
         region_list.append(region['name'])
     for rock_type in rock_type_list:
         rock_type_list.append(rock_type['name'])
-    for sample in samples:
-        if sample['collector'] and sample['collector'] not in collector_list:
-            collector_list.append(unicode(sample['collector']))
     for ref in references:
         reference_list.append(ref['name'])
     for mmr in metamorphic_regions:
@@ -67,7 +68,6 @@ def search():
         metamorphic_grade_list.append(mmg['name'])
 
     return render_template('search_form.html',
-                            samples=[],
                             query='',
                             regions=region_list,
                             rock_types=rock_types,
@@ -77,9 +77,44 @@ def search():
                             metamorphic_grades=metamorphic_grade_list)
 
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if session.get('api_key'):
+        return redirect(url_for('search'))
+
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        payload = {'email': form.email.data,
+                   'password': form.password.data}
+        response =  post(env('API_HOST') + '/authenticate/', data=payload)
+        if response.status_code == 200:
+            data = json.loads(response.text)
+            session['email'] = data['email']
+            session['api_key'] = data['api_key']
+            flash('Login successful!')
+            return redirect(url_for('search'))
+        else:
+            flash('Authentication failed. Please try again.')
+
+
+    return render_template('login.html',
+                            form=form)
+
+
+@app.route('/logout')
+def logout():
+    session.pop('email', None)
+    session.pop('api_key', None)
+    flash('Logout successful.')
+    return redirect(url_for('search'))
+
+
 @app.route('/samples/')
 def samples():
-    api = MetpetAPI(None, None).api
+    email = session.get('email', None)
+    api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
 
     filters = ast.literal_eval(json.dumps(request.args))
     offset = request.args.get('offset', 0)
@@ -112,7 +147,10 @@ def samples():
 
 @app.route('/sample/<int:id>')
 def sample(id):
-    api = MetpetAPI(None, None).api
+    email = session.get('email', None)
+    api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
+
     sample = api.sample.get(id).data
 
     location = sample['location'].split(" ")
@@ -150,7 +188,10 @@ def sample(id):
 
 @app.route('/subsample/<int:id>')
 def subsample(id):
-    api = MetpetAPI(None, None).api
+    email = session.get('email', None)
+    api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
+
     subsample = api.subsample.get(id).data
     user = api.user.get(subsample['user']['user_id']).data
 
@@ -170,7 +211,9 @@ def subsample(id):
 
 @app.route('/chemical_analyses/')
 def chemical_analyses():
-    api = MetpetAPI(None, None).api
+    email = session.get('email', None)
+    api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
 
     filters = ast.literal_eval(json.dumps(request.args))
     print(filters)
