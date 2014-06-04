@@ -281,8 +281,13 @@ hr
 {
     background-color: rgb(235, 235, 235);
     width: 650px;
-    margin-bottom: 50px;
+    margin: 0 auto 50px auto;
 
+}
+
+#subsample_title
+{
+ text-align:center;
 }
 
 .subsample_value
@@ -325,7 +330,7 @@ background-color: rgb(235, 235, 235);
     position: absolute;
     z-index: 1000;
     width: auto;
-    -webkit-transition: opacity 0.3s ease-out;
+    -webkit-transtion: opacity 0.3s ease-out;
     opacity: 0;
     overflow: hidden;
 }
@@ -336,15 +341,49 @@ background-color: rgb(235, 235, 235);
 
 @media (max-width: 1199px)
 {
-  #sampleview_table
+ h3
+ {
+  text-align:center;
+ }
+
+ #sampleview_table
  {
   float: none;
   margin: 0 auto 50px auto;
+ }
+
+ #sampleview_table
+ {
+  float: none;
+  margin: 0 auto 50px auto;
+ }
+
+ #chemicalanalysisview_table
+ {
+  float: none;
+  margin: 0 auto 50px auto;
+ }
+
+ #chem_elements
+ {
+  float: none;
+  margin: 0 auto;
  }
 
  #map_canvas
  {
   float: none;
   margin: 0 auto;
+  width: auto;
+  max-width: 450px;
+ }
+}
+
+@media (max-width: 510px)
+{
+ #slices
+ {
+
+
  }
 }
