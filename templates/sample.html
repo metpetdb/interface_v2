@@ -136,7 +136,7 @@
         <td>{{subsample.subsample_type.subsample_type}}</td>
         <td>{{subsample.image_count}}</td>
         <td>{{subsample.chem_analyses_count}}</td>
-        <td>{{ subsample.user.name }}</td>
+        <td><a href="{{ url_for('user', id=subsample.user.user_id) }}" target="_blank">{{ subsample.user.name }}</a></td>
         <td> -- </td>
       </tr>
       {%endfor%}

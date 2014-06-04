@@ -250,6 +250,17 @@ def chemical_analysis(id):
                             data=response.json())
 
 
+@app.route('/user/<int:id>')
+def user(id):
+    api = MetpetAPI(None, None).api
+    user = api.user.get(id).data
+    print(user)
+    if sample:
+        return render_template('user.html', user=user)
+    else:
+        return HttpResponse("User does not Exist")
+
+
 if __name__ == '__main__':
     dotenv.read_dotenv('../app_variables.env')
     app.run(debug=True)
