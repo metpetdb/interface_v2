@@ -334,4 +334,17 @@ background-color: rgb(235, 235, 235);
     margin:100px;
 }
 
+@media (max-width: 1199px)
+{
+  #sampleview_table
+ {
+  float: none;
+  margin: 0 auto 50px auto;
+ }
 
+ #map_canvas
+ {
+  float: none;
+  margin: 0 auto;
+ }
+}
