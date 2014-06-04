@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block body %}
-
+<div class = "table-responsive">
   <table id="sampleview_table" class="table">
 
     <tbody>
@@ -79,13 +79,14 @@
       </tr>
     </tbody>
   </table>
-
+</div> <!-- table-responsive -->
 
   <div id="map_canvas"></div>
   <hr>
 
   <!-- adding image link from metpetdbweb -->
   <div id="sampleview_images">
+  <div class = "table-responsive">
     <h4 id="s_images">Sample Images</h4>
     <table id="image_canvas" class="table">
       <thead>
@@ -110,6 +111,7 @@
         {%endfor%}
       </tbody>
     </table>
+  </div> <!-- table-responsive -->
   </div>
 
 

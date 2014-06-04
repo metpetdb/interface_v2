@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block body %}
-
+<div class = "table-responsive">
   <table id="samplelist" class="table">
     <thead>
       <tr>
@@ -40,6 +40,7 @@
     </tbody>
     </thead>
   </table>
+</div> <!-- table-responsive-->
   &lt;&lt; <a href="{{ first_page }}"> First </a>
   {% if prev_url %}
      &nbsp;  &nbsp; &lt; <a href="{{ prev_url }}">Prev </a>

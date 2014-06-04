@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block body %}
-
+<div class = "table-responsive">
   <table id="subsampleview_table" class="table">
     <tbody>
       <tr>
@@ -26,10 +26,12 @@
       </tr>
     </tbody>
   </table>
+</div> <!-- table-responsive -->
   <hr>
 
 
   <h4 id="ss_images">Subsample Images</h4>
+  <div class = "table-responsive">
   <table id="subsampleviewimg_canvas">
     <thead>
       <tr>
@@ -54,9 +56,11 @@
       {%endfor%}
     </tbody>
   </table>
+</div><!-- table-responsive -->
 
   <hr>
   <h4 id="chemtable">Chemical Analyses</h4>
+  <div class = "table-responsive">
   <table id="chemtable_canvas">
     <thead>
       <tr>
@@ -89,7 +93,7 @@
       {%endfor%}
     </tbody>
   </table>
-
+</div> <!-- table-responsive -->
 
 <!-- JS for the page elements -->
 
