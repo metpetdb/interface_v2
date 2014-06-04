@@ -244,8 +244,13 @@ def chemical_analyses():
 
 @app.route('/chemical_analysis/<int:id>')
 def chemical_analysis(id):
+    email = session.get('email', None)
+    api_key = session.get('api_key', None)
+    payload = {'email': email, 'api_key': api_key}
+
     url = env('API_HOST') + '/chemical_analysis/{0}'.format(id)
-    response = get(url)
+    response = get(url, params=payload)
+
     return render_template('chemical_analysis.html',
                             data=response.json())
 
