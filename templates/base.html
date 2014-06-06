@@ -31,15 +31,31 @@
           <li><a id="chemical_analyses" href="{{ url_for('chemical_analyses') }}">View Chemical Analyses</a></li>
           <li><a id="about" href="#">About</a></li>
           <li><a id="help" href="#">Help</a></li>
+
+          {% if session['api_key'] %}
+            <li><a href="{{ url_for('logout') }}"><b>Logout</b></a></li>
+          {% else %}
+            <li><a href="{{ url_for('login') }}"><b>Login</b></a></li>
+          {% endif %}
             </ul>
           </div><!--/.nav-collapse -->
 </div><!-- navbar inner --></div>
         </div><!--/.container-fluid -->
-
   </header>
 
 {% block title %}
 {% endblock %}
+
+<hr>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul>
+    {% for message in messages %}
+        <p style="color: red;">{{ message }} </li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 
 {% block body %}
 {% endblock %}

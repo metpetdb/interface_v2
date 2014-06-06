@@ -1,6 +1,8 @@
 Flask==0.10.1
+Flask-WTF==0.9.5
 Jinja2==2.7.2
 MarkupSafe==0.23
+WTForms==1.0.5
 Werkzeug==0.9.4
 argparse==1.2.1
 django-dotenv==1.2
