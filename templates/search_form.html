@@ -1,62 +1,102 @@
 {% extends "base.html" %}
 {% block body %}
+<ul class="nav nav-tabs" id="myTab">
+  <li class="active"><a href="#rocktypes">Rock Types</a></li>
+  <li><a href="#metgrade">Metamorphic Grade</a></li>
+  <li><a href="#location">Location</a></li>
+  <li><a href="#minerals">Minerals</a></li>
+  <li><a href="#chemistry">Chemistry</a></li>
+  <li><a href="#provenance">Provenance</a></li>
+</ul>
 
-  <form action="" method="get">
-    <h3>Rock Types</h3>
-    <label for="rock_type__rock_type">Rock Types: </label><br>
-      {% for rock_type in rock_types %}
-        <input type="checkbox" name="rock_type__rock_type__in" value="{{rock_type.rock_type}}">{{ rock_type.rock_type }}
-      {% endfor %}
-
-        <br><br>
-
-    <h3>Metamorphic Grade</h3>
-    <label for="metamorphic_grades__name">Metamorphic Grade: </label><br>
-        {% for grade in metamorphic_grades %}
-          <input type="checkbox" name="metamorphic_grades__name__in" value="{{ grade }}">{{ grade }}
-        {% endfor %}
-
-
-    <h3>Location</h3>
-
-    <label for="regions__name">Regions: </label><br>
-    <select name="regions__name">
+    <form action="" method="get" id='content' class="tab-content">
+      <div class="tab-pane active" id="rocktypes">
+        <ul>
+         <h3>Rock Types</h3>
+         <label for="rock_type__rock_type">Rock Types: </label><br>
+         {% for rock_type in rock_types %}
+         <input type="checkbox" name="rock_type__rock_type__in"         
+         value="{{rock_type.rock_type}}">{{ rock_type.rock_type }}
+         {% endfor %}
+         <br><br>
+        </ul>
+      </div>
+      
+      <div class="tab-pane" id="metgrade">
+        <ul>
+         <h3>Metamorphic Grade</h3>
+         <label for="metamorphic_grades__name">Metamorphic Grade: </label><br>
+         {% for grade in metamorphic_grades %}
+         <input type="checkbox" name="metamorphic_grades__name__in" value="{{ grade }}">
+         {{ grade }}
+         {% endfor %}
+        </ul>
+      </div>
+      
+      <div class="tab-pane" id="location">
+       <ul>
+        <h3>Location</h3>
+        <label for="regions__name">Regions: </label><br>
+        <select name="regions__name">
         <option value="" selected="selected">Regions</option>
         {% for region in regions %}
-            <option value="{{ region }}">{{ region }}</option>
+             <option value="{{ region }}">{{ region }}</option>
         {% endfor %}
-    </select>
-    <br>
-    <label for="metamophic_regions__name">Metamorphic Regions: </label><br>
-    <select name="metamorphic_regions__name">
+        </select>
+        <br>
+        <label for="metamophic_regions__name">Metamorphic Regions: </label><br>
+        <select name="metamorphic_regions__name">
         <option value="" selected="selected">Metamorphic Regions</option>
         {% for region in metamorphic_regions %}
-            <option value="{{ region }}">{{ region }}</option>
+             <option value="{{ region }}">{{ region }}</option>
         {% endfor %}
-    </select>
-    <h3>Provenance</h3>
+        </select>
+       </ul>
+      </div>
+      
+      <div class="tab-pane" id="minerals">
+      </div>
 
-    <label for="collector">Collector: </label><br>
-    <select name="collector">
+      <div class="tab-pane" id="chemistry">
+      </div>
+
+      <div class="tab-pane" id="provenance">
+       <ul>
+        <h3>Provenance</h3>
+        <label for="collector">Collector: </label><br>
+        <select name="collector">
         <option value="" selected="selected">Collector</option>
         {% for col in provenenances %}
             <option value="{{ col }}">{{ col }}</option>
         {% endfor %}
-    </select><br>
-    <label for="reference__name">Reference: </label><br>
-    <select name="reference__name">
+        </select><br>
+        <label for="reference__name">Reference: </label><br>
+        <select name="reference__name">
         <option value="" selected="selected">Reference</option>
         {% for ref in references %}
             <option value="{{ ref }}">{{ ref }}</option>
         {% endfor %}
-    </select><br>
-    Number: <input type="text" name="number"><br><br>
-            <input type="radio" name="resource" value="sample" checked>Sample<br>
-            <input type="radio" name="resource" value="chemicalanalysis">Chemical Analysis<br><br>
-            <input type="submit" value="Search">
-  </form>
+        </select><br>
+         Number: <input type="text" name="number"><br><br>
+       </ul>
+      </div>
+
+      <div id = "form-submit">
+       <input type="radio" name="resource" value="sample" checked>Sample<br>
+       <input type="radio" name="resource" value="chemicalanalysis">Chemical Analysis<br><br>
+       <input type="submit" value="Search">
+      </div>
+  </form>  <!-- tabs -->
   {% if error %}
       <p style="color: red;">Please submit a search term.</p>
   {% endif %}
+
+
+<script>
+$('#myTab a').click(function (e) {
+  e.preventDefault()
+  $(this).tab('show')
+})
+</script>
 
 {% endblock %}
