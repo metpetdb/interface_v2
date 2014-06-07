@@ -1,35 +1,37 @@
 {% extends "base.html" %}
 {% block body %}
 <ul class="nav nav-tabs" id="myTab">
-  <li class="active"><a href="#rocktypes">Rock Types</a></li>
+  <li class= "active" href="#rocktypes"><a href="#rocktypes">Rock Types</a></li>
   <li><a href="#metgrade">Metamorphic Grade</a></li>
   <li><a href="#location">Location</a></li>
   <li><a href="#minerals">Minerals</a></li>
   <li><a href="#chemistry">Chemistry</a></li>
   <li><a href="#provenance">Provenance</a></li>
 </ul>
-
     <form action="" method="get" id='content' class="tab-content">
       <div class="tab-pane active" id="rocktypes">
         <ul>
          <h3>Rock Types</h3>
-         <label for="rock_type__rock_type">Rock Types: </label><br>
+         <div id="rocktypelist">
          {% for rock_type in rock_types %}
-         <input type="checkbox" name="rock_type__rock_type__in"         
+         <input type="checkbox" class="rocktype" name="rock_type__rock_type__in"         
          value="{{rock_type.rock_type}}">{{ rock_type.rock_type }}
          {% endfor %}
+
          <br><br>
+         </div><!-- control-group-->
         </ul>
-      </div>
+      </div><!-- rocktypes -->
       
       <div class="tab-pane" id="metgrade">
         <ul>
          <h3>Metamorphic Grade</h3>
-         <label for="metamorphic_grades__name">Metamorphic Grade: </label><br>
+         <div id = "metgrade-checkboxes">
          {% for grade in metamorphic_grades %}
-         <input type="checkbox" name="metamorphic_grades__name__in" value="{{ grade }}">
+         <input type="checkbox" class = "metgrade" name="metamorphic_grades__name__in" value="{{ grade }}">
          {{ grade }}
          {% endfor %}
+         </div><!-- metgrade checkboxes -->
         </ul>
       </div>
       
@@ -94,9 +96,87 @@
 
 <script>
 $('#myTab a').click(function (e) {
-  e.preventDefault()
-  $(this).tab('show')
-})
+  e.preventDefault();
+  $(this).tab('show');
+});
+
+$(function()
+{
+ //Group rock types
+ var originalHTML = $("#rocktypelist :input");
+ var newInnerHTML = '';
+ var a;
+ var b = 0;
+ var div;
+ var rocktypes = document.createElement('div');
+
+ for (a = 0; a < originalHTML.length; a++)
+ {
+  if(b == 0)
+  {
+   div = document.createElement('div');
+   div.className = 'checkboxgroup';
+  }
+  var input = document.createElement('input');
+  $(input).className = "rocktype";
+  $(input).attr('type','checkbox');
+  $(input).attr('name','rock_type__rock_type__in');
+  var val = $(originalHTML[a]).attr('value');
+  $(input).attr('value', val);
+
+ 
+  div.appendChild(input);
+  div.innerHTML += val += "<br>";
+
+  if(b == 4 || a == originalHTML.length - 1)
+  {
+   rocktypes.appendChild(div);
+   b = 0;
+  }
+  else
+   b++;
+ }
+ document.getElementById('rocktypelist').innerHTML = '';
+ document.getElementById('rocktypelist').appendChild(rocktypes);
+console.log(rocktypes.innerHTML);
+
+
+//Group metamorphic grades
+ originalHTML = $("#metgrade-checkboxes :input");
+ newInnerHTML = '';
+ b = 0;
+ var metgrades = document.createElement('div');
+
+ for (a = 0; a < originalHTML.length; a++)
+ {
+  if(b == 0)
+  {
+   div = document.createElement('div');
+   div.className = 'checkboxgroup';
+  }
+  var input = document.createElement('input');
+  $(input).className = "metgrade";
+  $(input).attr('type','checkbox');
+  $(input).attr('name','metamorphic_grades__name__in');
+  var val = $(originalHTML[a]).attr('value');
+  $(input).attr('value', val);
+
+  div.appendChild(input);
+  div.innerHTML += val += "<br>";
+
+  if(b == 4 || a == originalHTML.length - 1)
+  {
+   metgrades.appendChild(div);
+   b = 0;
+  }
+  else
+   b++;
+ }
+ document.getElementById('metgrade-checkboxes').innerHTML = '';
+ document.getElementById('metgrade-checkboxes').appendChild(metgrades);
+console.log(metgrades.innerHTML);
+
+});
 </script>
 
 {% endblock %}

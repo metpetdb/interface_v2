@@ -1,3 +1,9 @@
+.checkboxgroup
+{
+ float:left;
+ width: 200px;
+}
+
 .navbar-toggle 
 {
  background-color: rgba(0, 0, 0, 0.19) !important;
