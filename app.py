@@ -126,8 +126,8 @@ def request_reset_password():
         if response.status_code == 200:
             data = json.loads(response.text)
             message = Message("Metpetdb: Reset Password",
-                               sender='krishna@aradhi.me',
-                               recipients = ['krishna@aradhi.me'])
+                               sender=env('DEFAULT_MAIL_SENDER'),
+                               recipients = [form.email.data])
             reset_url = url_for('reset_password', token=data['reset_token'],
                                  _external=True)
             message.body = render_template('reset_password_email.html',
