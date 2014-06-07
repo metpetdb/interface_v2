@@ -1,20 +1,26 @@
 import ast
+import StringIO
+import base64
 from urllib import urlencode
 from requests import get, post
 import json
+from itsdangerous import URLSafeTimedSerializer
+
 from flask import Flask, request, render_template, url_for, redirect, flash, \
                   session
+from flask_mail import Mail, Message
 import dotenv
 from getenv import env
 import drest
 
 from api import MetpetAPI
-from forms import LoginForm
+from forms import LoginForm, RequestPasswordResetForm, PasswordResetForm
 from utilities import paginate_model
 
 
 app = Flask(__name__)
 app.config.from_object('config')
+mail = Mail(app)
 
 
 @app.route('/')
@@ -108,6 +114,59 @@ def logout():
     session.pop('api_key', None)
     flash('Logout successful.')
     return redirect(url_for('search'))
+
+
+@app.route('/request-password-reset', methods=['GET', 'POST'])
+def request_reset_password():
+    form = RequestPasswordResetForm()
+
+    if form.validate_on_submit():
+        payload = {'email': form.email.data}
+        response = post(env('API_HOST') + '/reset-password/', data=payload)
+        if response.status_code == 200:
+            data = json.loads(response.text)
+            message = Message("Metpetdb: Reset Password",
+                               sender=env('DEFAULT_MAIL_SENDER'),
+                               recipients = [form.email.data])
+            reset_url = url_for('reset_password', token=data['reset_token'],
+                                 _external=True)
+            message.body = render_template('reset_password_email.html',
+                                           reset_url=reset_url)
+            mail.send(message)
+            flash('Please check your email for a link to reset your password')
+            return redirect(url_for('login'))
+        else:
+            flash("Invalid email. Please try again.")
+
+    return render_template('request_password_reset.html', form=form)
+
+
+@app.route('/reset-password/<string:token>', methods=['GET', 'POST'])
+def reset_password(token):
+    form = PasswordResetForm()
+    if form.validate_on_submit():
+        payload = {'token': form.token.data,
+                   'password': form.password.data}
+        response = post(env('API_HOST') + '/reset-password/', data=payload)
+        if response.status_code == 200:
+            print(response.text)
+            data = json.loads(response.text)
+            session['email'] = data['email']
+            session['api_key'] = data['api_key']
+            flash('Password reset successful!')
+            return redirect(url_for('search'))
+        else:
+            flash('Password reset failed. Please try again.')
+            return redirect(url_for('request_reset_password'))
+
+    if token:
+        response = get(env('API_HOST') + '/reset-password/' + token)
+        if response.status_code == 200:
+            form = PasswordResetForm(token=token)
+            return render_template('reset_password.html', form=form)
+
+    flash('Password reset failed. Please try again.')
+    return redirect(url_for('request_reset_password'))
 
 
 @app.route('/samples/')
@@ -244,10 +303,26 @@ def chemical_analyses():
 
 @app.route('/chemical_analysis/<int:id>')
 def chemical_analysis(id):
+    email = session.get('email', None)
+    api_key = session.get('api_key', None)
+    payload = {'email': email, 'api_key': api_key}
+
     url = env('API_HOST') + '/chemical_analysis/{0}'.format(id)
-    response = get(url)
+    response = get(url, params=payload)
+
     return render_template('chemical_analysis.html',
                             data=response.json())
+
+
+@app.route('/user/<int:id>')
+def user(id):
+    api = MetpetAPI(None, None).api
+    user = api.user.get(id).data
+    print(user)
+    if sample:
+        return render_template('user.html', user=user)
+    else:
+        return HttpResponse("User does not Exist")
 
 
 if __name__ == '__main__':
