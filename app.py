@@ -51,7 +51,7 @@ def search():
     metamorphic_grade_list = []
 
     regions = api.region.get(params={'order_by': 'name'}).data['objects']
-    rock_types = api.rock_type.get(params={'order_by': 'rock_type'}).data['objects']
+    rock_types = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
     references = api.reference.get(params={'order_by': 'name'}).data['objects']
     metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name'}).data['objects']
     metamorphic_grades = api.metamorphic_grade.get().data['objects']

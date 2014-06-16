@@ -53,8 +53,8 @@
         <label for="bounds">SW Long: </label>
         <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-long" class="latlong" ><br><br>
 
-<input type="hidden" id="ne-location-bound" name="samples__location__lt" value="">
-<input type="hidden" id="sw-location-bound" name="samples__location__gt" value="">
+<input type="hidden" id="ne-location-bound" name="samples__location__contained" value="">
+<!-- <input type="hidden" id="sw-location-bound" name="samples__location__contained" value=""> -->
 
 
         <div id = "location-regions"
@@ -281,19 +281,45 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
 
    //Update POINT 4326 values to submit
    //SRID=4326;POINT(-118.0488106 33.9346343)
-   var upperbound = 'SRID=4326;POINT(' + ne.lat().toString() + ' ' +  ne.lng().toString() + ')';
-   var lowerbound = 'SRID=4326;POINT(' + sw.lat().toString() + ' ' +  sw.lng().toString() + ')';
-   document.getElementById("ne-location-bound").value = upperbound;
-   document.getElementById("sw-location-bound").value = lowerbound;
-   console.log(upperbound);
-   console.log( lowerbound);
+   //var upperbound = 'SRID=4326;POINT(' + ne.lat().toString() + ' ' +  ne.lng().toString() + ')';
+   //var lowerbound = 'SRID=4326;POINT(' + sw.lat().toString() + ' ' +  sw.lng().toString() + ')';
+
+//   var upperbound = "{\"type\": \"Point\", \"coordinates\": [" + ne.lat().toString() + "," + ne.lng().toString() + "]}";
+//   var lowerbound = "{\"type\": \"Point\", \"coordinates\": [" + sw.lat().toString() + "," + sw.lng().toString() + "]}";
+  
+  //POINT (-71.8552169799804972 44.0474815368651988)
+  //var upperbound = "POINT(" + ne.lat().toString() + " " + ne.lng().toString() + ")";
+  //var lowerbound = "POINT(" + sw.lat().toString() + " " + sw.lng().toString() + ")";
+  
+ /*
+ { "type": "Polygon",
+    "coordinates": [
+      [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0] ]
+      ]
+   }
+ */
+
+  //http://stackoverflow.com/questions/15536241/how-to-get-4-vertex-coordinates-from-gmaps-rectangle-overlay
+  var nw = new google.maps.LatLng(ne.lat(),sw.lng());
+  var se = new google.maps.LatLng(sw.lat(),ne.lng());
+  var polygon =  "{ \"type\": \"Polygon\", \"coordinates\": [[" + ne.lat().toString() + "," + ne.lng().toString() +"] , [" + se.lat().toString() + ", " + se.lng().toString() + "] , [" + sw.lat().toString() + "," + sw.lng().toString() +"] , [" + nw.lat().toString() + "," + nw.lng().toString() + "]]}";
+
+
+   //document.getElementById("ne-location-bound").value = upperbound;
+   //document.getElementById("sw-location-bound").value = lowerbound;
+   document.getElementById("ne-location-bound").value = polygon;
+   console.log(polygon);
+   //console.log(upperbound);
+   //console.log( lowerbound);
+
   }
 
   }
 });
 }
+
+//Initialize map listener
 google.maps.event.addDomListener(document.getElementById("location-tab"), 'click', initialize);
-      //google.maps.event.addDomListener(window, 'load', initialize);  
 
 }); //END READY FUNCTION
 
@@ -311,8 +337,11 @@ function updateBounds()
 
    //Update POINT 4326 values to submit
    //SRID=4326;POINT(-118.0488106 33.9346343)
-   var upperbound = 'SRID=4326;POINT(' + nelat + ' ' +  nelong + ')';
-   var lowerbound = 'SRID=4326;POINT(' + swlat + ' ' +  swlong + ')';
+   //var upperbound = 'SRID=4326;POINT(' + nelat + ' ' +  nelong + ')';
+   //var lowerbound = 'SRID=4326;POINT(' + swlat + ' ' +  swlong + ')';
+   var upperbound = "{'type': 'Point', 'coordinates': [" + nelat + "," + nelong + "]}";
+   var lowerbound = "{'type': 'Point', 'coordinates': [" + swlat + "," + swlong + "]}";
+
    document.getElementById("ne-location-bound").value = upperbound;
    document.getElementById("sw-location-bound").value = lowerbound;
    console.log(upperbound);
