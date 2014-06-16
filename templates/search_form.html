@@ -3,7 +3,7 @@
 <ul class="nav nav-tabs" id="myTab">
   <li class= "active" href="#rocktypes"><a href="#rocktypes">Rock Types</a></li>
   <li><a href="#metgrade">Metamorphic Grade</a></li>
-  <li><a href="#location">Location</a></li>
+  <li><a id = "location-tab" href="#location">Location</a></li>
   <li><a href="#minerals">Minerals</a></li>
   <li><a href="#chemistry">Chemistry</a></li>
   <li><a href="#provenance">Provenance</a></li>
@@ -206,9 +206,13 @@ function initialize()
 {
  var map = new google.maps.Map(document.getElementById('map-canvas'), {
     zoom: 11,
-    center: new google.maps.LatLng(33.678176, -116.242568),
-    mapTypeId: google.maps.MapTypeId.TERRAIN
+    center: new google.maps.LatLng(40.710836, -74.019889),
+    mapTypeId: google.maps.MapTypeId.ROADMAP
  });
+
+ google.maps.event.addListenerOnce(map, 'idle', function() {
+    google.maps.event.trigger(map, 'resize');
+});
 
 //SET UP DRAWING MANAGER
 var drawingManager = new google.maps.drawing.DrawingManager({
@@ -288,7 +292,8 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
   }
 });
 }
-      google.maps.event.addDomListener(window, 'load', initialize);  
+google.maps.event.addDomListener(document.getElementById("location-tab"), 'click', initialize);
+      //google.maps.event.addDomListener(window, 'load', initialize);  
 
 }); //END READY FUNCTION
 

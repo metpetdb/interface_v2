@@ -447,6 +447,17 @@ background-color: rgb(235, 235, 235);
  }
 }
 
+@media (max-width: 550px)
+{
+ #map-canvas
+ {
+  float: none;
+  margin: 0 auto;
+  width: auto;
+  max-width: 550px;
+ }
+}
+
 @media (max-width: 450px)
 {
  #slices img
