@@ -42,20 +42,20 @@
         <div id="map-canvas"></div>
         <p id ="map-instructions">Draw a selection on the map to toggle coordinates below.</p><br>
         <label for="bounds">NE Lat: </label>
-        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="ne-lat" class="latlong" name="rock_type__rock_type__in"         
-         > 
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="ne-lat" class="latlong" > 
         
         <label for="bounds">NE Long: </label>
-        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="ne-long" class="latlong" name="rock_type__rock_type__in"         
-         ><br>
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="ne-long" class="latlong" ><br>
 
         <label for="bounds">SW Long: </label>
-        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-lat" class="latlong" name="rock_type__rock_type__in"         
-         > 
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-lat" class="latlong" > 
 
         <label for="bounds">SW Long: </label>
-        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-long" class="latlong" name="rock_type__rock_type__in"         
-         ><br><br>
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-long" class="latlong" ><br><br>
+
+<input type="hidden" id="ne-location-bound" name="samples__location__lt" value="">
+<input type="hidden" id="sw-location-bound" name="samples__location__gt" value="">
+
 
         <div id = "location-regions"
         <label for="regions__name">Regions: </label><br>
@@ -210,24 +210,6 @@ function initialize()
     mapTypeId: google.maps.MapTypeId.TERRAIN
  });
 
-  /*var drawButtonDiv = document.createElement('div');
-  var drawButton = new DrawButton(drawButtonDiv, map);
-
-  drawButtonDiv.index = 1;
-  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(drawButtonDiv);
-
-  var rectangle = new google.maps.Rectangle({
-    strokeColor: '#FF0000',
-    strokeOpacity: 0.8,
-    strokeWeight: 2,
-    fillColor: '#FF0000',
-    fillOpacity: 0.35,
-    map: map,
-    bounds: new google.maps.LatLngBounds(
-      new google.maps.LatLng(33.671068, -116.25128),
-      new google.maps.LatLng(33.685282, -116.233942))
- });
-*/
 //SET UP DRAWING MANAGER
 var drawingManager = new google.maps.drawing.DrawingManager({
   drawingMode: google.maps.drawing.OverlayType.MARKER,
@@ -292,6 +274,15 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
    document.getElementById("ne-long").value = ne.lng().toString();
    document.getElementById("sw-lat").value = sw.lat().toString();
    document.getElementById("sw-long").value = sw.lng().toString();
+
+   //Update POINT 4326 values to submit
+   //SRID=4326;POINT(-118.0488106 33.9346343)
+   var upperbound = 'SRID=4326;POINT(' + ne.lat().toString() + ' ' +  ne.lng().toString() + ')';
+   var lowerbound = 'SRID=4326;POINT(' + sw.lat().toString() + ' ' +  sw.lng().toString() + ')';
+   document.getElementById("ne-location-bound").value = upperbound;
+   document.getElementById("sw-location-bound").value = lowerbound;
+   console.log(upperbound);
+   console.log( lowerbound);
   }
 
   }
@@ -312,6 +303,15 @@ function updateBounds()
       new google.maps.LatLng(nelat, nelong),
       new google.maps.LatLng(swlat, swlong)
   ));
+
+   //Update POINT 4326 values to submit
+   //SRID=4326;POINT(-118.0488106 33.9346343)
+   var upperbound = 'SRID=4326;POINT(' + nelat + ' ' +  nelong + ')';
+   var lowerbound = 'SRID=4326;POINT(' + swlat + ' ' +  swlong + ')';
+   document.getElementById("ne-location-bound").value = upperbound;
+   document.getElementById("sw-location-bound").value = lowerbound;
+   console.log(upperbound);
+   console.log( lowerbound);
 }
 </script>
 
