@@ -1,7 +1,43 @@
-.checkboxgroup
+#map-instructions
+{
+
+}
+
+label[for=bounds]
+{
+ width: 60px;
+}
+
+#form-container
+{
+ max-width: 1100px;
+}
+
+#content
+{
+ margin: 0 auto;
+}
+
+#map-canvas 
+{ 
+ height: 400px;
+ width: 450px;
+ border: 3px solid #C7C6C6;
+ border-radius: 5px;
+ margin: 0 35px 40px 35px;
+ float: left;
+}
+
+.rocktypecheckboxgroup
 {
  float:left;
- width: 200px;
+ width: 180px;
+}
+
+.metgradecheckboxgroup
+{
+ float:left;
+ width: 220px;
 }
 
 .navbar-toggle 

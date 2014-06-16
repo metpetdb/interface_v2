@@ -8,6 +8,7 @@
   <li><a href="#chemistry">Chemistry</a></li>
   <li><a href="#provenance">Provenance</a></li>
 </ul>
+<div id = "form-container">
     <form action="" method="get" id='content' class="tab-content">
       <div class="tab-pane active" id="rocktypes">
         <ul>
@@ -38,6 +39,25 @@
       <div class="tab-pane" id="location">
        <ul>
         <h3>Location</h3>
+        <div id="map-canvas"></div>
+        <p id ="map-instructions">Draw a selection on the map to toggle coordinates below.</p><br>
+        <label for="bounds">NE Lat: </label>
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="ne-lat" class="latlong" name="rock_type__rock_type__in"         
+         > 
+        
+        <label for="bounds">NE Long: </label>
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="ne-long" class="latlong" name="rock_type__rock_type__in"         
+         ><br>
+
+        <label for="bounds">SW Long: </label>
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-lat" class="latlong" name="rock_type__rock_type__in"         
+         > 
+
+        <label for="bounds">SW Long: </label>
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-long" class="latlong" name="rock_type__rock_type__in"         
+         ><br><br>
+
+        <div id = "location-regions"
         <label for="regions__name">Regions: </label><br>
         <select name="regions__name">
         <option value="" selected="selected">Regions</option>
@@ -53,6 +73,7 @@
              <option value="{{ region }}">{{ region }}</option>
         {% endfor %}
         </select>
+        </div> <!-- end location-regions -->
        </ul>
       </div>
       
@@ -89,10 +110,12 @@
        <input type="submit" value="Search">
       </div>
   </form>  <!-- tabs -->
+</div><!--end form container-->
   {% if error %}
       <p style="color: red;">Please submit a search term.</p>
   {% endif %}
 
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 
 <script>
 $('#myTab a').click(function (e) {
@@ -100,6 +123,10 @@ $('#myTab a').click(function (e) {
   $(this).tab('show');
 });
 
+//GLOBAL VARS
+var currentOverlay;
+
+//ON READY FUNCTION
 $(function()
 {
  //Group rock types
@@ -115,7 +142,7 @@ $(function()
   if(b == 0)
   {
    div = document.createElement('div');
-   div.className = 'checkboxgroup';
+   div.className = 'rocktypecheckboxgroup';
   }
   var input = document.createElement('input');
   $(input).className = "rocktype";
@@ -138,8 +165,6 @@ $(function()
  }
  document.getElementById('rocktypelist').innerHTML = '';
  document.getElementById('rocktypelist').appendChild(rocktypes);
-console.log(rocktypes.innerHTML);
-
 
 //Group metamorphic grades
  originalHTML = $("#metgrade-checkboxes :input");
@@ -152,7 +177,7 @@ console.log(rocktypes.innerHTML);
   if(b == 0)
   {
    div = document.createElement('div');
-   div.className = 'checkboxgroup';
+   div.className = 'metgradecheckboxgroup';
   }
   var input = document.createElement('input');
   $(input).className = "metgrade";
@@ -174,9 +199,120 @@ console.log(rocktypes.innerHTML);
  }
  document.getElementById('metgrade-checkboxes').innerHTML = '';
  document.getElementById('metgrade-checkboxes').appendChild(metgrades);
-console.log(metgrades.innerHTML);
 
+
+//GOOGLE MAP RENDERING
+function initialize()
+{
+ var map = new google.maps.Map(document.getElementById('map-canvas'), {
+    zoom: 11,
+    center: new google.maps.LatLng(33.678176, -116.242568),
+    mapTypeId: google.maps.MapTypeId.TERRAIN
+ });
+
+  /*var drawButtonDiv = document.createElement('div');
+  var drawButton = new DrawButton(drawButtonDiv, map);
+
+  drawButtonDiv.index = 1;
+  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(drawButtonDiv);
+
+  var rectangle = new google.maps.Rectangle({
+    strokeColor: '#FF0000',
+    strokeOpacity: 0.8,
+    strokeWeight: 2,
+    fillColor: '#FF0000',
+    fillOpacity: 0.35,
+    map: map,
+    bounds: new google.maps.LatLngBounds(
+      new google.maps.LatLng(33.671068, -116.25128),
+      new google.maps.LatLng(33.685282, -116.233942))
+ });
+*/
+//SET UP DRAWING MANAGER
+var drawingManager = new google.maps.drawing.DrawingManager({
+  drawingMode: google.maps.drawing.OverlayType.MARKER,
+  drawingControl: true,
+  drawingControlOptions: {
+    position: google.maps.ControlPosition.TOP_CENTER,
+    drawingModes: [
+      google.maps.drawing.OverlayType.RECTANGLE
+    ]
+  },
+  circleOptions: {
+    fillColor: '#ffff00',
+    fillOpacity: 1,
+    strokeWeight: 5,
+    clickable: false,
+    zIndex: 1,
+    editable: true
+  }
+}); //end drawing manager  
+
+drawingManager.setMap(map); 
+
+currentOverlay = new google.maps.Rectangle({
+    bounds: null,
+    editable: true,
+    draggable: true
+  });
+
+  currentOverlay.setMap(map);
+
+
+//DRAW COMPLETE LISTENER
+google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event) {
+  if (event.type == google.maps.drawing.OverlayType.RECTANGLE) {
+  {
+   //Set draggable and editable
+   event.overlay.setEditable(true);
+   event.overlay.setDraggable(true);
+
+   //Remove last overlay
+   if(currentOverlay)
+    currentOverlay.setMap(null);
+
+   //Set current overlay
+   currentOverlay = event.overlay;
+
+   //Update bounds for drag and edit
+   google.maps.event.addListener(currentOverlay, "bounds_changed", function() 
+   {
+   var ne = event.overlay.getBounds().getNorthEast();
+   var sw = event.overlay.getBounds().getSouthWest();
+   document.getElementById("ne-lat").value = ne.lat().toString();
+   document.getElementById("ne-long").value = ne.lng().toString();
+   document.getElementById("sw-lat").value = sw.lat().toString();
+   document.getElementById("sw-long").value = sw.lng().toString();
+   });
+
+   //Update bounds for creation
+   var ne = event.overlay.getBounds().getNorthEast();
+   var sw = event.overlay.getBounds().getSouthWest();
+   document.getElementById("ne-lat").value = ne.lat().toString();
+   document.getElementById("ne-long").value = ne.lng().toString();
+   document.getElementById("sw-lat").value = sw.lat().toString();
+   document.getElementById("sw-long").value = sw.lng().toString();
+  }
+
+  }
 });
+}
+      google.maps.event.addDomListener(window, 'load', initialize);  
+
+}); //END READY FUNCTION
+
+//UPDATE BOUNDS
+function updateBounds()
+{
+  var nelat = document.getElementById("ne-lat").value;
+  var nelong = document.getElementById("ne-long").value;
+  var swlat = document.getElementById("sw-lat").value;
+  var swlong = document.getElementById("sw-long").value;
+  currentOverlay.setBounds(new google.maps.LatLngBounds(
+      new google.maps.LatLng(nelat, nelong),
+      new google.maps.LatLng(swlat, swlong)
+  ));
+}
 </script>
 
 {% endblock %}
