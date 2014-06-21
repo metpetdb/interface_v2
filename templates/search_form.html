@@ -1,5 +1,20 @@
 {% extends "base.html" %}
 {% block body %}
+<div id="spinner" class="spinner" style="display:none;">
+    <img id="img-spinner" src="/static/images/ajax-loader.gif" alt="Loading"/>
+</div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+          Search Options
+        </a>
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in">
+      <div class="panel-body">
+        
 <ul class="nav nav-tabs" id="myTab">
   <li class= "active" href="#rocktypes"><a href="#rocktypes">Rock Types</a></li>
   <li><a href="#metgrade">Metamorphic Grade</a></li>
@@ -84,23 +99,30 @@
       </div>
 
       <div class="tab-pane" id="provenance">
-       <ul>
+       <ul id = "provenance">
         <h3>Provenance</h3>
-        <label for="collector">Collector: </label><br>
+        <label class="provenance-label" for="collector">Collector: </label>
         <select name="collector">
         <option value="" selected="selected">Collector</option>
-        {% for col in provenenances %}
+<script>
+var p = "{{provenances}}";
+console.log("P IS ");
+console.log(p);
+</script>
+        {% for col in provenances %}
             <option value="{{ col }}">{{ col }}</option>
         {% endfor %}
         </select><br>
-        <label for="reference__name">Reference: </label><br>
+        <label class="provenance-label" for="reference__name">Reference: </label>
         <select name="reference__name">
         <option value="" selected="selected">Reference</option>
         {% for ref in references %}
             <option value="{{ ref }}">{{ ref }}</option>
         {% endfor %}
         </select><br>
-         Number: <input type="text" name="number"><br><br>
+         <label class="provenance-label" for="number">Number: </label><input type="text" name="number"><br>
+        <label class="provenance-label" for="igsn">IGSN: </label><input type="text" name="igsn"><br>
+<label class="provenance-label" for="dates">Date Range: </label><input type="text" name="dates" id="date-start"> to <input type="text" name="dates" id="date-end"><br>
        </ul>
       </div>
 
@@ -114,8 +136,17 @@
   {% if error %}
       <p style="color: red;">Please submit a search term.</p>
   {% endif %}
+      </div>
+    </div>
+  </div>
+
+<div id = "results"></div>
+
 
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 
 <script>
 $('#myTab a').click(function (e) {
@@ -321,6 +352,29 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
 //Initialize map listener
 google.maps.event.addDomListener(document.getElementById("location-tab"), 'click', initialize);
 
+//Date picker
+$( "#date-start" ).datepicker();
+$( "#date-end" ).datepicker();
+
+//Ajax call to update sample data
+var frm = $('#content');
+    frm.submit(function () {
+    $('#spinner').show();
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: frm.serialize(),
+            success: function (data) {
+                $("#results").html(data);
+                $('#spinner').hide();
+            },
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+        });
+        return false;
+    }); //END ajax
 }); //END READY FUNCTION
 
 //UPDATE BOUNDS
