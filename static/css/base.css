@@ -1,11 +1,44 @@
+.clear
+{
+ clear:both;
+}
+
+#location-regions
+{
+ margin-bottom:10px;
+}
+
+#search-summary
+{
+ width:95%;
+ margin: 30px auto 0 auto;
+}
+
+
+.chosen-container
+{
+ vertical-align:top !important;
+ margin-bottom: 5px;
+}
+
+.chosen-container-multi .chosen-choices li.search-field input[type=text]
+{
+ width:100% !important;
+ height:inherit !important;
+ padding:3px !important;
+}
+
 #form-submit
 {
- padding-top:20px;
+ padding: 0 0 0 40px;
 }
 
 #provenance
 {
  float:left;
+ margin:0 auto;
+ width:100%;
+ margin-bottom:10px;
 }
 .provenance-label
 {
@@ -42,7 +75,7 @@ label[for=bounds]
 
 #content
 {
- margin: 0 auto;
+ margin: 0 auto 20px 0;
 }
 
 #map-canvas 
@@ -106,6 +139,7 @@ body
 {
 	font-family: 'Source Sans Pro', sans-serif;
 	background-color: #e4e6e5;
+        padding-bottom: 40px;
 }
 
 #page_title

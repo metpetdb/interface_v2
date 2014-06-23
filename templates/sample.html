@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-  <h3>Sample {{sample.sample_id}}</h3>
+  <h3>Sample {{sample.number}}</h3>
 {% endblock %}
 
 {% block body %}
@@ -15,7 +15,7 @@
       </tr>
       <tr>
         <td class="sample_label">IGSN</td>
-        <td class="sample_value">{{sample.number}}</td>
+        <td class="sample_value">{{sample.sesar_number}}</td>
       </tr>
       <tr>
         <td class="sample_label">Aliases</td>

@@ -47,14 +47,16 @@ def search():
     rock_type_list = []
     collector_list = []
     reference_list = []
+    number_list = []
+    igsn_list = []
     metamorphic_region_list = []
     metamorphic_grade_list = []
 
     regions = api.region.get(params={'order_by': 'name'}).data['objects']
     rock_types = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
-    references = api.reference.get(params={'order_by': 'name'}).data['objects']
-    metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name'}).data['objects']
-    metamorphic_grades = api.metamorphic_grade.get().data['objects']
+    references = api.reference.get(params={'order_by': 'name', 'limit': 0}).data['objects']
+    metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
+    metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
     samples = api.sample.get().data['objects']
 
     for region in regions:
@@ -70,6 +72,8 @@ def search():
     for sample in samples:
         if sample['collector'] and sample['collector'] not in collector_list:
             collector_list.append(unicode(sample['collector']))
+        number_list.append(sample['number'])
+        igsn_list.append(sample['sesar_number'])
 
     return render_template('search_form.html',
                             query='',
@@ -77,6 +81,8 @@ def search():
                             rock_types=rock_types,
                             provenances=collector_list,
                             references=reference_list,
+			    numbers=number_list,
+                            igsns=igsn_list,
                             metamorphic_regions=metamorphic_region_list,
                             metamorphic_grades=metamorphic_grade_list)
 

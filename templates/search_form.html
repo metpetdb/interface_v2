@@ -30,7 +30,7 @@
          <h3>Rock Types</h3>
          <div id="rocktypelist">
          {% for rock_type in rock_types %}
-         <input type="checkbox" class="rocktype" name="rock_type__rock_type__in"         
+         <input type="checkbox" class="rocktype" onchange="updateRockTypes()"  name="rock_type__rock_type__in"         
          value="{{rock_type.rock_type}}">{{ rock_type.rock_type }}
          {% endfor %}
 
@@ -44,7 +44,8 @@
          <h3>Metamorphic Grade</h3>
          <div id = "metgrade-checkboxes">
          {% for grade in metamorphic_grades %}
-         <input type="checkbox" class = "metgrade" name="metamorphic_grades__name__in" value="{{ grade }}">
+         <input type="checkbox" class = "metgrade" onchange="updateMetGrades()"
+  name="metamorphic_grades__name__in" value="{{ grade }}">
          {{ grade }}
          {% endfor %}
          </div><!-- metgrade checkboxes -->
@@ -68,7 +69,7 @@
         <label for="bounds">SW Long: </label>
         <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-long" class="latlong" ><br><br>
 
-<input type="hidden" id="ne-location-bound" name="samples__location__contained" value="">
+<input type="hidden" id="ne-location-bound" name="location__contained" value="">
 <!-- <input type="hidden" id="sw-location-bound" name="samples__location__contained" value=""> -->
 
 
@@ -101,27 +102,38 @@
       <div class="tab-pane" id="provenance">
        <ul id = "provenance">
         <h3>Provenance</h3>
+        <label class="provenance-label" for="owner">Owner: </label>
+        <select multiple name="owner" class="chosen-select">
+        {% for o in owners %}
+            <option value="{{ o }}">{{ o }}</option>
+        {% endfor %}
+        </select><br>
         <label class="provenance-label" for="collector">Collector: </label>
-        <select name="collector">
-        <option value="" selected="selected">Collector</option>
-<script>
-var p = "{{provenances}}";
-console.log("P IS ");
-console.log(p);
-</script>
+        <select multiple name="collector__in" class="chosen-select">
         {% for col in provenances %}
             <option value="{{ col }}">{{ col }}</option>
         {% endfor %}
         </select><br>
-        <label class="provenance-label" for="reference__name">Reference: </label>
-        <select name="reference__name">
-        <option value="" selected="selected">Reference</option>
+        <label class="provenance-label" for="references__name__in">Reference: </label>
+        <select multiple class="chosen-select" name="references__name__in">
         {% for ref in references %}
             <option value="{{ ref }}">{{ ref }}</option>
         {% endfor %}
         </select><br>
-         <label class="provenance-label" for="number">Number: </label><input type="text" name="number"><br>
-        <label class="provenance-label" for="igsn">IGSN: </label><input type="text" name="igsn"><br>
+        <label class="provenance-label" for="samples__number">Number: </label>
+        <select name="number" class="chosen-select">
+        <option value="">Select sample number</option>
+        {% for n in numbers %}
+            <option value="{{ n }}">{{ n }}</option>
+        {% endfor %}
+        </select><br>
+        <label class="provenance-label" for="igsn">IGSN: </label>
+        <select name="igsn" class="chosen-select">
+        <option value="">Select IGSN</option>
+        {% for i in isgns %}
+            <option value="{{ i }}">{{ i }}</option>
+        {% endfor %}
+        </select><br>
 <label class="provenance-label" for="dates">Date Range: </label><input type="text" name="dates" id="date-start"> to <input type="text" name="dates" id="date-end"><br>
        </ul>
       </div>
@@ -132,6 +144,26 @@ console.log(p);
        <input type="submit" value="Search">
       </div>
   </form>  <!-- tabs -->
+
+<div class="clear"></div>
+
+<div id="search-summary" class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+          Search Summary
+        </a>
+      </h4>
+    </div>
+    <div id="collapseTwo" class="panel-collapse collapse in">
+      <div class="panel-body">
+      <div id = "search-options-rock-type"></div>
+      <div id = "search-options-metgrades"></div>
+      </div>
+</div><!--end collapsetwo -->
+</div>
+
+
 </div><!--end form container-->
   {% if error %}
       <p style="color: red;">Please submit a search term.</p>
@@ -145,8 +177,10 @@ console.log(p);
 
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
-  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-  <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+<link rel="stylesheet" href="/static/css/chosen.min.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+<script src="/static/js/chosen.jquery.min.js"></script>
 
 <script>
 $('#myTab a').click(function (e) {
@@ -178,6 +212,7 @@ $(function()
   var input = document.createElement('input');
   $(input).className = "rocktype";
   $(input).attr('type','checkbox');
+  $(input).attr('onchange','updateRockTypes()');
   $(input).attr('name','rock_type__rock_type__in');
   var val = $(originalHTML[a]).attr('value');
   $(input).attr('value', val);
@@ -213,6 +248,7 @@ $(function()
   var input = document.createElement('input');
   $(input).className = "metgrade";
   $(input).attr('type','checkbox');
+  $(input).attr('onchange','updateMetGrades()');
   $(input).attr('name','metamorphic_grades__name__in');
   var val = $(originalHTML[a]).attr('value');
   $(input).attr('value', val);
@@ -356,6 +392,13 @@ google.maps.event.addDomListener(document.getElementById("location-tab"), 'click
 $( "#date-start" ).datepicker();
 $( "#date-end" ).datepicker();
 
+//Chosen-select plugin activate
+$(".chosen-select").chosen({
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
+
 //Ajax call to update sample data
 var frm = $('#content');
     frm.submit(function () {
@@ -375,6 +418,12 @@ var frm = $('#content');
         });
         return false;
     }); //END ajax
+
+//Update search summary
+$('.provenance').keyup(function() {
+   $('#CFName').val($(this).val());
+});
+
 }); //END READY FUNCTION
 
 //UPDATE BOUNDS
@@ -400,6 +449,64 @@ function updateBounds()
    document.getElementById("sw-location-bound").value = lowerbound;
    console.log(upperbound);
    console.log( lowerbound);
+}
+
+//UPDATE SUMMARY
+function updateRockTypes()
+{
+ //Update Rock Types
+ document.getElementById("search-options-rock-type").innerHTML = "";
+ var checkBoxes = document.getElementsByName("rock_type__rock_type__in");
+ document.getElementById("search-options-rock-type").innerHTML += "<h4>Rock Types</h4>";
+
+ for(var i=0; i < checkBoxes.length;i++)
+ { 
+  if(checkBoxes[i].checked)
+  {         
+   console.log(checkBoxes[i].defaultValue);
+   document.getElementById("search-options-rock-type").innerHTML += checkBoxes[i].defaultValue + ", ";
+  }
+ }
+ document.getElementById("search-options-rock-type").innerHTML += "<a onclick='clearRockTypes()'>Clear</a>";
+}
+
+function updateMetGrades()
+{
+//Update Metamorphic Grades
+ document.getElementById("search-options-metgrades").innerHTML = "";
+ checkBoxes = document.getElementsByName("metamorphic_grades__name__in");
+ console.log(checkBoxes);
+ document.getElementById("search-options-metgrades").innerHTML += "<h4>Metamorphic Grades</h4>";
+
+ for(var i=0; i < checkBoxes.length;i++)
+ { 
+  if(checkBoxes[i].checked)
+  {         
+   console.log(checkBoxes[i].defaultValue);
+   document.getElementById("search-options-metgrades").innerHTML += checkBoxes[i].defaultValue + ", ";
+  }
+ }
+ document.getElementById("search-options-metgrades").innerHTML += "<a onclick='clearMetGrades()'>Clear</a>";
+}
+
+function clearRockTypes()
+{
+ var checkBoxes = document.getElementsByName("rock_type__rock_type__in");
+ for(var i=0; i < checkBoxes.length;i++)
+ { 
+ checkBoxes[i].checked = false;
+ }
+ document.getElementById("search-options-rock-type").innerHTML = "";
+}
+
+function clearMetGrades()
+{
+ var checkBoxes = document.getElementsByName("metamorphic_grades__name__in");
+ for(var i=0; i < checkBoxes.length;i++)
+ { 
+ checkBoxes[i].checked = false;
+ }
+ document.getElementById("search-options-metgrades").innerHTML = "";
 }
 </script>
 
