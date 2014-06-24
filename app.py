@@ -46,6 +46,7 @@ def search():
     region_list = []
     rock_type_list = []
     collector_list = []
+    country_list = []
     reference_list = []
     number_list = []
     igsn_list = []
@@ -70,11 +71,12 @@ def search():
     for mmg in metamorphic_grades:
         metamorphic_grade_list.append(mmg['name'])
     for sample in samples:
-        if sample['collector'] and sample['collector'] not in collector_list:
-            collector_list.append(unicode(sample['collector']))
+        collector_list.append(unicode(sample['collector']))
         number_list.append(sample['number'])
         igsn_list.append(sample['sesar_number'])
-
+        country_list.append(sample['country'])
+    collector_list = list (set ( collector_list ))
+    country_list = list(set (country_list))
     return render_template('search_form.html',
                             query='',
                             regions=region_list,
@@ -83,6 +85,7 @@ def search():
                             references=reference_list,
 			    numbers=number_list,
                             igsns=igsn_list,
+			    countries=country_list,
                             metamorphic_regions=metamorphic_region_list,
                             metamorphic_grades=metamorphic_grade_list)
 

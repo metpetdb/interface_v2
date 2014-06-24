@@ -75,16 +75,21 @@
 
         <div id = "location-regions"
         <label for="regions__name">Regions: </label><br>
-        <select name="regions__name">
-        <option value="" selected="selected">Regions</option>
+        <select multiple class="chosen-select" name="regions__name__in">
         {% for region in regions %}
              <option value="{{ region }}">{{ region }}</option>
         {% endfor %}
         </select>
         <br>
+        <label for="country__name">Country: </label><br>
+        <select multiple class="chosen-select" name="country__in">
+        {% for c in countries %}
+             <option value="{{ c }}">{{ c }}</option>
+        {% endfor %}
+        </select>
+        <br>
         <label for="metamophic_regions__name">Metamorphic Regions: </label><br>
-        <select name="metamorphic_regions__name">
-        <option value="" selected="selected">Metamorphic Regions</option>
+        <select multiple class="chosen-select" name="metamorphic_regions__name__in">
         {% for region in metamorphic_regions %}
              <option value="{{ region }}">{{ region }}</option>
         {% endfor %}
@@ -159,6 +164,7 @@
       <div class="panel-body">
       <div id = "search-options-rock-type"></div>
       <div id = "search-options-metgrades"></div>
+      <div id = "search-options-location"></div>
       </div>
 </div><!--end collapsetwo -->
 </div>
