@@ -108,9 +108,9 @@
        <ul id = "provenance">
         <h3>Provenance</h3>
         <label class="provenance-label" for="owner">Owner: </label>
-        <select multiple name="owner" class="chosen-select">
+        <select multiple name="user_id__in" class="chosen-select">
         {% for o in owners %}
-            <option value="{{ o }}">{{ o }}</option>
+            <option value="{{ o.user_id }}">{{ o.name }}</option>
         {% endfor %}
         </select><br>
         <label class="provenance-label" for="collector">Collector: </label>
@@ -139,7 +139,9 @@
             <option value="{{ i }}">{{ i }}</option>
         {% endfor %}
         </select><br>
-<label class="provenance-label" for="dates">Date Range: </label><input type="text" name="dates" id="date-start"> to <input type="text" name="dates" id="date-end"><br>
+<input type="hidden" id="startdatevalue" name="collection_date__gt" value="">
+<input type="hidden" id="enddatevalue" name="collection_date__lt" value="">
+<label class="provenance-label" for="dates" >Date Range: </label><input type="text" name="dates" onchange="updateStartDate(this)" id="date-start"> to <input type="text" name="dates" onchange="updateEndDate(this)" id="date-end"><br>
        </ul>
       </div>
 
@@ -513,6 +515,26 @@ function clearMetGrades()
  checkBoxes[i].checked = false;
  }
  document.getElementById("search-options-metgrades").innerHTML = "";
+}
+
+function updateStartDate(input)
+{
+ var year = input.value.substr(-4);
+ var date = input.value.substr(3, 2);
+ var month = input.value.substr(0, 2);
+ var timestamp = year + "-" + month + "-" + date + " 00:00:00"; 
+ $('#startdatevalue').attr('value', timestamp);
+ console.log($('#startdatevalue').val());
+}
+
+function updateEndDate(input)
+{
+ var year = input.value.substr(-4);
+ var date = input.value.substr(3, 2);
+ var month = input.value.substr(0, 2);
+ var timestamp = year + "-" + month + "-" + date + " 00:00:00"; 
+ $('#enddatevalue').attr('value', timestamp);
+ console.log($('#enddatevalue').val());
 }
 </script>
 

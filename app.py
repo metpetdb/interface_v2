@@ -43,6 +43,7 @@ def search():
     api_key = session.get('api_key', None)
     api = MetpetAPI(email, api_key).api
 
+    owner_list = []
     region_list = []
     rock_type_list = []
     collector_list = []
@@ -59,6 +60,7 @@ def search():
     metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
     metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
     samples = api.sample.get().data['objects']
+    users = api.user.get().data['objects']
 
     for region in regions:
         region_list.append(region['name'])
@@ -75,6 +77,8 @@ def search():
         number_list.append(sample['number'])
         igsn_list.append(sample['sesar_number'])
         country_list.append(sample['country'])
+    for user in users:
+        owner_list.append(user)
     collector_list = list (set ( collector_list ))
     country_list = list(set (country_list))
     return render_template('search_form.html',
@@ -86,6 +90,7 @@ def search():
 			    numbers=number_list,
                             igsns=igsn_list,
 			    countries=country_list,
+			    owners = owner_list,
                             metamorphic_regions=metamorphic_region_list,
                             metamorphic_grades=metamorphic_grade_list)
 
