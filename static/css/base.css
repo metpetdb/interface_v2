@@ -1,3 +1,26 @@
+#clear-map
+{
+ border-radius: 12px;
+ padding: 5px;
+ margin-top: 5px;
+}
+
+#clear-map:hover
+{
+ background-color: 'green';
+}
+
+body
+{
+ text-overflow: ellipsis !important;
+}
+
+#search-options
+{
+ float: left;
+ width: 69%;
+}
+
 .clear
 {
  clear:both;
@@ -10,8 +33,11 @@
 
 #search-summary
 {
- width:95%;
- margin: 30px auto 0 auto;
+ width:30%;
+ float:right;
+ margin: 0 auto 0 auto;
+ 
+ 
 }
 
 
@@ -508,14 +534,14 @@ background-color: rgb(235, 235, 235);
  }
 }
 
-@media (max-width: 550px)
+@media (max-width: 1000px)
 {
  #map-canvas
  {
   float: none;
   margin: 0 auto;
   width: auto;
-  max-width: 550px;
+  max-width: 1000px;
  }
 }
 

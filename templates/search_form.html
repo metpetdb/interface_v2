@@ -4,7 +4,7 @@
     <img id="img-spinner" src="/static/images/ajax-loader.gif" alt="Loading"/>
 </div>
 
-  <div class="panel panel-default">
+  <div id = "search-options" class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
@@ -73,23 +73,25 @@
 <!-- <input type="hidden" id="sw-location-bound" name="samples__location__contained" value=""> -->
 
 
-        <div id = "location-regions"
+        <div id = "location-regions">
         <label for="regions__name">Regions: </label><br>
-        <select multiple class="chosen-select" name="regions__name__in">
+        <select onchange="updateBounds()" id="selected-regions" multiple class="chosen-select" name="regions__name__in">
+<option value=""></option>
         {% for region in regions %}
-             <option value="{{ region }}">{{ region }}</option>
+             <option onchange="updateBounds()" value="{{ region }}">{{ region }}</option>
         {% endfor %}
         </select>
         <br>
+
         <label for="country__name">Country: </label><br>
-        <select multiple class="chosen-select" name="country__in">
+        <select onchange="updateBounds()" id="selected-countries" multiple class="chosen-select" name="country__in">
         {% for c in countries %}
              <option value="{{ c }}">{{ c }}</option>
         {% endfor %}
         </select>
         <br>
         <label for="metamophic_regions__name">Metamorphic Regions: </label><br>
-        <select multiple class="chosen-select" name="metamorphic_regions__name__in">
+        <select onchange="updateBounds()" multiple class="chosen-select" id = "selected-metregions" name="metamorphic_regions__name__in">
         {% for region in metamorphic_regions %}
              <option value="{{ region }}">{{ region }}</option>
         {% endfor %}
@@ -98,7 +100,8 @@
        </ul>
       </div>
       
-      <div class="tab-pane" id="minerals">
+      <div class="tab-pane" id="minerals"><br>
+       <div id ="mineral-tree"></div><br>
       </div>
 
       <div class="tab-pane" id="chemistry">
@@ -108,33 +111,33 @@
        <ul id = "provenance">
         <h3>Provenance</h3>
         <label class="provenance-label" for="owner">Owner: </label>
-        <select multiple name="user_id__in" class="chosen-select">
+        <select id="selected-owners" onchange="updateProvenance()" multiple name="user__in" class="chosen-select">
         {% for o in owners %}
             <option value="{{ o.user_id }}">{{ o.name }}</option>
         {% endfor %}
         </select><br>
         <label class="provenance-label" for="collector">Collector: </label>
-        <select multiple name="collector__in" class="chosen-select">
+        <select id = "selected-collectors" onchange="updateProvenance()" multiple name="collector__in" class="chosen-select">
         {% for col in provenances %}
             <option value="{{ col }}">{{ col }}</option>
         {% endfor %}
         </select><br>
         <label class="provenance-label" for="references__name__in">Reference: </label>
-        <select multiple class="chosen-select" name="references__name__in">
+        <select id="selected-references" onchange="updateProvenance()" multiple class="chosen-select" name="references__name__in">
         {% for ref in references %}
             <option value="{{ ref }}">{{ ref }}</option>
         {% endfor %}
         </select><br>
         <label class="provenance-label" for="samples__number">Number: </label>
-        <select name="number" class="chosen-select">
-        <option value="">Select sample number</option>
+        <select id="selected-number" onchange="updateProvenance()" name="number" class="chosen-select">
+        <option value="" disabled selected>Select sample number</option>
         {% for n in numbers %}
             <option value="{{ n }}">{{ n }}</option>
         {% endfor %}
         </select><br>
         <label class="provenance-label" for="igsn">IGSN: </label>
-        <select name="igsn" class="chosen-select">
-        <option value="">Select IGSN</option>
+        <select id="selected-igsn" onchange="updateProvenance()" name="igsn" class="chosen-select">
+        <option value="" disabled selected>Select IGSN</option>
         {% for i in isgns %}
             <option value="{{ i }}">{{ i }}</option>
         {% endfor %}
@@ -154,6 +157,15 @@
 
 <div class="clear"></div>
 
+
+</div><!--end form container-->
+  {% if error %}
+      <p style="color: red;">Please submit a search term.</p>
+  {% endif %}
+      </div>
+    </div>
+  </div>
+
 <div id="search-summary" class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
@@ -163,22 +175,15 @@
       </h4>
     </div>
     <div id="collapseTwo" class="panel-collapse collapse in">
-      <div class="panel-body">
-      <div id = "search-options-rock-type"></div>
-      <div id = "search-options-metgrades"></div>
-      <div id = "search-options-location"></div>
-      </div>
-</div><!--end collapsetwo -->
+       <div class="panel-body">
+          <div id = "search-options-rock-type"></div>
+          <div id = "search-options-metgrades"></div>
+          <div id = "search-options-location"></div>
+          <div id = "search-options-provenance"></div>
+          <div id = "search-options-minerals"></div>
+       </div>
+    </div><!--end collapsetwo -->
 </div>
-
-
-</div><!--end form container-->
-  {% if error %}
-      <p style="color: red;">Please submit a search term.</p>
-  {% endif %}
-      </div>
-    </div>
-  </div>
 
 <div id = "results"></div>
 
@@ -189,6 +194,9 @@
 <script src="//code.jquery.com/jquery-1.10.2.js"></script>
 <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 <script src="/static/js/chosen.jquery.min.js"></script>
+
+<link rel="stylesheet" href="/static/css/style.min.css">
+<script src="/static/js/jstree.min.js"></script>
 
 <script>
 $('#myTab a').click(function (e) {
@@ -319,6 +327,12 @@ currentOverlay = new google.maps.Rectangle({
 
   currentOverlay.setMap(map);
 
+//Clear map button
+var homeControlDiv = document.createElement('div');
+  var homeControl = new HomeControl(homeControlDiv, map);
+
+  homeControlDiv.index = 1;
+  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(homeControlDiv);
 
 //DRAW COMPLETE LISTENER
 google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event) {
@@ -344,6 +358,12 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
    document.getElementById("ne-long").value = ne.lng().toString();
    document.getElementById("sw-lat").value = sw.lat().toString();
    document.getElementById("sw-long").value = sw.lng().toString();
+
+//Update Location in search summary
+  document.getElementById("search-options-location").innerHTML = "";
+  document.getElementById("search-options-location").innerHTML += "<h4>Location</h4>";
+  document.getElementById("search-options-location").innerHTML += "NE Lat: " + ne.lat().toString() + "<br>NE Long: " + ne.lng().toString() + "<br>SW Lat: " + sw.lat().toString() + "<br>SW Long: " + sw.lng().toString() + "<br><a onclick='clearBounds()'>Clear</a>";
+
    });
 
    //Update bounds for creation
@@ -353,6 +373,11 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
    document.getElementById("ne-long").value = ne.lng().toString();
    document.getElementById("sw-lat").value = sw.lat().toString();
    document.getElementById("sw-long").value = sw.lng().toString();
+
+  //Update Location in search summary
+  document.getElementById("search-options-location").innerHTML = "";
+  document.getElementById("search-options-location").innerHTML += "<h4>Location</h4>";
+  document.getElementById("search-options-location").innerHTML += "NE Lat: " + ne.lat().toString() + "<br>NE Long: " + ne.lng().toString() + "<br>SW Lat: " + sw.lat().toString() + "<br>SW Long: " + sw.lng().toString() + "<br><a onclick='clearBounds()'>Clear</a>";
 
    //Update POINT 4326 values to submit
    //SRID=4326;POINT(-118.0488106 33.9346343)
@@ -432,20 +457,98 @@ $('.provenance').keyup(function() {
    $('#CFName').val($(this).val());
 });
 
+var mineralnodes = {{ mineral_nodes|safe }};
+console.log(mineralnodes);
+/*var mineralRelationships = {{ mineralrelationships|safe }};
+var mineralNodes = [];
+var mineralRoots = [];
+//console.log(mineralRelationships);
+
+//Find mineral roots
+for(var a = 0; a < mineralRelationships.length; a++)
+{
+ var currentMineral = mineralRelationships[a].parent_mineral.name;
+ var root = true;
+ for(var b = 0; b < mineralRelationships.length; b++)
+ {
+  if(currentMineral == mineralRelationships[b].child_mineral.name)
+   root = false;
+ }
+ if(root == true)
+ {
+  var node= { "id": currentMineral, "parent": "#", "text": currentMineral };
+   mineralRoots.push(node);
+ }
+}
+
+var mineralRootsClean = [];
+for(var a = 0; a < mineralRoots.length; a++)
+{
+ for(var b = 0; b < mineralRoots.length; b++)
+ {
+  var alreadyExists = false;
+  if(mineralRoots[b].id == mineralRoots[a].id)
+    alreadyExists = true;
+ }
+ if(!alreadyExists)
+  mineralRootsClean.push(mineralRoots[a]);
+}
+
+for(var a = 0; a < mineralRootsClean.length; a++)
+ mineralNodes.push(mineralRootsClean[a]);
+
+//Add children
+for(var a = 0; a < mineralRelationships.length; a++)
+{
+ //console.log(m[a]);
+ var node = { "id": mineralRelationships[a].child_mineral.name,
+              "parent": mineralRelationships[a].parent_mineral.name,
+	      "text": mineralRelationships[a].child_mineral.name };
+ mineralNodes.push(node);
+}
+
+console.log(mineralNodes);
+*/
+/*$('#mineral-tree').jstree({ 'core' : {
+    'data' : [
+       { "id" : "ajson1", "parent" : "#", "text" : "Test root" },
+       { "id" : "ajson2", "parent" : "#", "text" : "Test root 2" },
+       { "id" : "ajson3", "parent" : "ajson2", "text" : "Child 1" },
+       { "id" : "ajson4", "parent" : "ajson2", "text" : "Child 2" },
+    ]
+}*/
+
+
+$('#mineral-tree').jstree({ 'core' : {
+    'data' : mineralnodes
+}
+,
+
+"checkbox" : {
+      "keep_selected_style" : false
+    },
+    "plugins" : [ "checkbox" ]
+ });
+
 }); //END READY FUNCTION
 
 //UPDATE BOUNDS
 function updateBounds()
 {
-  var nelat = document.getElementById("ne-lat").value;
-  var nelong = document.getElementById("ne-long").value;
-  var swlat = document.getElementById("sw-lat").value;
-  var swlong = document.getElementById("sw-long").value;
-  currentOverlay.setBounds(new google.maps.LatLngBounds(
-      new google.maps.LatLng(nelat, nelong),
-      new google.maps.LatLng(swlat, swlong)
-  ));
+   var searchOptions = document.getElementById("search-options-location");
+   searchOptions.innerHTML = "";
 
+   var nelat = document.getElementById("ne-lat").value;
+   var nelong = document.getElementById("ne-long").value;
+   var swlat = document.getElementById("sw-lat").value;
+   var swlong = document.getElementById("sw-long").value;
+
+  if(!currentOverlay || document.getElementById("selected-regions").options.length)
+   searchOptions.innerHTML += "<h4>Location</h4>";
+
+  //Update Location
+  if(!currentOverlay)
+  {
    //Update POINT 4326 values to submit
    //SRID=4326;POINT(-118.0488106 33.9346343)
    //var upperbound = 'SRID=4326;POINT(' + nelat + ' ' +  nelong + ')';
@@ -457,9 +560,63 @@ function updateBounds()
    document.getElementById("sw-location-bound").value = lowerbound;
    console.log(upperbound);
    console.log( lowerbound);
+
+   searchOptions.innerHTML += "NE Lat: " + nelat + "<br>NE Long: " + nelong + "<br>SW Lat: " + swlat + "<br>SW Long: " + swlong + "<br>";
+  }
+
+  //Update Region
+  var selectedRegions = document.getElementById("selected-regions");
+  if($("#selected-regions option:selected").length)
+  {
+   searchOptions.innerHTML += "Regions: ";
+   for(var a = 0; a < selectedRegions.options.length; a++)
+   {
+   if(selectedRegions.options[a].selected)
+    searchOptions.innerHTML += selectedRegions.options[a].innerHTML + ", ";
+   }
+  }
+
+  //Update Countries
+  var selectedCountries = document.getElementById("selected-countries");
+  if($("#selected-countries option:selected").length)
+  {
+   searchOptions.innerHTML += "<br>Countries: ";
+   for(var a = 0; a < selectedCountries.options.length; a++)
+   {
+   if(selectedCountries.options[a].selected)
+    searchOptions.innerHTML += selectedCountries.options[a].innerHTML + ", ";
+   }
+  }
+
+  //Update Met Regions
+  var selectedMetRegions = document.getElementById("selected-metregions");
+  if($("#selected-metregions option:selected").length)
+  {
+   searchOptions.innerHTML += "<br>Metamorphic Regions: ";
+   for(var a = 0; a < selectedMetRegions.options.length; a++)
+   {
+   if(selectedMetRegions.options[a].selected)
+    searchOptions.innerHTML += selectedMetRegions.options[a].innerHTML + ", ";
+   }
+  }
+
+  if(!currentOverlay || document.getElementById("selected-regions").options.length)
+      searchOptions.innerHTML += "<a onclick='clearBounds()'>Clear</a><br>";
+  else
+     clearBounds();
+  //Update Country
+  //Update Metamorphic Regions
+  var metregions;
+
+
+  currentOverlay.setBounds(new google.maps.LatLngBounds(
+      new google.maps.LatLng(nelat, nelong),
+      new google.maps.LatLng(swlat, swlong)
+  ));
+
 }
 
-//UPDATE SUMMARY
+//UPDATE ROCK TYPES
 function updateRockTypes()
 {
  //Update Rock Types
@@ -497,6 +654,81 @@ function updateMetGrades()
  document.getElementById("search-options-metgrades").innerHTML += "<a onclick='clearMetGrades()'>Clear</a>";
 }
 
+//UPDATE PROVENANCES
+function updateProvenance()
+{
+   var searchOptions = document.getElementById("search-options-provenance");
+   searchOptions.innerHTML = "";
+
+  if($("#selected-owners option:selected").length ||
+     $("#selected-collectors option:selected").length ||
+     $("#selected-reference option:selected").length ||
+     $("#selected-number option:selected").length ||
+     $("#selected-igsn option:selected").length)
+   searchOptions.innerHTML += "<h4>Provenance</h4>";
+
+  //Update Owners
+  var selectedOwners = document.getElementById("selected-owners");
+  if($("#selected-owners option:selected").length)
+  {
+   searchOptions.innerHTML += "Owners: ";
+   for(var a = 0; a < selectedOwners.options.length; a++)
+   {
+   if(selectedOwners.options[a].selected)
+    searchOptions.innerHTML += selectedOwners.options[a].innerHTML + ", ";
+   }
+  }
+
+  //Update Collectors
+  var selectedCollectors = document.getElementById("selected-collectors");
+  if($("#selected-collectors option:selected").length)
+  {
+   searchOptions.innerHTML += "<br>Collectors: ";
+   for(var a = 0; a < selectedCollectors.options.length; a++)
+   {
+   if(selectedCollectors.options[a].selected)
+    searchOptions.innerHTML += selectedCollectors.options[a].innerHTML + ", ";
+   }
+  }
+
+  //Update References
+  var selectedReferences = document.getElementById("selected-references");
+  if($("#selected-references option:selected").length)
+  {
+   searchOptions.innerHTML += "<br>References: ";
+   for(var a = 0; a < selectedReferences.options.length; a++)
+   {
+   if(selectedReferences.options[a].selected)
+    searchOptions.innerHTML += selectedReferences.options[a].innerHTML + ", ";
+   }
+  }
+
+  //Update Number
+  var selectedNumber = document.getElementById("selected-number");
+  if($("#selected-number option:selected").length)
+  {
+   searchOptions.innerHTML += "<br>Number: " + $("#selected-number option:selected").text() + "<br> ";
+  }
+
+  //Update Number
+  var selectedIGSN = document.getElementById("selected-igsn");
+  if($("#selected-igsn option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>IGSN: " + $("#selected-igsn option:selected").text() + "<br> ";
+  }
+
+  //Update Date
+if($("#date-start").val()) { console.log("VAL"); } else { console.log("HAT");} 
+
+  if($("#selected-owners option:selected").length ||
+     $("#selected-collectors option:selected").length ||
+     $("#selected-reference option:selected").length ||
+     $("#selected-number option:selected").length ||
+     $("#selected-igsn option:selected").length)
+      searchOptions.innerHTML += "<a onclick='clearProvenance()'>Clear</a><br>";
+
+}
+
 function clearRockTypes()
 {
  var checkBoxes = document.getElementsByName("rock_type__rock_type__in");
@@ -515,6 +747,11 @@ function clearMetGrades()
  checkBoxes[i].checked = false;
  }
  document.getElementById("search-options-metgrades").innerHTML = "";
+}
+
+function clearProvenance()
+{
+ document.getElementById("search-options-provenance").innerHTML = "";
 }
 
 function updateStartDate(input)
@@ -536,6 +773,66 @@ function updateEndDate(input)
  $('#enddatevalue').attr('value', timestamp);
  console.log($('#enddatevalue').val());
 }
+
+function clearBounds()
+{
+ //Update Location in search summary
+  document.getElementById("search-options-location").innerHTML = "";
+  document.getElementById("ne-lat").value = "";
+  document.getElementById("ne-long").value = "";
+  document.getElementById("sw-lat").value = "";
+  document.getElementById("sw-long").value = "";
+
+  if(currentOverlay)
+    currentOverlay.setMap(null);
+$(function() 
+{ //doc ready
+$("#selected-regions option:selected").each(function(i) {$("#selected-regions option:selected")[i+1].selected = false; });
+
+ $("#selected-regions").trigger("chosen:updated");
+
+$('#selected-countries option:selected').each(function(i){
+    i.selected = false;
+});
+
+$('#selected-metregions option:selected').each(function(i){
+    i.selected = false;
+});
+}); //end ready
+}
+
+function HomeControl(controlDiv, map) {
+
+  // Set CSS styles for the DIV containing the control
+  // Setting padding to 5 px will offset the control
+  // from the edge of the map
+
+  // Set CSS for the control border
+  var controlUI = document.createElement('div');
+  controlUI.style.backgroundColor = 'white';
+  controlUI.style.cursor = 'pointer';
+  controlUI.style.textAlign = 'center';
+  controlUI.title = 'Clear selection';
+  controlUI.id = 'clear-map';
+  controlDiv.appendChild(controlUI);
+
+  // Set CSS for the control interior
+  var controlText = document.createElement('div');
+  controlText.style.fontFamily = 'Arial,sans-serif';
+  controlText.style.fontSize = '12px';
+  controlText.style.paddingLeft = '4px';
+  controlText.style.paddingRight = '4px';
+  controlText.innerHTML = '<b>Clear </b>';
+  controlUI.appendChild(controlText);
+
+  // Setup the click event listeners: simply set the map to
+  // Chicago
+  google.maps.event.addDomListener(controlUI, 'click', function() {
+    clearBounds();
+  });
+
+}
+
 </script>
 
 {% endblock %}

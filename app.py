@@ -61,7 +61,26 @@ def search():
     metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
     samples = api.sample.get().data['objects']
     users = api.user.get().data['objects']
+    mineral_relationships = api.mineral_relationship.get(params={'limit': 0}).data['objects']
 
+    mineralroots = []
+    for m in mineral_relationships:
+	currentMineral = m['parent_mineral']['name']
+	root = 1;
+	for m2 in mineral_relationships:
+	    if currentMineral == m2['child_mineral']['name']:
+		root = 0
+	if root == 1:
+	    mineralroots.append(currentMineral)
+    mineralroots = list(set(mineralroots))
+
+    mineralnodes = []
+    for m in mineralroots:
+	mineralnodes.append({"id": m, "parent": "#", "text": m})
+    for m in mineral_relationships:
+        node = {"id": m['child_mineral']['name'], "parent": m['parent_mineral']['name'], "text": m['child_mineral']['name']}
+        mineralnodes.append(node)
+	    
     for region in regions:
         region_list.append(region['name'])
     for rock_type in rock_type_list:
@@ -84,6 +103,8 @@ def search():
     return render_template('search_form.html',
                             query='',
                             regions=region_list,
+			    mineralrelationships=json.dumps(mineral_relationships),
+			    mineral_nodes=json.dumps(mineralnodes),
                             rock_types=rock_types,
                             provenances=collector_list,
                             references=reference_list,
