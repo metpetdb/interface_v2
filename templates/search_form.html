@@ -102,6 +102,7 @@
       
       <div class="tab-pane" id="minerals"><br>
        <div id ="mineral-tree"></div><br>
+       <div id = "selected-minerals"></div>
       </div>
 
       <div class="tab-pane" id="chemistry">
@@ -529,6 +530,21 @@ $('#mineral-tree').jstree({ 'core' : {
     },
     "plugins" : [ "checkbox" ]
  });
+
+//mineral tree on change
+$('#mineral-tree').on("changed.jstree", function () 
+{
+  var mids = $('#mineral-tree').jstree('get_selected', true);
+  //console.log(data.selected);
+  document.getElementById("selected-minerals").innerHTML = "";
+  console.log(document.getElementById("selected-minerals").innerHTML );
+  for(var a = 0; a < mids.length; a++)
+  {
+   console.log("HERE IS ");
+   console.log(mids[a]);
+   document.getElementById("selected-minerals").innerHTML += "<input name='minerals__in' type='hidden' value=" + mids[a].original.mineral_id + " >";
+  }
+});
 
 }); //END READY FUNCTION
 

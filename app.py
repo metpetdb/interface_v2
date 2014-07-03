@@ -64,21 +64,25 @@ def search():
     mineral_relationships = api.mineral_relationship.get(params={'limit': 0}).data['objects']
 
     mineralroots = []
+    mineralrootids = []
     for m in mineral_relationships:
 	currentMineral = m['parent_mineral']['name']
+        currentId = m['parent_mineral']['mineral_id']
 	root = 1;
 	for m2 in mineral_relationships:
 	    if currentMineral == m2['child_mineral']['name']:
 		root = 0
 	if root == 1:
 	    mineralroots.append(currentMineral)
+	    mineralrootids.append(currentId)
     mineralroots = list(set(mineralroots))
+    mineralrootids = list(set(mineralrootids))
 
     mineralnodes = []
-    for m in mineralroots:
-	mineralnodes.append({"id": m, "parent": "#", "text": m})
+    for m in range(len(mineralroots)):
+	mineralnodes.append({"id": mineralroots[m], "parent": "#", "text": mineralroots[m], "mineral_id": mineralrootids[m]})
     for m in mineral_relationships:
-        node = {"id": m['child_mineral']['name'], "parent": m['parent_mineral']['name'], "text": m['child_mineral']['name']}
+        node = {"id": m['child_mineral']['name'], "parent": m['parent_mineral']['name'], "text": m['child_mineral']['name'], "mineral_id": m['child_mineral']['mineral_id']}
         mineralnodes.append(node)
 	    
     for region in regions:
