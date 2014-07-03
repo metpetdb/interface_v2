@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+
 
 {% block body %}
-
+<div class = "table-responsive">
   <table id="samplelist" class="table">
     <thead>
       <tr>
@@ -40,13 +40,36 @@
     </tbody>
     </thead>
   </table>
-  &lt;&lt; <a href="{{ first_page }}"> First </a>
+</div> <!-- table-responsive-->
+  &lt;&lt; <a class="samples-pagination" href="{{ first_page }}"> First </a>
   {% if prev_url %}
-     &nbsp;  &nbsp; &lt; <a href="{{ prev_url }}">Prev </a>
+     &nbsp;  &nbsp; &lt; <a class="samples-pagination" href="{{ prev_url }}">Prev </a>
   {% endif %}
   {% if next_url %}
-     &nbsp;  &nbsp;<a href="{{ next_url }}">Next</a> &gt;
+     &nbsp;  &nbsp;<a class="samples-pagination" href="{{ next_url }}">Next</a> &gt;
   {% endif %}
-   &nbsp;  &nbsp; <a href="{{ last_page }}">Last </a>  &gt;&gt;
+   &nbsp;  &nbsp; <a class="samples-pagination" href="{{ last_page }}">Last </a>  &gt;&gt;
 {% endblock %}
 
+<script>
+//Ajax call for first, last, next and previous samples
+$('.samples-pagination').click(function (event) 
+{ 
+   event.preventDefault(); 
+   var url = $(this).attr('href');
+    $('#spinner').show();
+        $.ajax({
+	    type: "GET",
+            url: url,
+            success: function (data) {
+                $("#results").html(data);
+                $('#spinner').hide();
+            },
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+        });
+        return false;
+ });
+</script>
