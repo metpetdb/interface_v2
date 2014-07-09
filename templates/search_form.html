@@ -543,6 +543,7 @@ $('#mineral-tree').on("changed.jstree", function ()
   document.getElementById("selected-minerals").innerHTML = "";
   console.log(document.getElementById("selected-minerals").innerHTML );
   var searchOptions = document.getElementById("search-options-minerals");
+  searchOptions.innerHTML = "";
   if(mids.length > 0)
    searchOptions.innerHTML = "<h4>Minerals</h4>";
   for(var a = 0; a < mids.length; a++)
