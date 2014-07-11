@@ -483,6 +483,7 @@ var frm = $('#content');
             success: function (data) {
                 $("#results").html(data);
                 $('#spinner').hide();
+                document.getElementsByTagName("header")[1].innerHTML = "";
             },
             error: function(data) {
                 $("#results").html("Error");

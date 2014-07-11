@@ -1,4 +1,4 @@
-<link rel="stylesheet" type="text/css" href="/static/css/base.css">
+{% extends "base.html" %}
 
 {% block body %}
 <div class = "table-responsive">
@@ -49,6 +49,36 @@
      &nbsp;  &nbsp;<a class="samples-pagination" href="{{ next_url }}">Next</a> &gt;
   {% endif %}
    &nbsp;  &nbsp; <a class="samples-pagination" href="{{ last_page }}">Last </a>  &gt;&gt;
+
+<script>
+//Ajax call for first, last, next and previous samples
+$('.samples-pagination').click(function (event) 
+{ 
+ if(document.URL.indexOf("search") !== -1)
+ {
+  console.log(document.URL.indexOf("search"));
+   event.preventDefault(); 
+   var url = $(this).attr('href');
+    $('#spinner').show();
+        $.ajax({
+	    type: "GET",
+            url: url,
+            success: function (data) {
+                $("#results").html(data);
+                $('#spinner').hide();
+            },
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+        });
+        return false;
+  } //endif
+  else
+   window.location = url;
+ });
+</script>
 {% endblock %}
+
 
 
