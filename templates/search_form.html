@@ -76,9 +76,8 @@
         <div id = "location-regions">
         <label for="regions__name">Regions: </label><br>
         <select onchange="updateBounds()" id="selected-regions" multiple class="chosen-select" name="regions__name__in">
-<option value=""></option>
         {% for region in regions %}
-             <option onchange="updateBounds()" value="{{ region }}">{{ region }}</option>
+             <option value="{{ region }}">{{ region }}</option>
         {% endfor %}
         </select>
         <br>
@@ -374,47 +373,7 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
    document.getElementById("sw-lat").value = sw.lat().toString();
    document.getElementById("sw-long").value = sw.lng().toString();
 
-//Update Region
-  console.log("HERE");
-  var selectedRegions = document.getElementById("selected-regions");
-  if($("#selected-regions option:selected").length)
-  {
-   console.log("REGION SELECTED");
-   searchOptions.innerHTML += "<b>Regions:</b> ";
-   for(var a = 0; a < selectedRegions.options.length; a++)
-   {
-   if(selectedRegions.options[a].selected)
-    searchOptions.innerHTML += selectedRegions.options[a].innerHTML + ", ";
-   }
-   searchOptions.innerHTML += "<br>";
-  }
-
-  //Update Countries
-  var selectedCountries = document.getElementById("selected-countries");
-  if($("#selected-countries option:selected").length)
-  {
-   searchOptions.innerHTML += "<b>Countries:</b> ";
-   for(var a = 0; a < selectedCountries.options.length; a++)
-   {
-   if(selectedCountries.options[a].selected)
-    searchOptions.innerHTML += selectedCountries.options[a].innerHTML + ", ";
-   }
-   searchOptions.innerHTML += "<br>";
-  }
-
-  //Update Met Regions
-  var selectedMetRegions = document.getElementById("selected-metregions");
-  if($("#selected-metregions option:selected").length)
-  {
-   searchOptions.innerHTML += "<b>Metamorphic Regions:</b> ";
-   for(var a = 0; a < selectedMetRegions.options.length; a++)
-   {
-   if(selectedMetRegions.options[a].selected)
-    searchOptions.innerHTML += selectedMetRegions.options[a].innerHTML + ", ";
-   }
-   searchOptions.innerHTML += "<br>";
-  }
-
+updateLocation(); 
   //Update Location in search summary
   var searchOptions = document.getElementById("search-options-location");
   searchOptions.innerHTML = "<h4>Location</h4>";
@@ -434,9 +393,10 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
    document.getElementById("sw-long").value = sw.lng().toString();
 
   //Update Location in search summary
-  document.getElementById("search-options-location").innerHTML = "";
-  document.getElementById("search-options-location").innerHTML += "<h4>Location</h4>";
-  document.getElementById("search-options-location").innerHTML += "NE Lat: " + ne.lat().toString() + "<br>NE Long: " + ne.lng().toString() + "<br>SW Lat: " + sw.lat().toString() + "<br>SW Long: " + sw.lng().toString() + "<br>";
+  var searchOptions = document.getElementById("search-options-location");
+  searchOptions.innerHTML = "";
+  searchOptions.innerHTML += "<h4>Location</h4>";
+  searchOptions.innerHTML += "NE Lat: " + ne.lat().toString() + "<br>NE Long: " + ne.lng().toString() + "<br>SW Lat: " + sw.lat().toString() + "<br>SW Long: " + sw.lng().toString() + "<br>";
 
   updateLocation();
   searchOptions.innerHTML += "<a onclick='clearBounds()'>Clear</a>";
@@ -661,11 +621,9 @@ function updateLocation()
 {
  var searchOptions = document.getElementById("search-options-location");
 //Update Region
-  console.log("HERE");
   var selectedRegions = document.getElementById("selected-regions");
   if($("#selected-regions option:selected").length)
   {
-   console.log("REGION SELECTED");
    searchOptions.innerHTML += "<b>Regions:</b> ";
    for(var a = 0; a < selectedRegions.options.length; a++)
    {
