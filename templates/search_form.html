@@ -52,9 +52,20 @@
         </ul>
       </div>
       
+
       <div class="tab-pane" id="location">
        <ul>
         <h3>Location</h3>
+
+    <ul id="myTab" class="nav nav-tabs">
+        <li class="active"><a href="#mapselect" data-toggle="tab">Map</a></li>
+        <li><a  href="#location-regions" data-toggle="tab">Region</a></li>
+
+        <!--dropdown has same tab selection above, showing with js how to select a tab dynamically-->
+
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active" id="mapselect"><br><br>
         <div id="map-canvas"></div>
         <p id ="map-instructions">Draw a selection on the map to toggle coordinates below.</p><br>
         <label for="bounds">NE Lat: </label>
@@ -71,9 +82,9 @@
 
 <input type="hidden" id="location-bound" name="location__contained" value="">
 <!-- <input type="hidden" id="sw-location-bound" name="samples__location__contained" value=""> -->
-
 <div class="clear"></div>
-        <div id = "location-regions">
+       </div><!--end mapselect -->
+         <div class= "tab-pane" id = "location-regions"><br><br>
         <label for="regions__name">Regions: </label><br>
         <select onchange="updateBounds()" id="selected-regions" multiple class="chosen-select" name="regions__name__in">
         {% for region in regions %}
@@ -96,6 +107,8 @@
         {% endfor %}
         </select>
         </div> <!-- end location-regions -->
+    </div>
+
        </ul>
       </div>
       
@@ -213,6 +226,11 @@
 
 <script>
 $('#myTab a').click(function (e) {
+  e.preventDefault();
+  $(this).tab('show');
+});
+
+$('#location-tab a').click(function (e) {
   e.preventDefault();
   $(this).tab('show');
 });
