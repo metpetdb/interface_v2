@@ -1,3 +1,27 @@
+#form-submit
+{
+ padding: 10px 0 0 0;
+ border-top: 1px solid #ccc;
+ margin-top: 8px;
+}
+
+#instructions
+{
+ width:100%;
+ border-bottom: 1px solid #ccc;
+ padding-bottom: 10px;
+ font-size: 12.5px;
+ margin: 0 auto;
+}
+
+#clearAll 
+{
+ font-size: 13px !important;
+ float: right;
+ margin-top: -15px;
+
+}
+
 #clear-map
 {
  border-radius: 12px;
@@ -52,11 +76,6 @@ body
  width:100% !important;
  height:inherit !important;
  padding:3px !important;
-}
-
-#form-submit
-{
- padding: 0 0 0 40px;
 }
 
 #provenance
