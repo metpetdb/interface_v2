@@ -69,7 +69,7 @@
         <label for="bounds">SW Long: </label>
         <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-long" class="latlong" ><br><br>
 
-<input type="hidden" id="ne-location-bound" name="location__contained" value="">
+<input type="hidden" id="location-bound" name="location__contained" value="">
 <!-- <input type="hidden" id="sw-location-bound" name="samples__location__contained" value=""> -->
 
 <div class="clear"></div>
@@ -366,6 +366,7 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
    //Update bounds for drag and edit
    google.maps.event.addListener(currentOverlay, "bounds_changed", function() 
    {
+    console.log("BOUNDS CHANGED");
    var ne = event.overlay.getBounds().getNorthEast();
    var sw = event.overlay.getBounds().getSouthWest();
    document.getElementById("ne-lat").value = ne.lat().toString();
@@ -373,10 +374,54 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
    document.getElementById("sw-lat").value = sw.lat().toString();
    document.getElementById("sw-long").value = sw.lng().toString();
 
-//Update Location in search summary
-  document.getElementById("search-options-location").innerHTML = "";
-  document.getElementById("search-options-location").innerHTML += "<h4>Location</h4>";
-  document.getElementById("search-options-location").innerHTML += "NE Lat: " + ne.lat().toString() + "<br>NE Long: " + ne.lng().toString() + "<br>SW Lat: " + sw.lat().toString() + "<br>SW Long: " + sw.lng().toString() + "<br><a onclick='clearBounds()'>Clear</a>";
+//Update Region
+  console.log("HERE");
+  var selectedRegions = document.getElementById("selected-regions");
+  if($("#selected-regions option:selected").length)
+  {
+   console.log("REGION SELECTED");
+   searchOptions.innerHTML += "<b>Regions:</b> ";
+   for(var a = 0; a < selectedRegions.options.length; a++)
+   {
+   if(selectedRegions.options[a].selected)
+    searchOptions.innerHTML += selectedRegions.options[a].innerHTML + ", ";
+   }
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update Countries
+  var selectedCountries = document.getElementById("selected-countries");
+  if($("#selected-countries option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Countries:</b> ";
+   for(var a = 0; a < selectedCountries.options.length; a++)
+   {
+   if(selectedCountries.options[a].selected)
+    searchOptions.innerHTML += selectedCountries.options[a].innerHTML + ", ";
+   }
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update Met Regions
+  var selectedMetRegions = document.getElementById("selected-metregions");
+  if($("#selected-metregions option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Metamorphic Regions:</b> ";
+   for(var a = 0; a < selectedMetRegions.options.length; a++)
+   {
+   if(selectedMetRegions.options[a].selected)
+    searchOptions.innerHTML += selectedMetRegions.options[a].innerHTML + ", ";
+   }
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update Location in search summary
+  var searchOptions = document.getElementById("search-options-location");
+  searchOptions.innerHTML = "<h4>Location</h4>";
+  searchOptions.innerHTML += "NE Lat: " + ne.lat().toString() + "<br>NE Long: " + ne.lng().toString() + "<br>SW Lat: " + sw.lat().toString() + "<br>SW Long: " + sw.lng().toString() + "<br>";
+
+  updateLocation();
+  searchOptions.innerHTML += "<a onclick='clearBounds()'>Clear</a>";
 
    });
 
@@ -391,7 +436,10 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
   //Update Location in search summary
   document.getElementById("search-options-location").innerHTML = "";
   document.getElementById("search-options-location").innerHTML += "<h4>Location</h4>";
-  document.getElementById("search-options-location").innerHTML += "NE Lat: " + ne.lat().toString() + "<br>NE Long: " + ne.lng().toString() + "<br>SW Lat: " + sw.lat().toString() + "<br>SW Long: " + sw.lng().toString() + "<br><a onclick='clearBounds()'>Clear</a>";
+  document.getElementById("search-options-location").innerHTML += "NE Lat: " + ne.lat().toString() + "<br>NE Long: " + ne.lng().toString() + "<br>SW Lat: " + sw.lat().toString() + "<br>SW Long: " + sw.lng().toString() + "<br>";
+
+  updateLocation();
+  searchOptions.innerHTML += "<a onclick='clearBounds()'>Clear</a>";
 
    //Update POINT 4326 values to submit
    //SRID=4326;POINT(-118.0488106 33.9346343)
@@ -421,7 +469,7 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
 
    //document.getElementById("ne-location-bound").value = upperbound;
    //document.getElementById("sw-location-bound").value = lowerbound;
-   document.getElementById("ne-location-bound").value = polygon;
+   document.getElementById("location-bound").value = polygon;
    console.log(polygon);
    //console.log(upperbound);
    //console.log( lowerbound);
@@ -578,7 +626,7 @@ function updateBounds()
    searchOptions.innerHTML += "<h4>Location</h4>";
 
   //Update Location
-  if(!currentOverlay)
+  if(currentOverlay !== null && currentOverlay !== undefined)
   {
    //Update POINT 4326 values to submit
    //SRID=4326;POINT(-118.0488106 33.9346343)
@@ -587,18 +635,37 @@ function updateBounds()
    var upperbound = "{'type': 'Point', 'coordinates': [" + nelat + "," + nelong + "]}";
    var lowerbound = "{'type': 'Point', 'coordinates': [" + swlat + "," + swlong + "]}";
 
-   document.getElementById("ne-location-bound").value = upperbound;
-   document.getElementById("sw-location-bound").value = lowerbound;
-   console.log(upperbound);
-   console.log( lowerbound);
+  //se.lat = sw.lat
+  //se.lng = ne.lng
+  //nw.lat = ne.lat
+  //nw.lng = sw.lng 
+  var polygon =  "{ \"type\": \"Polygon\", \"coordinates\": [[" + nelat + "," + nelong +"] , [" + swlat + ", " + nelong + "] , [" + swlat + "," + swlong +"] , [" + nelat + "," + swlong + "]]}";
+
+  document.getElementById("location-bound").value = polygon;
 
    searchOptions.innerHTML += "<b>NE Lat:</b> " + nelat + "<br><b>NE Long:</b> " + nelong + "<br><b>SW Lat:</b> " + swlat + "<br><b>SW Long:</b> " + swlong + "<br>";
   }
 
-  //Update Region
+
+
+  updateLocation();
+
+  if(!currentOverlay || $("#selected-regions option:selected").length ||
+     $("#selected-countries option:selected").length || 
+     $("#selected-metregions option:selected").length)
+      searchOptions.innerHTML += "<a onclick='clearBounds()'>Clear</a><br>";
+
+}
+
+function updateLocation()
+{
+ var searchOptions = document.getElementById("search-options-location");
+//Update Region
+  console.log("HERE");
   var selectedRegions = document.getElementById("selected-regions");
   if($("#selected-regions option:selected").length)
   {
+   console.log("REGION SELECTED");
    searchOptions.innerHTML += "<b>Regions:</b> ";
    for(var a = 0; a < selectedRegions.options.length; a++)
    {
@@ -634,17 +701,6 @@ function updateBounds()
    searchOptions.innerHTML += "<br>";
   }
 
-  if(!currentOverlay || $("#selected-regions option:selected").length ||
-     $("#selected-countries option:selected").length || 
-     $("#selected-metregions option:selected").length)
-      searchOptions.innerHTML += "<a onclick='clearBounds()'>Clear</a><br>";
-
-  var metregions;
-  currentOverlay.setBounds(new google.maps.LatLngBounds(
-      new google.maps.LatLng(nelat, nelong),
-      new google.maps.LatLng(swlat, swlong)
-  ));
-
 }
 
 //UPDATE ROCK TYPES
@@ -653,36 +709,50 @@ function updateRockTypes()
  //Update Rock Types
  document.getElementById("search-options-rock-type").innerHTML = "";
  var checkBoxes = document.getElementsByName("rock_type__rock_type__in");
- document.getElementById("search-options-rock-type").innerHTML += "<h4>Rock Types</h4>";
-
- for(var i=0; i < checkBoxes.length;i++)
- { 
-  if(checkBoxes[i].checked)
-  {         
+ 
+ var checked = false;
+  for(var i=0; i < checkBoxes.length;i++)
+  if(checkBoxes[i].checked)         
+   checked=true;
+ if(checked)
+ {
+  document.getElementById("search-options-rock-type").innerHTML += "<h4>Rock Types</h4>";
+  for(var i=0; i < checkBoxes.length;i++)
+  {  
+   if(checkBoxes[i].checked)
+   {         
+   checked=false;
    console.log(checkBoxes[i].defaultValue);
    document.getElementById("search-options-rock-type").innerHTML += checkBoxes[i].defaultValue + ", ";
+   }
   }
- }
  document.getElementById("search-options-rock-type").innerHTML += "<a onclick='clearRockTypes()'>Clear</a>";
+ }
 }
 
 function updateMetGrades()
 {
 //Update Metamorphic Grades
  document.getElementById("search-options-metgrades").innerHTML = "";
- checkBoxes = document.getElementsByName("metamorphic_grades__name__in");
+ var checkBoxes = document.getElementsByName("metamorphic_grades__name__in");
  console.log(checkBoxes);
- document.getElementById("search-options-metgrades").innerHTML += "<h4>Metamorphic Grades</h4>";
-
+ var checked = false;
  for(var i=0; i < checkBoxes.length;i++)
- { 
-  if(checkBoxes[i].checked)
-  {         
+ if(checkBoxes[i].checked)         
+  checked=true;
+ if(checked)
+ {
+  document.getElementById("search-options-metgrades").innerHTML += "<h4>Metamorphic Grades</h4>";
+  for(var i=0; i < checkBoxes.length;i++)
+  { 
+   if(checkBoxes[i].checked)
+   {         
    console.log(checkBoxes[i].defaultValue);
    document.getElementById("search-options-metgrades").innerHTML += checkBoxes[i].defaultValue + ", ";
+   }
   }
- }
  document.getElementById("search-options-metgrades").innerHTML += "<a onclick='clearMetGrades()'>Clear</a>";
+ }
 }
 
 //UPDATE PROVENANCES
