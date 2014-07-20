@@ -7,7 +7,7 @@
   <div id = "search-options" class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+        <a data-toggle="collapse" onclick="$('#collapseTwo').collapse('toggle');" data-parent="#accordion" href="#collapseOne">
           Search Options
         </a>
       </h4>
@@ -183,7 +183,7 @@
 <div id="search-summary" class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+        <a data-toggle="collapse" onclick="$('#collapseOne').collapse('toggle');" data-parent="#accordion" href="#collapseTwo">
           Search Summary
         </a>
       </h4>
@@ -554,8 +554,9 @@ function updateBounds()
    searchOptions.innerHTML += "<h4>Location</h4>";
 
   //Update Location
-  if(currentOverlay !== null && currentOverlay !== undefined)
+  if(currentOverlay == null)
   {
+   console.log("HERE");
    //Update POINT 4326 values to submit
    //SRID=4326;POINT(-118.0488106 33.9346343)
    //var upperbound = 'SRID=4326;POINT(' + nelat + ' ' +  nelong + ')';
