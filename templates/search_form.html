@@ -7,7 +7,7 @@
   <div id = "search-options" class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+        <a data-toggle="collapse" onclick="$('#collapseTwo').collapse('toggle');" data-parent="#accordion" href="#collapseOne">
           Search Options
         </a>
       </h4>
@@ -183,7 +183,7 @@
 <div id="search-summary" class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+        <a data-toggle="collapse" onclick="$('#collapseOne').collapse('toggle');" data-parent="#accordion" href="#collapseTwo">
           Search Summary
         </a>
       </h4>
@@ -215,9 +215,11 @@
 
 
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
+<script src="/static/js/jquery-2.1.1.min.js"></script>
+
 <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
 <link rel="stylesheet" href="/static/css/chosen.min.css">
-<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<!-- <script src="//code.jquery.com/jquery-1.10.2.js"></script> -->
 <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 <script src="/static/js/chosen.jquery.min.js"></script>
 
@@ -472,84 +474,8 @@ $(".chosen-select").chosen({
     width: "50%"
   });
 
-//Ajax call to update sample data
-var frm = $('#content');
-    frm.submit(function () {
-    $('#spinner').show();
-        $.ajax({
-            type: frm.attr('method'),
-            url: frm.attr('action'),
-            data: frm.serialize(),
-            success: function (data) {
-                $("#results").html(data);
-                $('#spinner').hide();
-                document.getElementsByTagName("header")[1].innerHTML = "";
-            },
-            error: function(data) {
-                $("#results").html("Error");
-                $('#spinner').hide();
-            }
-        });
-        return false;
-    }); //END ajax
-
-//Update search summary
-$('.provenance').keyup(function() {
-   $('#CFName').val($(this).val());
-});
-
 var mineralnodes = {{ mineral_nodes|safe }};
 console.log(mineralnodes);
-/*var mineralRelationships = {{ mineralrelationships|safe }};
-var mineralNodes = [];
-var mineralRoots = [];
-//console.log(mineralRelationships);
-
-//Find mineral roots
-for(var a = 0; a < mineralRelationships.length; a++)
-{
- var currentMineral = mineralRelationships[a].parent_mineral.name;
- var root = true;
- for(var b = 0; b < mineralRelationships.length; b++)
- {
-  if(currentMineral == mineralRelationships[b].child_mineral.name)
-   root = false;
- }
- if(root == true)
- {
-  var node= { "id": currentMineral, "parent": "#", "text": currentMineral };
-   mineralRoots.push(node);
- }
-}
-
-var mineralRootsClean = [];
-for(var a = 0; a < mineralRoots.length; a++)
-{
- for(var b = 0; b < mineralRoots.length; b++)
- {
-  var alreadyExists = false;
-  if(mineralRoots[b].id == mineralRoots[a].id)
-    alreadyExists = true;
- }
- if(!alreadyExists)
-  mineralRootsClean.push(mineralRoots[a]);
-}
-
-for(var a = 0; a < mineralRootsClean.length; a++)
- mineralNodes.push(mineralRootsClean[a]);
-
-//Add children
-for(var a = 0; a < mineralRelationships.length; a++)
-{
- //console.log(m[a]);
- var node = { "id": mineralRelationships[a].child_mineral.name,
-              "parent": mineralRelationships[a].parent_mineral.name,
-	      "text": mineralRelationships[a].child_mineral.name };
- mineralNodes.push(node);
-}
-
-console.log(mineralNodes);
-*/
 
 $('#mineral-tree').jstree({ 'core' : {
     'data' : mineralnodes
@@ -586,6 +512,29 @@ $('#mineral-tree').on("changed.jstree", function ()
    searchOptions.innerHTML += "<a onclick='clearMinerals()'>Clear</a>";
 });
 
+
+//Ajax call to update sample data
+var frm = $('#content');
+    frm.submit(function () {
+    $('#spinner').show();
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: frm.serialize(),
+            success: function (data) {
+                $("#results").html(data);
+                $('#spinner').hide();
+                document.getElementsByTagName("header")[1].innerHTML = "";
+
+            },
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+        });
+        return false;
+    }); //END ajax
+
 }); //END READY FUNCTION
 
 //UPDATE BOUNDS
@@ -605,8 +554,9 @@ function updateBounds()
    searchOptions.innerHTML += "<h4>Location</h4>";
 
   //Update Location
-  if(currentOverlay !== null && currentOverlay !== undefined)
+  if(currentOverlay == null)
   {
+   console.log("HERE");
    //Update POINT 4326 values to submit
    //SRID=4326;POINT(-118.0488106 33.9346343)
    //var upperbound = 'SRID=4326;POINT(' + nelat + ' ' +  nelong + ')';
@@ -837,6 +787,7 @@ function clearAll()
  clearMetGrades();
  clearBounds();
  clearProvenance();
+ clearMinerals();
  
 }
 
@@ -863,8 +814,10 @@ function clearMetGrades()
 function clearProvenance()
 {
  $("#provenance .chosen-select").val('').trigger("chosen:updated");
- $.datepicker._clearDate('#date-start');
- $.datepicker._clearDate('#date-end');
+ if($('#date-start').val())
+  $.datepicker._clearDate('#date-start');
+ if($('#date-end').val())
+  $.datepicker._clearDate('#date-end');
  $('#date-start').val('');
  $('#date-end').val('');
  $("input:radio[name='public_data']").each(function(i) { this.checked = false; });
