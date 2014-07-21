@@ -5,9 +5,9 @@
 </div>
 
   <div id = "search-options" class="panel panel-default">
-    <div class="panel-heading">
+    <div id = "search-panel" class="panel-heading">
       <h4 class="panel-title">
-        <a data-toggle="collapse" onclick="$('#collapseTwo').collapse('toggle');" data-parent="#accordion" href="#collapseOne">
+        <a class='accordion-toggle' data-toggle="collapse" onclick="$('#collapseTwo').collapse('toggle');" data-parent="#accordion" href="#collapseOne">
           Search Options
         </a>
       </h4>
@@ -183,7 +183,7 @@
 <div id="search-summary" class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <a data-toggle="collapse" onclick="$('#collapseOne').collapse('toggle');" data-parent="#accordion" href="#collapseTwo">
+        <a class='accordion-toggle' data-toggle="collapse" onclick="$('#collapseOne').collapse('toggle');" data-parent="#accordion" href="#collapseTwo">
           Search Summary
         </a>
       </h4>
@@ -225,6 +225,7 @@
 
 <link rel="stylesheet" href="/static/css/style.min.css">
 <script src="/static/js/jstree.min.js"></script>
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
 
 <script>
 $('#myTab a').click(function (e) {
@@ -238,7 +239,7 @@ $('#location-tab a').click(function (e) {
 });
 
 //GLOBAL VARS
-var currentOverlay;
+var currentOverlay = null;
 
 //ON READY FUNCTION
 $(function()
@@ -396,12 +397,11 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
 updateLocation(); 
   //Update Location in search summary
   var searchOptions = document.getElementById("search-options-location");
-  searchOptions.innerHTML = "<h4>Location</h4>";
+  searchOptions.innerHTML = "<div class='summary-title'><h4>Location</h4><a onclick='clearBounds()' class='clear-title'>Clear</a></div>";
+
   searchOptions.innerHTML += "NE Lat: " + ne.lat().toString() + "<br>NE Long: " + ne.lng().toString() + "<br>SW Lat: " + sw.lat().toString() + "<br>SW Long: " + sw.lng().toString() + "<br>";
 
   updateLocation();
-  searchOptions.innerHTML += "<a onclick='clearBounds()'>Clear</a>";
-
    });
 
    //Update bounds for creation
@@ -415,11 +415,10 @@ updateLocation();
   //Update Location in search summary
   var searchOptions = document.getElementById("search-options-location");
   searchOptions.innerHTML = "";
-  searchOptions.innerHTML += "<h4>Location</h4>";
+  searchOptions.innerHTML = "<div class='summary-title'><h4>Location</h4><a onclick='clearBounds()' class='clear-title'>Clear</a></div>";
   searchOptions.innerHTML += "NE Lat: " + ne.lat().toString() + "<br>NE Long: " + ne.lng().toString() + "<br>SW Lat: " + sw.lat().toString() + "<br>SW Long: " + sw.lng().toString() + "<br>";
 
   updateLocation();
-  searchOptions.innerHTML += "<a onclick='clearBounds()'>Clear</a>";
 
    //Update POINT 4326 values to submit
    //SRID=4326;POINT(-118.0488106 33.9346343)
@@ -498,7 +497,8 @@ $('#mineral-tree').on("changed.jstree", function ()
   var searchOptions = document.getElementById("search-options-minerals");
   searchOptions.innerHTML = "";
   if(mids.length > 0)
-   searchOptions.innerHTML = "<h4>Minerals</h4>";
+   searchOptions.innerHTML = "<div class='summary-title'><h4>Minerals</h4><a onclick='clearMinerals()' class='clear-title'>Clear</a></div>";
+
   for(var a = 0; a < mids.length; a++)
   {
    console.log(mids[a]);
@@ -508,8 +508,6 @@ $('#mineral-tree').on("changed.jstree", function ()
     searchOptions.innerHTML += mids[a].id + ", ";
    }
   }
-  if(mids.length > 0)
-   searchOptions.innerHTML += "<a onclick='clearMinerals()'>Clear</a>";
 });
 
 
@@ -551,12 +549,13 @@ function updateBounds()
   if(!currentOverlay || $("#selected-regions option:selected").length || 
      $("#selected-countries option:selected").length || 
      $("#selected-metregions option:selected").length)
-   searchOptions.innerHTML += "<h4>Location</h4>";
+   searchOptions.innerHTML = "<div class='summary-title'><h4>Location</h4><a onclick='clearBounds()' class='clear-title'>Clear</a></div>";
 
   //Update Location
-  if(currentOverlay == null)
+  if(currentOverlay.map !== null)
   {
    console.log("HERE");
+   console.log("map is " + currentOverlay.map);
    //Update POINT 4326 values to submit
    //SRID=4326;POINT(-118.0488106 33.9346343)
    //var upperbound = 'SRID=4326;POINT(' + nelat + ' ' +  nelong + ')';
@@ -578,12 +577,6 @@ function updateBounds()
 
 
   updateLocation();
-
-  if(!currentOverlay || $("#selected-regions option:selected").length ||
-     $("#selected-countries option:selected").length || 
-     $("#selected-metregions option:selected").length)
-      searchOptions.innerHTML += "<a onclick='clearBounds()'>Clear</a><br>";
-
 }
 
 function updateLocation()
@@ -599,6 +592,8 @@ function updateLocation()
    if(selectedRegions.options[a].selected)
     searchOptions.innerHTML += selectedRegions.options[a].innerHTML + ", ";
    }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
    searchOptions.innerHTML += "<br>";
   }
 
@@ -612,6 +607,8 @@ function updateLocation()
    if(selectedCountries.options[a].selected)
     searchOptions.innerHTML += selectedCountries.options[a].innerHTML + ", ";
    }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
    searchOptions.innerHTML += "<br>";
   }
 
@@ -625,60 +622,67 @@ function updateLocation()
    if(selectedMetRegions.options[a].selected)
     searchOptions.innerHTML += selectedMetRegions.options[a].innerHTML + ", ";
    }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
    searchOptions.innerHTML += "<br>";
   }
-
 }
 
 //UPDATE ROCK TYPES
 function updateRockTypes()
 {
  //Update Rock Types
- document.getElementById("search-options-rock-type").innerHTML = "";
+ var searchOptions = document.getElementById("search-options-rock-type");
+ searchOptions.innerHTML = "";
  var checkBoxes = document.getElementsByName("rock_type__rock_type__in");
- 
+
  var checked = false;
   for(var i=0; i < checkBoxes.length;i++)
   if(checkBoxes[i].checked)         
    checked=true;
  if(checked)
  {
-  document.getElementById("search-options-rock-type").innerHTML += "<h4>Rock Types</h4>";
+  searchOptions.innerHTML += "<div class = 'summary-title'><h4>Rock Types</h4><a onclick='clearRockTypes()' class='clear-title'>Clear</a></div>";
   for(var i=0; i < checkBoxes.length;i++)
   {  
    if(checkBoxes[i].checked)
    {         
    checked=false;
    console.log(checkBoxes[i].defaultValue);
-   document.getElementById("search-options-rock-type").innerHTML += checkBoxes[i].defaultValue + ", ";
+   searchOptions.innerHTML += checkBoxes[i].defaultValue + ", ";
    }
   }
- document.getElementById("search-options-rock-type").innerHTML += "<a onclick='clearRockTypes()'>Clear</a>";
+  var s = searchOptions.innerHTML;
+  searchOptions.innerHTML = s.slice(0, -2);
  }
 }
 
 function updateMetGrades()
 {
-//Update Metamorphic Grades
- document.getElementById("search-options-metgrades").innerHTML = "";
+ //Update Metamorphic Grades
+ var searchOptions = document.getElementById("search-options-metgrades");
+ searchOptions.innerHTML = "";
  var checkBoxes = document.getElementsByName("metamorphic_grades__name__in");
- console.log(checkBoxes);
  var checked = false;
  for(var i=0; i < checkBoxes.length;i++)
  if(checkBoxes[i].checked)         
   checked=true;
  if(checked)
  {
-  document.getElementById("search-options-metgrades").innerHTML += "<h4>Metamorphic Grades</h4>";
+  searchOptions.innerHTML += "<div class = 'summary-title'><h4>Metamorphic Grades</h4><a onclick='clearMetGrades()' class='clear-title'>Clear</a></div>";
   for(var i=0; i < checkBoxes.length;i++)
   { 
    if(checkBoxes[i].checked)
    {         
-   console.log(checkBoxes[i].defaultValue);
-   document.getElementById("search-options-metgrades").innerHTML += checkBoxes[i].defaultValue + ", ";
+    console.log(checkBoxes[i].defaultValue);
+    searchOptions.innerHTML += checkBoxes[i].defaultValue;
+    searchOptions.innerHTML += ', ';
    }
   }
- document.getElementById("search-options-metgrades").innerHTML += "<a onclick='clearMetGrades()'>Clear</a>";
+  var s = searchOptions.innerHTML;
+  searchOptions.innerHTML = s.slice(0, -2);
+
+  console.log(s.slice(0, -1));
  }
 }
 
@@ -694,7 +698,9 @@ function updateProvenance()
      $("#selected-number option:selected").length ||
      $("#selected-igsn option:selected").length ||
      $('startdatevalue').val() || $('enddatevalue').val())
-   searchOptions.innerHTML += "<h4>Provenance</h4>";
+   searchOptions.innerHTML += "<div class='summary-title'><h4>Provenance</h4><a onclick='clearProvenance()' class='clear-title'>Clear</a></div>";
+
+
 
   //Update Owners
   var selectedOwners = document.getElementById("selected-owners");
@@ -706,6 +712,8 @@ function updateProvenance()
    if(selectedOwners.options[a].selected)
     searchOptions.innerHTML += selectedOwners.options[a].innerHTML + ", ";
    }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
    searchOptions.innerHTML += "<br>";
   }
 
@@ -719,6 +727,8 @@ function updateProvenance()
    if(selectedCollectors.options[a].selected)
     searchOptions.innerHTML += selectedCollectors.options[a].innerHTML + ", ";
    }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
    searchOptions.innerHTML += "<br>";
   }
 
@@ -732,6 +742,8 @@ function updateProvenance()
    if(selectedReferences.options[a].selected)
     searchOptions.innerHTML += selectedReferences.options[a].innerHTML + ", ";
    }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
    searchOptions.innerHTML += "<br>";
   }
 
@@ -770,15 +782,6 @@ function updateProvenance()
    if(accessVal.val() == "N")
      searchOptions.innerHTML += "<b>Access:</b> " + "Private<br>"; 
   }
-
-  if($("#selected-owners option:selected").length ||
-     $("#selected-collectors option:selected").length ||
-     $("#selected-reference option:selected").length ||
-     $("#selected-number option:selected").length ||
-     $("#selected-igsn option:selected").length || 
-     $('startdatevalue').val() || $('enddatevalue').val())
-      searchOptions.innerHTML += "<a onclick='clearProvenance()'>Clear</a><br>";
-
 }
 
 function clearAll()
@@ -855,6 +858,7 @@ function clearMinerals()
  
 }
 
+
 function clearBounds()
 {
  //Update Location in search summary
@@ -863,6 +867,7 @@ function clearBounds()
   document.getElementById("ne-long").value = "";
   document.getElementById("sw-lat").value = "";
   document.getElementById("sw-long").value = "";
+  document.getElementById("location-bound").value = '';
 
   if(currentOverlay)
     currentOverlay.setMap(null);
