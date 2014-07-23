@@ -1,3 +1,31 @@
+#search-panel .accordion-toggle:after {
+    /* symbol for "opening" panels */
+    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+    content: "\e114";    /* adjust as needed, taken from bootstrap.css */
+    float: right;        /* adjust as needed */
+    color: grey;         /* adjust as needed */
+}
+#search-panel .accordion-toggle.collapsed:after {
+    /* symbol for "collapsed" panels */
+    content: "\e080";    /* adjust as needed, taken from bootstrap.css */
+}
+
+
+.summary-title
+{
+ border-top: 1px solid #ccc;
+ margin-top: 4px;
+ padding: 2px;
+ 
+}
+
+.clear-title 
+{
+ font-size: 13px !important;
+ float: right;
+ margin-top: -25px;
+}
+
 #form-submit
 {
  padding: 10px 0 0 0;
@@ -8,7 +36,6 @@
 #instructions
 {
  width:100%;
- border-bottom: 1px solid #ccc;
  padding-bottom: 10px;
  font-size: 12.5px;
  margin: 0 auto;
