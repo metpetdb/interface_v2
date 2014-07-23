@@ -7,7 +7,7 @@
   <div id = "search-options" class="panel panel-default">
     <div id = "search-panel" class="panel-heading">
       <h4 class="panel-title">
-        <a class='accordion-toggle' data-toggle="collapse" onclick="$('#collapseTwo').collapse('toggle');" data-parent="#accordion" href="#collapseOne">
+        <a class='accordion-toggle' data-toggle="collapse" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" data-parent="#accordion" href="">
           Search Options
         </a>
       </h4>
@@ -183,7 +183,7 @@
 <div id="search-summary" class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <a class='accordion-toggle' data-toggle="collapse" onclick="$('#collapseOne').collapse('toggle');" data-parent="#accordion" href="#collapseTwo">
+        <a class='accordion-toggle' data-toggle="collapse" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" data-parent="#accordion" href="">
           Search Summary
         </a>
       </h4>
@@ -219,9 +219,9 @@
 
 <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
 <link rel="stylesheet" href="/static/css/chosen.min.css">
-<!-- <script src="//code.jquery.com/jquery-1.10.2.js"></script> -->
-<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 <script src="/static/js/chosen.jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+
 
 <link rel="stylesheet" href="/static/css/style.min.css">
 <script src="/static/js/jstree.min.js"></script>
@@ -321,11 +321,20 @@ $(function()
 //GOOGLE MAP RENDERING
 function initialize()
 {
+ var mapCenter;
+
  var map = new google.maps.Map(document.getElementById('map-canvas'), {
     zoom: 11,
-    center: new google.maps.LatLng(40.710836, -74.019889),
+    center: new google.maps.LatLng(44, -74),
     mapTypeId: google.maps.MapTypeId.ROADMAP
  });
+
+ if (navigator.geolocation) {
+     navigator.geolocation.getCurrentPosition(function (position) {
+         initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+         map.setCenter(initialLocation);
+     });
+ }
 
  google.maps.event.addListenerOnce(map, 'idle', function() {
     google.maps.event.trigger(map, 'resize');
@@ -399,7 +408,7 @@ updateLocation();
   var searchOptions = document.getElementById("search-options-location");
   searchOptions.innerHTML = "<div class='summary-title'><h4>Location</h4><a onclick='clearBounds()' class='clear-title'>Clear</a></div>";
 
-  searchOptions.innerHTML += "NE Lat: " + ne.lat().toString() + "<br>NE Long: " + ne.lng().toString() + "<br>SW Lat: " + sw.lat().toString() + "<br>SW Long: " + sw.lng().toString() + "<br>";
+  searchOptions.innerHTML += "<b>NE:</b> [" + ne.lat().toFixed(2).toString() + ", " + ne.lng().toFixed(2).toString() + "] <b>SW:</b> [" + sw.lat().toFixed(2).toString() + ", " + sw.lng().toFixed(2).toString() + "]<br>";
 
   updateLocation();
    });
@@ -416,7 +425,9 @@ updateLocation();
   var searchOptions = document.getElementById("search-options-location");
   searchOptions.innerHTML = "";
   searchOptions.innerHTML = "<div class='summary-title'><h4>Location</h4><a onclick='clearBounds()' class='clear-title'>Clear</a></div>";
-  searchOptions.innerHTML += "NE Lat: " + ne.lat().toString() + "<br>NE Long: " + ne.lng().toString() + "<br>SW Lat: " + sw.lat().toString() + "<br>SW Long: " + sw.lng().toString() + "<br>";
+
+
+  searchOptions.innerHTML += "<b>NE:</b> [" + ne.lat().toFixed(2).toString() + ", " + ne.lng().toFixed(2).toString() + "] <b>SW:</b> [" + sw.lat().toFixed(2).toString() + ", " + sw.lng().toFixed(2).toString() + "]<br>";
 
   updateLocation();
 
@@ -533,6 +544,7 @@ var frm = $('#content');
         return false;
     }); //END ajax
 
+
 }); //END READY FUNCTION
 
 //UPDATE BOUNDS
@@ -552,10 +564,10 @@ function updateBounds()
    searchOptions.innerHTML = "<div class='summary-title'><h4>Location</h4><a onclick='clearBounds()' class='clear-title'>Clear</a></div>";
 
   //Update Location
-  if(currentOverlay.map !== null)
+  if(currentOverlay.map !== null && currentOverlay.bounds !== null)
   {
    console.log("HERE");
-   console.log("map is " + currentOverlay.map);
+   console.log("map is " + currentOverlay);
    //Update POINT 4326 values to submit
    //SRID=4326;POINT(-118.0488106 33.9346343)
    //var upperbound = 'SRID=4326;POINT(' + nelat + ' ' +  nelong + ')';
@@ -571,7 +583,7 @@ function updateBounds()
 
   document.getElementById("location-bound").value = polygon;
 
-   searchOptions.innerHTML += "<b>NE Lat:</b> " + nelat + "<br><b>NE Long:</b> " + nelong + "<br><b>SW Lat:</b> " + swlat + "<br><b>SW Long:</b> " + swlong + "<br>";
+   searchOptions.innerHTML += "<b>NE:</b> [" + parseFloat(nelat).toFixed(2) + ", " + parseFloat(nelong).toFixed(2) + "] <b>SW:</b> [" + parseFloat(swlat).toFixed(2) + ", " + parseFloat(swlong).toFixed(2) + "]<br>";
   }
 
 
@@ -697,7 +709,7 @@ function updateProvenance()
      $("#selected-reference option:selected").length ||
      $("#selected-number option:selected").length ||
      $("#selected-igsn option:selected").length ||
-     $('startdatevalue').val() || $('enddatevalue').val())
+     $('#startdatevalue').val() || $('#enddatevalue').val())
    searchOptions.innerHTML += "<div class='summary-title'><h4>Provenance</h4><a onclick='clearProvenance()' class='clear-title'>Clear</a></div>";
 
 
@@ -823,6 +835,9 @@ function clearProvenance()
   $.datepicker._clearDate('#date-end');
  $('#date-start').val('');
  $('#date-end').val('');
+ $('#startdatevalue').attr('value', '');
+ $('#enddatevalue').attr('value', '');
+ 
  $("input:radio[name='public_data']").each(function(i) { this.checked = false; });
  document.getElementById("search-options-provenance").innerHTML = "";
  

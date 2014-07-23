@@ -13,7 +13,10 @@
 
 .summary-title
 {
- border-top: 1px solid;
+ border-top: 1px solid #ccc;
+ margin-top: 4px;
+ padding: 2px;
+ 
 }
 
 .clear-title 
@@ -33,7 +36,6 @@
 #instructions
 {
  width:100%;
- border-bottom: 1px solid #ccc;
  padding-bottom: 10px;
  font-size: 12.5px;
  margin: 0 auto;
