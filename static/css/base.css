@@ -1,7 +1,217 @@
+#search-panel .accordion-toggle:after {
+    /* symbol for "opening" panels */
+    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+    content: "\e114";    /* adjust as needed, taken from bootstrap.css */
+    float: right;        /* adjust as needed */
+    color: grey;         /* adjust as needed */
+}
+#search-panel .accordion-toggle.collapsed:after {
+    /* symbol for "collapsed" panels */
+    content: "\e080";    /* adjust as needed, taken from bootstrap.css */
+}
+
+
+.summary-title
+{
+ border-top: 1px solid #ccc;
+ margin-top: 4px;
+ padding: 2px;
+ 
+}
+
+.clear-title 
+{
+ font-size: 13px !important;
+ float: right;
+ margin-top: -25px;
+}
+
+#form-submit
+{
+ padding: 10px 0 0 0;
+ border-top: 1px solid #ccc;
+ margin-top: 8px;
+}
+
+#instructions
+{
+ width:100%;
+ padding-bottom: 10px;
+ font-size: 12.5px;
+ margin: 0 auto;
+}
+
+#clearAll 
+{
+ font-size: 13px !important;
+ float: right;
+ margin-top: -15px;
+
+}
+
+#clear-map
+{
+ border-radius: 12px;
+ padding: 5px;
+ margin-top: 5px;
+}
+
+#clear-map:hover
+{
+ background-color: 'green';
+}
+
+body
+{
+ text-overflow: ellipsis !important;
+}
+
+#search-options
+{
+ float: left;
+ width: 69%;
+}
+
+.clear
+{
+ clear:both;
+}
+
+#location-regions
+{
+ margin-bottom:10px;
+}
+
+#search-summary
+{
+ width:30%;
+ float:right;
+ margin: 0 auto 0 auto;
+ 
+ 
+}
+
+
+.chosen-container
+{
+ vertical-align:top !important;
+ margin-bottom: 5px;
+}
+
+.chosen-container-multi .chosen-choices li.search-field input[type=text]
+{
+ width:100% !important;
+ height:inherit !important;
+ padding:3px !important;
+}
+
+#provenance
+{
+ float:left;
+ margin:0 auto;
+ width:100%;
+ margin-bottom:10px;
+}
+.provenance-label
+{
+ width: 100px;
+}
+
+.spinner {
+    position: fixed;
+    
+    left: 50%;
+    margin-left: -50px; /* half width of the spinner gif */
+    margin-top: -50px; /* half height of the spinner gif */
+    text-align:center;
+    z-index:1234;
+    overflow: auto;
+    width: 100px; /* width of the spinner gif */
+    height: 102px; /*hight of the spinner gif +2px to fix IE8 issue */
+}
+
+#map-instructions
+{
+
+}
+
+label[for=bounds]
+{
+ width: 60px;
+}
+
+#form-container
+{
+ max-width: 1100px;
+}
+
+#content
+{
+ margin: 0 auto 20px 0;
+}
+
+#map-canvas 
+{ 
+ height: 400px;
+ width: 450px;
+ border: 3px solid #C7C6C6;
+ border-radius: 5px;
+ margin: 0 35px 40px 35px;
+ float: left;
+}
+
+.rocktypecheckboxgroup
+{
+ float:left;
+ width: 180px;
+}
+
+.metgradecheckboxgroup
+{
+ float:left;
+ width: 220px;
+}
+
+.navbar-toggle 
+{
+ background-color: rgba(0, 0, 0, 0.19) !important;
+}
+.icon-bar 
+{
+background-color: white !important;
+}
+
+.navbar-inner {
+min-height: 40px;
+padding-left: 20px;
+padding-right: 20px;
+background-color: #fafafa;
+background-image: -moz-linear-gradient(top, #ffffff, #f2f2f2);
+background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#f2f2f2));
+background-image: -webkit-linear-gradient(top, #ffffff, #f2f2f2);
+background-image: -o-linear-gradient(top, #ffffff, #f2f2f2);
+background-image: linear-gradient(to bottom, #ffffff, #f2f2f2);
+background-repeat: repeat-x;
+filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#fff2f2f2', GradientType=0);
+border: 1px solid #d4d4d4;
+-webkit-border-radius: 4px;
+-moz-border-radius: 4px;
+border-radius: 4px;
+-webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+-moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+}
+
+.container-fluid
+{
+ padding: 0 !important;
+}
+
 body
 {
 	font-family: 'Source Sans Pro', sans-serif;
 	background-color: #e4e6e5;
+        padding-bottom: 40px;
 }
 
 #page_title
@@ -59,14 +269,15 @@ hr
     border-bottom: 1px solid white;
 }
 
-.navbar .nav
+/*.navbar-nav>li>a
 {
-    font-size: 16px;
-}
-.navbar .brand
+    font-size: 16px !important;
+}*/
+
+/*.navbar .brand
 {
-    padding: 7px 30px 5px;
-}
+    padding: 7px 30px 5px !important;
+}*/
 
 #heading
 {
@@ -77,14 +288,16 @@ hr
 
 #first_para
 {
-  width: 670px;
+  width: auto;
+ 
 }
 
 #slices
 {
     float: right;
     border: 3px solid #C7C6C6;
-    border-radius: 5px
+    border-radius: 5px;
+    margin: 20px;
 }
 
 
@@ -105,7 +318,7 @@ hr
 {
 	float: right;
 	height: 400px;
-	width: 500px;
+	width: 450px;
 	border: 3px solid #C7C6C6;
 	border-radius: 5px
 
@@ -132,7 +345,7 @@ hr
 
 #sampleview_images
 {
-	width: 650px;
+	width: 100%;
 	clear: both;
 }
 
@@ -269,8 +482,13 @@ hr
 {
     background-color: rgb(235, 235, 235);
     width: 650px;
-    margin-bottom: 50px;
+    margin: 0 auto 50px auto;
 
+}
+
+#subsample_title
+{
+ text-align:center;
 }
 
 .subsample_value
@@ -313,11 +531,71 @@ background-color: rgb(235, 235, 235);
     position: absolute;
     z-index: 1000;
     width: auto;
-    -webkit-transition: opacity 0.3s ease-out;
+    -webkit-transtion: opacity 0.3s ease-out;
     opacity: 0;
     overflow: hidden;
 }
 
 .sample_mineral {
     margin:100px;
+}
+
+@media (max-width: 1199px)
+{
+ h3
+ {
+  text-align:center;
+ }
+
+ #sampleview_table
+ {
+  float: none;
+  margin: 0 auto 50px auto;
+ }
+
+ #sampleview_table
+ {
+  float: none;
+  margin: 0 auto 50px auto;
+ }
+
+ #chemicalanalysisview_table
+ {
+  float: none;
+  margin: 0 auto 50px auto;
+ }
+
+ #chem_elements
+ {
+  float: none;
+  margin: 0 auto;
+ }
+
+ #map_canvas
+ {
+  float: none;
+  margin: 0 auto;
+  width: auto;
+  max-width: 450px;
+ }
+}
+
+@media (max-width: 1000px)
+{
+ #map-canvas
+ {
+  float: none;
+  margin: 0 auto;
+  width: auto;
+  max-width: 1000px;
+ }
+}
+
+@media (max-width: 450px)
+{
+ #slices img
+ {
+  width: 100%;
+  height: auto;
+ }
 }

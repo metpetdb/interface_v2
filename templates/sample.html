@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
 {% block title %}
-  <h3>Sample {{sample.sample_id}}</h3>
+  <h3>Sample {{sample.number}}</h3>
 {% endblock %}
 
 {% block body %}
+<script src="/static/js/jquery-2.1.1.min.js"></script>
 
+<div class = "table-responsive">
   <table id="sampleview_table" class="table">
 
     <tbody>
@@ -15,7 +17,7 @@
       </tr>
       <tr>
         <td class="sample_label">IGSN</td>
-        <td class="sample_value">{{sample.number}}</td>
+        <td class="sample_value">{{sample.sesar_number}}</td>
       </tr>
       <tr>
         <td class="sample_label">Aliases</td>
@@ -47,7 +49,7 @@
       </tr>
       <tr>
         <td class="sample_label">Collector</td>
-        <td class="sample_value">{{sample.collector_name}}</td>
+        <td class="sample_value">{{sample.collector}}</td>
       </tr>
       <tr>
         <td class="sample_label">Present Sample Location</td>
@@ -71,7 +73,7 @@
       </tr>
       <tr>
         <td class="sample_label">Abstracts</td>
-        <td class="sample_value">Don't know yet</td>
+        <td class="sample_value"></td>
       </tr>
       <tr>
         <td class="sample_label">Minerals</td>
@@ -79,13 +81,14 @@
       </tr>
     </tbody>
   </table>
-
+</div> <!-- table-responsive -->
 
   <div id="map_canvas"></div>
   <hr>
 
   <!-- adding image link from metpetdbweb -->
   <div id="sampleview_images">
+  <div class = "table-responsive">
     <h4 id="s_images">Sample Images</h4>
     <table id="image_canvas" class="table">
       <thead>
@@ -110,11 +113,13 @@
         {%endfor%}
       </tbody>
     </table>
+  </div> <!-- table-responsive -->
   </div>
 
 
   <hr>
   <h4 id="subsampletable_header">Subsamples</h4>
+  <div class = "table-responsive">
   <table id="subsampletable_canvas">
     <thead>
       <tr>
@@ -142,6 +147,7 @@
       {%endfor%}
     </tbody>
   </table>
+</div> <!-- table-responsive -->
 <br><br>
 
 <!-- JS for Page elements -->

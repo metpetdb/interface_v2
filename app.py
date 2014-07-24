@@ -49,19 +49,42 @@ def search():
     api_key = session.get('api_key', None)
     api = MetpetAPI(email, api_key).api
 
+    owner_list = []
     region_list = []
     rock_type_list = []
     collector_list = []
+    country_list = []
     reference_list = []
+    number_list = []
+    igsn_list = []
     metamorphic_region_list = []
     metamorphic_grade_list = []
 
     regions = api.region.get(params={'order_by': 'name'}).data['objects']
-    rock_types = api.rock_type.get(params={'order_by': 'rock_type'}).data['objects']
-    references = api.reference.get(params={'order_by': 'name'}).data['objects']
-    metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name'}).data['objects']
-    metamorphic_grades = api.metamorphic_grade.get().data['objects']
+    rock_types = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
+    references = api.reference.get(params={'order_by': 'name', 'limit': 0}).data['objects']
+    metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
+    metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
+    samples = api.sample.get().data['objects']
+    users = api.user.get().data['objects']
+    mineral_relationships = api.mineral_relationship.get(params={'limit': 0}).data['objects']
 
+    mineralroots = []
+    parents = set()
+    children = set()
+    for m in mineral_relationships:
+        parents.add((m['parent_mineral']['name'], m['parent_mineral']['mineral_id']))
+        children.add((m['child_mineral']['name'], m['child_mineral']['mineral_id']))
+    mineralroots = set(parents) - set(children)
+
+
+    mineralnodes = []
+    for (name, mid) in mineralroots:
+	mineralnodes.append({"id": name, "parent": "#", "text": name, "mineral_id": mid})
+    for m in mineral_relationships:
+        node = {"id": m['child_mineral']['name'], "parent": m['parent_mineral']['name'], "text": m['child_mineral']['name'], "mineral_id": m['child_mineral']['mineral_id']}
+        mineralnodes.append(node)
+	    
     for region in regions:
         region_list.append(region['name'])
     for rock_type in rock_type_list:
@@ -72,13 +95,27 @@ def search():
         metamorphic_region_list.append(mmr['name'])
     for mmg in metamorphic_grades:
         metamorphic_grade_list.append(mmg['name'])
-
+    for sample in samples:
+        collector_list.append(unicode(sample['collector']))
+        number_list.append(sample['number'])
+        igsn_list.append(sample['sesar_number'])
+        country_list.append(sample['country'])
+    for user in users:
+        owner_list.append(user)
+    collector_list = list (set ( collector_list ))
+    country_list = list(set (country_list))
     return render_template('search_form.html',
                             query='',
                             regions=region_list,
+			    mineralrelationships=json.dumps(mineral_relationships),
+			    mineral_nodes=json.dumps(mineralnodes),
                             rock_types=rock_types,
-                            provencances=collector_list,
+                            provenances=collector_list,
                             references=reference_list,
+			    numbers=number_list,
+                            igsns=igsn_list,
+			    countries=country_list,
+			    owners = owner_list,
                             metamorphic_regions=metamorphic_region_list,
                             metamorphic_grades=metamorphic_grade_list)
 

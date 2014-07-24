@@ -1,62 +1,1127 @@
 {% extends "base.html" %}
 {% block body %}
+<div id="spinner" class="spinner" style="display:none;">
+    <img id="img-spinner" src="/static/images/ajax-loader.gif" alt="Loading"/>
+</div>
 
-  <form action="" method="get">
-    <h3>Rock Types</h3>
-    <label for="rock_type__rock_type">Rock Types: </label><br>
-      {% for rock_type in rock_types %}
-        <input type="checkbox" name="rock_type__rock_type__in" value="{{rock_type.rock_type}}">{{ rock_type.rock_type }}
-      {% endfor %}
+  <div id = "search-options" class="panel panel-default">
+    <div id = "search-panel" class="panel-heading">
+      <h4 class="panel-title">
+        <a class='accordion-toggle' data-toggle="collapse" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" data-parent="#accordion" href="">
+          Search Options
+        </a>
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in">
+      <div class="panel-body">
+        
+<ul class="nav nav-tabs" id="myTab">
+  <li class= "active" href="#rocktypes"><a href="#rocktypes">Rock Types</a></li>
+  <li><a href="#metgrade">Metamorphic Grade</a></li>
+  <li><a id = "location-tab" href="#location">Location</a></li>
+  <li><a href="#minerals">Minerals</a></li>
+  <li><a href="#chemistry">Chemistry</a></li>
+  <li><a href="#provenance">Provenance</a></li>
+</ul>
+<div id = "form-container">
+    <form action="" method="get" id='content' class="tab-content">
+      <div class="tab-pane active" id="rocktypes">
+        <ul>
+         <h3>Rock Types</h3>
+         <div id="rocktypelist">
+         {% for rock_type in rock_types %}
+         <input type="checkbox" class="rocktype" onchange="updateRockTypes()"  name="rock_type__rock_type__in"         
+         value="{{rock_type.rock_type}}">{{ rock_type.rock_type }}
+         {% endfor %}
 
-        <br><br>
+         <br><br>
+         </div><!-- control-group-->
+        </ul>
+      </div><!-- rocktypes -->
+      
+      <div class="tab-pane" id="metgrade">
+        <ul>
+         <h3>Metamorphic Grade</h3>
+         <div id = "metgrade-checkboxes">
+         {% for grade in metamorphic_grades %}
+         <input type="checkbox" class = "metgrade" onchange="updateMetGrades()"
+  name="metamorphic_grades__name__in" value="{{ grade }}">
+         {{ grade }}
+         {% endfor %}
+         </div><!-- metgrade checkboxes -->
+        </ul>
+      </div>
+      
 
-    <h3>Metamorphic Grade</h3>
-    <label for="metamorphic_grades__name">Metamorphic Grade: </label><br>
-        {% for grade in metamorphic_grades %}
-          <input type="checkbox" name="metamorphic_grades__name__in" value="{{ grade }}">{{ grade }}
-        {% endfor %}
+      <div class="tab-pane" id="location">
+       <ul>
+        <h3>Location</h3>
 
+    <ul id="myTab" class="nav nav-tabs">
+        <li class="active"><a href="#mapselect" data-toggle="tab">Map</a></li>
+        <li><a  href="#location-regions" data-toggle="tab">Region</a></li>
 
-    <h3>Location</h3>
+        <!--dropdown has same tab selection above, showing with js how to select a tab dynamically-->
 
-    <label for="regions__name">Regions: </label><br>
-    <select name="regions__name">
-        <option value="" selected="selected">Regions</option>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active" id="mapselect"><br><br>
+        <div id="map-canvas"></div>
+        <p id ="map-instructions">Draw a selection on the map to toggle coordinates below.</p><br>
+        <label for="bounds">NE Lat: </label>
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="ne-lat" class="latlong" > 
+        
+        <label for="bounds">NE Long: </label>
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="ne-long" class="latlong" ><br>
+
+        <label for="bounds">SW Long: </label>
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-lat" class="latlong" > 
+
+        <label for="bounds">SW Long: </label>
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-long" class="latlong" ><br><br>
+
+<input type="hidden" id="location-bound" name="location__contained" value="">
+<!-- <input type="hidden" id="sw-location-bound" name="samples__location__contained" value=""> -->
+<div class="clear"></div>
+       </div><!--end mapselect -->
+         <div class= "tab-pane" id = "location-regions"><br><br>
+        <label for="regions__name">Regions: </label><br>
+        <select onchange="updateBounds()" id="selected-regions" multiple class="chosen-select" name="regions__name__in">
         {% for region in regions %}
-            <option value="{{ region }}">{{ region }}</option>
+             <option value="{{ region }}">{{ region }}</option>
         {% endfor %}
-    </select>
-    <br>
-    <label for="metamophic_regions__name">Metamorphic Regions: </label><br>
-    <select name="metamorphic_regions__name">
-        <option value="" selected="selected">Metamorphic Regions</option>
-        {% for region in metamorphic_regions %}
-            <option value="{{ region }}">{{ region }}</option>
-        {% endfor %}
-    </select>
-    <h3>Provenance</h3>
+        </select>
+        <br>
 
-    <label for="collector">Collector: </label><br>
-    <select name="collector">
-        <option value="" selected="selected">Collector</option>
-        {% for col in provenenances %}
+        <label for="country__name">Country: </label><br>
+        <select onchange="updateBounds()" id="selected-countries" multiple class="chosen-select" name="country__in">
+        {% for c in countries %}
+             <option value="{{ c }}">{{ c }}</option>
+        {% endfor %}
+        </select>
+        <br>
+        <label for="metamophic_regions__name">Metamorphic Regions: </label><br>
+        <select onchange="updateBounds()" multiple class="chosen-select" id = "selected-metregions" name="metamorphic_regions__name__in">
+        {% for region in metamorphic_regions %}
+             <option value="{{ region }}">{{ region }}</option>
+        {% endfor %}
+        </select>
+        </div> <!-- end location-regions -->
+    </div>
+
+       </ul>
+      </div>
+      
+      <div class="tab-pane" id="minerals"><br>
+       <div id ="mineral-tree"></div><br>
+       <div id = "selected-minerals"></div>
+      </div>
+
+      <div class="tab-pane" id="chemistry">
+      </div>
+
+      <div class="tab-pane" id="provenance">
+       <ul id = "provenance">
+        <h3>Provenance</h3>
+        <label class="provenance-label" for="owner">Owner: </label>
+        <select id="selected-owners" onchange="updateProvenance()" multiple name="user__in" class="chosen-select">
+        {% for o in owners %}
+            <option value="{{ o.user_id }}">{{ o.name }}</option>
+        {% endfor %}
+        </select><br>
+        <label class="provenance-label" for="collector">Collector: </label>
+        <select id = "selected-collectors" onchange="updateProvenance()" multiple name="collector__in" class="chosen-select">
+        {% for col in provenances %}
             <option value="{{ col }}">{{ col }}</option>
         {% endfor %}
-    </select><br>
-    <label for="reference__name">Reference: </label><br>
-    <select name="reference__name">
-        <option value="" selected="selected">Reference</option>
+        </select><br>
+        <label class="provenance-label" for="references__name__in">Reference: </label>
+        <select id="selected-references" onchange="updateProvenance()" multiple class="chosen-select" name="references__name__in">
         {% for ref in references %}
             <option value="{{ ref }}">{{ ref }}</option>
         {% endfor %}
-    </select><br>
-    Number: <input type="text" name="number"><br><br>
-            <input type="radio" name="resource" value="sample" checked>Sample<br>
-            <input type="radio" name="resource" value="chemicalanalysis">Chemical Analysis<br><br>
-            <input type="submit" value="Search">
-  </form>
+        </select><br>
+        <label class="provenance-label" for="samples__number">Number: </label>
+        <select id="selected-number" onchange="updateProvenance()" name="number" class="chosen-select">
+        <option value="" disabled selected>Select sample number</option>
+        {% for n in numbers %}
+            <option value="{{ n }}">{{ n }}</option>
+        {% endfor %}
+        </select><br>
+        <label class="provenance-label" for="igsn">IGSN: </label>
+        <select id="selected-igsn" onchange="updateProvenance()" name="igsn" class="chosen-select">
+        <option value="" disabled selected>Select IGSN</option>
+        {% for i in igsns %}
+            <option value="{{ i }}">{{ i }}</option>
+        {% endfor %}
+        </select><br>
+<input type="hidden" id="startdatevalue" name="collection_date__gt" value="">
+<input type="hidden" id="enddatevalue" name="collection_date__lt" value="">
+<label class="provenance-label" for="dates" >Date Range: </label><input type="text" name="dates" onchange="updateStartDate(this)" id="date-start"> to <input type="text" name="dates" onchange="updateEndDate(this)" id="date-end"><br>
+
+<label class="provenance-label" for="access">Access: </label><br>
+<div style="padding-left: 30px;" id = "access-buttons">
+<input type="radio" onchange="updateProvenance()" name="public_data" value="">No Preference<br>
+<input type="radio" onchange="updateProvenance()" name="public_data" value="Y">Public Access<br>
+<input type="radio" onchange="updateProvenance()" name="public_data" value="N">Private Access<br>
+</div>
+       </ul>
+      </div>
+
+
+<div class="clear"></div>
+
+
+</div><!--end form container-->
   {% if error %}
       <p style="color: red;">Please submit a search term.</p>
   {% endif %}
+      </div>
+    </div>
+  </div>
+
+<div id="search-summary" class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a class='accordion-toggle' data-toggle="collapse" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" data-parent="#accordion" href="">
+          Search Summary
+        </a>
+      </h4>
+      <a id= "clearAll" onclick="clearAll()">Clear All</a>
+    
+    </div>
+    <div id="collapseTwo" class="panel-collapse collapse in">
+       <div class="panel-body">
+          <p id= "instructions">Set your search criteria by selecting from the categories on the left.<br></p>
+          <div id = "search-options-rock-type"></div>
+          <div id = "search-options-metgrades"></div>
+          <div id = "search-options-location"></div>
+	  <div id = "search-options-minerals"></div>
+          <div id = "search-options-provenance"></div>
+                <div id = "form-submit">
+       <input type="radio" name="resource" value="sample" checked>Sample<br>
+       <input type="radio" name="resource" value="chemicalanalysis">Chemical Analysis<br><br>
+       <input type="submit" value="Search">
+      </div>
+       </div>
+    </div><!--end collapsetwo -->
+</div>
+
+  </form>  <!-- tabs -->
+
+<div class="clear"></div>
+
+<div id = "results"></div>
+
+
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
+<script src="/static/js/jquery-2.1.1.min.js"></script>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="/static/css/chosen.min.css">
+<script src="/static/js/chosen.jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+
+
+<link rel="stylesheet" href="/static/css/style.min.css">
+<script src="/static/js/jstree.min.js"></script>
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+
+<script>
+$('#myTab a').click(function (e) {
+  e.preventDefault();
+  $(this).tab('show');
+});
+
+$('#location-tab a').click(function (e) {
+  e.preventDefault();
+  $(this).tab('show');
+});
+
+//GLOBAL VARS
+var currentOverlay = null;
+
+//ON READY FUNCTION
+$(function()
+{
+ //Group rock types
+ var originalHTML = $("#rocktypelist :input");
+ var newInnerHTML = '';
+ var a;
+ var b = 0;
+ var div;
+ var rocktypes = document.createElement('div');
+
+ for (a = 0; a < originalHTML.length; a++)
+ {
+  if(b == 0)
+  {
+   div = document.createElement('div');
+   div.className = 'rocktypecheckboxgroup';
+  }
+  var input = document.createElement('input');
+  $(input).className = "rocktype";
+  $(input).attr('type','checkbox');
+  $(input).attr('onchange','updateRockTypes()');
+  $(input).attr('name','rock_type__rock_type__in');
+  var val = $(originalHTML[a]).attr('value');
+  $(input).attr('value', val);
+
+ 
+  div.appendChild(input);
+  div.innerHTML += val += "<br>";
+
+  if(b == 4 || a == originalHTML.length - 1)
+  {
+   rocktypes.appendChild(div);
+   b = 0;
+  }
+  else
+   b++;
+ }
+ document.getElementById('rocktypelist').innerHTML = '';
+ document.getElementById('rocktypelist').appendChild(rocktypes);
+
+//Group metamorphic grades
+ originalHTML = $("#metgrade-checkboxes :input");
+ newInnerHTML = '';
+ b = 0;
+ var metgrades = document.createElement('div');
+
+ for (a = 0; a < originalHTML.length; a++)
+ {
+  if(b == 0)
+  {
+   div = document.createElement('div');
+   div.className = 'metgradecheckboxgroup';
+  }
+  var input = document.createElement('input');
+  $(input).className = "metgrade";
+  $(input).attr('type','checkbox');
+  $(input).attr('onchange','updateMetGrades()');
+  $(input).attr('name','metamorphic_grades__name__in');
+  var val = $(originalHTML[a]).attr('value');
+  $(input).attr('value', val);
+
+  div.appendChild(input);
+  div.innerHTML += val += "<br>";
+
+  if(b == 4 || a == originalHTML.length - 1)
+  {
+   metgrades.appendChild(div);
+   b = 0;
+  }
+  else
+   b++;
+ }
+ document.getElementById('metgrade-checkboxes').innerHTML = '';
+ document.getElementById('metgrade-checkboxes').appendChild(metgrades);
+
+
+//GOOGLE MAP RENDERING
+function initialize()
+{
+ var mapCenter;
+
+ var map = new google.maps.Map(document.getElementById('map-canvas'), {
+    zoom: 11,
+    center: new google.maps.LatLng(44, -74),
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+ });
+
+ if (navigator.geolocation) {
+     navigator.geolocation.getCurrentPosition(function (position) {
+         initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+         map.setCenter(initialLocation);
+     });
+ }
+
+ google.maps.event.addListenerOnce(map, 'idle', function() {
+    google.maps.event.trigger(map, 'resize');
+});
+
+//SET UP DRAWING MANAGER
+var drawingManager = new google.maps.drawing.DrawingManager({
+  drawingMode: google.maps.drawing.OverlayType.MARKER,
+  drawingControl: true,
+  drawingControlOptions: {
+    position: google.maps.ControlPosition.TOP_CENTER,
+    drawingModes: [
+      google.maps.drawing.OverlayType.RECTANGLE
+    ]
+  },
+  circleOptions: {
+    fillColor: '#ffff00',
+    fillOpacity: 1,
+    strokeWeight: 5,
+    clickable: false,
+    zIndex: 1,
+    editable: true
+  }
+}); //end drawing manager  
+
+drawingManager.setMap(map); 
+
+currentOverlay = new google.maps.Rectangle({
+    bounds: null,
+    editable: true,
+    draggable: true
+  });
+
+  currentOverlay.setMap(map);
+
+//Clear map button
+var homeControlDiv = document.createElement('div');
+  var homeControl = new HomeControl(homeControlDiv, map);
+
+  homeControlDiv.index = 1;
+  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(homeControlDiv);
+
+//DRAW COMPLETE LISTENER
+google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event) {
+  if (event.type == google.maps.drawing.OverlayType.RECTANGLE) {
+  {
+   //Set draggable and editable
+   event.overlay.setEditable(true);
+   event.overlay.setDraggable(true);
+
+   //Remove last overlay
+   if(currentOverlay)
+    currentOverlay.setMap(null);
+
+   //Set current overlay
+   currentOverlay = event.overlay;
+
+   //Update bounds for drag and edit
+   google.maps.event.addListener(currentOverlay, "bounds_changed", function() 
+   {
+    console.log("BOUNDS CHANGED");
+   var ne = event.overlay.getBounds().getNorthEast();
+   var sw = event.overlay.getBounds().getSouthWest();
+   document.getElementById("ne-lat").value = ne.lat().toString();
+   document.getElementById("ne-long").value = ne.lng().toString();
+   document.getElementById("sw-lat").value = sw.lat().toString();
+   document.getElementById("sw-long").value = sw.lng().toString();
+
+updateLocation(); 
+  //Update Location in search summary
+  var searchOptions = document.getElementById("search-options-location");
+  searchOptions.innerHTML = "<div class='summary-title'><h4>Location</h4><a onclick='clearBounds()' class='clear-title'>Clear</a></div>";
+
+  searchOptions.innerHTML += "<b>NE:</b> [" + ne.lat().toFixed(2).toString() + ", " + ne.lng().toFixed(2).toString() + "] <b>SW:</b> [" + sw.lat().toFixed(2).toString() + ", " + sw.lng().toFixed(2).toString() + "]<br>";
+
+  updateLocation();
+   });
+
+   //Update bounds for creation
+   var ne = event.overlay.getBounds().getNorthEast();
+   var sw = event.overlay.getBounds().getSouthWest();
+   document.getElementById("ne-lat").value = ne.lat().toString();
+   document.getElementById("ne-long").value = ne.lng().toString();
+   document.getElementById("sw-lat").value = sw.lat().toString();
+   document.getElementById("sw-long").value = sw.lng().toString();
+
+  //Update Location in search summary
+  var searchOptions = document.getElementById("search-options-location");
+  searchOptions.innerHTML = "";
+  searchOptions.innerHTML = "<div class='summary-title'><h4>Location</h4><a onclick='clearBounds()' class='clear-title'>Clear</a></div>";
+
+
+  searchOptions.innerHTML += "<b>NE:</b> [" + ne.lat().toFixed(2).toString() + ", " + ne.lng().toFixed(2).toString() + "] <b>SW:</b> [" + sw.lat().toFixed(2).toString() + ", " + sw.lng().toFixed(2).toString() + "]<br>";
+
+  updateLocation();
+
+   //Update POINT 4326 values to submit
+   //SRID=4326;POINT(-118.0488106 33.9346343)
+   //var upperbound = 'SRID=4326;POINT(' + ne.lat().toString() + ' ' +  ne.lng().toString() + ')';
+   //var lowerbound = 'SRID=4326;POINT(' + sw.lat().toString() + ' ' +  sw.lng().toString() + ')';
+
+//   var upperbound = "{\"type\": \"Point\", \"coordinates\": [" + ne.lat().toString() + "," + ne.lng().toString() + "]}";
+//   var lowerbound = "{\"type\": \"Point\", \"coordinates\": [" + sw.lat().toString() + "," + sw.lng().toString() + "]}";
+  
+  //POINT (-71.8552169799804972 44.0474815368651988)
+  //var upperbound = "POINT(" + ne.lat().toString() + " " + ne.lng().toString() + ")";
+  //var lowerbound = "POINT(" + sw.lat().toString() + " " + sw.lng().toString() + ")";
+  
+ /*
+ { "type": "Polygon",
+    "coordinates": [
+      [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0] ]
+      ]
+   }
+ */
+
+  //http://stackoverflow.com/questions/15536241/how-to-get-4-vertex-coordinates-from-gmaps-rectangle-overlay
+  var nw = new google.maps.LatLng(ne.lat(),sw.lng());
+  var se = new google.maps.LatLng(sw.lat(),ne.lng());
+  var polygon =  "{ \"type\": \"Polygon\", \"coordinates\": [[" + ne.lat().toString() + "," + ne.lng().toString() +"] , [" + se.lat().toString() + ", " + se.lng().toString() + "] , [" + sw.lat().toString() + "," + sw.lng().toString() +"] , [" + nw.lat().toString() + "," + nw.lng().toString() + "]]}";
+
+
+   //document.getElementById("ne-location-bound").value = upperbound;
+   //document.getElementById("sw-location-bound").value = lowerbound;
+   document.getElementById("location-bound").value = polygon;
+   console.log(polygon);
+   //console.log(upperbound);
+   //console.log( lowerbound);
+
+  }
+
+  }
+});
+}
+
+//Initialize map listener
+google.maps.event.addDomListener(document.getElementById("location-tab"), 'click', initialize);
+
+//Date picker
+$( "#date-start" ).datepicker();
+$( "#date-end" ).datepicker();
+
+//Chosen-select plugin activate
+$(".chosen-select").chosen({
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
+
+var mineralnodes = {{ mineral_nodes|safe }};
+console.log(mineralnodes);
+
+$('#mineral-tree').jstree({ 'core' : {
+    'data' : mineralnodes
+}
+,
+
+"checkbox" : {
+      "keep_selected_style" : false
+    },
+    "plugins" : [ "checkbox" ]
+ });
+
+//mineral tree on change
+$('#mineral-tree').on("changed.jstree", function () 
+{
+  var mids = $('#mineral-tree').jstree('get_selected', true);
+  //console.log(data.selected);
+  document.getElementById("selected-minerals").innerHTML = "";
+  console.log(document.getElementById("selected-minerals").innerHTML );
+  var searchOptions = document.getElementById("search-options-minerals");
+  searchOptions.innerHTML = "";
+  if(mids.length > 0)
+   searchOptions.innerHTML = "<div class='summary-title'><h4>Minerals</h4><a onclick='clearMinerals()' class='clear-title'>Clear</a></div>";
+
+  for(var a = 0; a < mids.length; a++)
+  {
+   console.log(mids[a]);
+   if(mids[a].original.mineral_id)
+   {
+    document.getElementById("selected-minerals").innerHTML += "<input name='minerals__in' type='hidden' value=" + mids[a].original.mineral_id + " >";   
+    searchOptions.innerHTML += mids[a].id + ", ";
+   }
+  }
+});
+
+
+//Ajax call to update sample data
+var frm = $('#content');
+    frm.submit(function () {
+    $('#spinner').show();
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: frm.serialize(),
+            success: function (data) {
+                $("#results").html(data);
+                $('#spinner').hide();
+                document.getElementsByTagName("header")[1].innerHTML = "";
+
+            },
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+        });
+        return false;
+    }); //END ajax
+
+
+}); //END READY FUNCTION
+
+//UPDATE BOUNDS
+function updateBounds()
+{
+   var searchOptions = document.getElementById("search-options-location");
+   searchOptions.innerHTML = "";
+
+   var nelat = document.getElementById("ne-lat").value;
+   var nelong = document.getElementById("ne-long").value;
+   var swlat = document.getElementById("sw-lat").value;
+   var swlong = document.getElementById("sw-long").value;
+
+  if(!currentOverlay || $("#selected-regions option:selected").length || 
+     $("#selected-countries option:selected").length || 
+     $("#selected-metregions option:selected").length)
+   searchOptions.innerHTML = "<div class='summary-title'><h4>Location</h4><a onclick='clearBounds()' class='clear-title'>Clear</a></div>";
+
+  //Update Location
+  if(currentOverlay.map !== null && currentOverlay.bounds !== null)
+  {
+   console.log("HERE");
+   console.log("map is " + currentOverlay);
+   //Update POINT 4326 values to submit
+   //SRID=4326;POINT(-118.0488106 33.9346343)
+   //var upperbound = 'SRID=4326;POINT(' + nelat + ' ' +  nelong + ')';
+   //var lowerbound = 'SRID=4326;POINT(' + swlat + ' ' +  swlong + ')';
+   var upperbound = "{'type': 'Point', 'coordinates': [" + nelat + "," + nelong + "]}";
+   var lowerbound = "{'type': 'Point', 'coordinates': [" + swlat + "," + swlong + "]}";
+
+  //se.lat = sw.lat
+  //se.lng = ne.lng
+  //nw.lat = ne.lat
+  //nw.lng = sw.lng 
+  var polygon =  "{ \"type\": \"Polygon\", \"coordinates\": [[" + nelat + "," + nelong +"] , [" + swlat + ", " + nelong + "] , [" + swlat + "," + swlong +"] , [" + nelat + "," + swlong + "]]}";
+
+  document.getElementById("location-bound").value = polygon;
+
+   searchOptions.innerHTML += "<b>NE:</b> [" + parseFloat(nelat).toFixed(2) + ", " + parseFloat(nelong).toFixed(2) + "] <b>SW:</b> [" + parseFloat(swlat).toFixed(2) + ", " + parseFloat(swlong).toFixed(2) + "]<br>";
+  }
+
+
+
+  updateLocation();
+}
+
+function updateLocation()
+{
+ var searchOptions = document.getElementById("search-options-location");
+//Update Region
+  var selectedRegions = document.getElementById("selected-regions");
+  if($("#selected-regions option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Regions:</b> ";
+   for(var a = 0; a < selectedRegions.options.length; a++)
+   {
+   if(selectedRegions.options[a].selected)
+    searchOptions.innerHTML += selectedRegions.options[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update Countries
+  var selectedCountries = document.getElementById("selected-countries");
+  if($("#selected-countries option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Countries:</b> ";
+   for(var a = 0; a < selectedCountries.options.length; a++)
+   {
+   if(selectedCountries.options[a].selected)
+    searchOptions.innerHTML += selectedCountries.options[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update Met Regions
+  var selectedMetRegions = document.getElementById("selected-metregions");
+  if($("#selected-metregions option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Metamorphic Regions:</b> ";
+   for(var a = 0; a < selectedMetRegions.options.length; a++)
+   {
+   if(selectedMetRegions.options[a].selected)
+    searchOptions.innerHTML += selectedMetRegions.options[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+}
+
+//UPDATE ROCK TYPES
+function updateRockTypes()
+{
+ //Update Rock Types
+ var searchOptions = document.getElementById("search-options-rock-type");
+ searchOptions.innerHTML = "";
+ var checkBoxes = document.getElementsByName("rock_type__rock_type__in");
+
+ var checked = false;
+  for(var i=0; i < checkBoxes.length;i++)
+  if(checkBoxes[i].checked)         
+   checked=true;
+ if(checked)
+ {
+  searchOptions.innerHTML += "<div class = 'summary-title'><h4>Rock Types</h4><a onclick='clearRockTypes()' class='clear-title'>Clear</a></div>";
+  for(var i=0; i < checkBoxes.length;i++)
+  {  
+   if(checkBoxes[i].checked)
+   {         
+   checked=false;
+   console.log(checkBoxes[i].defaultValue);
+   searchOptions.innerHTML += checkBoxes[i].defaultValue + ", ";
+   }
+  }
+  var s = searchOptions.innerHTML;
+  searchOptions.innerHTML = s.slice(0, -2);
+ }
+}
+
+function updateMetGrades()
+{
+ //Update Metamorphic Grades
+ var searchOptions = document.getElementById("search-options-metgrades");
+ searchOptions.innerHTML = "";
+ var checkBoxes = document.getElementsByName("metamorphic_grades__name__in");
+ var checked = false;
+ for(var i=0; i < checkBoxes.length;i++)
+ if(checkBoxes[i].checked)         
+  checked=true;
+ if(checked)
+ {
+  searchOptions.innerHTML += "<div class = 'summary-title'><h4>Metamorphic Grades</h4><a onclick='clearMetGrades()' class='clear-title'>Clear</a></div>";
+  for(var i=0; i < checkBoxes.length;i++)
+  { 
+   if(checkBoxes[i].checked)
+   {         
+    console.log(checkBoxes[i].defaultValue);
+    searchOptions.innerHTML += checkBoxes[i].defaultValue;
+    searchOptions.innerHTML += ', ';
+   }
+  }
+  var s = searchOptions.innerHTML;
+  searchOptions.innerHTML = s.slice(0, -2);
+
+  console.log(s.slice(0, -1));
+ }
+}
+
+//UPDATE PROVENANCES
+function updateProvenance()
+{
+   var searchOptions = document.getElementById("search-options-provenance");
+   searchOptions.innerHTML = "";
+
+  if($("#selected-owners option:selected").length ||
+     $("#selected-collectors option:selected").length ||
+     $("#selected-reference option:selected").length ||
+     $("#selected-number option:selected").length ||
+     $("#selected-igsn option:selected").length ||
+     $('#startdatevalue').val() || $('#enddatevalue').val())
+   searchOptions.innerHTML += "<div class='summary-title'><h4>Provenance</h4><a onclick='clearProvenance()' class='clear-title'>Clear</a></div>";
+
+
+
+  //Update Owners
+  var selectedOwners = document.getElementById("selected-owners");
+  if($("#selected-owners option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Owners:<b> ";
+   for(var a = 0; a < selectedOwners.options.length; a++)
+   {
+   if(selectedOwners.options[a].selected)
+    searchOptions.innerHTML += selectedOwners.options[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update Collectors
+  var selectedCollectors = document.getElementById("selected-collectors");
+  if($("#selected-collectors option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Collectors:</b> ";
+   for(var a = 0; a < selectedCollectors.options.length; a++)
+   {
+   if(selectedCollectors.options[a].selected)
+    searchOptions.innerHTML += selectedCollectors.options[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update References
+  var selectedReferences = document.getElementById("selected-references");
+  if($("#selected-references option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>References:</b> ";
+   for(var a = 0; a < selectedReferences.options.length; a++)
+   {
+   if(selectedReferences.options[a].selected)
+    searchOptions.innerHTML += selectedReferences.options[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update Number
+  var selectedNumber = document.getElementById("selected-number");
+  if($("#selected-number option:selected").length
+    && $("#selected-number option:selected").text() != "Select sample number")
+  {
+   searchOptions.innerHTML += "<b>Number:</b> " + $("#selected-number option:selected").text() + "<br> ";
+  }
+
+  //Update IGSN
+  var selectedIGSN = document.getElementById("selected-igsn");
+  if($("#selected-igsn option:selected").length
+     && $("#selected-igsn option:selected").text() != "Select IGSN")
+  {
+   searchOptions.innerHTML += "<b>IGSN:</b> " + $("#selected-igsn option:selected").text() + "<br> ";
+  }
+
+  //Update Date
+  console.log($('#startdatevalue').val());
+  if($('#startdatevalue').val()) 
+   searchOptions.innerHTML += "<b>Start Date:</b> " + $('#date-start').val() + "<br>";
+  if($('#enddatevalue').val())
+   searchOptions.innerHTML += "<b>End Date:</b> " + $('#date-end').val() + "<br>"; 
+
+  //Update Access
+  var access = $('input[name=public_data]');
+  var accessVal = access.filter(':checked'); 
+  if(accessVal)
+  {
+   if(accessVal.val() == "")
+     searchOptions.innerHTML += "<b>Access:</b> " +  "No Preference<br>";
+   if(accessVal.val() == "Y")
+     searchOptions.innerHTML += "<b>Access:</b> " + "Public<br>";
+   if(accessVal.val() == "N")
+     searchOptions.innerHTML += "<b>Access:</b> " + "Private<br>"; 
+  }
+}
+
+function clearAll()
+{
+ clearRockTypes();
+ clearMetGrades();
+ clearBounds();
+ clearProvenance();
+ clearMinerals();
+ 
+}
+
+function clearRockTypes()
+{
+ var checkBoxes = document.getElementsByName("rock_type__rock_type__in");
+ for(var i=0; i < checkBoxes.length;i++)
+ { 
+ checkBoxes[i].checked = false;
+ }
+ document.getElementById("search-options-rock-type").innerHTML = "";
+}
+
+function clearMetGrades()
+{
+ var checkBoxes = document.getElementsByName("metamorphic_grades__name__in");
+ for(var i=0; i < checkBoxes.length;i++)
+ { 
+ checkBoxes[i].checked = false;
+ }
+ document.getElementById("search-options-metgrades").innerHTML = "";
+}
+
+function clearProvenance()
+{
+ $("#provenance .chosen-select").val('').trigger("chosen:updated");
+ if($('#date-start').val())
+  $.datepicker._clearDate('#date-start');
+ if($('#date-end').val())
+  $.datepicker._clearDate('#date-end');
+ $('#date-start').val('');
+ $('#date-end').val('');
+ $('#startdatevalue').attr('value', '');
+ $('#enddatevalue').attr('value', '');
+ 
+ $("input:radio[name='public_data']").each(function(i) { this.checked = false; });
+ document.getElementById("search-options-provenance").innerHTML = "";
+ 
+}
+
+function updateStartDate(input)
+{
+ var year = input.value.substr(-4);
+ var date = input.value.substr(3, 2);
+ var month = input.value.substr(0, 2);
+ var timestamp = year + "-" + month + "-" + date + " 00:00:00"; 
+ $('#startdatevalue').attr('value', timestamp);
+ console.log($('#startdatevalue').val());
+ updateProvenance();
+}
+
+function updateEndDate(input)
+{
+ var year = input.value.substr(-4);
+ var date = input.value.substr(3, 2);
+ var month = input.value.substr(0, 2);
+ var timestamp = year + "-" + month + "-" + date + " 00:00:00"; 
+ $('#enddatevalue').attr('value', timestamp);
+ console.log($('#enddatevalue').val());
+ updateProvenance();
+}
+
+function clearMinerals()
+{
+ var searchOptions = document.getElementById("search-options-minerals");
+ searchOptions.innerHTML = "";
+ $("#mineral-tree").jstree("deselect_all");
+ 
+}
+
+
+function clearBounds()
+{
+ //Update Location in search summary
+  document.getElementById("search-options-location").innerHTML = "";
+  document.getElementById("ne-lat").value = "";
+  document.getElementById("ne-long").value = "";
+  document.getElementById("sw-lat").value = "";
+  document.getElementById("sw-long").value = "";
+  document.getElementById("location-bound").value = '';
+
+  if(currentOverlay)
+    currentOverlay.setMap(null);
+
+$("#location .chosen-select").val('').trigger("chosen:updated");
+
+}
+
+function HomeControl(controlDiv, map) {
+
+  // Set CSS styles for the DIV containing the control
+  // Setting padding to 5 px will offset the control
+  // from the edge of the map
+
+  // Set CSS for the control border
+  var controlUI = document.createElement('div');
+  controlUI.style.backgroundColor = 'white';
+  controlUI.style.cursor = 'pointer';
+  controlUI.style.textAlign = 'center';
+  controlUI.title = 'Clear selection';
+  controlUI.id = 'clear-map';
+  controlDiv.appendChild(controlUI);
+
+  // Set CSS for the control interior
+  var controlText = document.createElement('div');
+  controlText.style.fontFamily = 'Arial,sans-serif';
+  controlText.style.fontSize = '12px';
+  controlText.style.paddingLeft = '4px';
+  controlText.style.paddingRight = '4px';
+  controlText.innerHTML = '<b>Clear </b>';
+  controlUI.appendChild(controlText);
+
+  // Setup the click event listeners: simply set the map to
+  // Chicago
+  google.maps.event.addDomListener(controlUI, 'click', function() {
+    clearBounds();
+  });
+
+}
+
+/*
+General Search requirements
+===========================
+
+Search interface consists of six different areas:
+
+  #. Rock types
+  #. Metamorphic grades
+  #. Location
+  #. Minerals
+  #. Chemistry 
+  #. Provenance
+
+The general rule is that conditions set within each area are connected
+with an OR, and the conditions across different areas are connected
+with an AND.
+
+Search interface must support a box listing all the selected criteria
+and the resulting query for usability reasons. 
+
+The default attributes for the search results are given below. 
+
+  - These attributes should be customizable.
+  - These attributes should be sortable, i.e. order the results.
+
+Total query results must be shown.
+
+By default 75 values are shown, but this number should be modifiable. 
+
+Next/previous page is supported. 
+
+Search results should be exportable as comma separated values, taking
+care that if any of the values contain commas, then the values are put
+in double qoutes.
+
+Note: We should implement two separate interfaces, one for chemical
+analysis and one for samples. However, these interfaces share many
+elements in common, hence must use the same underlying code.
+
+Chemical analysis search
+--------------------------
+
+This search supports all the areas listed above. It returns a table
+containing the following attributes:
+
+  - Point number (chemical_analyses.reference_id I think)
+  - Public or private
+  - Analysis method
+  - Analysis location (chemical_analyses.where_done)
+  - Analyst
+  - Reference x
+  - Reference y
+  - Total
+
+Sample search
+---------------
+
+This supports only the conditions below (no chemistry):
+
+  #. Rock types
+  #. Metamorphic grades
+  #. Location
+  #. Minerals
+  #. Provenance
+
+It returns a table containing the following attributes:
+
+  - Sample number (samples.number, not IGSN)
+  - Sample Public or not 
+  - Number of subsamples
+  - Number of images
+  - Number of chemical analyses
+  - Owner
+  - Rock type
+  - Minerals in the sample
+  - Date collected
+
+It should be possible to export search results as KML files for Google
+earth/map viewing.
+
+It should be possible to view the returned samples on Google maps.
+
+Search conditions
+=====================
+
+Rock Types
+-------------
+
+Rock types are listed with a check box allowing multiple to be selected.
+The selected types are combined with an OR.
+
+Metamorphic Grade
+-------------------
+
+Metamorphic grades are listed with a check box allowing multiple to be
+selected. The selected values of are combined with an OR.
+
+Location
+----------
+
+Location supports multiple ways to select the location. All conditions
+can have a value. These conditions should be connected with an OR
+within this area.
+
+
+  - Map box given by four coordinates: North/south latitude, and
+    east/west longitude.
+
+    It should be possible to select the box by
+    drawing a map on Google maps, or by entering directly in a text
+    box. If entered directly, it should show on the map automatically.
+
+  - Region: combo box allowing multiple choices, connected by OR
+  (from sample_regions, regions.name)
+
+  - Country: combo box allowing multiple choices, connected by OR
+  (from samples.country)
+  
+  - Metamorphic regions: combo box allowing multiple choices,
+    connected by OR (from sample_metamorphic_regions,
+    metamorphic_regions.name). 
+
+    The interface must also allow all these regions to be viewed as
+    polygons in google map).
+
+
+Minerals
+---------
+
+Minerals are displayed using a tree, top elements first, then elements
+that are children of the top nodes, following the next level. 
+
+The minerals are chosen using a check box, allowing multiple to be chosen. 
+
+If a top level mineral is chosen, then all the minerals below are also
+chosen in the check box. However, they can be manually checked off.
+
+All chosen minerals are combined with an OR by default.
+
+  - The interface must support a button that converts the mineral
+    selection to an AND query instead. In this case, samples
+    containing all the minerals chosen (through different join tuples)
+    must be returned.
+
+Chemistry
+-----------
+
+This option applies only to the chemical analysis search. *Note:* This
+has been changed from the old interface.
+
+It should allow two options, connected by an OR.
+
+  - Choose a single mineral from a combo box (from table minerals, all
+    minerals, plus the option "Bulk Rock")
+
+  Return all analyses with the given chemical_analyses.mineral_id or
+  if bulk rock is chosen, then return analyses where
+  chemical_analyses.large_rock='Y'.
+
+  - Choose multiple elements from a combo box, combined with an AND
+
+  Elements should be the union of: elements (elements.element_id,
+  elements.name) and oxides (oxides.species, -), ordered alphabetically.
+
+  The matching analyses are found through chemical_analysis_oxides and
+  chemical_analysis_elements.
+
+
+Provenance
+-----------
+
+Provenance supports multiple ways to select the provenance (origin of
+searched object). All conditions can have a value. These conditions
+should be connected with an OR within this area.
+
+
+  - Owner: combo box allowing multiple choices connected with an OR
+    (samples.user_id, users.name)
+
+  - Collector: combo box allowing multiple choices connected with an
+    OR (samples.collector)
+
+  - Number: single value (samples.number)
+
+  - IGSN: single value (samples.sesar_number)
+
+  - References: combo box allowing multiple choices connected with an
+    OR (sample_reference, reference.name)
+
+  - Collection data range: from (calendar choose or type directly), to
+    (calendar choose or type directly)
+
+  - Access: radio box with options: no preference (default), public or
+    private.
+
+  If no preference: all samples that user can access are shown.
+  If public: only public samples are shown.
+  If private: only samples with public = 'N' are shown.
+*/
+</script>
 
 {% endblock %}
