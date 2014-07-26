@@ -30,6 +30,10 @@ def index():
 
 @app.route('/search/')
 def search():
+    email = session.get('email', None)
+    api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
+
     filters = dict(request.args)
     filter_dictionary = {}
 
@@ -42,12 +46,24 @@ def search():
         url = url_for('samples') + '?' + urlencode(filter_dictionary)
         return redirect(url)
     elif request.args.get('resource') == 'chemicalanalysis':
-        url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
-        return redirect(url)
-
-    email = session.get('email', None)
-    api_key = session.get('api_key', None)
-    api = MetpetAPI(email, api_key).api
+        if request.args.get('search_filters') == 'samples':
+            request_obj = drest.api.API(baseurl=env('API_HOST'))
+            if email and api_key:
+                headers = {'email': email, 'api_key': api_key}
+            else:
+                headers = None
+            response = request_obj.\
+                           make_request('GET',
+                           '/get-chem-analyses-given-sample-filters/',
+                           params=filter_dictionary,
+                           headers=headers)
+            ids = response.data['chemical_analysis_ids']
+            url = url_for('chemical_analyses') + '?' + \
+                  urlencode({'chemical_analysis_id__in': ids})
+            return redirect(url)
+        else:
+            url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
+            return redirect(url)
 
     owner_list = []
     region_list = []
@@ -84,7 +100,7 @@ def search():
     for m in mineral_relationships:
         node = {"id": m['child_mineral']['name'], "parent": m['parent_mineral']['name'], "text": m['child_mineral']['name'], "mineral_id": m['child_mineral']['mineral_id']}
         mineralnodes.append(node)
-	    
+
     for region in regions:
         region_list.append(region['name'])
     for rock_type in rock_type_list:
