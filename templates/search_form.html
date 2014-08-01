@@ -125,7 +125,7 @@
        <ul id = "provenance">
         <h3>Provenance</h3>
         <label class="provenance-label" for="owner">Owner: </label>
-        <!-- <input type="hidden" name="fields" value="sample_id,number,subsample_count,image_count,user,public_data,rock_type,rock_type__rock_type,minerals__name,regions__name,references__name"> 
+       <!-- <input type="hidden" name="fields" value="sample_id,number,subsample_count,chem_analyses_count,image_count,user,public_data,rock_type,rock_type__rock_type,collection_date,minerals__name,regions__name,references__name"> 
 -->
 
         <select id="selected-owners" onchange="updateProvenance()" multiple name="user__in" class="chosen-select">
@@ -406,7 +406,7 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
    document.getElementById("sw-lat").value = sw.lat().toString();
    document.getElementById("sw-long").value = sw.lng().toString();
 
-   document.getElementById("location-bound").value = ne.lat() + "," + ne.lng() + ","+ sw.lat() + "," + sw.lng();
+   document.getElementById("location-bound").value = sw.lat() + "," + sw.lng() + ","+ ne.lat() + "," + ne.lng();
 
 updateLocation(); 
   //Update Location in search summary
@@ -461,7 +461,7 @@ updateLocation();
   //http://stackoverflow.com/questions/15536241/how-to-get-4-vertex-coordinates-from-gmaps-rectangle-overlay
   var nw = new google.maps.LatLng(ne.lat(),sw.lng());
   var se = new google.maps.LatLng(sw.lat(),ne.lng());
-  var polygon =  ne.lat().toString() + ',' + ne.lng().toString() + ',' + sw.lat().toString() + ',' + sw.lng().toString();
+  var polygon =  sw.lat().toString() + ',' + sw.lng().toString() + ',' + ne.lat().toString() + ',' + ne.lng().toString();
 
   
 
@@ -588,7 +588,6 @@ function updateBounds()
   //se.lng = ne.lng
   //nw.lat = ne.lat
   //nw.lng = sw.lng 
-  var polygon =  nelat + ',' + nelong + ',' + swlat + ',' + swlong;
 
   console.log("CHANGED BOUND IS");
   console.log(polygon);
