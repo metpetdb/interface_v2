@@ -25,6 +25,7 @@
 </ul>
 <div id = "form-container">
     <form action="" method="get" id='content' class="tab-content">
+
       <div class="tab-pane active" id="rocktypes">
         <ul>
          <h3>Rock Types</h3>
@@ -124,6 +125,9 @@
        <ul id = "provenance">
         <h3>Provenance</h3>
         <label class="provenance-label" for="owner">Owner: </label>
+        <!-- <input type="hidden" name="fields" value="sample_id,number,subsample_count,image_count,user,public_data,rock_type,rock_type__rock_type,minerals__name,regions__name,references__name"> 
+-->
+
         <select id="selected-owners" onchange="updateProvenance()" multiple name="user__in" class="chosen-select">
         {% for o in owners %}
             <option value="{{ o.user_id }}">{{ o.name }}</option>
@@ -168,7 +172,7 @@
        </ul>
       </div>
 
-
+<input type="hidden" id="search_filters" name="search_filters" value="samples">
 <div class="clear"></div>
 
 
@@ -212,7 +216,6 @@
 <div class="clear"></div>
 
 <div id = "results"></div>
-
 
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 <script src="/static/js/jquery-2.1.1.min.js"></script>
@@ -324,7 +327,7 @@ function initialize()
  var mapCenter;
 
  var map = new google.maps.Map(document.getElementById('map-canvas'), {
-    zoom: 11,
+    zoom: 5,
     center: new google.maps.LatLng(44, -74),
     mapTypeId: google.maps.MapTypeId.ROADMAP
  });
@@ -403,6 +406,8 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
    document.getElementById("sw-lat").value = sw.lat().toString();
    document.getElementById("sw-long").value = sw.lng().toString();
 
+   document.getElementById("location-bound").value = ne.lat() + "," + ne.lng() + ","+ sw.lat() + "," + sw.lng();
+
 updateLocation(); 
   //Update Location in search summary
   var searchOptions = document.getElementById("search-options-location");
@@ -420,6 +425,8 @@ updateLocation();
    document.getElementById("ne-long").value = ne.lng().toString();
    document.getElementById("sw-lat").value = sw.lat().toString();
    document.getElementById("sw-long").value = sw.lng().toString();
+
+   document.getElementById("location-bound").value = ne.lat() + "," + ne.lng() + ","+ sw.lat() + "," + sw.lng();
 
   //Update Location in search summary
   var searchOptions = document.getElementById("search-options-location");
@@ -454,8 +461,9 @@ updateLocation();
   //http://stackoverflow.com/questions/15536241/how-to-get-4-vertex-coordinates-from-gmaps-rectangle-overlay
   var nw = new google.maps.LatLng(ne.lat(),sw.lng());
   var se = new google.maps.LatLng(sw.lat(),ne.lng());
-  var polygon =  "{ \"type\": \"Polygon\", \"coordinates\": [[" + ne.lat().toString() + "," + ne.lng().toString() +"] , [" + se.lat().toString() + ", " + se.lng().toString() + "] , [" + sw.lat().toString() + "," + sw.lng().toString() +"] , [" + nw.lat().toString() + "," + nw.lng().toString() + "]]}";
+  var polygon =  ne.lat().toString() + ',' + ne.lng().toString() + ',' + sw.lat().toString() + ',' + sw.lng().toString();
 
+  
 
    //document.getElementById("ne-location-bound").value = upperbound;
    //document.getElementById("sw-location-bound").value = lowerbound;
@@ -531,6 +539,7 @@ var frm = $('#content');
             url: frm.attr('action'),
             data: frm.serialize(),
             success: function (data) {
+                $("#results").html("");
                 $("#results").html(data);
                 $('#spinner').hide();
                 document.getElementsByTagName("header")[1].innerHTML = "";
@@ -579,8 +588,10 @@ function updateBounds()
   //se.lng = ne.lng
   //nw.lat = ne.lat
   //nw.lng = sw.lng 
-  var polygon =  "{ \"type\": \"Polygon\", \"coordinates\": [[" + nelat + "," + nelong +"] , [" + swlat + ", " + nelong + "] , [" + swlat + "," + swlong +"] , [" + nelat + "," + swlong + "]]}";
+  var polygon =  nelat + ',' + nelong + ',' + swlat + ',' + swlong;
 
+  console.log("CHANGED BOUND IS");
+  console.log(polygon);
   document.getElementById("location-bound").value = polygon;
 
    searchOptions.innerHTML += "<b>NE:</b> [" + parseFloat(nelat).toFixed(2) + ", " + parseFloat(nelong).toFixed(2) + "] <b>SW:</b> [" + parseFloat(swlat).toFixed(2) + ", " + parseFloat(swlong).toFixed(2) + "]<br>";

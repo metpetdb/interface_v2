@@ -35,6 +35,7 @@ def search():
     api = MetpetAPI(email, api_key).api
 
     filters = dict(request.args)
+    print filters
     filter_dictionary = {}
 
     for key in filters:
@@ -235,9 +236,12 @@ def samples():
     next, previous, last, total_count = paginate_model('samples', data, filters)
 
     samples = data.data['objects']
+    print "SQUIRREL"
+    print samples
     for sample in samples:
-        mineral_names = [mineral['name'] for mineral in sample['minerals']]
-        sample['mineral_list'] = (', ').join(mineral_names)
+        if 'minerals' in samples:
+            mineral_names = [mineral['name'] for mineral in sample['minerals']]
+            sample['mineral_list'] = (', ').join(mineral_names)
 
     first_page_filters = filters
     del first_page_filters['offset']
