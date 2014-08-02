@@ -30,6 +30,10 @@ def index():
 
 @app.route('/search/')
 def search():
+    email = session.get('email', None)
+    api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
+
     filters = dict(request.args)
     filter_dictionary = {}
 
@@ -42,13 +46,25 @@ def search():
         url = url_for('samples') + '?' + urlencode(filter_dictionary)
         return redirect(url)
     elif request.args.get('resource') == 'chemicalanalysis':
-        url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
-        return redirect(url)
-
-    email = session.get('email', None)
-    api_key = session.get('api_key', None)
-    api = MetpetAPI(email, api_key).api
-
+        if request.args.get('search_filters') == 'samples':
+            request_obj = drest.api.API(baseurl=env('API_HOST'))
+            if email and api_key:
+                headers = {'email': email, 'api_key': api_key}
+            else:
+                headers = None
+            response = request_obj.\
+                           make_request('GET',
+                           '/get-chem-analyses-given-sample-filters/',
+                           params=filter_dictionary,
+                           headers=headers)
+            ids = response.data['chemical_analysis_ids']
+            url = url_for('chemical_analyses') + '?' + \
+                  urlencode({'chemical_analysis_id__in': ids})
+            return redirect(url)
+        else:
+            url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
+            return redirect(url)
+    
     owner_list = []
     region_list = []
     rock_type_list = []
@@ -60,13 +76,13 @@ def search():
     metamorphic_region_list = []
     metamorphic_grade_list = []
 
-    regions = api.region.get(params={'order_by': 'name'}).data['objects']
+    regions = api.region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
     rock_types = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
     references = api.reference.get(params={'order_by': 'name', 'limit': 0}).data['objects']
     metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
     metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
-    samples = api.sample.get().data['objects']
-    users = api.user.get().data['objects']
+    samples = api.sample.get(params={'fields': 'collector,number,sesar_number,country', 'limit': 0}).data['objects']
+    users = api.user.get(params={'limit': 0}).data['objects']
     mineral_relationships = api.mineral_relationship.get(params={'limit': 0}).data['objects']
 
     mineralroots = []
@@ -84,7 +100,7 @@ def search():
     for m in mineral_relationships:
         node = {"id": m['child_mineral']['name'], "parent": m['parent_mineral']['name'], "text": m['child_mineral']['name'], "mineral_id": m['child_mineral']['mineral_id']}
         mineralnodes.append(node)
-	    
+
     for region in regions:
         region_list.append(region['name'])
     for rock_type in rock_type_list:
@@ -164,7 +180,7 @@ def request_reset_password():
             data = json.loads(response.text)
             message = Message("Metpetdb: Reset Password",
                                sender=env('DEFAULT_MAIL_SENDER'),
-                               recipients = [form.email.data])
+                               recipients=[form.email.data])
             reset_url = url_for('reset_password', token=data['reset_token'],
                                  _external=True)
             message.body = render_template('reset_password_email.html',
@@ -186,7 +202,6 @@ def reset_password(token):
                    'password': form.password.data}
         response = post(env('API_HOST') + '/reset-password/', data=payload)
         if response.status_code == 200:
-            print(response.text)
             data = json.loads(response.text)
             session['email'] = data['email']
             session['api_key'] = data['api_key']
@@ -221,9 +236,10 @@ def samples():
 
     samples = data.data['objects']
     for sample in samples:
-        mineral_names = [mineral['name'] for mineral in sample['minerals']]
-        sample['mineral_list'] = (', ').join(mineral_names)
-
+        if 'minerals' in samples:
+            mineral_names = [mineral['name'] for mineral in sample['minerals']]
+            sample['mineral_list'] = (', ').join(mineral_names)
+   
     first_page_filters = filters
     del first_page_filters['offset']
 
@@ -312,7 +328,6 @@ def chemical_analyses():
     api = MetpetAPI(email, api_key).api
 
     filters = ast.literal_eval(json.dumps(request.args))
-    print(filters)
     offset = request.args.get('offset', 0)
     filters['offset'] = offset
 
@@ -355,7 +370,6 @@ def chemical_analysis(id):
 def user(id):
     api = MetpetAPI(None, None).api
     user = api.user.get(id).data
-    print(user)
     if sample:
         return render_template('user.html', user=user)
     else:
