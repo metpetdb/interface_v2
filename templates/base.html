@@ -23,10 +23,12 @@
             </button>
             <a class="navbar-brand" href="{{ url_for('index') }}"><img src="/static/images/MPDBlogo_sml.png"/></a>
           </div>
+
           <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
-               <li><a id="samples" href="{{ url_for('search') }}">Search Database</a></li>
-          <li><a id="samples" href="{{ url_for('samples') }}">View Samples</a></li>
+               <li><a id="samples" href="{{ url_for('search') }}"> 
+Search Database</a></li>
+          <li><a id="samples" href="{{ url_for('samples') }}?fields=sample_id,number,subsample_count,chem_analyses_count,image_count,user,public_data,rock_type,rock_type__rock_type,collection_date,minerals__name">View Samples</a></li>
           <li><a id="chemical_analyses" href="{{ url_for('chemical_analyses') }}">View Chemical Analyses</a></li>
           <li><a id="about" href="#">About</a></li>
           <li><a id="help" href="#">Help</a></li>

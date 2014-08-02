@@ -64,7 +64,7 @@ def search():
         else:
             url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
             return redirect(url)
-
+    
     owner_list = []
     region_list = []
     rock_type_list = []
@@ -76,13 +76,13 @@ def search():
     metamorphic_region_list = []
     metamorphic_grade_list = []
 
-    regions = api.region.get(params={'order_by': 'name'}).data['objects']
+    regions = api.region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
     rock_types = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
     references = api.reference.get(params={'order_by': 'name', 'limit': 0}).data['objects']
     metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
     metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
-    samples = api.sample.get().data['objects']
-    users = api.user.get().data['objects']
+    samples = api.sample.get(params={'fields': 'collector,number,sesar_number,country', 'limit': 0}).data['objects']
+    users = api.user.get(params={'limit': 0}).data['objects']
     mineral_relationships = api.mineral_relationship.get(params={'limit': 0}).data['objects']
 
     mineralroots = []
@@ -239,7 +239,7 @@ def samples():
         if 'minerals' in samples:
             mineral_names = [mineral['name'] for mineral in sample['minerals']]
             sample['mineral_list'] = (', ').join(mineral_names)
-
+   
     first_page_filters = filters
     del first_page_filters['offset']
 

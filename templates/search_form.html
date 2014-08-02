@@ -125,8 +125,8 @@
        <ul id = "provenance">
         <h3>Provenance</h3>
         <label class="provenance-label" for="owner">Owner: </label>
-       <!-- <input type="hidden" name="fields" value="sample_id,number,subsample_count,chem_analyses_count,image_count,user,public_data,rock_type,rock_type__rock_type,collection_date,minerals__name,regions__name,references__name"> 
--->
+        <input type="hidden" name="fields" value="sample_id,number,subsample_count,chem_analyses_count,image_count,user,public_data,rock_type,rock_type__rock_type,collection_date,minerals__name"> 
+
 
         <select id="selected-owners" onchange="updateProvenance()" multiple name="user__in" class="chosen-select">
         {% for o in owners %}
