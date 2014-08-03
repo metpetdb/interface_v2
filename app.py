@@ -64,7 +64,7 @@ def search():
         else:
             url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
             return redirect(url)
-    
+
     owner_list = []
     region_list = []
     rock_type_list = []
@@ -83,14 +83,17 @@ def search():
     metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
     samples = api.sample.get(params={'fields': 'collector,number,sesar_number,country', 'limit': 0}).data['objects']
     users = api.user.get(params={'limit': 0}).data['objects']
-    mineral_relationships = api.mineral_relationship.get(params={'limit': 0}).data['objects']
+    mineral_relationships = api.mineral_relationship.get(\
+                                params={'limit': 0,
+                                        'fields':'parent_mineral__mineral_id,parent_mineral__name,child_mineral__mineral_id,child_mineral__name'}).\
+                                                    data['objects']
 
     mineralroots = []
     parents = set()
     children = set()
     for m in mineral_relationships:
-        parents.add((m['parent_mineral']['name'], m['parent_mineral']['mineral_id']))
-        children.add((m['child_mineral']['name'], m['child_mineral']['mineral_id']))
+        parents.add((m['parent_mineral__name'], m['parent_mineral__mineral_id']))
+        children.add((m['child_mineral__name'], m['child_mineral__mineral_id']))
     mineralroots = set(parents) - set(children)
 
 
@@ -98,7 +101,7 @@ def search():
     for (name, mid) in mineralroots:
 	mineralnodes.append({"id": name, "parent": "#", "text": name, "mineral_id": mid})
     for m in mineral_relationships:
-        node = {"id": m['child_mineral']['name'], "parent": m['parent_mineral']['name'], "text": m['child_mineral']['name'], "mineral_id": m['child_mineral']['mineral_id']}
+        node = {"id": m['child_mineral__name'], "parent": m['parent_mineral__name'], "text": m['child_mineral__name'], "mineral_id": m['child_mineral__mineral_id']}
         mineralnodes.append(node)
 
     for region in regions:
@@ -239,7 +242,7 @@ def samples():
         if 'minerals' in samples:
             mineral_names = [mineral['name'] for mineral in sample['minerals']]
             sample['mineral_list'] = (', ').join(mineral_names)
-   
+
     first_page_filters = filters
     del first_page_filters['offset']
 
