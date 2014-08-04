@@ -121,6 +121,11 @@ def search():
         metamorphic_grade_list.append(mmg['name'])
 
     owner_dict = {}
+    if email:
+        logged_in_user = api.user.get(params={'email': email,
+                                              'fields': 'user_id,name'}).data['objects']
+        owner_dict[logged_in_user[0]['user_id']] = logged_in_user[0]['name']
+
     for sample in samples:
         collector_list.append(unicode(sample['collector']))
         number_list.append(sample['number'])
