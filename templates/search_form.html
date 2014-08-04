@@ -129,8 +129,8 @@
 
 
         <select id="selected-owners" onchange="updateProvenance()" multiple name="user__in" class="chosen-select">
-        {% for o in owners %}
-            <option value="{{ o.user_id }}">{{ o.name }}</option>
+        {% for user_id, name in owners.iteritems() %}
+            <option value="{{ user_id }}">{{ name }}</option>
         {% endfor %}
         </select><br>
         <label class="provenance-label" for="collector">Collector: </label>
