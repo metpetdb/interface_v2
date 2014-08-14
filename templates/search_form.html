@@ -119,19 +119,24 @@
       </div>
 
       <div class="tab-pane" id="chemistry">
-      <h3>Provenance</h3>
-        <label for="elements__name">Elements: &nbsp;</label>
-        <select onchange="updateChemistry()" id="selected-elements" multiple class="chosen-select">
+      <h3>Chemistry</h3>
+        <label class="provenance-label" for="elements">Elements: &nbsp;</label>
+        <select name="elements__element_id__in" onchange="updateChemistry()" id="selected-elements" multiple class="chosen-select">
         {% for element in elements %}
-             <option name="elements__element_id__in" value="{{ element.element_id }}">{{ element.name }}</option>
-        {% endfor %}
-        {% for oxide in oxides %}
-             <option name="oxides__oxide_id__in" value="{{ oxide.oxide_id }}">{{ oxide.species }}</option>
+             <option value="{{ element.element_id }}">{{ element.name }}</option>
         {% endfor %}
         </select>
         <br>
-       <!--<input type="hidden" value="" name="elements__element_id__in" >-->
-       <label for="elements__name">Minerals: </label>
+
+        <label class="provenance-label" for="oxides">Oxides: &nbsp;</label>
+        <select name="oxides__oxide_id__in" onchange="updateChemistry()" id="selected-oxides" multiple class="chosen-select">
+        {% for oxide in oxides %}
+             <option value="{{ oxide.oxide_id }}">{{ oxide.species }}</option>
+        {% endfor %}
+        </select>
+        <br>
+
+       <label for="minerals">Minerals: </label>
        <div id ="chem-mineral-tree"></div>
        <div id = "selected-chem-minerals"></div>
 
@@ -188,8 +193,8 @@
        </ul>
       </div>
 
-<!-- <input type="hidden" id="search_filters" name="search_filters" value="samples">
- -->
+<input type="hidden" id="search_filters" name="search_filters" value="samples">
+
 
 <div class="clear"></div>
 
@@ -641,12 +646,25 @@ function updateBounds()
 
 function updateChemistry()
 {
+ //Chemistry search options, selected chemistry minerals
  var searchOptions = document.getElementById("search-options-chemistry");
-
  var mids = $('#chem-mineral-tree').jstree('get_selected', true);
- if($("#selected-elements option:selected").length)
-   searchOptions.innerHTML = "<div class='summary-title'><h4>Chemistry</h4><a onclick='clearChemistry()' class='clear-title'>Clear</a></div>";
 
+ //Clear search options summary
+ searchOptions.innerHTML = "";
+
+ //If elements, oxides, or minerals selected, update summary title
+ //and set search-filter value to chemistry
+ //else sest search-filter value to sample 
+ if($("#selected-elements option:selected").length || $("#selected-oxides option:selected").length || mids.length > 0)
+ {
+  searchOptions.innerHTML = "<div class='summary-title'><h4>Chemistry</h4><a onclick='clearChemistry()' class='clear-title'>Clear</a></div>";
+  document.getElementById("search_filters").value = "chemical_analyses"; 
+ }
+ else
+  document.getElementById("search_filters").value = "samples"; 
+
+  //Update elements in search summary
   var selectedElements = document.getElementById("selected-elements");
   if($("#selected-elements option:selected").length)
   {
@@ -661,7 +679,22 @@ function updateChemistry()
    searchOptions.innerHTML += "<br>";
   }
 
-  //Update minerals
+  //Update oxides in search summary
+  var selectedOxides = document.getElementById("selected-oxides");
+  if($("#selected-oxides option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Oxides:</b> ";
+   for(var a = 0; a < selectedOxides.options.length; a++)
+   {
+   if(selectedOxides.options[a].selected)
+    searchOptions.innerHTML += selectedOxides.options[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update minerals in ssearch summary
   document.getElementById("selected-chem-minerals").innerHTML = "";
   console.log(document.getElementById("selected-chem-minerals").innerHTML );
   if(mids.length > 0)
@@ -679,7 +712,7 @@ function updateChemistry()
 
 function clearChemistry()
 {
- //$("#chemistry .chosen-select").val('').trigger("chosen:updated");
+ $("#chemistry .chosen-select").val('').trigger("chosen:updated");
  clearChemMinerals();
  document.getElementById("search-options-chemistry").innerHTML = "";
 }

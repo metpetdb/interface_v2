@@ -30,6 +30,7 @@ def index():
 
 @app.route('/search/')
 def search():
+    print "REQ ARGS"
     print request.args
     email = session.get('email', None)
     api_key = session.get('api_key', None)
@@ -44,14 +45,9 @@ def search():
             filter_dictionary[key] = ",".join(filters[key])
 
     if request.args.get('resource') == 'sample':
-        element_ids = request.args.get('elements__element_id__in')
-        print element_ids
-
         url = url_for('samples') + '?' + urlencode(filter_dictionary)
         return redirect(url)
     elif request.args.get('resource') == 'chemicalanalysis':
-        element_ids = request.args.get('elements__element_id__in')
-        print element_ids
         if request.args.get('search_filters') == 'samples':
             request_obj = drest.api.API(baseurl=env('API_HOST'))
             if email and api_key:
@@ -71,21 +67,23 @@ def search():
             #url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
             #return redirect(url)
 
-            print "HAT"
             element_ids = (',').join(request.args.getlist('elements__element_id__in'))
+            oxide_ids = (',').join(request.args.getlist('oxides__oxide_id__in'))
             mineral_ids = (',').join(request.args.getlist('minerals__in'))
-            print element_ids
-            print mineral_ids
-            #chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
-            print "RODENT"
-            #cid_list = []
-            #for cid in chem_analysis_ids:
-            #    cid_list.append(cid['chemical_analysis_id'])
-            #print cid_list
-            #url = url_for('chemical_analyses') + '?' + \
-            #      urlencode({'chemical_analysis_id__in': (',').join(str(c) for c in cid_list)})
+
+            e_chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
+            o_chem_analysis_ids = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
+
+            cid_list = []
+            for cid in e_chem_analysis_ids:
+                cid_list.append(cid['chemical_analysis_id'])
+            for cid in o_chem_analysis_ids:
+                cid_list.append(cid['chemical_analysis_id'])
+            print cid_list
             url = url_for('chemical_analyses') + '?' + \
-                  urlencode({'elements__element_id__in': element_ids, 'minerals__in': mineral_ids})
+                  urlencode({'chemical_analysis_id__in': (',').join(str(c) for c in cid_list)})
+            #url = url_for('chemical_analyses') + '?' + \
+            #      urlencode({'elements__element_id__in': element_ids, 'minerals__in': mineral_ids})
             return redirect(url)
             
     
