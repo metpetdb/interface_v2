@@ -285,14 +285,12 @@ def samples():
 
     samples = data.data['objects']
     for sample in samples:
-<<<<<<< HEAD
         mineral_names = [str(m) for m in sample['minerals__name']]
         sample['mineral_list'] = (', ').join(mineral_names)
-=======
+
         if 'minerals' in samples:
             mineral_names = [mineral['name'] for mineral in sample['minerals']]
             sample['mineral_list'] = (', ').join(mineral_names)
->>>>>>> 41fc0561f7d11210afd0496019be643dbcb6039b
 
     first_page_filters = filters
     del first_page_filters['offset']
