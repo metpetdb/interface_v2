@@ -85,8 +85,7 @@ def search():
             #url = url_for('chemical_analyses') + '?' + \
             #      urlencode({'elements__element_id__in': element_ids, 'minerals__in': mineral_ids})
             return redirect(url)
-            
-    
+
     owner_list = []
     region_list = []
     rock_type_list = []
@@ -107,24 +106,27 @@ def search():
     references = api.reference.get(params={'order_by': 'name', 'limit': 0}).data['objects']
     metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
     metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
-    samples = api.sample.get(params={'fields': 'collector,number,sesar_number,country', 'limit': 0}).data['objects']
-    users = api.user.get(params={'limit': 0}).data['objects']
-    mineral_relationships = api.mineral_relationship.get(params={'limit': 0}).data['objects']
+    samples = api.sample.get(params={'fields': 'user__user_id,user__name,collector,number,sesar_number,country,public_data', 
+                                     'limit': 0}).data['objects']
+    mineral_relationships = api.mineral_relationship.get(\
+                                params={'limit': 0,
+                                        'fields':'parent_mineral__mineral_id,parent_mineral__name,child_mineral__mineral_id,child_mineral__name'}).\
+                                                    data['objects']
 
     mineralroots = []
     parents = set()
     children = set()
     for m in mineral_relationships:
-        parents.add((m['parent_mineral']['name'], m['parent_mineral']['mineral_id']))
-        children.add((m['child_mineral']['name'], m['child_mineral']['mineral_id']))
+        parents.add((m['parent_mineral__name'], m['parent_mineral__mineral_id']))
+        children.add((m['child_mineral__name'], m['child_mineral__mineral_id']))
     mineralroots = set(parents) - set(children)
 
 
     mineralnodes = []
     for (name, mid) in mineralroots:
-	mineralnodes.append({"id": name, "parent": "#", "text": name, "mineral_id": mid})
+        mineralnodes.append({"id": name, "parent": "#", "text": name, "mineral_id": mid})
     for m in mineral_relationships:
-        node = {"id": m['child_mineral']['name'], "parent": m['parent_mineral']['name'], "text": m['child_mineral']['name'], "mineral_id": m['child_mineral']['mineral_id']}
+        node = {"id": m['child_mineral__name'], "parent": m['parent_mineral__name'], "text": m['child_mineral__name'], "mineral_id": m['child_mineral__mineral_id']}
         mineralnodes.append(node)
 
     for element in elements:
@@ -133,21 +135,36 @@ def search():
         oxide_list.append(oxide)
     for region in regions:
         region_list.append(region['name'])
+
     for rock_type in rock_type_list:
         rock_type_list.append(rock_type['name'])
+        
     for ref in references:
         reference_list.append(ref['name'])
+
     for mmr in metamorphic_regions:
         metamorphic_region_list.append(mmr['name'])
+
     for mmg in metamorphic_grades:
         metamorphic_grade_list.append(mmg['name'])
+
+    owner_dict = {}
+    if email:
+        logged_in_user = api.user.get(params={'email': email,
+                                              'fields': 'user_id,name'}).data['objects']
+        owner_dict[logged_in_user[0]['user_id']] = logged_in_user[0]['name']
+
     for sample in samples:
         collector_list.append(unicode(sample['collector']))
         number_list.append(sample['number'])
         igsn_list.append(sample['sesar_number'])
         country_list.append(sample['country'])
-    for user in users:
-        owner_list.append(user)
+        """The 'owners' list in the Provenance tab should contain only users
+        with public samples"""
+        if sample['public_data'] == 'Y':
+            if not sample['user__user_id'] in owner_dict:
+                owner_dict[sample['user__user_id']] = sample['user__name']
+
     collector_list = list (set ( collector_list ))
     country_list = list(set (country_list))
     return render_template('search_form.html',
@@ -163,7 +180,7 @@ def search():
 			    numbers=number_list,
                             igsns=igsn_list,
 			    countries=country_list,
-			    owners = owner_list,
+			    owners = owner_dict,
                             metamorphic_regions=metamorphic_region_list,
                             metamorphic_grades=metamorphic_grade_list)
 
@@ -268,8 +285,14 @@ def samples():
 
     samples = data.data['objects']
     for sample in samples:
+<<<<<<< HEAD
         mineral_names = [str(m) for m in sample['minerals__name']]
         sample['mineral_list'] = (', ').join(mineral_names)
+=======
+        if 'minerals' in samples:
+            mineral_names = [mineral['name'] for mineral in sample['minerals']]
+            sample['mineral_list'] = (', ').join(mineral_names)
+>>>>>>> 41fc0561f7d11210afd0496019be643dbcb6039b
 
     first_page_filters = filters
     del first_page_filters['offset']

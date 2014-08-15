@@ -75,7 +75,7 @@
         <label for="bounds">NE Long: </label>
         <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="ne-long" class="latlong" ><br>
 
-        <label for="bounds">SW Long: </label>
+        <label for="bounds">SW Lat: </label>
         <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-lat" class="latlong" > 
 
         <label for="bounds">SW Long: </label>
@@ -150,8 +150,8 @@
 
 
         <select id="selected-owners" onchange="updateProvenance()" multiple name="user__in" class="chosen-select">
-        {% for o in owners %}
-            <option value="{{ o.user_id }}">{{ o.name }}</option>
+        {% for user_id, name in owners.iteritems() %}
+            <option value="{{ user_id }}">{{ name }}</option>
         {% endfor %}
         </select><br>
         <label class="provenance-label" for="collector">Collector: </label>
@@ -430,7 +430,7 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
    document.getElementById("sw-lat").value = sw.lat().toString();
    document.getElementById("sw-long").value = sw.lng().toString();
 
-   document.getElementById("location-bound").value = sw.lat() + "," + sw.lng() + ","+ ne.lat() + "," + ne.lng();
+   document.getElementById("location-bound").value = sw.lng() + "," + sw.lat() + ","+ ne.lng() + "," + ne.lat();
 
 updateLocation(); 
   //Update Location in search summary
@@ -450,7 +450,7 @@ updateLocation();
    document.getElementById("sw-lat").value = sw.lat().toString();
    document.getElementById("sw-long").value = sw.lng().toString();
 
-   document.getElementById("location-bound").value = ne.lat() + "," + ne.lng() + ","+ sw.lat() + "," + sw.lng();
+   document.getElementById("location-bound").value = sw.lng() + "," + sw.lat() + ","+ ne.lng() + "," + ne.lat();
 
   //Update Location in search summary
   var searchOptions = document.getElementById("search-options-location");
@@ -485,7 +485,7 @@ updateLocation();
   //http://stackoverflow.com/questions/15536241/how-to-get-4-vertex-coordinates-from-gmaps-rectangle-overlay
   var nw = new google.maps.LatLng(ne.lat(),sw.lng());
   var se = new google.maps.LatLng(sw.lat(),ne.lng());
-  var polygon =  sw.lat().toString() + ',' + sw.lng().toString() + ',' + ne.lat().toString() + ',' + ne.lng().toString();
+  var polygon =  sw.lng().toString() + ',' + sw.lat().toString() + ',' + ne.lng().toString() + ',' + ne.lat().toString();
 
   
 
