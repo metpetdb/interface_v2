@@ -29,8 +29,10 @@
         <td td class="sample_value">{{ sample.user }}</td>
         <td td class="sample_value">{{ sample.rock_type }}</td>
         <td td class="sample_mineral sample_value">
-          {{ sample.mineral_list}}
-       
+          {{ sample.mineral_list|truncate(30)}}
+          {% if sample.mineral_list %}
+            <div class = "full_list">{{ sample.mineral_list }}</span>
+          {% endif %}
         </td>
         <td td class="sample_value">{{ sample.collection_date }}</td>
       </tr>

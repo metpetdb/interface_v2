@@ -30,6 +30,8 @@ def index():
 
 @app.route('/search/')
 def search():
+    print "REQ ARGS"
+    print request.args
     email = session.get('email', None)
     api_key = session.get('api_key', None)
     api = MetpetAPI(email, api_key).api
@@ -62,7 +64,26 @@ def search():
                   urlencode({'chemical_analysis_id__in': ids})
             return redirect(url)
         else:
-            url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
+            #url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
+            #return redirect(url)
+
+            element_ids = (',').join(request.args.getlist('elements__element_id__in'))
+            oxide_ids = (',').join(request.args.getlist('oxides__oxide_id__in'))
+            mineral_ids = (',').join(request.args.getlist('minerals__in'))
+
+            e_chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
+            o_chem_analysis_ids = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
+
+            cid_list = []
+            for cid in e_chem_analysis_ids:
+                cid_list.append(cid['chemical_analysis_id'])
+            for cid in o_chem_analysis_ids:
+                cid_list.append(cid['chemical_analysis_id'])
+            print cid_list
+            url = url_for('chemical_analyses') + '?' + \
+                  urlencode({'chemical_analysis_id__in': (',').join(str(c) for c in cid_list)})
+            #url = url_for('chemical_analyses') + '?' + \
+            #      urlencode({'elements__element_id__in': element_ids, 'minerals__in': mineral_ids})
             return redirect(url)
 
     owner_list = []
@@ -75,9 +96,13 @@ def search():
     igsn_list = []
     metamorphic_region_list = []
     metamorphic_grade_list = []
+    element_list = []
+    oxide_list = []
 
-    regions = api.region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
+    oxides = api.oxide.get(params={'limit': 0}).data['objects']
+    elements = api.element.get(params={'limit': 0}).data['objects']
     rock_types = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
+    regions = api.region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
     references = api.reference.get(params={'order_by': 'name', 'limit': 0}).data['objects']
     metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
     metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
@@ -104,7 +129,10 @@ def search():
         node = {"id": m['child_mineral__name'], "parent": m['parent_mineral__name'], "text": m['child_mineral__name'], "mineral_id": m['child_mineral__mineral_id']}
         mineralnodes.append(node)
 
-
+    for element in elements:
+        element_list.append(element)
+    for oxide in oxides:
+        oxide_list.append(oxide)
     for region in regions:
         region_list.append(region['name'])
 
@@ -141,6 +169,8 @@ def search():
     country_list = list(set (country_list))
     return render_template('search_form.html',
                             query='',
+			    elements=element_list,
+			    oxides=oxide_list,
                             regions=region_list,
 			    mineralrelationships=json.dumps(mineral_relationships),
 			    mineral_nodes=json.dumps(mineralnodes),
@@ -255,6 +285,9 @@ def samples():
 
     samples = data.data['objects']
     for sample in samples:
+        mineral_names = [str(m) for m in sample['minerals__name']]
+        sample['mineral_list'] = (', ').join(mineral_names)
+
         if 'minerals' in samples:
             mineral_names = [mineral['name'] for mineral in sample['minerals']]
             sample['mineral_list'] = (', ').join(mineral_names)
