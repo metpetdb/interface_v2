@@ -1,0 +1,540 @@
+{% extends "base.html" %}
+{% block body %}
+<div id="spinner" class="spinner" style="display:none;">
+    <img id="img-spinner" src="/static/images/ajax-loader.gif" alt="Loading"/>
+</div>
+
+  <div id = "search-options" class="panel panel-default">
+    <div id = "search-panel" class="panel-heading">
+      <h4 class="panel-title">
+        <a class='accordion-toggle' data-toggle="collapse" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" data-parent="#accordion" href="">
+          Search Options
+        </a>
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in">
+      <div class="panel-body">
+        
+<ul class="nav nav-tabs" id="myTab">
+
+  <li class= "active"><a href="#chemistry">Chemistry</a></li>
+
+</ul>
+<div id = "form-container">
+    <form action="" method="get" id='content' class="tab-content">
+
+     
+
+      <div class="tab-pane active" id="chemistry">
+      <h3>Chemistry</h3>
+        <form id= "form1">
+        <label class="provenance-label" for="elements">Elements: &nbsp;</label>
+        <select id = "" name="elements__element_id__in" onchange="updateChemistry()" id="selected-elements" multiple class="chosen-select">
+        {% for element in elements %}
+             <option value="{{ element.element_id }}">{{ element.name }}</option>
+        {% endfor %}
+        </select>
+        <br>
+
+        <label class="provenance-label" for="oxides">Oxides: &nbsp;</label>
+        <select name="oxides__oxide_id__in" onchange="updateChemistry()" id="selected-oxides" multiple class="chosen-select">
+        {% for oxide in oxides %}
+             <option value="{{ oxide.oxide_id }}">{{ oxide.species }}</option>
+        {% endfor %}
+        </select>
+        <br>
+
+       <label for="minerals">Minerals: </label>
+       <div id="chem-tree1" class ="chem-mineral-tree"></div>
+       <div class = "selected-chem-minerals"></div>
+       </form>
+
+        <form id= "form2">
+        <label class="provenance-label" for="elements">Elements: &nbsp;</label>
+        <select id = "" name="elements__element_id__in" onchange="updateChemistry()" id="selected-elements" multiple class="chosen-select">
+        {% for element in elements %}
+             <option value="{{ element.element_id }}">{{ element.name }}</option>
+        {% endfor %}
+        </select>
+        <br>
+
+        <label class="provenance-label" for="oxides">Oxides: &nbsp;</label>
+        <select name="oxides__oxide_id__in" onchange="updateChemistry()" id="selected-oxides" multiple class="chosen-select">
+        {% for oxide in oxides %}
+             <option value="{{ oxide.oxide_id }}">{{ oxide.species }}</option>
+        {% endfor %}
+        </select>
+        <br>
+
+       <label for="minerals">Minerals: </label>
+       <div id="chem-tree2" class ="chem-mineral-tree"></div>
+       <div id = "selected-chem-minerals"></div>
+       </form>
+
+      </div><!-- end chemistry-->
+
+
+
+
+
+<div class="clear"></div>
+
+
+</div><!--end form container-->
+  {% if error %}
+      <p style="color: red;">Please submit a search term.</p>
+  {% endif %}
+      </div>
+    </div>
+  </div>
+
+<div id="search-summary" class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a class='accordion-toggle' data-toggle="collapse" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" data-parent="#accordion" href="">
+          Search Summary
+        </a>
+      </h4>
+      <a id= "clearAll" onclick="clearAll()">Clear All</a>
+    
+    </div>
+    <div id="collapseTwo" class="panel-collapse collapse in">
+       <div class="panel-body">
+          <p id= "instructions">Set your search criteria by selecting from the categories on the left.<br></p>
+
+          <div id = "search-options-chemistry"></div>
+
+                <div id = "form-submit">
+       <input type="radio" name="resource" value="sample" checked>Sample<br>
+       <input type="radio" name="resource" value="chemicalanalysis">Chemical Analysis<br><br>
+       <input type="submit" value="Search">
+      </div>
+       </div>
+    </div><!--end collapsetwo -->
+</div>
+
+  </form>  <!-- tabs -->
+
+<div class="clear"></div>
+
+<div id = "results"></div>
+
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
+<script src="/static/js/jquery-2.1.1.min.js"></script>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="/static/css/chosen.min.css">
+<script src="/static/js/chosen.jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+
+
+<link rel="stylesheet" href="/static/css/style.min.css">
+<script src="/static/js/jstree.min.js"></script>
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+
+<script>
+$('#myTab a').click(function (e) {
+  e.preventDefault();
+  $(this).tab('show');
+});
+
+$('#location-tab a').click(function (e) {
+  e.preventDefault();
+  $(this).tab('show');
+});
+
+
+//ON READY FUNCTION
+$(function()
+{
+//Chosen-select plugin activate
+$(".chosen-select").chosen({
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
+
+var mineralnodes = {{ mineral_nodes|safe }};
+console.log(mineralnodes);
+
+$('#mineral-tree').jstree({ 'core' : {
+    'data' : mineralnodes
+}
+,
+
+"checkbox" : {
+      "keep_selected_style" : false
+    },
+    "plugins" : [ "checkbox" ]
+ });
+
+//CHEM MINERAL TREE
+$('.chem-mineral-tree').jstree({ 'core' : {
+    'data' : mineralnodes
+}
+,
+
+"checkbox" : {
+      "keep_selected_style" : false
+    },
+    "plugins" : [ "checkbox" ]
+ });
+
+//mineral tree on change
+$('.chem-mineral-tree').on("changed.jstree", function () 
+{
+ updateChemistry();
+});
+
+
+
+//Ajax call to update sample data
+var frm = document.getElementById('content');
+
+    frm.submit(function (e) {
+     e.preventDefault();
+     console.log('sybmit clicked');
+    $('#spinner').show();
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: frm.serialize(),
+            success: function (data) {
+                console.log("SUBMIT CLICKED");
+
+            },
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+        });
+        return false;
+    }); //END ajax
+
+/*
+//Ajax call to update sample data
+var frm = $('#content');
+
+    frm.submit(function () {
+    $('#spinner').show();
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: frm.serialize(),
+            success: function (data) {
+                $("#results").html("");
+                $("#results").html(data);
+                $('#spinner').hide();
+                document.getElementsByTagName("header")[1].innerHTML = "";
+
+            },
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+        });
+        return false;
+    }); //END ajax
+*/
+
+
+}); //END READY FUNCTION
+
+
+function updateChemistry()
+{
+/*
+ //Chemistry search options, selected chemistry minerals
+ var searchOptions = document.getElementById("search-options-chemistry");
+ var mids = $('#chem-mineral-tree').jstree('get_selected', true);
+
+ //Clear search options summary
+ searchOptions.innerHTML = "";
+
+ //If elements, oxides, or minerals selected, update summary title
+ //and set search-filter value to chemistry
+ //else sest search-filter value to sample 
+ if($("#selected-elements option:selected").length || $("#selected-oxides option:selected").length || mids.length > 0)
+ {
+  searchOptions.innerHTML = "<div class='summary-title'><h4>Chemistry</h4><a onclick='clearChemistry()' class='clear-title'>Clear</a></div>";
+  document.getElementById("search_filters").value = "chemical_analyses"; 
+ }
+ else
+  document.getElementById("search_filters").value = "samples"; 
+
+  //Update elements in search summary
+  var selectedElements = document.getElementById("selected-elements");
+  if($("#selected-elements option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Elements:</b> ";
+   for(var a = 0; a < selectedElements.options.length; a++)
+   {
+   if(selectedElements.options[a].selected)
+    searchOptions.innerHTML += selectedElements.options[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update oxides in search summary
+  var selectedOxides = document.getElementById("selected-oxides");
+  if($("#selected-oxides option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Oxides:</b> ";
+   for(var a = 0; a < selectedOxides.options.length; a++)
+   {
+   if(selectedOxides.options[a].selected)
+    searchOptions.innerHTML += selectedOxides.options[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update minerals in search summary
+  document.getElementById("selected-chem-minerals").innerHTML = "";
+  console.log(document.getElementById("selected-chem-minerals").innerHTML );
+  if(mids.length > 0)
+  searchOptions.innerHTML += "<b>Minerals:</b> ";
+  for(var a = 0; a < mids.length; a++)
+  {
+   console.log(mids[a]);
+   if(mids[a].original.mineral_id)
+   {
+    document.getElementById("selected-chem-minerals").innerHTML += "<input name='minerals__in' type='hidden' value=" + mids[a].original.mineral_id + " >";   
+    searchOptions.innerHTML += mids[a].id + ", ";
+   }
+  }//end mineral update
+*/
+}
+
+function clearChemistry()
+{
+ $("#chemistry .chosen-select").val('').trigger("chosen:updated");
+ clearChemMinerals();
+ document.getElementById("search-options-chemistry").innerHTML = "";
+}
+
+
+function clearAll()
+{
+ /*clearRockTypes();
+ clearMetGrades();
+ clearBounds();
+ clearProvenance();
+ clearMinerals();
+*/
+}
+
+function clearChemMinerals()
+{
+ var searchOptions = document.getElementById("search-options-chemistry");
+ $("#chem-mineral-tree").jstree("deselect_all");
+ 
+}
+
+
+
+/*
+General Search requirements
+===========================
+
+Search interface consists of six different areas:
+
+  #. Rock types
+  #. Metamorphic grades
+  #. Location
+  #. Minerals
+  #. Chemistry 
+  #. Provenance
+
+The general rule is that conditions set within each area are connected
+with an OR, and the conditions across different areas are connected
+with an AND.
+
+Search interface must support a box listing all the selected criteria
+and the resulting query for usability reasons. 
+
+The default attributes for the search results are given below. 
+
+  - These attributes should be customizable.
+  - These attributes should be sortable, i.e. order the results.
+
+Total query results must be shown.
+
+By default 75 values are shown, but this number should be modifiable. 
+
+Next/previous page is supported. 
+
+Search results should be exportable as comma separated values, taking
+care that if any of the values contain commas, then the values are put
+in double qoutes.
+
+Note: We should implement two separate interfaces, one for chemical
+analysis and one for samples. However, these interfaces share many
+elements in common, hence must use the same underlying code.
+
+Chemical analysis search
+--------------------------
+
+This search supports all the areas listed above. It returns a table
+containing the following attributes:
+
+  - Point number (chemical_analyses.reference_id I think)
+  - Public or private
+  - Analysis method
+  - Analysis location (chemical_analyses.where_done)
+  - Analyst
+  - Reference x
+  - Reference y
+  - Total
+
+Sample search
+---------------
+
+This supports only the conditions below (no chemistry):
+
+  #. Rock types
+  #. Metamorphic grades
+  #. Location
+  #. Minerals
+  #. Provenance
+
+It returns a table containing the following attributes:
+
+  - Sample number (samples.number, not IGSN)
+  - Sample Public or not 
+  - Number of subsamples
+  - Number of images
+  - Number of chemical analyses
+  - Owner
+  - Rock type
+  - Minerals in the sample
+  - Date collected
+
+It should be possible to export search results as KML files for Google
+earth/map viewing.
+
+It should be possible to view the returned samples on Google maps.
+
+Search conditions
+=====================
+
+Rock Types
+-------------
+
+Rock types are listed with a check box allowing multiple to be selected.
+The selected types are combined with an OR.
+
+Metamorphic Grade
+-------------------
+
+Metamorphic grades are listed with a check box allowing multiple to be
+selected. The selected values of are combined with an OR.
+
+Location
+----------
+
+Location supports multiple ways to select the location. All conditions
+can have a value. These conditions should be connected with an OR
+within this area.
+
+
+  - Map box given by four coordinates: North/south latitude, and
+    east/west longitude.
+
+    It should be possible to select the box by
+    drawing a map on Google maps, or by entering directly in a text
+    box. If entered directly, it should show on the map automatically.
+
+  - Region: combo box allowing multiple choices, connected by OR
+  (from sample_regions, regions.name)
+
+  - Country: combo box allowing multiple choices, connected by OR
+  (from samples.country)
+  
+  - Metamorphic regions: combo box allowing multiple choices,
+    connected by OR (from sample_metamorphic_regions,
+    metamorphic_regions.name). 
+
+    The interface must also allow all these regions to be viewed as
+    polygons in google map).
+
+
+Minerals
+---------
+
+Minerals are displayed using a tree, top elements first, then elements
+that are children of the top nodes, following the next level. 
+
+The minerals are chosen using a check box, allowing multiple to be chosen. 
+
+If a top level mineral is chosen, then all the minerals below are also
+chosen in the check box. However, they can be manually checked off.
+
+All chosen minerals are combined with an OR by default.
+
+  - The interface must support a button that converts the mineral
+    selection to an AND query instead. In this case, samples
+    containing all the minerals chosen (through different join tuples)
+    must be returned.
+
+Chemistry
+-----------
+
+This option applies only to the chemical analysis search. *Note:* This
+has been changed from the old interface.
+
+It should allow two options, connected by an OR.
+
+  - Choose a single mineral from a combo box (from table minerals, all
+    minerals, plus the option "Bulk Rock")
+
+  Return all analyses with the given chemical_analyses.mineral_id or
+  if bulk rock is chosen, then return analyses where
+  chemical_analyses.large_rock='Y'.
+
+  - Choose multiple elements from a combo box, combined with an AND
+
+  Elements should be the union of: elements (elements.element_id,
+  elements.name) and oxides (oxides.species, -), ordered alphabetically.
+
+  The matching analyses are found through chemical_analysis_oxides and
+  chemical_analysis_elements.
+
+
+Provenance
+-----------
+
+Provenance supports multiple ways to select the provenance (origin of
+searched object). All conditions can have a value. These conditions
+should be connected with an OR within this area.
+
+
+  - Owner: combo box allowing multiple choices connected with an OR
+    (samples.user_id, users.name)
+
+  - Collector: combo box allowing multiple choices connected with an
+    OR (samples.collector)
+
+  - Number: single value (samples.number)
+
+  - IGSN: single value (samples.sesar_number)
+
+  - References: combo box allowing multiple choices connected with an
+    OR (sample_reference, reference.name)
+
+  - Collection data range: from (calendar choose or type directly), to
+    (calendar choose or type directly)
+
+  - Access: radio box with options: no preference (default), public or
+    private.
+
+  If no preference: all samples that user can access are shown.
+  If public: only public samples are shown.
+  If private: only samples with public = 'N' are shown.
+*/
+</script>
+
+{% endblock %}

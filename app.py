@@ -184,6 +184,162 @@ def search():
                             metamorphic_regions=metamorphic_region_list,
                             metamorphic_grades=metamorphic_grade_list)
 
+@app.route('/search-chemistry/')
+def search_chemistry():
+    print "REQ ARGS"
+    print request.args
+    email = session.get('email', None)
+    api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
+
+    filters = dict(request.args)
+    filter_dictionary = {}
+
+    for key in filters:
+        if filters[key][0]:
+          if key != "resource":
+            filter_dictionary[key] = ",".join(filters[key])
+
+    if request.args.get('resource') == 'sample':
+        url = url_for('samples') + '?' + urlencode(filter_dictionary)
+        return redirect(url)
+    elif request.args.get('resource') == 'chemicalanalysis':
+        if request.args.get('search_filters') == 'samples':
+            request_obj = drest.api.API(baseurl=env('API_HOST'))
+            if email and api_key:
+                headers = {'email': email, 'api_key': api_key}
+            else:
+                headers = None
+            response = request_obj.\
+                           make_request('GET',
+                           '/get-chem-analyses-given-sample-filters/',
+                           params=filter_dictionary,
+                           headers=headers)
+            ids = response.data['chemical_analysis_ids']
+            url = url_for('chemical_analyses') + '?' + \
+                  urlencode({'chemical_analysis_id__in': ids})
+            return redirect(url)
+        else:
+            url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
+            return redirect(url)
+
+            element_ids = (',').join(request.args.getlist('elements__element_id__in'))
+            oxide_ids = (',').join(request.args.getlist('oxides__oxide_id__in'))
+            mineral_ids = (',').join(request.args.getlist('minerals__in'))
+
+            e_chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
+            o_chem_analysis_ids = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
+
+            cid_list = []
+            for cid in e_chem_analysis_ids:
+                cid_list.append(cid['chemical_analysis_id'])
+            for cid in o_chem_analysis_ids:
+                cid_list.append(cid['chemical_analysis_id'])
+            print cid_list
+            url = url_for('chemical_analyses') + '?' + \
+                  urlencode({'chemical_analysis_id__in': (',').join(str(c) for c in cid_list)})
+            #url = url_for('chemical_analyses') + '?' + \
+            #      urlencode({'elements__element_id__in': element_ids, 'minerals__in': mineral_ids})
+            return redirect(url)
+
+    owner_list = []
+    region_list = []
+    rock_type_list = []
+    collector_list = []
+    country_list = []
+    reference_list = []
+    number_list = []
+    igsn_list = []
+    metamorphic_region_list = []
+    metamorphic_grade_list = []
+    element_list = []
+    oxide_list = []
+
+    oxides = api.oxide.get(params={'limit': 0}).data['objects']
+    elements = api.element.get(params={'limit': 0}).data['objects']
+    rock_types = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
+    regions = api.region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
+    references = api.reference.get(params={'order_by': 'name', 'limit': 0}).data['objects']
+    metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
+    metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
+    samples = api.sample.get(params={'fields': 'user__user_id,user__name,collector,number,sesar_number,country,public_data', 
+                                     'limit': 0}).data['objects']
+    mineral_relationships = api.mineral_relationship.get(\
+                                params={'limit': 0,
+                                        'fields':'parent_mineral__mineral_id,parent_mineral__name,child_mineral__mineral_id,child_mineral__name'}).\
+                                                    data['objects']
+
+    mineralroots = []
+    parents = set()
+    children = set()
+    for m in mineral_relationships:
+        parents.add((m['parent_mineral__name'], m['parent_mineral__mineral_id']))
+        children.add((m['child_mineral__name'], m['child_mineral__mineral_id']))
+    mineralroots = set(parents) - set(children)
+
+
+    mineralnodes = []
+    for (name, mid) in mineralroots:
+        mineralnodes.append({"id": name, "parent": "#", "text": name, "mineral_id": mid})
+    for m in mineral_relationships:
+        node = {"id": m['child_mineral__name'], "parent": m['parent_mineral__name'], "text": m['child_mineral__name'], "mineral_id": m['child_mineral__mineral_id']}
+        mineralnodes.append(node)
+
+    for element in elements:
+        element_list.append(element)
+    for oxide in oxides:
+        oxide_list.append(oxide)
+    for region in regions:
+        region_list.append(region['name'])
+
+    for rock_type in rock_type_list:
+        rock_type_list.append(rock_type['name'])
+        
+    for ref in references:
+        reference_list.append(ref['name'])
+
+    for mmr in metamorphic_regions:
+        metamorphic_region_list.append(mmr['name'])
+
+    for mmg in metamorphic_grades:
+        metamorphic_grade_list.append(mmg['name'])
+
+    owner_dict = {}
+    if email:
+        logged_in_user = api.user.get(params={'email': email,
+                                              'fields': 'user_id,name'}).data['objects']
+        owner_dict[logged_in_user[0]['user_id']] = logged_in_user[0]['name']
+
+    for sample in samples:
+        collector_list.append(unicode(sample['collector']))
+        number_list.append(sample['number'])
+        igsn_list.append(sample['sesar_number'])
+        country_list.append(sample['country'])
+        """The 'owners' list in the Provenance tab should contain only users
+        with public samples"""
+        if sample['public_data'] == 'Y':
+            if not sample['user__user_id'] in owner_dict:
+                owner_dict[sample['user__user_id']] = sample['user__name']
+
+    collector_list = list (set ( collector_list ))
+    country_list = list(set (country_list))
+    return render_template('chemical_search_form.html',
+                            query='',
+			    elements=element_list,
+			    oxides=oxide_list,
+                            regions=region_list,
+			    mineralrelationships=json.dumps(mineral_relationships),
+			    mineral_nodes=json.dumps(mineralnodes),
+                            rock_types=rock_types,
+                            provenances=collector_list,
+                            references=reference_list,
+			    numbers=number_list,
+                            igsns=igsn_list,
+			    countries=country_list,
+			    owners = owner_dict,
+                            metamorphic_regions=metamorphic_region_list,
+                            metamorphic_grades=metamorphic_grade_list)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
