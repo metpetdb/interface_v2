@@ -122,6 +122,7 @@
 
    <div class="tab-pane active" id="chemistry">
       <h3>Chemistry</h3>
+        <div id="chemanalysisids"></div>
         <div id= "form1">
         <input type="hidden" name="squirrel" value="squirrel">
         <label class="provenance-label" for="elements">Elements: &nbsp;</label>
@@ -593,7 +594,16 @@ var frm = $('#content');
             data: $('#form1 :input').serialize(),
             success: function (result) {
                 console.log("FORM 1 DATA SUBMITTED");
-                console.log(result);
+                console.log(JSON.parse(result));
+                $.each(JSON.parse(result), function(element, value) 
+                {
+                  console.log(value);
+                  var input = document.createElement('input');
+                  $(input).attr('type','hidden');
+                  $(input).attr('name','chemical_analysis_id__in');
+                  $(input).attr('value', value);
+                  $("#chemanalysisids").append(input);    
+                });
                 $('#spinner').hide();
                 //document.getElementsByTagName("header")[1].innerHTML = "";
 
