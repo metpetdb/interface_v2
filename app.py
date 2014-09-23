@@ -201,25 +201,34 @@ def search_chemistry():
             filter_dictionary[key] = ",".join(filters[key])
 
     if request.args.get('squirrel') == 'squirrel':
-        print "TURTLES"
-        element_ids = (',').join(request.args.getlist('elements__element_id__in'))
-        oxide_ids = (',').join(request.args.getlist('oxides__oxide_id__in'))
-        mineral_ids = (',').join(request.args.getlist('minerals__in'))
+        print "MOUSE"
+        #If chem analysis ids are passed, return results
+        if 'chemical_analysis_id__in' in request.args:
+            print "TREEFROG"
+            url = url_for('chemical_analyses') + '?' + \
+              urlencode({'chemical_analysis_id__in': (',').join(request.args.getlist('chemical_analysis_id__in'))})
+            return redirect(url)
 
-        e_chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
-        o_chem_analysis_ids = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
+        #Else handle the individual element+min or oxide+min and return chem ids   
+        else:
+            element_ids = (',').join(request.args.getlist('elements__element_id__in'))
+            oxide_ids = (',').join(request.args.getlist('oxides__oxide_id__in'))
+            mineral_ids = (',').join(request.args.getlist('minerals__in'))
 
-        cid_list = []
-        for cid in e_chem_analysis_ids:
-            cid_list.append(cid['chemical_analysis_id'])
-        for cid in o_chem_analysis_ids:
-            cid_list.append(cid['chemical_analysis_id'])
-        print cid_list
+            e_chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
+            o_chem_analysis_ids = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
+
+            cid_list = []
+            for cid in e_chem_analysis_ids:
+                cid_list.append(cid['chemical_analysis_id'])
+            for cid in o_chem_analysis_ids:
+                cid_list.append(cid['chemical_analysis_id'])
+            print cid_list
         #url = url_for('chemical_analyses') + '?' + \
              # urlencode({'chemical_analysis_id__in': (',').join(str(c) for c in cid_list)})
             #url = url_for('chemical_analyses') + '?' + \
             #      urlencode({'elements__element_id__in': element_ids, 'minerals__in': mineral_ids})
-        return json.dumps(cid_list)
+            return json.dumps(cid_list)
 
     owner_list = []
     region_list = []

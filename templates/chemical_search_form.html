@@ -122,7 +122,10 @@
 
    <div class="tab-pane active" id="chemistry">
       <h3>Chemistry</h3>
-        <div id="chemanalysisids"></div>
+        <div id="chemanalysisids">
+        <input type="hidden" name="treefrog" value="treefrog">
+        <input type="hidden" name="squirrel" value="squirrel">
+        </div>
         <div id= "form1">
         <input type="hidden" name="squirrel" value="squirrel">
         <label class="provenance-label" for="elements">Elements: &nbsp;</label>
@@ -588,6 +591,7 @@ var frm = $('#content');
     $('#spinner').show();
     console.log("FORM 1 DATA");
     console.log($('#form1 :input').serialize());
+        //Do for each row of elem+min / ox+min data
         $.ajax({
             type: frm.attr('method'),
             url: frm.attr('action'),
@@ -606,13 +610,34 @@ var frm = $('#content');
                 });
                 $('#spinner').hide();
                 //document.getElementsByTagName("header")[1].innerHTML = "";
-
             },
+            async: false,
             error: function(data) {
                 $("#results").html("Error");
                 $('#spinner').hide();
             }
         }); //end ajax function
+        
+
+        //Final ajax call for passing chem analysis ids
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: $('#chemanalysisids :input').serialize(),
+            success: function (result) {
+                console.log("CHEM ANAL DATA SUBMITTED");
+                console.log(result);
+                $("#results").html("");
+                $("#results").html(result);
+                $('#spinner').hide();
+                document.getElementsByTagName("header")[1].innerHTML = "";
+            },
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+        }); //end final ajax function
+
         return false;
     }); //END form submit function
 
