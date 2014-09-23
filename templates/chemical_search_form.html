@@ -126,6 +126,7 @@
         <input type="hidden" name="treefrog" value="treefrog">
         <input type="hidden" name="squirrel" value="squirrel">
         </div>
+
         <div id= "form1">
         <input type="hidden" name="squirrel" value="squirrel">
         
@@ -133,6 +134,26 @@
         <option selected="selected" value="element">Element</option>
         <option value="oxide">Oxide</option>
         </select>
+         <br>
+        <div class = "elementoxidelist">
+        <select id = "" name="elements__element_id__in" onchange="updateChemistry()" id="selected-elements" class="chosen-select">
+        {% for element in elements %}
+             <option value="{{ element.element_id }}">{{ element.name }}</option>
+        {% endfor %}
+        </select>
+        </div>
+
+       <div id="chem-tree1" class ="chem-mineral-tree"></div>
+       <div class = "selected-chem-minerals"></div><br>
+       </div> <!--end form1 -->
+
+        <div id= "form2">
+        <input type="hidden" name="squirrel" value="squirrel">
+        
+        <select class="elementoroxide" onchange="renderElementOxideList(this)">
+        <option selected="selected" value="element">Element</option>
+        <option value="oxide">Oxide</option>
+        </select><br>
 
         <div class = "elementoxidelist">
         <select id = "" name="elements__element_id__in" onchange="updateChemistry()" id="selected-elements" class="chosen-select">
@@ -142,11 +163,9 @@
         </select>
         </div>
 
-       <label for="minerals">Minerals: </label>
-       <div id="chem-tree1" class ="chem-mineral-tree"></div>
-       <div class = "selected-chem-minerals"></div>
-       </div> <!--end form1 -->
-
+       <div id="chem-tree2" class ="chem-mineral-tree"></div>
+       <div class = "selected-chem-minerals"></div><br>
+       </div> <!--end form2 -->
       </div><!-- end chemistry-->
 
 
@@ -565,8 +584,6 @@ $('.chem-mineral-tree').jstree({ 'core' : {
 var frm = $('#content');
     frm.submit(function () {
     $('#spinner').show();
-    console.log("FORM 1 DATA");
-    console.log($('#form1 :input').serialize());
         //Do for each row of elem+min / ox+min data
         $.ajax({
             type: frm.attr('method'),
@@ -585,7 +602,32 @@ var frm = $('#content');
                   $("#chemanalysisids").append(input);    
                 });
                 $('#spinner').hide();
-                //document.getElementsByTagName("header")[1].innerHTML = "";
+            },
+            async: false,
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+        }); //end ajax function
+
+        //Do for form2
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: $('#form2 :input').serialize(),
+            success: function (result) {
+                console.log("FORM 2 DATA SUBMITTED");
+                console.log(JSON.parse(result));
+                $.each(JSON.parse(result), function(element, value) 
+                {
+                  console.log(value);
+                  var input = document.createElement('input');
+                  $(input).attr('type','hidden');
+                  $(input).attr('name','chemical_analysis_id__in');
+                  $(input).attr('value', value);
+                  $("#chemanalysisids").append(input);    
+                });
+                $('#spinner').hide();
             },
             async: false,
             error: function(data) {

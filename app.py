@@ -272,8 +272,9 @@ def search_chemistry():
 
 
     mineralnodes = []
+    mineralnodes.append({"id": "Minerals", "parent" : "#", "text": "Minerals"})
     for (name, mid) in mineralroots:
-        mineralnodes.append({"id": name, "parent": "#", "text": name, "mineral_id": mid})
+        mineralnodes.append({"id": name, "parent": "Minerals", "text": name, "mineral_id": mid})
     for m in mineral_relationships:
         node = {"id": m['child_mineral__name'], "parent": m['parent_mineral__name'], "text": m['child_mineral__name'], "mineral_id": m['child_mineral__mineral_id']}
         mineralnodes.append(node)
