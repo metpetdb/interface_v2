@@ -128,48 +128,24 @@
         </div>
         <div id= "form1">
         <input type="hidden" name="squirrel" value="squirrel">
-        <label class="provenance-label" for="elements">Elements: &nbsp;</label>
-        <select id = "" name="elements__element_id__in" onchange="updateChemistry()" id="selected-elements" multiple class="chosen-select">
+        
+        <select class="elementoroxide" onchange="renderElementOxideList(this)">
+        <option selected="selected" value="element">Element</option>
+        <option value="oxide">Oxide</option>
+        </select>
+
+        <div class = "elementoxidelist">
+        <select id = "" name="elements__element_id__in" onchange="updateChemistry()" id="selected-elements" class="chosen-select">
         {% for element in elements %}
              <option value="{{ element.element_id }}">{{ element.name }}</option>
         {% endfor %}
         </select>
-        <br>
-
-        <label class="provenance-label" for="oxides">Oxides: &nbsp;</label>
-        <select name="oxides__oxide_id__in" onchange="updateChemistry()" id="selected-oxides" multiple class="chosen-select">
-        {% for oxide in oxides %}
-             <option value="{{ oxide.oxide_id }}">{{ oxide.species }}</option>
-        {% endfor %}
-        </select>
-        <br>
+        </div>
 
        <label for="minerals">Minerals: </label>
        <div id="chem-tree1" class ="chem-mineral-tree"></div>
        <div class = "selected-chem-minerals"></div>
        </div> <!--end form1 -->
-
-        <div id= "form2">
-        <label class="provenance-label" for="elements">Elements: &nbsp;</label>
-        <select id = "" name="elements__element_id__in" onchange="updateChemistry()" id="selected-elements" multiple class="chosen-select">
-        {% for element in elements %}
-             <option value="{{ element.element_id }}">{{ element.name }}</option>
-        {% endfor %}
-        </select>
-        <br>
-
-        <label class="provenance-label" for="oxides">Oxides: &nbsp;</label>
-        <select name="oxides__oxide_id__in" onchange="updateChemistry()" id="selected-oxides" multiple class="chosen-select">
-        {% for oxide in oxides %}
-             <option value="{{ oxide.oxide_id }}">{{ oxide.species }}</option>
-        {% endfor %}
-        </select>
-        <br>
-
-       <label for="minerals">Minerals: </label>
-       <div id="chem-tree2" class ="chem-mineral-tree"></div>
-       <div id = "selected-chem-minerals"></div>
-       </div> <!-- end form2 -->
 
       </div><!-- end chemistry-->
 
@@ -1186,6 +1162,29 @@ function toggleToSampleView()
  console.log(document.getElementById("sample-or-chem").value);
  //Resubmit form data
  $('#content').submit();
+}
+
+function renderElementOxideList(elem)
+{
+ //Clear element/oxide list
+ var list = $($(elem).parent()[0]).find(".elementoxidelist")[0];
+ console.log(list);
+ list.innerHTML = "";
+
+ //Render elements
+ if($(elem).val() == "element")
+  list.innerHTML = "<select name='elements__element_id__in' onchange='updateChemistry()' id='elorox' class='chosen-select'>{% for element in elements %}<option value='{{ element.element_id }}'>{{ element.name }}</option>{% endfor %}</select>";
+ //Render oxides
+ else if($(elem).val() == "oxide")
+  list.innerHTML = "<select name='oxides__oxide_id__in' onchange='updateChemistry()' id='elorox' class='chosen-select'>{% for oxide in oxides %}<option value='{{ oxide.oxide_id }}'>{{ oxide.species }}</option>{% endfor %}</select>";
+
+ //Call chosen plugin
+ //Chosen-select plugin activate
+$(list).find("#elorox").chosen({
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
 }
 
 function HomeControl(controlDiv, map) {

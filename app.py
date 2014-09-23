@@ -211,19 +211,24 @@ def search_chemistry():
 
         #Else handle the individual element+min or oxide+min and return chem ids   
         else:
-            element_ids = (',').join(request.args.getlist('elements__element_id__in'))
-            oxide_ids = (',').join(request.args.getlist('oxides__oxide_id__in'))
+            #If chem analysis ids are passed, return results
+            if 'elements__element_id__in' in request.args:
+                element = request.args.get('elements__element_id__in')
+            elif 'oxides__oxide_id__in' in request.args:
+                oxide = request.args.get('oxides__oxide_id__in')
             mineral_ids = (',').join(request.args.getlist('minerals__in'))
-
-            e_chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
-            o_chem_analysis_ids = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
-
+            
             cid_list = []
-            for cid in e_chem_analysis_ids:
-                cid_list.append(cid['chemical_analysis_id'])
-            for cid in o_chem_analysis_ids:
-                cid_list.append(cid['chemical_analysis_id'])
-            print cid_list
+            #If chem analysis ids are passed, return results
+            if 'elements__element_id__in' in request.args:
+                e_chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
+                for cid in e_chem_analysis_ids:
+                    cid_list.append(cid['chemical_analysis_id'])
+            elif 'oxides__oxide_id__in' in request.args:
+                o_chem_analysis_ids = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
+                for cid in o_chem_analysis_ids:
+                    cid_list.append(cid['chemical_analysis_id'])
+
         #url = url_for('chemical_analyses') + '?' + \
              # urlencode({'chemical_analysis_id__in': (',').join(str(c) for c in cid_list)})
             #url = url_for('chemical_analyses') + '?' + \

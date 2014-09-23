@@ -1,3 +1,13 @@
+.elementoroxide
+{
+ clear: none;
+}
+
+#chemistry .chosen-container
+{
+ width: 100px !important;
+}
+
 #page_title { display:none; }
 
 #search-panel .accordion-toggle:after {
