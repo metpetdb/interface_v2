@@ -136,7 +136,7 @@
         </select>
          <br>
         <div class = "elementoxidelist">
-        <select id = "" name="elements__element_id__in" onchange="updateChemistry()" id="selected-elements" class="chosen-select">
+        <select name="elements__element_id__in" onchange="" class="chosen-select">
         {% for element in elements %}
              <option value="{{ element.element_id }}">{{ element.name }}</option>
         {% endfor %}
@@ -144,28 +144,35 @@
         </div>
 
        <div id="chem-tree1" class ="chem-mineral-tree"></div>
+       <a class="add" onclick="addChemistryRow()">Add</a>
+       <a class="remove" onclick="removeChemistryRow(this.parentNode.id)">Remove</a>
        <div class = "selected-chem-minerals"></div><br>
        </div> <!--end form1 -->
 
-        <div id= "form2">
-        <input type="hidden" name="squirrel" value="squirrel">
-        
-        <select class="elementoroxide" onchange="renderElementOxideList(this)">
-        <option selected="selected" value="element">Element</option>
-        <option value="oxide">Oxide</option>
-        </select><br>
+<!-- form 2 -->
+<div id= 'form2'><input type='hidden' name='squirrel' value='squirrel'><select class='elementoroxide' onchange='renderElementOxideList(this)'><option selected='selected' value='element'>Element</option><option value='oxide'>Oxide</option></select><br><div class = 'elementoxidelist'><select name='elements__element_id__in' onchange='' class='selected-elements chosen-select'>{% for element in elements %}<option value='{{ element.element_id }}'>{{ element.name }}</option>{% endfor %}</select></div><div id='chem-tree2' class ='chem-mineral-tree'></div><a class='add' onclick='addChemistryRow()'>Add</a><a class='remove' onclick='removeChemistryRow(this.parentNode.id)'>Remove</a><div class = 'selected-chem-minerals'></div><br></div>
 
-        <div class = "elementoxidelist">
-        <select id = "" name="elements__element_id__in" onchange="updateChemistry()" id="selected-elements" class="chosen-select">
-        {% for element in elements %}
-             <option value="{{ element.element_id }}">{{ element.name }}</option>
-        {% endfor %}
-        </select>
-        </div>
+<script>
+//Chosen-select plugin activate
+$("#form2 .chosen-select").chosen({
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
 
-       <div id="chem-tree2" class ="chem-mineral-tree"></div>
-       <div class = "selected-chem-minerals"></div><br>
-       </div> <!--end form2 -->
+//CHEM MINERAL TREE
+$('#chem-tree2').jstree({ 'core' : {
+    'data' : mineralnodes
+}
+,
+
+"checkbox" : {
+      "keep_selected_style" : false
+    },
+    "plugins" : [ "checkbox" ]
+ });
+</script>
+
       </div><!-- end chemistry-->
 
 
@@ -195,7 +202,7 @@
       </h4>
       <a id= "clearAll" onclick="clearAll()">Clear All</a>
     
-    </div>
+     </div>
     <div id="collapseTwo" class="panel-collapse collapse in">
        <div class="panel-body">
           <p id= "instructions">Set your search criteria by selecting from the categories on the left.<br></p>
@@ -262,6 +269,7 @@ $('#location-tab a').click(function (e) {
 
 //GLOBAL VARS
 var currentOverlay = null;
+var chemistryRows = 2;
 
 //ON READY FUNCTION
 $(function()
@@ -562,10 +570,10 @@ $('#chem-mineral-tree').jstree({ 'core' : {
  });
 
 //mineral tree on change
-$('#chem-mineral-tree').on("changed.jstree", function () 
+/*$('#chem-mineral-tree').on("changed.jstree", function () 
 {
  updateChemistry();
-});
+});*/
 
 
 //CHEM MINERAL TREE
@@ -580,53 +588,111 @@ $('.chem-mineral-tree').jstree({ 'core' : {
     "plugins" : [ "checkbox" ]
  });
 
+var resultJSON = []; 
+var resultIDs = [];
+
 //Ajax call to update sample data
 var frm = $('#content');
+    chemistryRows = 3;
     frm.submit(function () {
     $('#spinner').show();
         //Do for each row of elem+min / ox+min data
-        $.ajax({
+        var a;
+        for(a = 1; a < chemistryRows; a++)
+        {
+         $.ajax({
             type: frm.attr('method'),
             url: frm.attr('action'),
-            data: $('#form1 :input').serialize(),
+            data: $('#form' + a + ' :input').serialize(),
             success: function (result) {
-                console.log("FORM 1 DATA SUBMITTED");
+                console.log("FORM " + a + " DATA SUBMITTED");
                 console.log(JSON.parse(result));
                 $.each(JSON.parse(result), function(element, value) 
                 {
+                  if ($.inArray(value.chemical_analysis_id, resultIDs) === -1)
+                  {
+                   resultJSON.push(value);
+                   resultIDs.push(value.chemical_analysis_id);  
+                  }
+                  
+                  /*
                   console.log(value);
                   var input = document.createElement('input');
                   $(input).attr('type','hidden');
                   $(input).attr('name','chemical_analysis_id__in');
                   $(input).attr('value', value);
-                  $("#chemanalysisids").append(input);    
+                  $("#chemanalysisids").append(input); 
+                  */   
                 });
-                $('#spinner').hide();
-            },
-            async: false,
-            error: function(data) {
-                $("#results").html("Error");
-                $('#spinner').hide();
-            }
-        }); //end ajax function
+                //Append results to results div                
+                //Build table header
+                /*
+                var div = document.createElement('div');
+                div.setAttribute('class', 'table-responsive');
+                var table = document.createElement('table');
+                table.setAttribute('class', 'table');
+                table.id = 'samplelist';
+                var thead = document.createElement('thead');
+                var tr = document.createElement('tr');
+                tr.appendChild(document.createTextNode('Point Number'));
+                tr.appendChild(document.createTextNode('Public Data'));
+                tr.appendChild(document.createTextNode('Analysis Method'));
+                tr.appendChild(document.createTextNode('Analysis Material'));
+                tr.appendChild(document.createTextNode('Location'));
+                tr.appendChild(document.createTextNode('Analyst'));
+                tr.appendChild(document.createTextNode('Analysis Date'));
+                tr.appendChild(document.createTextNode('Reference X'));
+                tr.appendChild(document.createTextNode('Reference Y'));
+                tr.appendChild(document.createTextNode('Total'));
+                thead.appendChild(tr);
+                table.appendChild(thead);
+                div.appendChild(table);
+                document.getElementById("results").appendChild(div);
 
-        //Do for form2
-        $.ajax({
-            type: frm.attr('method'),
-            url: frm.attr('action'),
-            data: $('#form2 :input').serialize(),
-            success: function (result) {
-                console.log("FORM 2 DATA SUBMITTED");
-                console.log(JSON.parse(result));
-                $.each(JSON.parse(result), function(element, value) 
-                {
-                  console.log(value);
-                  var input = document.createElement('input');
-                  $(input).attr('type','hidden');
-                  $(input).attr('name','chemical_analysis_id__in');
-                  $(input).attr('value', value);
-                  $("#chemanalysisids").append(input);    
-                });
+                //Build table contents
+
+/*
+<div class = "table-responsive">
+<table id="samplelist" class="table">
+  <thead>
+    <tr>
+      <th>Point Number</th>
+      <th>Public Data</th>
+      <th>Analysis Method</th>
+      <th>Analysis Material</th>
+      <th>Location</th>
+      <th>Analyst</th>
+      <th>Analysis Date</th>
+      <th>Reference X</th>
+      <th>Reference Y</th>
+      <th>Total</th>
+  </thead>
+  <tbody>
+    {% if total %}
+      <p>Total: {{ total }}</p>
+    {% endif %}
+    {% for analysis in chemical_analyses %}
+    <tr>
+      <td td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.chemical_analysis_id) }}" target="_blank" >{{ analysis.spot_id }}</a></td>
+      <td class="sample_value">{{ analysis.public_data }}</td>
+      <td class="sample_value">{{ analysis.analysis_method }}</td>
+      <td class="sample_value">{{ analysis.mineral.name }}</td>
+      <td class="sample_value">{{ analysis.where_done }}</td>
+      <td class="sample_value">{{ analysis.analyst }}</td>
+      {% if analysis.analysis_date != '' %}
+        <td class="sample_value">{{ analysis.analysis_date }}</td>
+      {% endif %}
+      <td class="sample_value">{{ analysis.reference_x }}</td>
+      <td class="sample_value">{{ analysis.reference_y }}</td>
+      <td class="sample_value">{{ analysis.total }}</td>
+    </tr>
+    {%endfor%}
+  </tbody>
+  </thead>
+</table>
+</div> <!-- table-responsive -->
+*/
+//End build div table
                 $('#spinner').hide();
             },
             async: false,
@@ -634,11 +700,12 @@ var frm = $('#content');
                 $("#results").html("Error");
                 $('#spinner').hide();
             }
-        }); //end ajax function
-        
+         }); //end ajax function
+        } //end loop on chemistry rows
+       
 
         //Final ajax call for passing chem analysis ids
-        $.ajax({
+        /*$.ajax({
             type: frm.attr('method'),
             url: frm.attr('action'),
             data: $('#chemanalysisids :input').serialize(),
@@ -654,8 +721,8 @@ var frm = $('#content');
                 $("#results").html("Error");
                 $('#spinner').hide();
             }
-        }); //end final ajax function
-
+        }); */ //end final ajax function
+        console.log(resultJSON);
         return false;
     }); //END form submit function
 
@@ -1227,6 +1294,40 @@ $(list).find("#elorox").chosen({
     no_results_text: "Oops, nothing found!",
     width: "50%"
   });
+}
+
+function addChemistryRow()
+{
+ var mineralnodes = {{ mineral_nodes|safe }};
+ var rows = document.getElementById("chemistry");
+ rows.innerHTML += "<div id= 'form" + chemistryRows + "'><input type='hidden' name='squirrel' value='squirrel'><select class='elementoroxide' onchange='renderElementOxideList(this)'><option selected='selected' value='element'>Element</option><option value='oxide'>Oxide</option></select><br><div class = 'elementoxidelist'><select name='elements__element_id__in' onchange='updateChemistry()' class='selected-elements chosen-select'>{% for element in elements %}<option value='{{ element.element_id }}'>{{ element.name }}</option>{% endfor %}</select></div><div id='chem-tree" + chemistryRows + "' class ='chem-mineral-tree'></div><a class='add' onclick='addChemistryRow()'>Add</a><a class='remove' onclick='removeChemistryRow(this.parentNode.id)'>Remove</a><div class = 'selected-chem-minerals'></div><br></div>";
+
+console.log(chemistryRows);
+//Chosen-select plugin activate
+$("#form" + chemistryRows + " .chosen-select").chosen({
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
+
+//CHEM MINERAL TREE
+$('#chem-tree' + chemistryRows).jstree({ 'core' : {
+    'data' : mineralnodes
+}
+,
+
+"checkbox" : {
+      "keep_selected_style" : false
+    },
+    "plugins" : [ "checkbox" ]
+ });
+chemistryRows++;
+}
+
+function removeChemistryRow(id)
+{
+ var element = document.getElementById(id);
+ element.parentNode.removeChild(element);
 }
 
 function HomeControl(controlDiv, map) {
