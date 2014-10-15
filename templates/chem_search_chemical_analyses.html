@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block body %}
+<script src="/static/js/jquery-2.1.1.min.js"></script>
+<div class = "table-responsive">
+<table id="samplelist" class="table">
+  <thead>
+    <tr>
+      <th>Point Number</th>
+      <th>Public Data</th>
+      <th>Analysis Method</th>
+      <th>Analysis Material</th>
+      <th>Location</th>
+      <th>Analyst</th>
+      <th>Analysis Date</th>
+      <th>Reference X</th>
+      <th>Reference Y</th>
+      <th>Total</th>
+  </thead>
+  <tbody>
+    {% if total %}
+      <p>Total: {{ total }}</p>
+    {% endif %}
+    {% for analysis in chemical_analyses %}
+    <tr>
+      <td td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.chemical_analysis_id) }}" target="_blank" >{{ analysis.spot_id }}</a></td>
+      <td class="sample_value">{{ analysis.public_data }}</td>
+      <td class="sample_value">{{ analysis.analysis_method }}</td>
+      <td class="sample_value">{{ analysis.mineral.name }}</td>
+      <td class="sample_value">{{ analysis.where_done }}</td>
+      <td class="sample_value">{{ analysis.analyst }}</td>
+      {% if analysis.analysis_date != '' %}
+        <td class="sample_value">{{ analysis.analysis_date }}</td>
+      {% endif %}
+      <td class="sample_value">{{ analysis.reference_x }}</td>
+      <td class="sample_value">{{ analysis.reference_y }}</td>
+      <td class="sample_value">{{ analysis.total }}</td>
+    </tr>
+    {%endfor%}
+  </tbody>
+  </thead>
+</table>
+</div> <!-- table-responsive -->
+    &lt;&lt; <a href="{{ first_page }}"> First </a>
+    {% if prev_url %}
+       &nbsp;  &nbsp; &lt; <a href="{{ prev_url }}">Prev </a>
+    {% endif %}
+    {% if next_url %}
+       &nbsp;  &nbsp;<a href="{{ next_url }}">Next</a> &gt;
+    {% endif %}
+     &nbsp;  &nbsp; <a href="{{ last_page }}">Last </a>  &gt;&gt;
+
+{% endblock %}
