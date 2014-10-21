@@ -27,7 +27,6 @@ mail = Mail(app)
 def index():
     return render_template('index.html')
 
-
 @app.route('/search/')
 def search():
     print "REQ ARGS"
@@ -200,14 +199,26 @@ def search_chemistry():
           if key != "resource":
             filter_dictionary[key] = ",".join(filters[key])
 
+    #If chem analysis ids are passed, return results
+    if request.args :
+        if 'squirrel' not in request.args:
+            print "FINAL RESULTS"
+            print request.args.get("chemical_analyses")
+            return render_template('chem_search_chemical_analyses.html', can=request.args.get("chemical_analyses"))
+            #url = url_for('chem_search_chemical_analyses') + '?' + \
+            #  urlencode({'chemical_analyses': request.args.get("chemical_analyses")})
+            #return redirect(url)
+
     if request.args.get('squirrel') == 'squirrel':
         print "MOUSE"
         #If chem analysis ids are passed, return results
-        if 'chemical_analysis_id__in' in request.args:
-            print "TREEFROG"
-            url = url_for('chemical_analyses') + '?' + \
-              urlencode({'chemical_analysis_id__in': (',').join(request.args.getlist('chemical_analysis_id__in'))})
-            return redirect(url)
+        if 'chemical_analyses' in request.args:
+            print "FINAL RESULTS"
+            print request.args.get("chemical_analyses")
+            return render_template('chem_search_chemical_analyses.html', chemical_analyses=request.args.get("chemical_analyses"))
+            #url = url_for('chem_search_chemical_analyses') + '?' + \
+            #  urlencode({'chemical_analyses': request.args.get("chemical_analyses")})
+            #return redirect(url)
 
         #Else handle the individual element+min or oxide+min and return chem ids   
         else:
@@ -221,11 +232,12 @@ def search_chemistry():
             cid_list = []
             #If chem analysis ids are passed, return results
             if 'elements__element_id__in' in request.args:
-                e_chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element, 'minerals__in': mineral_ids, 'fields': 'chemical_analysis_id', 'limit': 0}).data['objects']
+                e_chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element, 'minerals__in': mineral_ids, 'fields': 'chemical_analysis_id,spot_id,public_data,analysis_method,mineral__name,where_done,analyst,analysis_date,reference_x,reference_y,total,chemical_analysis_id', 'limit': 0}).data['objects']
+                
                 for cid in e_chem_analysis_ids:
                     cid_list.append(cid)
             elif 'oxides__oxide_id__in' in request.args:
-                o_chem_analysis_ids = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide, 'minerals__in': mineral_ids, 'fields': 'chemical_analysis_id', 'limit': 0}).data['objects']
+                o_chem_analysis_ids = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide, 'minerals__in': mineral_ids, 'fields': 'chemical_analysis_id,spot_id,public_data,analysis_method,mineral__name,where_done,analyst,analysis_date,reference_x,reference_y,total,chemical_analysis_id', 'limit': 0}).data['objects']
                 for cid in o_chem_analysis_ids:
                     cid_list.append(cid)
 

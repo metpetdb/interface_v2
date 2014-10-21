@@ -16,109 +16,12 @@
       <div class="panel-body">
         
 <ul class="nav nav-tabs" id="myTab">
-  <li href="#rocktypes"><a href="#rocktypes">Rock Types</a></li>
-  <li><a href="#metgrade">Metamorphic Grade</a></li>
-  <li><a id = "location-tab" href="#location">Location</a></li>
-  <li><a href="#minerals">Minerals</a></li>
   <li class= "active"><a href="#chemistry">Chemistry</a></li>
-  <li><a href="#provenance">Provenance</a></li>
 </ul>
 <div id = "form-container">
     <form action="" method="get" id='content' class="tab-content">
 
-      <div class="tab-pane" id="rocktypes">
-        <ul>
-         <h3>Rock Types</h3>
-         <div id="rocktypelist">
-         {% for rock_type in rock_types %}
-         <input type="checkbox" class="rocktype" onchange="updateRockTypes()"  name="rock_type__rock_type__in"         
-         value="{{rock_type.rock_type}}">{{ rock_type.rock_type }}
-         {% endfor %}
-
-         <br><br>
-         </div><!-- control-group-->
-        </ul>
-      </div><!-- rocktypes -->
-      
-      <div class="tab-pane" id="metgrade">
-        <ul>
-         <h3>Metamorphic Grade</h3>
-         <div id = "metgrade-checkboxes">
-         {% for grade in metamorphic_grades %}
-         <input type="checkbox" class = "metgrade" onchange="updateMetGrades()"
-  name="metamorphic_grades__name__in" value="{{ grade }}">
-         {{ grade }}
-         {% endfor %}
-         </div><!-- metgrade checkboxes -->
-        </ul>
-      </div>
-      
-
-      <div class="tab-pane" id="location">
-       <ul>
-        <h3>Location</h3>
-
-    <ul id="myTab" class="nav nav-tabs">
-        <li class="active"><a href="#mapselect" data-toggle="tab">Map</a></li>
-        <li><a  href="#location-regions" data-toggle="tab">Region</a></li>
-
-        <!--dropdown has same tab selection above, showing with js how to select a tab dynamically-->
-
-    </ul>
-    <div class="tab-content">
-        <div class="tab-pane active" id="mapselect"><br><br>
-        <div id="map-canvas"></div>
-        <p id ="map-instructions">Draw a selection on the map to toggle coordinates below.</p><br>
-        <label for="bounds">NE Lat: </label>
-        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="ne-lat" class="latlong" > 
-        
-        <label for="bounds">NE Long: </label>
-        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="ne-long" class="latlong" ><br>
-
-        <label for="bounds">SW Lat: </label>
-        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-lat" class="latlong" > 
-
-        <label for="bounds">SW Long: </label>
-        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-long" class="latlong" ><br><br>
-
-<input type="hidden" id="location-bound" name="location__contained" value="">
-<!-- <input type="hidden" id="sw-location-bound" name="samples__location__contained" value=""> -->
-<div class="clear"></div>
-       </div><!--end mapselect -->
-         <div class= "tab-pane" id = "location-regions"><br><br>
-        <label for="regions__name">Regions: </label><br>
-        <select onchange="updateBounds()" id="selected-regions" multiple class="chosen-select" name="regions__name__in">
-        {% for region in regions %}
-             <option value="{{ region }}">{{ region }}</option>
-        {% endfor %}
-        </select>
-        <br>
-
-        <label for="country__name">Country: </label><br>
-        <select onchange="updateBounds()" id="selected-countries" multiple class="chosen-select" name="country__in">
-        {% for c in countries %}
-             <option value="{{ c }}">{{ c }}</option>
-        {% endfor %}
-        </select>
-        <br>
-        <label for="metamophic_regions__name">Metamorphic Regions: </label><br>
-        <select onchange="updateBounds()" multiple class="chosen-select" id = "selected-metregions" name="metamorphic_regions__name__in">
-        {% for region in metamorphic_regions %}
-             <option value="{{ region }}">{{ region }}</option>
-        {% endfor %}
-        </select>
-        </div> <!-- end location-regions -->
-    </div>
-
-       </ul>
-      </div>
-      
-      <div class="tab-pane" id="minerals"><br>
-       <!--<div id ="mineral-tree"></div><br>
-       <div id = "selected-minerals"></div>-->
-      </div>
-      
-
+     
 
    <div class="tab-pane active" id="chemistry">
       <h3>Chemistry</h3>
@@ -256,251 +159,6 @@ var chemistryRows = 2;
 //ON READY FUNCTION
 $(function()
 {
- //Group rock types
- var originalHTML = $("#rocktypelist :input");
- var newInnerHTML = '';
- var a;
- var b = 0;
- var div;
- var rocktypes = document.createElement('div');
-
- for (a = 0; a < originalHTML.length; a++)
- {
-  if(b == 0)
-  {
-   div = document.createElement('div');
-   div.className = 'rocktypecheckboxgroup';
-  }
-  var input = document.createElement('input');
-  $(input).className = "rocktype";
-  $(input).attr('type','checkbox');
-  $(input).attr('onchange','updateRockTypes()');
-  $(input).attr('name','rock_type__rock_type__in');
-  var val = $(originalHTML[a]).attr('value');
-  $(input).attr('value', val);
-
- 
-  div.appendChild(input);
-  div.innerHTML += val += "<br>";
-
-  if(b == 4 || a == originalHTML.length - 1)
-  {
-   rocktypes.appendChild(div);
-   b = 0;
-  }
-  else
-   b++;
- }
- document.getElementById('rocktypelist').innerHTML = '';
- document.getElementById('rocktypelist').appendChild(rocktypes);
-
-//Group metamorphic grades
- originalHTML = $("#metgrade-checkboxes :input");
- newInnerHTML = '';
- b = 0;
- var metgrades = document.createElement('div');
-
- for (a = 0; a < originalHTML.length; a++)
- {
-  if(b == 0)
-  {
-   div = document.createElement('div');
-   div.className = 'metgradecheckboxgroup';
-  }
-  var input = document.createElement('input');
-  $(input).className = "metgrade";
-  $(input).attr('type','checkbox');
-  $(input).attr('onchange','updateMetGrades()');
-  $(input).attr('name','metamorphic_grades__name__in');
-  var val = $(originalHTML[a]).attr('value');
-  $(input).attr('value', val);
-
-  div.appendChild(input);
-  div.innerHTML += val += "<br>";
-
-  if(b == 4 || a == originalHTML.length - 1)
-  {
-   metgrades.appendChild(div);
-   b = 0;
-  }
-  else
-   b++;
- }
- document.getElementById('metgrade-checkboxes').innerHTML = '';
- document.getElementById('metgrade-checkboxes').appendChild(metgrades);
-
-
-//GOOGLE MAP RENDERING
-function initialize()
-{
- var mapCenter;
-
- var map = new google.maps.Map(document.getElementById('map-canvas'), {
-    zoom: 5,
-    center: new google.maps.LatLng(44, -74),
-    mapTypeId: google.maps.MapTypeId.ROADMAP
- });
-
- if (navigator.geolocation) {
-     navigator.geolocation.getCurrentPosition(function (position) {
-         initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-         map.setCenter(initialLocation);
-     });
- }
-
- google.maps.event.addListenerOnce(map, 'idle', function() {
-    google.maps.event.trigger(map, 'resize');
-});
-
-//SET UP DRAWING MANAGER
-var drawingManager = new google.maps.drawing.DrawingManager({
-  drawingMode: google.maps.drawing.OverlayType.MARKER,
-  drawingControl: true,
-  drawingControlOptions: {
-    position: google.maps.ControlPosition.TOP_CENTER,
-    drawingModes: [
-      google.maps.drawing.OverlayType.RECTANGLE
-    ]
-  },
-  circleOptions: {
-    fillColor: '#ffff00',
-    fillOpacity: 1,
-    strokeWeight: 5,
-    clickable: false,
-    zIndex: 1,
-    editable: true
-  }
-}); //end drawing manager  
-
-drawingManager.setMap(map); 
-
-currentOverlay = new google.maps.Rectangle({
-    bounds: null,
-    editable: true,
-    draggable: true
-  });
-
-  currentOverlay.setMap(map);
-
-//Clear map button
-var homeControlDiv = document.createElement('div');
-  var homeControl = new HomeControl(homeControlDiv, map);
-
-  homeControlDiv.index = 1;
-  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(homeControlDiv);
-
-//DRAW COMPLETE LISTENER
-google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event) {
-  if (event.type == google.maps.drawing.OverlayType.RECTANGLE) {
-  {
-   //Set draggable and editable
-   event.overlay.setEditable(true);
-   event.overlay.setDraggable(true);
-
-   //Remove last overlay
-   if(currentOverlay)
-    currentOverlay.setMap(null);
-
-   //Set current overlay
-   currentOverlay = event.overlay;
-
-   //Update bounds for drag and edit
-   google.maps.event.addListener(currentOverlay, "bounds_changed", function() 
-   {
-    console.log("BOUNDS CHANGED");
-   var ne = event.overlay.getBounds().getNorthEast();
-   var sw = event.overlay.getBounds().getSouthWest();
-   document.getElementById("ne-lat").value = ne.lat().toString();
-   document.getElementById("ne-long").value = ne.lng().toString();
-   document.getElementById("sw-lat").value = sw.lat().toString();
-   document.getElementById("sw-long").value = sw.lng().toString();
-
-   document.getElementById("location-bound").value = sw.lng() + "," + sw.lat() + ","+ ne.lng() + "," + ne.lat();
-
-updateLocation(); 
-  //Update Location in search summary
-  var searchOptions = document.getElementById("search-options-location");
-  searchOptions.innerHTML = "<div class='summary-title'><h4>Location</h4><a onclick='clearBounds()' class='clear-title'>Clear</a></div>";
-
-  searchOptions.innerHTML += "<b>NE:</b> [" + ne.lat().toFixed(2).toString() + ", " + ne.lng().toFixed(2).toString() + "] <b>SW:</b> [" + sw.lat().toFixed(2).toString() + ", " + sw.lng().toFixed(2).toString() + "]<br>";
-
-  updateLocation();
-   });
-
-   //Update bounds for creation
-   var ne = event.overlay.getBounds().getNorthEast();
-   var sw = event.overlay.getBounds().getSouthWest();
-   document.getElementById("ne-lat").value = ne.lat().toString();
-   document.getElementById("ne-long").value = ne.lng().toString();
-   document.getElementById("sw-lat").value = sw.lat().toString();
-   document.getElementById("sw-long").value = sw.lng().toString();
-
-   document.getElementById("location-bound").value = sw.lng() + "," + sw.lat() + ","+ ne.lng() + "," + ne.lat();
-
-  //Update Location in search summary
-  var searchOptions = document.getElementById("search-options-location");
-  searchOptions.innerHTML = "";
-  searchOptions.innerHTML = "<div class='summary-title'><h4>Location</h4><a onclick='clearBounds()' class='clear-title'>Clear</a></div>";
-
-
-  searchOptions.innerHTML += "<b>NE:</b> [" + ne.lat().toFixed(2).toString() + ", " + ne.lng().toFixed(2).toString() + "] <b>SW:</b> [" + sw.lat().toFixed(2).toString() + ", " + sw.lng().toFixed(2).toString() + "]<br>";
-
-  updateLocation();
-
-   //Update POINT 4326 values to submit
-   //SRID=4326;POINT(-118.0488106 33.9346343)
-   //var upperbound = 'SRID=4326;POINT(' + ne.lat().toString() + ' ' +  ne.lng().toString() + ')';
-   //var lowerbound = 'SRID=4326;POINT(' + sw.lat().toString() + ' ' +  sw.lng().toString() + ')';
-
-//   var upperbound = "{\"type\": \"Point\", \"coordinates\": [" + ne.lat().toString() + "," + ne.lng().toString() + "]}";
-//   var lowerbound = "{\"type\": \"Point\", \"coordinates\": [" + sw.lat().toString() + "," + sw.lng().toString() + "]}";
-  
-  //POINT (-71.8552169799804972 44.0474815368651988)
-  //var upperbound = "POINT(" + ne.lat().toString() + " " + ne.lng().toString() + ")";
-  //var lowerbound = "POINT(" + sw.lat().toString() + " " + sw.lng().toString() + ")";
-  
- /*
- { "type": "Polygon",
-    "coordinates": [
-      [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0] ]
-      ]
-   }
- */
-
-  //http://stackoverflow.com/questions/15536241/how-to-get-4-vertex-coordinates-from-gmaps-rectangle-overlay
-  var nw = new google.maps.LatLng(ne.lat(),sw.lng());
-  var se = new google.maps.LatLng(sw.lat(),ne.lng());
-  var polygon =  sw.lng().toString() + ',' + sw.lat().toString() + ',' + ne.lng().toString() + ',' + ne.lat().toString();
-
-  
-
-   //document.getElementById("ne-location-bound").value = upperbound;
-   //document.getElementById("sw-location-bound").value = lowerbound;
-   document.getElementById("location-bound").value = polygon;
-   console.log(polygon);
-   //console.log(upperbound);
-   //console.log( lowerbound);
-
-  }
-
-  }
-});
-}
-
-//Initialize map listener
-google.maps.event.addDomListener(document.getElementById("location-tab"), 'click', initialize);
-
-//Date picker
-$( "#date-start" ).datepicker();
-$( "#date-end" ).datepicker();
-
-//Chosen-select plugin activate
-$(".chosen-select").chosen({
-    disable_search_threshold: 10,
-    no_results_text: "Oops, nothing found!",
-    width: "50%"
-  });
-
 var mineralnodes = {{ mineral_nodes|safe }};
 console.log(mineralnodes);
 
@@ -515,17 +173,6 @@ $('#mineral-tree').jstree({ 'core' : {
     "plugins" : [ "checkbox" ]
  });
 
-//CHEM MINERAL TREE
-$('#chem-tree').jstree({ 'core' : {
-    'data' : mineralnodes
-}
-,
-
-"checkbox" : {
-      "keep_selected_style" : false
-    },
-    "plugins" : [ "checkbox" ]
- });
 
 //mineral tree on change
 $('#mineral-tree').on("changed.jstree", function () 
@@ -542,7 +189,7 @@ $('#mineral-tree').on("changed.jstree", function ()
 */
   for(var a = 0; a < mids.length; a++)
   {
-   console.log(mids[a]);
+   //console.log(mids[a]);
    if(mids[a].original.mineral_id)
    {
     document.getElementById("selected-minerals").innerHTML += "<input name='minerals__in' type='hidden' value=" + mids[a].original.mineral_id + " >";   
@@ -550,38 +197,6 @@ $('#mineral-tree').on("changed.jstree", function ()
    }
   }
 });
-
-
-//CHEM MINERAL TREE
-$('#chem-mineral-tree').jstree({ 'core' : {
-    'data' : mineralnodes
-}
-,
-
-"checkbox" : {
-      "keep_selected_style" : false
-    },
-    "plugins" : [ "checkbox" ]
- });
-
-//mineral tree on change
-/*$('#chem-mineral-tree').on("changed.jstree", function () 
-{
- updateChemistry();
-});*/
-
-
-//CHEM MINERAL TREE
-$('.chem-mineral-tree').jstree({ 'core' : {
-    'data' : mineralnodes
-}
-,
-
-"checkbox" : {
-      "keep_selected_style" : false
-    },
-    "plugins" : [ "checkbox" ]
- });
 
 var resultJSON = []; 
 var resultIDs = [];
@@ -623,9 +238,26 @@ var frm = $('#content');
 
         for(a = 1; a < resultJSON.length; a++)
          resultIntersection = intersectionObjects(resultIntersection, resultJSON[a]);
-        
         console.log("RESULT FINAL: " + JSON.stringify(resultIntersection));
+        
         //Send result to template
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: {"chemical_analyses": JSON.stringify(resultIntersection)},
+            success: function (data) {
+                $("#results").html("");
+                $("#results").html(data);
+                $('#spinner').hide();
+                document.getElementsByTagName("header")[1].innerHTML = "";
+            },
+            async: false,
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+         }); //end ajax function
+
         return false;
     }); //END form submit function
 
