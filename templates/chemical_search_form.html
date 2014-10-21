@@ -34,21 +34,21 @@
         <div id= "form1">
         <input type="hidden" name="squirrel" value="squirrel">
         
-        <select class="elementoroxide" onchange="renderElementOxideList(this)">
+        <select class="elementoroxide">
         <option selected="selected" value="element">Element</option>
         <option value="oxide">Oxide</option>
         </select>
-         <br>
+         <br class = "br">
         <div class = "elementoxidelist">
-        <select name="elements__element_id__in" onchange="" class="">
+        <select name="elements__element_id__in" onchange="" class="chosen-select">
         {% for element in elements %}
              <option value="{{ element.element_id }}">{{ element.name }}</option>
         {% endfor %}
         </select>
         </div>
 
-       <a class="add" onclick="addChemistryRow()">Add</a>
-       <a class="remove" onclick="removeChemistryRow(this.parentNode.id)">Remove</a>
+       <a class="add">Add</a>
+       <a class="remove">Remove</a>
        <br>
        </div> <!--end form1 -->
        </div> <!--end chemistry-forms -->
@@ -314,6 +314,11 @@ $('.btn-toggle').click(function() {
     return false;
 });*/
 
+$("#form1 .chosen-select").chosen({
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
 }); //END READY FUNCTION
 
 //UPDATE BOUNDS
@@ -846,6 +851,163 @@ function toggleToSampleView()
  $('#content').submit();
 }
 
+function addChemistryRow()
+{
+ var mineralnodes = {{ mineral_nodes|safe }};
+ var rows = document.getElementById("chemistry-forms");
+ var div = document.createElement("div");
+ div.id = "form" + chemistryRows;
+ div.class = "chosen-select";
+
+ //Element Oxide select
+ var eloroxSelect = document.createElement("select");
+ eloroxSelect.className = "elementoroxide";
+ //eloroxSelect.onchange = renderElementOxideList(this);
+ var option1 = document.createElement("option");
+ var option1Text = document.createTextNode("Element");
+ var option2 = document.createElement("option");
+ var option2Text = document.createTextNode("Oxide");
+ option1.appendChild(option1Text);
+ option2.appendChild(option2Text);
+ eloroxSelect.appendChild(option1);
+ eloroxSelect.appendChild(option2);
+ div.appendChild(eloroxSelect);
+ var br = document.createElement("br");
+ br.className = "br";
+ div.appendChild(br);
+
+ //Element Oxide list
+ var innerDiv = document.createElement("div");
+ innerDiv.className = "elementoxidelist";
+ var valueSelect = document.createElement("select");
+ valueSelect.name = "elements__element_id__in";
+ valueSelect.onchange = "";
+ valueSelect.className = "chosen-select elorox";
+
+ {% for element in elements %}
+   var newOption = document.createElement("option");
+   var newOptionText = document.createTextNode("{{element.name}}");
+   newOption.value = "{{element.element_id}}";
+   newOption.appendChild(newOptionText);
+   valueSelect.appendChild(newOption);
+ {% endfor %}
+
+ innerDiv.appendChild(valueSelect);
+ div.appendChild(innerDiv);
+ 
+ //Add and Remove anchors
+ var add = document.createElement("a");
+ add.className = "add";
+ var addText = document.createTextNode("Add");
+ add.appendChild(addText);
+ div.appendChild(add);
+ 
+ var remove = document.createElement("a");
+ remove.className = "remove";
+ //remove.onclick = removeChemistryRow(this.parentNode.id);
+ var removeText = document.createTextNode("Remove");
+ remove.appendChild(removeText);
+ div.appendChild(remove);
+  var br2 = document.createElement("br");
+ div.appendChild(br2);
+
+ //Append new div to rows
+ rows.appendChild(div);
+  
+ 
+ //rows.innerHTML += "<div id= 'form" + chemistryRows + "'><select class='elementoroxide' onchange='renderElementOxideList(this)'><option selected='selected' value='element'>Element</option><option value='oxide'>Oxide</option></select><br><div class = 'elementoxidelist'><select name='elements__element_id__in' onchange='' class='chosen-select elorox'>{% for element in elements %}<option value='{{ element.element_id }}'>{{ element.name }}</option>{% endfor %}</select></div><a class='add' onclick='addChemistryRow()'>Add</a><a class='remove' onclick='removeChemistryRow(this.parentNode.id)'>Remove</a><br></div> <!--end form -->";
+
+console.log(chemistryRows);
+//Chosen-select plugin activate
+$("#form" + chemistryRows + " .chosen-select").chosen({
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
+
+chemistryRows++;
+}
+
+$('#chemistry-forms').click(function(e){
+       var elem = e.target;
+       if(elem.className == "add")
+        addChemistryRow();
+       else if(elem.className == "remove")
+        removeChemistryRow(elem.parentNode.id);
+});
+
+$('#chemistry-forms').change(function(e){
+       var elem = e.target;
+       if(elem.className == "elementoroxide")
+       {
+        
+         console.log(elem.options[elem.selectedIndex].value);
+          var list = $($(elem).parent()[0]).find(".elementoxidelist")[0];
+          elem.parentNode.removeChild(list); 
+          var oldadd = $($(elem).parent()[0]).find(".add")[0];
+          elem.parentNode.removeChild(oldadd);
+          var oldremove = $($(elem).parent()[0]).find(".remove")[0];
+          elem.parentNode.removeChild(oldremove);
+          //var oldbr = $($(elem).parent()[0]).find(".br")[0];
+          //elem.parentNode.removeChild(oldbr);
+          var id = elem.parentNode.id;
+          $("#" + id + " br:lt(1)").remove();
+
+         //Element Oxide list
+         var innerDiv = document.createElement("div");
+         innerDiv.className = "elementoxidelist";
+         var valueSelect = document.createElement("select");
+         valueSelect.className = "chosen-select";
+
+         if(elem.options[elem.selectedIndex].value == "oxide")
+         {
+          valueSelect.name = "oxides__oxide_id__in";
+          {% for oxide in oxides %}
+           var newOption = document.createElement("option");
+           var newOptionText = document.createTextNode("{{oxide.species}}");
+           newOption.value = "{{oxide.oxide_id}}";
+           newOption.appendChild(newOptionText);
+           valueSelect.appendChild(newOption);
+          {% endfor %}
+         }
+         else if(elem.options[elem.selectedIndex].value == "element")
+         {
+          valueSelect.name = "elements__element_id__in";
+          {% for element in elements %}
+           var newOption = document.createElement("option");
+           var newOptionText = document.createTextNode("{{element.name}}");
+           newOption.value = "{{element.element_id}}";
+           newOption.appendChild(newOptionText);
+           valueSelect.appendChild(newOption);
+          {% endfor %}
+         }
+        innerDiv.appendChild(valueSelect);
+        elem.parentNode.appendChild(innerDiv);
+
+         //Add and Remove anchors
+         var add = document.createElement("a");
+         add.className = "add";
+         var addText = document.createTextNode("Add");
+         add.appendChild(addText);
+         elem.parentNode.appendChild(add);
+ 
+         var remove = document.createElement("a");
+         remove.className = "remove";
+         var removeText = document.createTextNode("Remove");
+         remove.appendChild(removeText);
+         elem.parentNode.appendChild(remove);
+         var br2 = document.createElement("br");
+         elem.parentNode.appendChild(br2);
+
+
+$(elem.parentNode).find(".chosen-select").chosen({
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
+       }
+});
+
 function renderElementOxideList(elem)
 {
  //Clear element/oxide list
@@ -867,23 +1029,6 @@ function renderElementOxideList(elem)
     no_results_text: "Oops, nothing found!",
     width: "50%"
   });*/
-}
-
-function addChemistryRow()
-{
- var mineralnodes = {{ mineral_nodes|safe }};
- var rows = document.getElementById("chemistry-forms");
- rows.innerHTML += "<div id= 'form" + chemistryRows + "'><input type='hidden' name='squirrel' value='squirrel'><select class='elementoroxide' onchange='renderElementOxideList(this)'><option selected='selected' value='element'>Element</option><option value='oxide'>Oxide</option></select><br><div class = 'elementoxidelist'><select name='elements__element_id__in' onchange='' class='chosen-select elorox'>{% for element in elements %}<option value='{{ element.element_id }}'>{{ element.name }}</option>{% endfor %}</select></div><a class='add' onclick='addChemistryRow()'>Add</a><a class='remove' onclick='removeChemistryRow(this.parentNode.id)'>Remove</a><br></div> <!--end form -->";
-
-console.log(chemistryRows);
-//Chosen-select plugin activate
-/*$("#form" + chemistryRows + " .chosen-select").chosen({
-    disable_search_threshold: 10,
-    no_results_text: "Oops, nothing found!",
-    width: "50%"
-  });
-*/
-chemistryRows++;
 }
 
 function removeChemistryRow(id)
