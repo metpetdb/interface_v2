@@ -31,7 +31,7 @@
         </div>
         
         <div id = "chemistry-forms">
-        <div id= "form1">
+        <div id= "form1" class="chemistry-form">
         <input type="hidden" name="squirrel" value="squirrel">
         
         <select class="elementoroxide">
@@ -198,24 +198,28 @@ $('#mineral-tree').on("changed.jstree", function ()
   }
 });
 
-var resultJSON = []; 
-var resultIDs = [];
-
 //Ajax call to update sample data
 var frm = $('#content');
     frm.submit(function (e) {
+     var resultJSON = []; 
+     var resultIDs = [];
      e.preventDefault();
     $('#spinner').show();
+        var formList = document.getElementById("chemistry-forms").getElementsByClassName("chemistry-form");
         //Do for each row of elem+min / ox+min data
+
         var a;
-        for(a = 1; a < chemistryRows; a++)
+        for(a = 0; a < formList.length; a++)
         {
-         var data = $('#form' + a + ' :input, #selected-minerals :input').serialize();
+         var formId = formList.item(a).id;
+         console.log("FORM ID IS " + formId);
+         var data = $('#' + formId + ' :input, #selected-minerals :input').serialize();
          console.log("DATA: " + data);
          $.ajax({
             type: frm.attr('method'),
             url: frm.attr('action'),
             data: data,
+            datatype: "json",
             success: function (result) {
                 console.log(result);
                 console.log("FORM " + a + " DATA SUBMITTED");
@@ -236,6 +240,7 @@ var frm = $('#content');
         if(resultJSON.length)
          resultIntersection = resultJSON[0];
 
+
         for(a = 1; a < resultJSON.length; a++)
          resultIntersection = intersectionObjects(resultIntersection, resultJSON[a]);
         console.log("RESULT FINAL: " + JSON.stringify(resultIntersection));
@@ -243,8 +248,9 @@ var frm = $('#content');
         //Send result to template
         $.ajax({
             type: frm.attr('method'),
-            url: frm.attr('action'),
+            url: frm.attr('action'), 
             data: {"chemical_analyses": JSON.stringify(resultIntersection)},
+            datatype: "json",
             success: function (data) {
                 $("#results").html("");
                 $("#results").html(data);
@@ -857,7 +863,15 @@ function addChemistryRow()
  var rows = document.getElementById("chemistry-forms");
  var div = document.createElement("div");
  div.id = "form" + chemistryRows;
- div.className = "chosen-select";
+ div.className = "chemistry-form";
+
+ //Squirrel
+ //<input type="hidden" name="squirrel" value="squirrel">
+ var squirrel = document.createElement("input");
+ squirrel.value = "squirrel";
+ squirrel.type = "hidden";
+ squirrel.name = "squirrel";
+ div.appendChild(squirrel);
 
  //Element Oxide select
  var eloroxSelect = document.createElement("select");
@@ -940,7 +954,6 @@ $('#chemistry-forms').change(function(e){
        var elem = e.target;
        if(elem.className == "elementoroxide")
        {
-        
          console.log(elem.options[elem.selectedIndex].value);
           var list = $($(elem).parent()[0]).find(".elementoxidelist")[0];
           elem.parentNode.removeChild(list); 
@@ -959,7 +972,7 @@ $('#chemistry-forms').change(function(e){
          var valueSelect = document.createElement("select");
          valueSelect.className = "chosen-select";
 
-         if(elem.options[elem.selectedIndex].value == "oxide")
+         if(elem.options[elem.selectedIndex].text == "Oxide")
          {
           valueSelect.name = "oxides__oxide_id__in";
           {% for oxide in oxides %}
@@ -970,7 +983,7 @@ $('#chemistry-forms').change(function(e){
            valueSelect.appendChild(newOption);
           {% endfor %}
          }
-         else if(elem.options[elem.selectedIndex].value == "element")
+         else if(elem.options[elem.selectedIndex].text == "Element")
          {
           valueSelect.name = "elements__element_id__in";
           {% for element in elements %}
