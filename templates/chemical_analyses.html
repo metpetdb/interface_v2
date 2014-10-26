@@ -26,7 +26,7 @@
       <td td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.chemical_analysis_id) }}" target="_blank" >{{ analysis.spot_id }}</a></td>
       <td class="sample_value">{{ analysis.public_data }}</td>
       <td class="sample_value">{{ analysis.analysis_method }}</td>
-      <td class="sample_value"><!--{{ analysis.mineral.name }}--></td>
+      <td class="sample_value">{{ analysis.minerals.name }}</td>
       <td class="sample_value">{{ analysis.where_done }}</td>
       <td class="sample_value">{{ analysis.analyst }}</td>
       {% if analysis.analysis_date != '' %}

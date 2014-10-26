@@ -84,7 +84,7 @@
           Search Summary
         </a>
       </h4>
-      <a id= "clearAll" onclick="clearAll()">Clear All</a>
+      <a id= "clearAll" onclick="clearChemistry()">Clear All</a>
     
      </div>
     <div id="collapseTwo" class="panel-collapse collapse in">
@@ -99,12 +99,12 @@
                 <div id = "form-submit">
 
 
-<div class = "text-center">
+<div id = "resource" class = "text-center">
     <div class="btn-group" data-toggle="buttons" style="margin:0 auto;">
-        <label class="btn btn-primary active">
+        <label class="btn btn-primary">
             <input type="radio" name="resource" value="sample" id="option1" checked="checked"> View Samples
         </label>
-        <label class="btn btn-primary">
+        <label class="btn btn-primary active">
             <input type="radio" name="resource" value="chemicalanalysis" id="option2"> View Chemical Analyses
         </label>
     </div>
@@ -213,7 +213,7 @@ var frm = $('#content');
         {
          var formId = formList.item(a).id;
          console.log("FORM ID IS " + formId);
-         var data = $('#' + formId + ' :input, #selected-minerals :input').serialize();
+         var data = $('#' + formId + ' :input, #selected-minerals :input, #resource :input').serialize();
          console.log("DATA: " + data);
          $.ajax({
             type: frm.attr('method'),
@@ -376,31 +376,48 @@ function updateChemistry()
 {
  //Chemistry search options, selected chemistry minerals
  var searchOptions = document.getElementById("search-options-chemistry");
- var mids = $('#chem-mineral-tree').jstree('get_selected', true);
+ var mids = $('#mineral-tree').jstree('get_selected', true);
 
  //Clear search options summary
  searchOptions.innerHTML = "";
 
+ //Are there any elements or oxides selected?
+ var elementSelected = false;
+ var oxideSelected = false;
+ var formList = document.getElementById("chemistry-forms").getElementsByClassName("chemistry-form");
+ var a;
+ for(a = 0; a < formList.length; a++)
+ {
+  var formId = formList.item(a).id;
+  if($("#" + formId + " .chosen-select :selected").text() != "")
+  {
+   if($("#" + formId + " .elementoroxide :selected").text() == "Oxide")
+    oxideSelected = true;
+   if($("#" + formId + " .elementoroxide :selected").text() == "Element")
+    elementSelected = true;
+  }
+ }
+
  //If elements, oxides, or minerals selected, update summary title
  //and set search-filter value to chemistry
  //else sest search-filter value to sample 
- if($("#selected-elements option:selected").length || $("#selected-oxides option:selected").length || mids.length > 0)
+ if(mids.length > 0 || elementSelected || oxideSelected)
  {
   searchOptions.innerHTML = "<div class='summary-title'><h4>Chemistry</h4><a onclick='clearChemistry()' class='clear-title'>Clear</a></div>";
-  document.getElementById("search_filters").value = "chemical_analyses"; 
  }
- else
-  document.getElementById("search_filters").value = "samples"; 
 
   //Update elements in search summary
-  var selectedElements = document.getElementById("selected-elements");
-  if($("#selected-elements option:selected").length)
+  if(elementSelected)
   {
    searchOptions.innerHTML += "<b>Elements:</b> ";
-   for(var a = 0; a < selectedElements.options.length; a++)
+   for(a = 0; a < formList.length; a++)
    {
-   if(selectedElements.options[a].selected)
-    searchOptions.innerHTML += selectedElements.options[a].innerHTML + ", ";
+    var formId = formList.item(a).id;
+    if($("#" + formId + " .chosen-select").length)
+    {
+     if($("#" + formId + " .elementoroxide :selected").text() == "Element")
+      searchOptions.innerHTML += $("#" + formId + " .chosen-select :selected").text() + ", ";
+    }
    }
    var s = searchOptions.innerHTML;
    searchOptions.innerHTML = s.slice(0, -2);
@@ -408,40 +425,39 @@ function updateChemistry()
   }
 
   //Update oxides in search summary
-  var selectedOxides = document.getElementById("selected-oxides");
-  if($("#selected-oxides option:selected").length)
+  if(oxideSelected)
   {
    searchOptions.innerHTML += "<b>Oxides:</b> ";
-   for(var a = 0; a < selectedOxides.options.length; a++)
+   for(a = 0; a < formList.length; a++)
    {
-   if(selectedOxides.options[a].selected)
-    searchOptions.innerHTML += selectedOxides.options[a].innerHTML + ", ";
+    var formId = formList.item(a).id;
+    if($("#" + formId + " .chosen-select").length)
+    {
+     if($("#" + formId + " .elementoroxide :selected").text() == "Oxide")
+      searchOptions.innerHTML += $("#" + formId + " .chosen-select :selected").text() + ", ";
+    }
    }
    var s = searchOptions.innerHTML;
    searchOptions.innerHTML = s.slice(0, -2);
    searchOptions.innerHTML += "<br>";
   }
 
-  //Update minerals in ssearch summary
-  document.getElementById("selected-chem-minerals").innerHTML = "";
-  console.log(document.getElementById("selected-chem-minerals").innerHTML );
+  //Update minerals in search summary
   if(mids.length > 0)
   searchOptions.innerHTML += "<b>Minerals:</b> ";
   for(var a = 0; a < mids.length; a++)
   {
    console.log(mids[a]);
    if(mids[a].original.mineral_id)
-   {
-    document.getElementById("selected-chem-minerals").innerHTML += "<input name='minerals__in' type='hidden' value=" + mids[a].original.mineral_id + " >";   
     searchOptions.innerHTML += mids[a].id + ", ";
-   }
-  }//end mineral update
+  }
+  searchOptions.innerHTML = searchOptions.innerHTML.slice(0, -2);
 }
 
 function clearChemistry()
 {
  $("#chemistry .chosen-select").val('').trigger("chosen:updated");
- clearChemMinerals();
+ $("#mineral-tree").jstree("deselect_all");
  document.getElementById("search-options-chemistry").innerHTML = "";
 }
 
@@ -727,12 +743,6 @@ function clearMinerals()
  
 }
 
-function clearChemMinerals()
-{
- var searchOptions = document.getElementById("search-options-chemistry");
- $("#chem-mineral-tree").jstree("deselect_all");
- 
-}
 
 
 function clearBounds()
@@ -941,6 +951,10 @@ $("#form" + chemistryRows + " .chosen-select").chosen({
 
 chemistryRows++;
 }
+
+$('#chemistry').click(function(e){
+updateChemistry();
+});
 
 $('#chemistry-forms').click(function(e){
        var elem = e.target;
