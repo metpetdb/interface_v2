@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}
+  <h3>Sample {{sample.number}}</h3>
+{% endblock %}
+
+{% block body %}
+<script src="/static/js/jquery-2.1.1.min.js"></script>
+
+<form action="" method="post" name="edit">
+{{form.hidden_tag()}}
+
+<!--ADD LATITUDE AND LONGITUDE -->
+
+<div class = "table-responsive">
+  <form action="" method="post" name = "edit">
+  <table id="sampleview_table" class="table">
+    <tbody>
+      <tr>
+        <td class="sample_label">Owner{% if form.owner.flags.required %}*{% endif %}</td>
+        <td class="sample_value">{{form.owner(size=32)}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">IGSN</td>
+        <td class="sample_value">{{sample.sesar_number}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Aliases</td>
+        <td class="sample_value">{{ form.aliases(size=32) }}</td>
+        <!-- DIFFERENT CHOICES -->
+      </tr>
+      <tr>
+        <td class="sample_label">Date Collected</td>
+        <td class="sample_value">{{form.date_collected(size=32)}}</td>
+        <!-- need a calendar for this -->
+      </tr>
+      <tr>
+        <td class="sample_label">Rock Type{% if form.rock_type.flags.required %}*{% endif %}</td>
+        <td class="sample value">{{form.rock_type()}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Public{% if form.public.flags.required %}*{% endif %}</td>
+        <td class="sample_value">{{form.public(size=32)}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Latitude{% if form.latitude.flags.required %}*{% endif %}</td>
+        <td class="sample_value">{{form.latitude(size=32)}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Longitude{% if form.longitude.flags.required %}*{% endif %}</td>
+        <td class="sample_value">{{form.longitude(size=32)}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Country</td>
+        <td class="sample_value">{{form.country(size=32)}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Collector</td>
+        <td class="sample_value">{{form.collector(size=32)}}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Present Sample Location</td>
+        <td class="sample_value">{{form.location_text(size=32)}}</td>
+      </tr>
+
+      <tr>
+        <td class="sample_label">Region</td>
+        <td class="sample_value">{{ form.region(size=32) }}</td>
+        <script type="text/javascript">
+         function addTextField()  {
+           //var list = document.getElementById();
+           var list;
+           //document.form.region.append_entry();
+           /*for (unsigned int i = 0; i < form.region.size(); i++)  {
+             var str = i.toString();
+             var x = "region-";
+             var total = x+str;
+             list.appendChild(document.getElementById(total));
+           }*/
+           var list = document.getElementById("region");
+           var newListElement = document.createElement("li");
+           var newInput = document.createElement("input");
+           var label = document.createElement("Label");
+           //var string = "region-" + region_size;
+           label.htmlFor = 'region';
+           //var for_label = "region-" + region_Si;
+           //label.setAttribute("for", "region-"+list.size());
+           label.innerHTML = "Region ";
+           //label.appendChild(newInput);
+           newInput.type = "text";
+           newInput.id = "region";
+           newInput.name = "region";
+           //newInput.name = "region-"+region_size;
+           newListElement.appendChild(label);
+           newListElement.appendChild(newInput);
+           list.appendChild(newListElement);
+           region_size++;
+         }
+        </script>
+        <td class="sample_value"><a href="#" onClick="addTextField()">Add Entry</a></p></td>
+      </tr>
+      <tr>
+        <td class="sample_label">Metamorphic Region</td>
+        <td class="sample_value">{{ metamorphic_regions }}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Metamorphic Grade</td>
+        <td class="sample_value">{{ form.metamorphic_grades() }}</td>
+        <!-- need drop down menu for this -->
+      </tr>
+      <tr>
+        <td class="sample_label">Publication References</td>
+        <td class="sample_value">{{ references }}</td>
+        <!-- list ... thing for this -->
+      </tr>
+      <tr>
+        <td class="sample_label">Abstracts</td>
+        <td class="sample_value"></td>
+        <!--add reference button for this -->
+      </tr>
+      <tr>
+        <td class="sample_label">Minerals</td>
+        <td class="sample_value">{{form.minerals(size=10)}}</td>
+        <td class="sample_value">
+          <select id="minerals" name="minerals">
+          </select>
+        </td>
+        <!--drop down menu for this -->
+      </tr>
+      <tr>
+        <td></td>
+        <td><input type="submit" value="Save Changes"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
