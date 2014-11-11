@@ -1,5 +1,7 @@
 import ast
 import StringIO
+import os
+import sys
 import base64
 from urllib import urlencode
 from requests import get, post
@@ -14,13 +16,15 @@ from getenv import env
 import drest
 
 from api import MetpetAPI
-from forms import LoginForm, RequestPasswordResetForm, PasswordResetForm
+from forms import LoginForm, RequestPasswordResetForm, PasswordResetForm, EditForm, EditChemForm
 from utilities import paginate_model
 
+mail = Mail()
 
 app = Flask(__name__)
 app.config.from_object('config')
-mail = Mail(app)
+mail.init_app(app)
+#mail = Mail(app)
 
 
 @app.route('/')
@@ -33,7 +37,8 @@ def search():
     print "REQ ARGS"
     print request.args
     email = session.get('email', None)
-    api_key = session.get('api_key', None)
+    #api_key = session.get('api_key', None)
+    api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f';
     api = MetpetAPI(email, api_key).api
 
     filters = dict(request.args)
@@ -106,7 +111,7 @@ def search():
     references = api.reference.get(params={'order_by': 'name', 'limit': 0}).data['objects']
     metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
     metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
-    samples = api.sample.get(params={'fields': 'user__user_id,user__name,collector,number,sesar_number,country,public_data', 
+    samples = api.sample.get(params={'fields': 'user__user_id,user__name,collector,number,sesar_number,country,public_data',
                                      'limit': 0}).data['objects']
     mineral_relationships = api.mineral_relationship.get(\
                                 params={'limit': 0,
@@ -128,7 +133,6 @@ def search():
     for m in mineral_relationships:
         node = {"id": m['child_mineral__name'], "parent": m['parent_mineral__name'], "text": m['child_mineral__name'], "mineral_id": m['child_mineral__mineral_id']}
         mineralnodes.append(node)
-
     for element in elements:
         element_list.append(element)
     for oxide in oxides:
@@ -138,7 +142,7 @@ def search():
 
     for rock_type in rock_type_list:
         rock_type_list.append(rock_type['name'])
-        
+
     for ref in references:
         reference_list.append(ref['name'])
 
@@ -149,6 +153,7 @@ def search():
         metamorphic_grade_list.append(mmg['name'])
 
     owner_dict = {}
+    #print mineralnodes
     if email:
         logged_in_user = api.user.get(params={'email': email,
                                               'fields': 'user_id,name'}).data['objects']
@@ -200,6 +205,7 @@ def login():
             data = json.loads(response.text)
             session['email'] = data['email']
             session['api_key'] = data['api_key']
+            print session
             flash('Login successful!')
             return redirect(url_for('search'))
         else:
@@ -228,13 +234,15 @@ def request_reset_password():
         if response.status_code == 200:
             data = json.loads(response.text)
             message = Message("Metpetdb: Reset Password",
-                               sender=env('DEFAULT_MAIL_SENDER'),
+                               sender = 'metpetdb@gmail.com',
+#                               sender=env('DEFAULT_MAIL_SENDER'),
                                recipients=[form.email.data])
             reset_url = url_for('reset_password', token=data['reset_token'],
                                  _external=True)
             message.body = render_template('reset_password_email.html',
                                            reset_url=reset_url)
-            mail.send(message)
+            print message.recipients, message.sender, message.body
+            #mail.send(message)
             flash('Please check your email for a link to reset your password')
             return redirect(url_for('login'))
         else:
@@ -273,7 +281,8 @@ def reset_password(token):
 @app.route('/samples/')
 def samples():
     email = session.get('email', None)
-    api_key = session.get('api_key', None)
+    #api_key = session.get('api_key', None)
+    api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f';
     api = MetpetAPI(email, api_key).api
 
     filters = ast.literal_eval(json.dumps(request.args))
@@ -309,13 +318,164 @@ def samples():
                             last_page=last)
 
 
+@app.route('/edit_chemical/<int:id>', methods = ['GET','POST'])
+def edit_chemical(id):
+  form = EditChemForm()
+  email = session.get('email', None)
+  #api_key = session.get('api_key', None)
+  api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f'
+  api = MetpetAPI(email,api_key).api
+  payload = {'email': email, 'api_key': api_key}
+
+  url = env('API_HOST') + '/chemical_analysis/{0}'.format(id)
+  response = get(url, params=payload)
+  data = response.json()
+
+  if form.validate_on_submit():
+    data['chemical_analysis']['owner_name'] = form.owner.data
+    data['chemical_analysis']['public_data'] = form.public.data
+    data['chemical_analysis']['analyst'] = form.analyst.data
+    data['chemical_analysis']['analysis_material'] =form.analysis_material.data
+    data['chemical_analysis']['total'] =form.total.data
+    data['chemical_analysis']['stage_x']=form.StageX.data
+    data['chemical_analysis']['stage_y']=form.StageY.data
+    return redirect(url_for('search'))
+  else:
+    form.owner.data = data['chemical_analysis']['owner_name']
+    form.public.data = data['chemical_analysis']['public_data']
+    form.analyst.data = data['chemical_analysis']['analyst']
+    form.analysis_material.data = data['chemical_analysis']['analysis_material']
+    form.total.data = data['chemical_analysis']['total']
+    form.StageX.data = data['chemical_analysis']['stage_x']
+    form.StageY.data = data['chemical_analysis']['stage_y']
+  return render_template('edit_chemical.html',
+                          form = form,
+                          data = data,
+                          api_key = api_key)
+
+@app.route('/edit_sample/<int:id>', methods = ['GET','POST'])
+def edit_sample(id):
+  form = EditForm()
+  email = session.get('email', None)
+  api_key = session.get('api_key', None)
+  #api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f';
+  api = MetpetAPI(email,api_key).api
+  api.auth(user=email,
+           api_key=api_key)
+
+  sample = api.sample.get(id).data
+  rock_type_list = []
+  rock_type = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
+  for rock in rock_type:
+      rock_type_list.append(rock['rock_type'])
+  form.rock_type.choices = [(rock,rock) for rock in rock_type_list]
+
+  metamorphic_grade_list = []
+  metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
+  for mmg in metamorphic_grades:
+      metamorphic_grade_list.append(mmg['name'])
+  form.metamorphic_grades.choices = [(m,m) for m in metamorphic_grade_list]
+
+  regions = [region['name'] for region in sample['regions']]
+  min_entries = len(regions)+1
+  location = sample['location'].split(" ")
+  longtitude = location[1].replace("(","")
+  latitude = location[2].replace(")","")
+  loc = [longtitude, latitude]
+
+  metamorphic_grades = [metamorphic_grade['name'] for metamorphic_grade in sample['metamorphic_grades']]
+  form.region.min_entries = len(regions)+1
+
+  region_length = len(regions)
+  metamorphic_regions = [metamorphic_region['name'] for metamorphic_region in sample['metamorphic_regions']]
+
+
+  minerals = [mineral['name'] for mineral in sample['minerals']]
+  new_regions = []
+
+  #(MetpetAPI(email,api_key).api.sample.get(id).data['user']['name'].replace("PUBLICATION", "hi"))
+  sample2 = api.sample.get(id)
+  #response = api_resource.get(resource_id)
+  sample2.data['user']['name'] = 'bob'
+  #response.data['description'] = 'Updated sample'
+  #sample2 = api.sample.put(id, sample2.data)
+  #response = api_resource.put(resource_id, response.data)
+  #MetpetAPI(email,api_key).api.sample.get(id).data['user']['name'] = 'bob'
+  #MetpetAPI(email,api_key).api.sample = MetpetAPI(email,api_key).api.put(id, MetpetAPI(email,api_key).api.sample.get(id).data)
+
+  form.minerals.choices = [(mineral, mineral) for mineral in minerals]
+
+  #with open('data.json') as data_file:
+  #      data = json.load(data_file)
+  #print data['environments']
+  #api = drest.api.TastyPieAPI(data['environments'][]['url'])
+  #api = drest.api.TastyPieAPI(data['environments'][argv[1]]['url'])
+  #api.auth(user=data['environments'][argv[1]]['user'],
+  #         api_key=data['environments'][argv[1]]['api_key'])
+
+  if form.validate_on_submit():
+    #print form.owner.data
+    #sample['user']['name'] = form.owner.data
+    #print api.sample.get(id).data['user']['name']
+    sample2.data['user']['name'] = form.owner.data
+    #print sample['user']['name']
+    api.sample.get(id).data['user']['name'] = form.owner.data
+    #print api.sample.get(id).data['user']['name']
+    sample2.data['public_data'] = form.public.data
+    sample2.data['location_text'] = form.location_text.data
+    sample2.data['collector'] = form.collector.data
+    sample2.data['rock_type']['rock_type'] = form.rock_type.data
+    sample2.data['metamorphic_grades'][0]['name'] = form.metamorphic_grades.data
+    sample2.data['country'] = form.country.data
+    sample2.data['collection_date'] = form.date_collected.data
+    for x in range(0,len(form.region)):
+      new_regions.append(form.region.pop_entry())
+    loc[0] = form.longitude.data
+    loc[1] = form.latitude.data
+    regions = []
+    for r in new_regions:
+      regions.append(r)
+      #fix regions
+    print sample2.data['user']['name']
+    sample2 = api.sample.put(id, sample2.data)
+    return redirect(url_for('search'))
+  else:
+    form.owner.data = sample['user']['name']
+    form.public.data = sample['public_data']
+    form.location_text.data = sample['location_text']
+    form.collector.data = sample['collector']
+    form.rock_type.data = sample['rock_type']['rock_type']
+    form.metamorphic_grades.data = sample['metamorphic_grades'][0]['name']
+    form.country.data = sample['country']
+    form.date_collected.data = sample['collection_date']
+    form.longitude.data = loc[0]
+    for r in regions:
+      form.region.append_entry(r)
+    form.latitude.data = loc[1]
+
+  #change location in sample
+  return render_template('edit_sample.html',
+                          form = form,
+                          region_list = regions,
+                          location = loc,
+                          rock_types = rock_type_list,
+                          sample = sample,
+                          region_size = len(regions),
+                          metamorphic_regions=(', ').join(metamorphic_regions),
+                          api_key = api_key)
+
 @app.route('/sample/<int:id>')
 def sample(id):
     email = session.get('email', None)
-    api_key = session.get('api_key', None)
+    #api_key = session.get('api_key', None)
+    api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f'
     api = MetpetAPI(email, api_key).api
 
     sample = api.sample.get(id).data
+    #sample_owner = sample['owner']
+    #print sample
+    sampleid = sample['sample_id']
+    #print sample['user']['name']
 
     location = sample['location'].split(" ")
     longtitude = location[1].replace("(","")
@@ -345,7 +505,7 @@ def sample(id):
                                 metamorphic_grades=(', ').join(metamorphic_grades),
                                 metamorphic_regions=(', ').join(metamorphic_regions),
                                 aliases=(', ').join(aliases_str),
-                                subsamples=subsamples)
+                                subsamples=subsamples, sampleid = sampleid, api_key = api_key)
     else:
         return HttpResponse("Sample does not Exist")
 
@@ -353,7 +513,8 @@ def sample(id):
 @app.route('/subsample/<int:id>')
 def subsample(id):
     email = session.get('email', None)
-    api_key = session.get('api_key', None)
+    api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f';
+    #api_key = session.get('api_key', None)
     api = MetpetAPI(email, api_key).api
 
     subsample = api.subsample.get(id).data
@@ -376,7 +537,8 @@ def subsample(id):
 @app.route('/chemical_analyses/')
 def chemical_analyses():
     email = session.get('email', None)
-    api_key = session.get('api_key', None)
+    #api_key = session.get('api_key', None)
+    api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f';
     api = MetpetAPI(email, api_key).api
 
     filters = ast.literal_eval(json.dumps(request.args))
@@ -387,6 +549,9 @@ def chemical_analyses():
     next, previous, last, total_count = paginate_model('chemical_analyses',
                                                         data, filters)
     chemical_analyses = data.data['objects']
+
+    for a in chemical_analyses:
+      print a
 
     first_page_filters = filters
     del first_page_filters['offset']
@@ -408,14 +573,18 @@ def chemical_analyses():
 @app.route('/chemical_analysis/<int:id>')
 def chemical_analysis(id):
     email = session.get('email', None)
-    api_key = session.get('api_key', None)
+    #api_key = session.get('api_key', None)
+    api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f'
+
     payload = {'email': email, 'api_key': api_key}
 
     url = env('API_HOST') + '/chemical_analysis/{0}'.format(id)
     response = get(url, params=payload)
+    data1 = response.json()
+    print data1['chemical_analysis']['id']
 
     return render_template('chemical_analysis.html',
-                            data=response.json())
+                            api_key = api_key, data=response.json())
 
 
 @app.route('/user/<int:id>')

@@ -79,6 +79,11 @@
         <td class="sample_label">Minerals</td>
         <td class="sample_value">{{ minerals }}</td>
       </tr>
+      <tr>
+        {% if api_key %}
+          <p><a href="{{ url_for('edit_sample', id = sampleid) }}" target="_blank">Edit</a></p>
+        {% endif %}
+    </tr>
     </tbody>
   </table>
 </div> <!-- table-responsive -->
