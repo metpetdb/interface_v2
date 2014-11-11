@@ -37,8 +37,7 @@ def search():
     print "REQ ARGS"
     print request.args
     email = session.get('email', None)
-    #api_key = session.get('api_key', None)
-    api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f';
+    api_key = session.get('api_key', None)
     api = MetpetAPI(email, api_key).api
 
     filters = dict(request.args)
@@ -234,15 +233,15 @@ def request_reset_password():
         if response.status_code == 200:
             data = json.loads(response.text)
             message = Message("Metpetdb: Reset Password",
-                               sender = 'metpetdb@gmail.com',
-#                               sender=env('DEFAULT_MAIL_SENDER'),
+                               # sender = 'metpetdb@gmail.com',
+                               sender=env('DEFAULT_MAIL_SENDER'),
                                recipients=[form.email.data])
             reset_url = url_for('reset_password', token=data['reset_token'],
                                  _external=True)
             message.body = render_template('reset_password_email.html',
                                            reset_url=reset_url)
             print message.recipients, message.sender, message.body
-            #mail.send(message)
+            mail.send(message)
             flash('Please check your email for a link to reset your password')
             return redirect(url_for('login'))
         else:
@@ -281,8 +280,7 @@ def reset_password(token):
 @app.route('/samples/')
 def samples():
     email = session.get('email', None)
-    #api_key = session.get('api_key', None)
-    api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f';
+    api_key = session.get('api_key', None)
     api = MetpetAPI(email, api_key).api
 
     filters = ast.literal_eval(json.dumps(request.args))
@@ -322,8 +320,7 @@ def samples():
 def edit_chemical(id):
   form = EditChemForm()
   email = session.get('email', None)
-  #api_key = session.get('api_key', None)
-  api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f'
+  api_key = session.get('api_key', None)
   api = MetpetAPI(email,api_key).api
   payload = {'email': email, 'api_key': api_key}
 
@@ -358,7 +355,6 @@ def edit_sample(id):
   form = EditForm()
   email = session.get('email', None)
   api_key = session.get('api_key', None)
-  #api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f';
   api = MetpetAPI(email,api_key).api
   api.auth(user=email,
            api_key=api_key)
@@ -467,8 +463,7 @@ def edit_sample(id):
 @app.route('/sample/<int:id>')
 def sample(id):
     email = session.get('email', None)
-    #api_key = session.get('api_key', None)
-    api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f'
+    api_key = session.get('api_key', None)
     api = MetpetAPI(email, api_key).api
 
     sample = api.sample.get(id).data
@@ -512,9 +507,8 @@ def sample(id):
 
 @app.route('/subsample/<int:id>')
 def subsample(id):
-    email = session.get('email', None)
-    api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f';
-    #api_key = session.get('api_key', None)
+    # email = session.get('email', None)
+    api_key = session.get('api_key', None)
     api = MetpetAPI(email, api_key).api
 
     subsample = api.subsample.get(id).data
@@ -537,8 +531,7 @@ def subsample(id):
 @app.route('/chemical_analyses/')
 def chemical_analyses():
     email = session.get('email', None)
-    #api_key = session.get('api_key', None)
-    api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f';
+    api_key = session.get('api_key', None)
     api = MetpetAPI(email, api_key).api
 
     filters = ast.literal_eval(json.dumps(request.args))
@@ -573,8 +566,7 @@ def chemical_analyses():
 @app.route('/chemical_analysis/<int:id>')
 def chemical_analysis(id):
     email = session.get('email', None)
-    #api_key = session.get('api_key', None)
-    api_key = '21a5cddd7b08ad551ec3cd69f92124a3fb6f415f'
+    api_key = session.get('api_key', None)
 
     payload = {'email': email, 'api_key': api_key}
 
