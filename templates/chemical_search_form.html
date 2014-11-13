@@ -249,7 +249,7 @@ var frm = $('#content');
         $.ajax({
             type: frm.attr('method'),
             url: frm.attr('action'), 
-            data: {"chemical_analyses": JSON.stringify(resultIntersection)},
+            data: {"results": JSON.stringify(resultIntersection), "resource": $('#resource :input:checked').val()},
             datatype: "json",
             success: function (data) {
                 $("#results").html("");

@@ -205,10 +205,10 @@ def search_chemistry():
 
     #If chem analysis data is passed, return results
     if request.args :
-        if 'squirrel' not in request.args:
-            print "FINAL RESULTS"
-            print request.args.get("chemical_analyses")
-            return render_template('chem_search_chemical_analyses.html', can=request.args.get("chemical_analyses"))
+        if 'squirrel' not in request.args and request.args.get('resource') == 'chemicalanalysis':
+            return render_template('chem_search_chemical_analyses.html', can=request.args.get("results"))
+        elif 'squirrel' not in request.args and request.args.get('resource') == 'sample':
+            return render_template('chem_search_samples.html', samples=request.args.get("results"))
             #url = url_for('chem_search_chemical_analyses') + '?' + \
             #  urlencode({'chemical_analyses': request.args.get("chemical_analyses")})
             #return redirect(url)
@@ -219,25 +219,69 @@ def search_chemistry():
             element = request.args.get('elements__element_id__in')
         elif 'oxides__oxide_id__in' in request.args:
             oxide = request.args.get('oxides__oxide_id__in')
-
         mineral_ids = (',').join(request.args.getlist('minerals__in'))            
         cid_list = []
 
-        if 'elements__element_id__in' in request.args:
+	#Get chemical analyses for (E, M)
+        if 'elements__element_id__in' in request.args and request.args.get('resource') == 'chemicalanalysis':
             e_chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element, 'minerals__in': mineral_ids, 'fields': 'chemical_analysis_id,spot_id,public_data,analysis_method,mineral__name,where_done,analyst,analysis_date,reference_x,reference_y,total,chemical_analysis_id', 'limit': 0}).data['objects']
-                
+
             for cid in e_chem_analysis_ids:
                 cid_list.append(cid)
-        elif 'oxides__oxide_id__in' in request.args:
+	    return json.dumps(cid_list)
+	
+	#Get chemical analyses for (O, M)
+        elif 'oxides__oxide_id__in' in request.args and request.args.get('resource') == 'chemicalanalysis':
             o_chem_analysis_ids = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide, 'minerals__in': mineral_ids, 'fields': 'chemical_analysis_id,spot_id,public_data,analysis_method,mineral__name,where_done,analyst,analysis_date,reference_x,reference_y,total,chemical_analysis_id', 'limit': 0}).data['objects']
             for cid in o_chem_analysis_ids:
                 cid_list.append(cid)
+            return json.dumps(cid_list)
 
-        #url = url_for('chemical_analyses') + '?' + \
-             # urlencode({'chemical_analysis_id__in': (',').join(str(c) for c in cid_list)})
-            #url = url_for('chemical_analyses') + '?' + \
-            #      urlencode({'elements__element_id__in': element_ids, 'minerals__in': mineral_ids})
-        return json.dumps(cid_list)
+	#Get samples for (E, M)
+	elif 'elements__element_id__in' in request.args and request.args.get('resource') == 'sample':
+            subsample_resources = api.chemical_analysis.get(params={'elements__element_id__in': element, 'minerals__in': mineral_ids, 'fields': 'subsample', 'limit': 0}).data['objects']
+	    subsample_ids = []
+            for s in subsample_resources:
+                #Remove first 18 characters and trailing /
+                subsample_id = s['subsample'].replace("Subsample #", "")
+                subsample_ids.append(subsample_id)
+            #print subsample_ids
+
+	    sample_resources = api.subsample.get(params={'subsample__subsample_id': (',').join(str(s) for s in subsample_ids), 'fields': 'sample', 'limit':0}).data['objects']
+	    #print sample_resources
+	    sample_ids = []
+            for s in sample_resources:
+                #Remove first 18 characters and trailing /
+                sample_id = s['sample'].replace("Sample #", "")
+                sample_ids.append(sample_id)
+            #print sample_ids
+	    sample_results = api.sample.get(params={'sample__sample_id': (',').join(str(s) for s in sample_ids)}).data['objects']
+            #print "S RESULTS"
+	    print sample_results
+	    return json.dumps(sample_results)
+
+	#Get samples for (O, M)
+	elif 'oxides__oxide_id__in' in request.args and request.args.get('resource') == 'sample':
+            subsample_resources = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide, 'minerals__in': mineral_ids, 'fields': 'subsample', 'limit': 0}).data['objects']
+	    subsample_ids = []
+            for s in subsample_resources:
+                #Remove first 18 characters and trailing /
+                subsample_id = s['subsample'].replace("Subsample #", "")
+                subsample_ids.append(subsample_id)
+            #print subsample_ids
+
+	    sample_resources = api.subsample.get(params={'subsample__subsample_id': (',').join(str(s) for s in subsample_ids), 'fields': 'sample', 'limit':0}).data['objects']
+	    #print sample_resources
+	    sample_ids = []
+            for s in sample_resources:
+                #Remove first 18 characters and trailing /
+                sample_id = s['sample'].replace("Sample #", "")
+                sample_ids.append(sample_id)
+            #print sample_ids
+	    sample_results = api.sample.get(params={'sample__sample_id': (',').join(str(s) for s in sample_ids)}).data['objects']
+            #print "S RESULTS"
+	    print sample_results
+	    return json.dumps(sample_results)
 
     owner_list = []
     region_list = []

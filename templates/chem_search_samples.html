@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block body %}
+<!--<script src="/static/js/jquery-2.1.1.min.js"></script>-->
+<div class = "table-responsive">
+<table id="samplelist" class="table">
+
+<script>
+var json = {{samples|safe}};
+var a;
+var rows = document.getElementById("rows");
+
+for (a = 0; a < json.length; a++)
+{
+ console.log(json[a].chemical_analysis_id);
+ var cdate = '';
+ if(json[a].collection_date == null)
+  cdate = 'None';
+ else
+  cdate = json[a].collection_date;
+
+var m;
+
+var table = "<tr><td class='sample_value'><a href='/sample/" + json[a].sample_id +  "' target='_blank' > " + json[a].number + "</a></td><td class='sample_value'>" + json[a].public_data + "</td><td class='sample_value'>" + json[a].subsample_count + "</td><td class='sample_value'>" + json[a].chem_analyses_count + "</td><td class='sample_value'>" + json[a].image_count + "</td><td class='sample_value'>" + json[a].user.name + "</td><td class='sample_value'>" + json[a].rock_type.rock_type + "</td><td class='sample_value'>";
+for(m = 0; m < json[a].minerals.length; m++)
+table += json[a].minerals[m].name + ', ';
+table = table.substr(0, table.length-2);
+table += "</td><td class='sample_value'>" + cdate + "</td></tr>";
+
+rows.innerHTML += table;
+
+}
+
+
+
+</script>
+
+  <thead>
+    <tr>
+        <th>Sample Number</th>
+        <th>Public Data</th>
+        <th>Subsamples</th>
+        <th>Chemical Analyses</th>
+        <th>Images</th>
+        <th>Username</th>
+        <th>Rock Type</th>
+        <th>Minerals</th>
+        <th>Date Collected</th>
+  </thead>
+  <tbody id ="rows">
+    {% if total %}
+      <p>Total: {{ total }}</p>
+    {% endif %}
+    
+  </tbody>
+
+</table>
+</div> <!-- table-responsive -->
+<!--    &lt;&lt; <a href="{{ first_page }}"> First </a>
+    {% if prev_url %}
+       &nbsp;  &nbsp; &lt; <a href="{{ prev_url }}">Prev </a>
+    {% endif %}
+    {% if next_url %}
+       &nbsp;  &nbsp;<a href="{{ next_url }}">Next</a> &gt;
+    {% endif %}
+     &nbsp;  &nbsp; <a href="{{ last_page }}">Last </a>  &gt;&gt;
+-->
+{% endblock %}
