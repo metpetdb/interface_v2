@@ -225,7 +225,7 @@ var frm = $('#content');
                 console.log("FORM " + a + " DATA SUBMITTED");
                 var res = JSON.parse(result);
                 resultJSON.push(res);
-                $('#spinner').hide();
+                //$('#spinner').hide();
             },
             async: false,
             error: function(data) {
@@ -256,6 +256,7 @@ var frm = $('#content');
                 $("#results").html(data);
                 $('#spinner').hide();
                 document.getElementsByTagName("header")[1].innerHTML = "";
+                $('#spinner').hide();
             },
             async: false,
             error: function(data) {
