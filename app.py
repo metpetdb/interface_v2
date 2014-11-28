@@ -284,7 +284,7 @@ def search_chemistry():
                 sample_id = s['sample'].replace("Sample #", "")
                 sample_ids.add(sample_id)
             print sample_ids
-	    sample_results = api.sample.get(params={'sample_id__in': (',').join(str(s) for s in sample_ids), 'fields': 'user__name,collector,number,public_data,rock_type__rock_type,collection_date', 'limit':0}).data['objects']
+	    sample_results = api.sample.get(params={'sample_id__in': (',').join(str(s) for s in sample_ids), 'fields': 'sample_id,user__name,collector,number,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date', 'limit':0}).data['objects']
             print "S RESULTS"
 	    print sample_results
 	    return json.dumps(sample_results)
