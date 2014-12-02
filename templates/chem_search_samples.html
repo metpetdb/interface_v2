@@ -13,15 +13,23 @@ var rows = document.getElementById("rows");
 for (a = 0; a < json.length; a++)
 {
  console.log(json[a].chemical_analysis_id);
- var cdate = '';
+ var cdate = json[a].collection_date;
+ var subsamples = json[a].subsample_count;
+ var chemanalyses = json[a].chem_analyses_count;
+ var images = json[a].image_count;
  if(json[a].collection_date == null)
   cdate = 'None';
- else
-  cdate = json[a].collection_date;
+ if(json[a].subsample_count == null)
+  subsamples = 'None';
+ if(json[a].chem_analyses_count == null)
+  chemanalyses = 'None';
+ if(json[a].image_count == null)
+  images = 'None';
+
 
 var m;
 
-var table = "<tr><td class='sample_value'><a href='/sample/" + json[a].sample_id +  "' target='_blank' > " + json[a].number + "</a></td><td class='sample_value'>" + json[a].public_data + "</td><td class='sample_value'>" + json[a].subsample_count + "</td><td class='sample_value'>" + json[a].chem_analyses_count + "</td><td class='sample_value'>" + json[a].image_count + "</td><td class='sample_value'>" + json[a].user__name + "</td><td class='sample_value'>" + json[a].rock_type__rock_type + "</td><td class='sample_value'>";
+var table = "<tr><td class='sample_value'><a href='/sample/" + json[a].sample_id +  "' target='_blank' > " + json[a].number + "</a></td><td class='sample_value'>" + json[a].public_data + "</td><td class='sample_value'>" + subsamples + "</td><td class='sample_value'>" + chemanalyses + "</td><td class='sample_value'>" + images + "</td><td class='sample_value'>" + json[a].user__name + "</td><td class='sample_value'>" + json[a].rock_type__rock_type + "</td><td class='sample_value'>";
 for(m = 0; m < json[a].minerals__name.length; m++)
 table += json[a].minerals__name[m] + ', ';
 table = table.substr(0, table.length-2);
