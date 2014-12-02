@@ -244,7 +244,7 @@ var frm = $('#content');
         for(a = 1; a < resultJSON.length; a++)
          resultIntersection = intersectionObjects(resultIntersection, resultJSON[a]);
         console.log("RESULT FINAL: " + JSON.stringify(resultIntersection));
-        
+        $('#spinner').show();
         //Send result to template
         $.ajax({
             type: frm.attr('method'),
@@ -256,7 +256,6 @@ var frm = $('#content');
                 $("#results").html(data);
                 $('#spinner').hide();
                 document.getElementsByTagName("header")[1].innerHTML = "";
-                $('#spinner').hide();
             },
             async: false,
             error: function(data) {

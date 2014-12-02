@@ -240,32 +240,6 @@ def search_chemistry():
 	#Get samples for (E, M)
 	elif 'elements__element_id__in' in request.args and request.args.get('resource') == 'sample':
             subsample_resources = api.chemical_analysis.get(params={'elements__element_id__in': element, 'minerals__in': mineral_ids, 'fields': 'subsample', 'limit': 0}).data['objects']
-	    subsample_ids = []
-            for s in subsample_resources:
-                #Remove first 18 characters and trailing /
-                subsample_id = s['subsample'].replace("Subsample #", "")
-                subsample_ids.append(subsample_id)
-            #print subsample_ids
-
-	    sample_resources = api.subsample.get(params={'subsample__subsample_id': (',').join(str(s) for s in subsample_ids), 'fields': 'sample', 'limit':0}).data['objects']
-	    #print sample_resources
-	    sample_ids = []
-            for s in sample_resources:
-                #Remove first 18 characters and trailing /
-                sample_id = s['sample'].replace("Sample #", "")
-                sample_ids.append(sample_id)
-            #print sample_ids
-	    sample_results = api.sample.get(params={'sample__sample_id': (',').join(str(s) for s in sample_ids), 'fields': 'user__name,collector,number,public_data,rock_type__rock_type,collection_date', 'limit':0}).data['objects']
-            #print "S RESULTS"
-	    print sample_results
-	    return json.dumps(sample_results)
-
-	#Get samples for (O, M)
-	elif 'oxides__oxide_id__in' in request.args and request.args.get('resource') == 'sample':
-            subsample_resources = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide, 'minerals__in': mineral_ids, 'fields': 'subsample', 'limit': 0}).data['objects']
-	    print("XXXXXXXXX")
-	    print(subsample_resources)
-            print("XXXXXXXXX")
 	    subsample_ids = set()
             for s in subsample_resources:
                 #Remove first 18 characters and trailing /
@@ -274,10 +248,28 @@ def search_chemistry():
             print subsample_ids
 
 	    sample_resources = api.subsample.get(params={'subsample_id__in': (',').join(str(s) for s in subsample_ids), 'fields': 'sample', 'limit':0}).data['objects']
-            #sample_resources = api.sample.get(params={'sample__subsamples__subsample_id__in':(',').join(str(s) for s in subsample_ids), 'fields': 'sample_id','limit': 0}).data['objects']
-	    print("YYYYYYYYY")
-	    print sample_resources
-	    print("YYYYYYYYY")
+	    sample_ids = set()
+            for s in sample_resources:
+                #Remove first 18 characters and trailing /
+                sample_id = s['sample'].replace("Sample #", "")
+                sample_ids.add(sample_id)
+            print sample_ids
+	    sample_results = api.sample.get(params={'sample_id__in': (',').join(str(s) for s in sample_ids), 'fields': 'sample_id,user__name,collector,number,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date', 'limit':0}).data['objects']
+            print "S RESULTS"
+	    print sample_results
+	    return json.dumps(sample_results)
+
+	#Get samples for (O, M)
+	elif 'oxides__oxide_id__in' in request.args and request.args.get('resource') == 'sample':
+            subsample_resources = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide, 'minerals__in': mineral_ids, 'fields': 'subsample', 'limit': 0}).data['objects']
+	    subsample_ids = set()
+            for s in subsample_resources:
+                #Remove first 18 characters and trailing /
+                subsample_id = s['subsample'].replace("Subsample #", "")
+                subsample_ids.add(subsample_id)
+            print subsample_ids
+
+	    sample_resources = api.subsample.get(params={'subsample_id__in': (',').join(str(s) for s in subsample_ids), 'fields': 'sample', 'limit':0}).data['objects']
 	    sample_ids = set()
             for s in sample_resources:
                 #Remove first 18 characters and trailing /
