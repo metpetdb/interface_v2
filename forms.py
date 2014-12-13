@@ -1,5 +1,5 @@
 from flask.ext.wtf import Form
-from wtforms import TextField, PasswordField, HiddenField, FormField, FieldList, RadioField, DateField, SelectField, BooleanField, SelectMultipleField
+from wtforms import widgets, TextField, PasswordField, HiddenField, FormField, FieldList, RadioField, DateField, SelectField, BooleanField, SelectMultipleField
 from wtforms.validators import Required, Email, EqualTo
 
 class LoginForm(Form):
@@ -27,11 +27,13 @@ class EditForm(Form):
   country = TextField('Country')
   location_text = TextField('Location')
   collector = TextField('Collector')
-  region = FieldList(TextField('Region'), min_entries = 1)
+  region = FieldList(TextField('Region'))
   metamorphic_grades = SelectField('Metamorphic Grade')
   longitude = TextField('Longitude', validators = [Required()])
   latitude = TextField('Latitude', validators = [Required()])
-  minerals = SelectMultipleField('Minerals')
+  minerals = SelectMultipleField('Minerals', option_widget=widgets.CheckboxInput(),
+                                  widget=widgets.ListWidget(prefix_label=False))
+  mineral2 = BooleanField('Minerals')
 
 class EditChemForm(Form):
   owner = TextField('Owner', validators=[Required()])

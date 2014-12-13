@@ -235,7 +235,7 @@ def request_reset_password():
             message = Message("Metpetdb: Reset Password",
                                # sender = 'metpetdb@gmail.com',
                                sender=env('DEFAULT_MAIL_SENDER'),
-                               recipients=[form.email.data])
+                               recipients= [form.email.data])
             reset_url = url_for('reset_password', token=data['reset_token'],
                                  _external=True)
             message.body = render_template('reset_password_email.html',
@@ -352,7 +352,7 @@ def edit_chemical(id):
 
 @app.route('/edit_sample/<int:id>', methods = ['GET','POST'])
 def edit_sample(id):
-  form = EditForm()
+  form = EditForm(minerals=True)
   email = session.get('email', None)
   api_key = session.get('api_key', None)
   api = MetpetAPI(email,api_key).api
@@ -360,6 +360,7 @@ def edit_sample(id):
            api_key=api_key)
 
   sample = api.sample.get(id).data
+  sample2 = api.sample.get(id)
   rock_type_list = []
   rock_type = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
   for rock in rock_type:
@@ -379,44 +380,45 @@ def edit_sample(id):
   latitude = location[2].replace(")","")
   loc = [longtitude, latitude]
 
+
+  mineral_relationships = api.mineral_relationship.get(\
+                              params={'limit': 0,
+                                      'fields':'parent_mineral__mineral_id,parent_mineral__name,child_mineral__mineral_id,child_mineral__name'}).\
+                                                  data['objects']
+  mineralroots = []
+  parents = set()
+  children = set()
+  for m in mineral_relationships:
+      parents.add((m['parent_mineral__name'], m['parent_mineral__mineral_id']))
+      children.add((m['child_mineral__name'], m['child_mineral__mineral_id']))
+  mineralroots = set(parents) - set(children)
+
+
+  mineralnodes = []
+  for (name, mid) in mineralroots:
+      mineralnodes.append({"id": name, "parent": "#", "text": name, "mineral_id": mid})
+  for m in mineral_relationships:
+      node = {"id": m['child_mineral__name'], "parent": m['parent_mineral__name'], "text": m['child_mineral__name'], "mineral_id": m['child_mineral__mineral_id']}
+      mineralnodes.append(node)
+
+  print mineralroots
+  print len(mineralroots)
+
   metamorphic_grades = [metamorphic_grade['name'] for metamorphic_grade in sample['metamorphic_grades']]
   form.region.min_entries = len(regions)+1
 
   region_length = len(regions)
   metamorphic_regions = [metamorphic_region['name'] for metamorphic_region in sample['metamorphic_regions']]
 
-
   minerals = [mineral['name'] for mineral in sample['minerals']]
   new_regions = []
 
-  #(MetpetAPI(email,api_key).api.sample.get(id).data['user']['name'].replace("PUBLICATION", "hi"))
-  sample2 = api.sample.get(id)
-  #response = api_resource.get(resource_id)
-  sample2.data['user']['name'] = 'bob'
-  #response.data['description'] = 'Updated sample'
-  #sample2 = api.sample.put(id, sample2.data)
-  #response = api_resource.put(resource_id, response.data)
-  #MetpetAPI(email,api_key).api.sample.get(id).data['user']['name'] = 'bob'
-  #MetpetAPI(email,api_key).api.sample = MetpetAPI(email,api_key).api.put(id, MetpetAPI(email,api_key).api.sample.get(id).data)
-
   form.minerals.choices = [(mineral, mineral) for mineral in minerals]
+  #form.minerals.initial = [(mineral, mineral) for mineral in minerals]
 
-  #with open('data.json') as data_file:
-  #      data = json.load(data_file)
-  #print data['environments']
-  #api = drest.api.TastyPieAPI(data['environments'][]['url'])
-  #api = drest.api.TastyPieAPI(data['environments'][argv[1]]['url'])
-  #api.auth(user=data['environments'][argv[1]]['user'],
-  #         api_key=data['environments'][argv[1]]['api_key'])
 
   if form.validate_on_submit():
-    #print form.owner.data
-    #sample['user']['name'] = form.owner.data
-    #print api.sample.get(id).data['user']['name']
     sample2.data['user']['name'] = form.owner.data
-    #print sample['user']['name']
-    api.sample.get(id).data['user']['name'] = form.owner.data
-    #print api.sample.get(id).data['user']['name']
     sample2.data['public_data'] = form.public.data
     sample2.data['location_text'] = form.location_text.data
     sample2.data['collector'] = form.collector.data
@@ -424,6 +426,8 @@ def edit_sample(id):
     sample2.data['metamorphic_grades'][0]['name'] = form.metamorphic_grades.data
     sample2.data['country'] = form.country.data
     sample2.data['collection_date'] = form.date_collected.data
+    minerals = form.minerals.data
+    print minerals
     for x in range(0,len(form.region)):
       new_regions.append(form.region.pop_entry())
     loc[0] = form.longitude.data
@@ -432,8 +436,10 @@ def edit_sample(id):
     for r in new_regions:
       regions.append(r)
       #fix regions
-    print sample2.data['user']['name']
+    #print sample2.data['user']['name']
+    #print len(regions)
     sample2 = api.sample.put(id, sample2.data)
+
     return redirect(url_for('search'))
   else:
     form.owner.data = sample['user']['name']
@@ -445,9 +451,11 @@ def edit_sample(id):
     form.country.data = sample['country']
     form.date_collected.data = sample['collection_date']
     form.longitude.data = loc[0]
+    form.minerals.data = minerals
     for r in regions:
       form.region.append_entry(r)
     form.latitude.data = loc[1]
+
 
   #change location in sample
   return render_template('edit_sample.html',
@@ -456,6 +464,7 @@ def edit_sample(id):
                           location = loc,
                           rock_types = rock_type_list,
                           sample = sample,
+                          mineral_roots = mineralroots,
                           region_size = len(regions),
                           metamorphic_regions=(', ').join(metamorphic_regions),
                           api_key = api_key)

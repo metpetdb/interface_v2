@@ -94,11 +94,45 @@
            newListElement.appendChild(label);
            newListElement.appendChild(newInput);
            list.appendChild(newListElement);
-           region_size++;
          }
+         
         </script>
-        <td class="sample_value"><a href="#" onClick="addTextField()">Add Entry</a></p></td>
+
+        <td class="sample_value"><button name = "addmore" type = "button" onClick="addTextField()">Add Entry</a></p></td>
       </tr>
+      <!--
+      <tr>
+        <td class="sample_label">Region</td>
+        <script type = "text/javascript">
+        $(document).ready(function() {
+          var max_fields      = 10; //maximum input boxes allowed
+          var wrapper         = $(".input_fields_wrap"); //Fields wrapper
+          var add_button      = $(".add_field_button"); //Add button ID
+
+          var x = 1; //initlal text box count
+          $(add_button).click(function(e){ //on add input button click
+              e.preventDefault();
+              //if(x < max_fields){ //max input box allowed
+              x++; //text box increment
+              $(wrapper).append('<div><input type="text" name="mytext[]"/><a href="#" class="remove_field">Remove</a></div>'); //add input box
+              //}
+          });
+
+          $(wrapper).on("click",".remove_field", function(e){ //user click on remove text
+              e.preventDefault(); $(this).parent('div').remove(); x--;
+            })
+          });
+        </script>
+        <td class="sample_value">
+          <div class="input_fields_wrap">
+            <button class="add_field_button">Add Region</button>
+            {%for r in region_list%}
+              <div><input type="text" name="mytext[]" value = "{{r}}"></div>
+            {%endfor%}
+          </div>
+        </td>
+      </tr>
+    -->
       <tr>
         <td class="sample_label">Metamorphic Region</td>
         <td class="sample_value">{{ metamorphic_regions }}</td>
@@ -121,11 +155,18 @@
       <tr>
         <td class="sample_label">Minerals</td>
         <td class="sample_value">{{form.minerals(size=10)}}</td>
-        <td class="sample_value">
-          <select id="minerals" name="minerals">
-          </select>
-        </td>
+        <!--{%for m in mineral_roots%}
+          <td class="sample_value">{{m}}{{form.mineral2()}}</td>
+        {%endfor%}-->
         <!--drop down menu for this -->
+      </tr>
+      <tr>
+        <div class="flyout-parents">
+          <div class="flyout-item">
+            <div class="mpcheckbox">
+            </div>
+          </div>
+        </div>
       </tr>
       <tr>
         <td></td>
