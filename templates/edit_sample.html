@@ -10,7 +10,6 @@
 <form action="" method="post" name="edit">
 {{form.hidden_tag()}}
 
-<!--ADD LATITUDE AND LONGITUDE -->
 
 <div class = "table-responsive">
   <form action="" method="post" name = "edit">
@@ -27,12 +26,10 @@
       <tr>
         <td class="sample_label">Aliases</td>
         <td class="sample_value">{{ form.aliases(size=32) }}</td>
-        <!-- DIFFERENT CHOICES -->
       </tr>
       <tr>
         <td class="sample_label">Date Collected</td>
         <td class="sample_value">{{form.date_collected(size=32)}}</td>
-        <!-- need a calendar for this -->
       </tr>
       <tr>
         <td class="sample_label">Rock Type{% if form.rock_type.flags.required %}*{% endif %}</td>
@@ -95,7 +92,7 @@
            newListElement.appendChild(newInput);
            list.appendChild(newListElement);
          }
-         
+
         </script>
 
         <td class="sample_value"><button name = "addmore" type = "button" onClick="addTextField()">Add Entry</a></p></td>
@@ -140,17 +137,14 @@
       <tr>
         <td class="sample_label">Metamorphic Grade</td>
         <td class="sample_value">{{ form.metamorphic_grades() }}</td>
-        <!-- need drop down menu for this -->
       </tr>
       <tr>
         <td class="sample_label">Publication References</td>
         <td class="sample_value">{{ references }}</td>
-        <!-- list ... thing for this -->
       </tr>
       <tr>
         <td class="sample_label">Abstracts</td>
         <td class="sample_value"></td>
-        <!--add reference button for this -->
       </tr>
       <tr>
         <td class="sample_label">Minerals</td>
@@ -158,7 +152,6 @@
         <!--{%for m in mineral_roots%}
           <td class="sample_value">{{m}}{{form.mineral2()}}</td>
         {%endfor%}-->
-        <!--drop down menu for this -->
       </tr>
       <tr>
         <div class="flyout-parents">
