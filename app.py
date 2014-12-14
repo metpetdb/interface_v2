@@ -315,7 +315,11 @@ def search_chemistry():
         parents.add((m['parent_mineral__name'], m['parent_mineral__mineral_id']))
         children.add((m['child_mineral__name'], m['child_mineral__mineral_id']))
     mineralroots = set(parents) - set(children)
-
+    m_list= []
+    mineral_list = []
+    m_list = parents.union(children)
+    for (name, mid) in m_list:
+        mineral_list.append({"name": name, "id": mid})
 
     mineralnodes = []
     mineralnodes.append({"id": "Minerals", "parent" : "#", "text": "Minerals"})
@@ -369,6 +373,7 @@ def search_chemistry():
 			    oxides=oxide_list,
                             regions=region_list,
 			    mineralrelationships=json.dumps(mineral_relationships),
+                            minerals=mineral_list,
 			    mineral_nodes=json.dumps(mineralnodes),
                             rock_types=rock_types,
                             provenances=collector_list,

@@ -23,14 +23,27 @@
 
      
 
-   <div class="tab-pane active" id="chemistry">
+   <div class="tab-pane active" id="chemistry" onchange="updateChemistry()">
       <h3>Chemistry</h3>
+        <div id = "selection-error"></div>
         <div id="chemanalysisids">
         <input type="hidden" name="treefrog" value="treefrog">
         <input type="hidden" name="squirrel" value="squirrel">
         </div>
         
         <div id = "chemistry-forms">
+       <label for="mineral-tree">Mineral: </label>
+       <div id="mineral-select">
+       <select name="minerals__in" onchange="" name="" class="chosen-select">
+       <option></option>
+        {% for m in minerals %}
+            <option value="{{ m.id }}">{{ m.name }}</option>
+        {% endfor %}
+       </select>
+       </div>
+       <br><br>
+
+<label for="mineral-tree">Elements and Oxides: </label>
         <div id= "form1" class="chemistry-form">
         <input type="hidden" name="squirrel" value="squirrel">
         
@@ -41,6 +54,7 @@
          <br class = "br">
         <div class = "elementoxidelist">
         <select name="elements__element_id__in" onchange="" class="chosen-select">
+        <option></option>
         {% for element in elements %}
              <option value="{{ element.element_id }}">{{ element.name }}</option>
         {% endfor %}
@@ -53,8 +67,7 @@
        </div> <!--end form1 -->
        </div> <!--end chemistry-forms -->
        
-       <label for="mineral-tree">Minerals: </label>
-       <div id ="mineral-tree"></div><br>
+
        <div id = "selected-minerals"></div>
 
       </div><!-- end chemistry-->
@@ -201,6 +214,32 @@ $('#mineral-tree').on("changed.jstree", function ()
 //Ajax call to update sample data
 var frm = $('#content');
     frm.submit(function (e) {
+e.preventDefault();
+    //Clear error message
+    document.getElementById("selection-error").innerHTML = "";
+    var mineralSelected = false;
+    var oxideSelected = false;
+    var elementSelected = false;
+
+    //Proceed only if a mineral and at least one oxide/element are selected
+    var formList = document.getElementById("chemistry-forms").getElementsByClassName("chemistry-form");
+    var a;
+    for(a = 0; a < formList.length; a++)
+    {
+     var formId = formList.item(a).id;
+  if($("#" + formId + " .chosen-select :selected").text() != "")
+  {
+   if($("#" + formId + " .elementoroxide :selected").text() == "Oxide")
+    oxideSelected = true;
+   if($("#" + formId + " .elementoroxide :selected").text() == "Element")
+    elementSelected = true;
+  }
+ }
+ if($("#mineral-select .chosen-select :selected").text())
+    mineralSelected = true;
+
+   if(mineralSelected & (oxideSelected || elementSelected))
+   {
      var resultJSON = []; 
      var resultIDs = [];
      e.preventDefault();
@@ -213,7 +252,7 @@ var frm = $('#content');
         {
          var formId = formList.item(a).id;
          console.log("FORM ID IS " + formId);
-         var data = $('#' + formId + ' :input, #selected-minerals :input, #resource :input').serialize();
+         var data = $('#' + formId + ' :input, #mineral-select :input, #resource :input').serialize();
          console.log("DATA: " + data);
          $.ajax({
             type: frm.attr('method'),
@@ -244,7 +283,7 @@ var frm = $('#content');
         for(a = 1; a < resultJSON.length; a++)
          resultIntersection = intersectionObjects(resultIntersection, resultJSON[a]);
         console.log("RESULT FINAL: " + JSON.stringify(resultIntersection));
-        $('#spinner').show();
+
         //Send result to template
         $.ajax({
             type: frm.attr('method'),
@@ -265,6 +304,12 @@ var frm = $('#content');
          }); //end ajax function
 
         return false;
+     } //end mineral element selection check if
+     else
+     {
+      console.log("FIX SELECTION");
+      document.getElementById("selection-error").innerHTML = "<p>Select a mineral and at least one element or oxide.</p>";
+     } //end mineral element selection check else
     }); //END form submit function
 
 //Intersection functions
@@ -321,6 +366,14 @@ $('.btn-toggle').click(function() {
 });*/
 
 $("#form1 .chosen-select").chosen({
+    allow_single_deselect: true,
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
+
+$("#mineral-select .chosen-select").chosen({
+    allow_single_deselect: true,
     disable_search_threshold: 10,
     no_results_text: "Oops, nothing found!",
     width: "50%"
@@ -384,6 +437,7 @@ function updateChemistry()
  //Are there any elements or oxides selected?
  var elementSelected = false;
  var oxideSelected = false;
+ var mineralSelected = false;
  var formList = document.getElementById("chemistry-forms").getElementsByClassName("chemistry-form");
  var a;
  for(a = 0; a < formList.length; a++)
@@ -397,11 +451,13 @@ function updateChemistry()
     elementSelected = true;
   }
  }
+ if($("#mineral-select .chosen-select :selected").text())
+    mineralSelected = true;
 
  //If elements, oxides, or minerals selected, update summary title
  //and set search-filter value to chemistry
  //else sest search-filter value to sample 
- if(mids.length > 0 || elementSelected || oxideSelected)
+ if(mineralSelected || elementSelected || oxideSelected)
  {
   searchOptions.innerHTML = "<div class='summary-title'><h4>Chemistry</h4><a onclick='clearChemistry()' class='clear-title'>Clear</a></div>";
  }
@@ -443,6 +499,7 @@ function updateChemistry()
   }
 
   //Update minerals in search summary
+ /*
   if(mids.length > 0)
   searchOptions.innerHTML += "<b>Minerals:</b> ";
   for(var a = 0; a < mids.length; a++)
@@ -452,6 +509,12 @@ function updateChemistry()
     searchOptions.innerHTML += mids[a].id + ", ";
   }
   searchOptions.innerHTML = searchOptions.innerHTML.slice(0, -2);
+*/
+
+ if(mineralSelected)
+  searchOptions.innerHTML += "<b>Mineral:</b> ";
+    searchOptions.innerHTML += $("#mineral-select" + " .chosen-select :selected").text();
+
 }
 
 function clearChemistry()
