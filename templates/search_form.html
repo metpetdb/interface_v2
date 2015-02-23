@@ -114,8 +114,22 @@
       </div>
       
       <div class="tab-pane" id="minerals"><br>
-       <div id ="mineral-tree"></div><br>
+       <!--<div id ="mineral-tree"></div><br>-->
        <div id = "selected-minerals"></div>
+
+
+       <label for="mineral-tree">Mineral: </label>
+       <div id="mineral-select">
+       <select name="minerals__in" onchange="" name="" class="chosen-select">
+       <option></option>
+        {% for m in minerals %}
+            <option value="{{ m.id }}">{{ m.name }}</option>
+        {% endfor %}
+       </select>
+       </div>
+       <br><br>
+
+
       </div>
       
 

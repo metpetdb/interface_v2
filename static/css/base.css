@@ -20,6 +20,11 @@
  margin-left: 20px;
 }
 
+.addFirst
+{
+ float: none !important;
+}
+
 .jstree-default>.jstree-container-ul>.jstree-node
 {
  margin-left: 20px !important;

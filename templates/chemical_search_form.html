@@ -23,8 +23,7 @@
 
      
 
-   <div class="tab-pane active" id="chemistry" onchange="updateChemistry()">
-      <h3>Chemistry</h3>
+   <div class="tab-pane active" id="chemistry" onchange="updateChemistry()"><br><br>
         <div id = "selection-error"></div>
         <div id="chemanalysisids">
         <input type="hidden" name="treefrog" value="treefrog">
@@ -215,6 +214,12 @@ $('#mineral-tree').on("changed.jstree", function ()
 var frm = $('#content');
     frm.submit(function (e) {
 e.preventDefault();
+
+$('#spinner').show();
+
+//START SET TIMEOUT
+setTimeout(function() {
+
     //Clear error message
     document.getElementById("selection-error").innerHTML = "";
     var mineralSelected = false;
@@ -242,8 +247,7 @@ e.preventDefault();
    {
      var resultJSON = []; 
      var resultIDs = [];
-     e.preventDefault();
-    $('#spinner').show();
+     
         var formList = document.getElementById("chemistry-forms").getElementsByClassName("chemistry-form");
         //Do for each row of elem+min / ox+min data
 
@@ -264,7 +268,7 @@ e.preventDefault();
                 console.log("FORM " + a + " DATA SUBMITTED");
                 var res = JSON.parse(result);
                 resultJSON.push(res);
-                //$('#spinner').hide();
+                $('#spinner').hide();
             },
             async: false,
             error: function(data) {
@@ -310,6 +314,8 @@ e.preventDefault();
       console.log("FIX SELECTION");
       document.getElementById("selection-error").innerHTML = "<p>Select a mineral and at least one element or oxide.</p>";
      } //end mineral element selection check else
+
+}, 1000); //END SET TIMEOUT
     }); //END form submit function
 
 //Intersection functions
@@ -1023,9 +1029,20 @@ $('#chemistry-forms').click(function(e){
        var elem = e.target;
        if(elem.className == "add")
         addChemistryRow();
+       else if(elem.className == "add addFirst")
+       {
+        removeAddFirst();
+        addChemistryRow();
+       }
        else if(elem.className == "remove")
         removeChemistryRow(elem.parentNode.id);
 });
+
+function removeAddFirst()
+{
+ var addFirst = document.getElementsByClassName("addFirst")[0];
+ addFirst.parentNode.removeChild(addFirst);
+}
 
 $('#chemistry-forms').change(function(e){
        var elem = e.target;
@@ -1125,6 +1142,20 @@ function removeChemistryRow(id)
 {
  var element = document.getElementById(id);
  element.parentNode.removeChild(element);
+
+ if(document.getElementsByClassName("elementoroxide").length < 1)
+ {
+  console.log("Add ADD button");
+  var chemistryForm = document.getElementById("chemistry-forms");
+  //Add ADD chemistry row button
+  var add = document.createElement("a");
+  add.className = "add";
+  add.className += " addFirst";
+  var addText = document.createTextNode("Add");
+  add.appendChild(addText);
+  chemistryForm.appendChild(add);
+  
+ }
 }
 
 function HomeControl(controlDiv, map) {

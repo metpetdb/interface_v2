@@ -68,8 +68,8 @@ def search():
 
             element_ids = (',').join(request.args.getlist('elements__element_id__in'))
             oxide_ids = (',').join(request.args.getlist('oxides__oxide_id__in'))
-            mineral_ids = (',').join(request.args.getlist('minerals__in'))
-
+            #mineral_ids = (',').join(request.args.getlist('minerals__in'))
+            mineral_ids = request.args.get('minerals_in')
             e_chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
             o_chem_analysis_ids = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
 
@@ -120,6 +120,11 @@ def search():
         children.add((m['child_mineral__name'], m['child_mineral__mineral_id']))
     mineralroots = set(parents) - set(children)
 
+    m_list= []
+    mineral_list = []
+    m_list = parents.union(children)
+    for (name, mid) in m_list:
+        mineral_list.append({"name": name, "id": mid})
 
     mineralnodes = []
     for (name, mid) in mineralroots:
@@ -173,6 +178,7 @@ def search():
                             regions=region_list,
 			    mineralrelationships=json.dumps(mineral_relationships),
 			    mineral_nodes=json.dumps(mineralnodes),
+                            minerals=mineral_list,
                             rock_types=rock_types,
                             provenances=collector_list,
                             references=reference_list,
