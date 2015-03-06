@@ -43,9 +43,70 @@ def search():
           if key != "resource":
             filter_dictionary[key] = ",".join(filters[key])
 
+    #If View Samples selected
     if request.args.get('resource') == 'sample':
-        url = url_for('samples') + '?' + urlencode(filter_dictionary)
+        #url = url_for('samples') + '?' + urlencode(filter_dictionary)
+        #return redirect(url)
+
+        #If minerals are selected, check for AND/OR
+        #If AND, get samples with filters
+        #If OR, union samples with mineral and samples with other filters
+        if request.args.getlist('minerals__in'):
+
+            #MINERAL AND
+            if (request.args.get('mineralandor') == 'or'):
+                #filter_dictionary['fields'] =  'sample_id,rock_type__rock_type,minerals__name,collection_date';
+                #filter_dictionary['limit'] = 0;
+                #samples = api.sample.get(params=filter_dictionary).data['objects']
+                #print (samples)
+                #print len(samples)
+                url = url_for('samples') + '?' + urlencode(filter_dictionary)
+                return redirect(url)
+
+            #MINERAL OR
+            elif request.args.get('mineralandor') == 'and':
+                sample_results = []
+                for key in filter_dictionary:
+                    #print "KEY IS " + key
+                    #print "VALUE IS " + filter_dictionary[key]
+                    if key != "minerals__in" and key != "search_filters" and key != "fields" and key != "mineralandor":
+                        #print "KEY IS " + key
+                        #print "VALUE IS " + filter_dictionary[key]
+                        minerals = request.args.getlist('minerals__in')
+                        for m in minerals:
+                            #print "MINERAL IS " 
+                            #print m
+                            samples = api.sample.get(params={key : filter_dictionary[key], 'minerals__in': m,  'fields': 'sample_id,user__name,collector,number,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date', 'limit':0}).data['objects']
+                            #print "TYPE OF SAMPLES IS"
+                            #print type(set(samples))
+                            #print "TYPE OF SAMPLE RESULTS IS"
+                            #print type(set(sample_results))
+                            temp_list = [];
+                            if not sample_results: 
+                                sample_results = samples
+                            else:
+                                #intersect sample_results and samples
+                                for s in sample_results:
+                                    if s in samples:
+                                        temp_list.append(s)
+                                sample_results = temp_list
+                                    
+                            #sample_results = sample_results & set(samples)
+                #print "SAMPLE RESULTS"
+                #print sample_results
+                print "COUNT"
+                print len(sample_results)
+                for sample in sample_results:
+                    mineral_names = [str(m) for m in sample['minerals__name']]
+                    sample['mineral_list'] = (', ').join(mineral_names)
+                #return json.dumps(sample_results)
+                return render_template('samples_mineral_and_samples.html', samples=sample_results)
+        #If no mineral, get samples with filters
+        else:
+            url = url_for('samples') + '?' + urlencode(filter_dictionary)
         return redirect(url)
+
+    #If View Chemical Analyses selected
     elif request.args.get('resource') == 'chemicalanalysis':
         if request.args.get('search_filters') == 'samples':
             request_obj = drest.api.API(baseurl=env('API_HOST'))

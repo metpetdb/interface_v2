@@ -117,18 +117,27 @@
        <!--<div id ="mineral-tree"></div><br>-->
        <div id = "selected-minerals"></div>
 
-
        <label for="mineral-tree">Mineral: </label>
        <div id="mineral-select">
-       <select name="minerals__in" onchange="" name="" class="chosen-select">
+       <select multiple id="selected-mineral" name="minerals__in" onchange="updateMineral()" name="" class="chosen-select">
        <option></option>
         {% for m in minerals %}
             <option value="{{ m.id }}">{{ m.name }}</option>
         {% endfor %}
        </select>
        </div>
-       <br><br>
+       <br>
 
+       <div id="mineral-and-or" class = "text-center">
+         <div class="btn-group" data-toggle="buttons" style="margin:0 auto;">
+          <label class="btn btn-primary active">
+            <input type="radio" name="mineralandor" value="and" checked="checked"> AND
+        </label>
+        <label class="btn btn-primary">
+            <input type="radio" name="mineralandor" value="or"> OR
+        </label>
+       </div>
+      </div>
 
       </div>
       
@@ -245,6 +254,8 @@
 <div class="clear"></div>
 
 <div id = "results"></div>
+
+<div id ="result_map_canvas"></div>
 
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 <script src="/static/js/jquery-2.1.1.min.js"></script>
@@ -363,10 +374,19 @@ function initialize()
     mapTypeId: google.maps.MapTypeId.ROADMAP
  });
 
+var resultmapCenter;
+
+ var resultmap = new google.maps.Map(document.getElementById('result_map_canvas'), {
+    zoom: 5,
+    center: new google.maps.LatLng(44, -74),
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+ });
+
  if (navigator.geolocation) {
      navigator.geolocation.getCurrentPosition(function (position) {
          initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
          map.setCenter(initialLocation);
+         resultmap.setCenter(initialLocation);
      });
  }
 
@@ -511,6 +531,8 @@ updateLocation();
 
 //Initialize map listener
 google.maps.event.addDomListener(document.getElementById("location-tab"), 'click', initialize);
+google.maps.event.addDomListener(window, 'load', initialize);
+
 
 //Date picker
 $( "#date-start" ).datepicker();
@@ -592,7 +614,7 @@ var frm = $('#content');
                 $("#results").html("");
                 $("#results").html(data);
                 $('#spinner').hide();
-                document.getElementsByTagName("header")[1].innerHTML = "";
+                //document.getElementsByTagName("header")[1].innerHTML = "";
 
             },
             error: function(data) {
@@ -617,6 +639,7 @@ $('.btn-toggle').click(function() {
 	alert($(this["options"]).val());
     return false;
 });*/
+
 
 }); //END READY FUNCTION
 
@@ -669,7 +692,15 @@ function updateChemistry()
 {
  //Chemistry search options, selected chemistry minerals
  var searchOptions = document.getElementById("search-options-chemistry");
- var mids = $('#chem-mineral-tree').jstree('get_selected', true);
+ //var mids = $('#chem-mineral-tree').jstree('get_selected', true);
+ var mineralSelected = false;
+ //Update mineral
+  if($("#selected-mineral option:selected").length
+   /* && $("#selected-number option:selected").text() != "Select sample number"*/)
+  {
+   console.log("SELECTED MINERAL");
+   mineralSelected = true;
+  }
 
  //Clear search options summary
  searchOptions.innerHTML = "";
@@ -677,7 +708,7 @@ function updateChemistry()
  //If elements, oxides, or minerals selected, update summary title
  //and set search-filter value to chemistry
  //else sest search-filter value to sample 
- if($("#selected-elements option:selected").length || $("#selected-oxides option:selected").length || mids.length > 0)
+ if($("#selected-elements option:selected").length || $("#selected-oxides option:selected").length || mineralSelected)
  {
   searchOptions.innerHTML = "<div class='summary-title'><h4>Chemistry</h4><a onclick='clearChemistry()' class='clear-title'>Clear</a></div>";
   document.getElementById("search_filters").value = "chemical_analyses"; 
@@ -716,7 +747,7 @@ function updateChemistry()
   }
 
   //Update minerals in ssearch summary
-  document.getElementById("selected-chem-minerals").innerHTML = "";
+  /*document.getElementById("selected-chem-minerals").innerHTML = "";
   console.log(document.getElementById("selected-chem-minerals").innerHTML );
   if(mids.length > 0)
   searchOptions.innerHTML += "<b>Minerals:</b> ";
@@ -728,14 +759,46 @@ function updateChemistry()
     document.getElementById("selected-chem-minerals").innerHTML += "<input name='minerals__in' type='hidden' value=" + mids[a].original.mineral_id + " >";   
     searchOptions.innerHTML += mids[a].id + ", ";
    }
-  }//end mineral update
+  }*///end mineral update
+
+  //Update mineral (NON TREE)
+  if($("#selected-mineral option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Mineral:</b> " + $("#mineral-select option:selected").text() + "<br> ";
+  }
 }
 
 function clearChemistry()
 {
  $("#chemistry .chosen-select").val('').trigger("chosen:updated");
- clearChemMinerals();
+ //clearChemMinerals();
  document.getElementById("search-options-chemistry").innerHTML = "";
+}
+
+function updateMineral()
+{
+ var searchOptions = document.getElementById("search-options-minerals");
+ searchOptions.innerHTML = "";
+ 
+ if($("#selected-mineral option:selected").length)
+  {
+   searchOptions.innerHTML += "<div class = 'summary-title'><h4>Mineral</h4><a onclick='clearMineral()' class='clear-title'>Clear</a></div>";
+   for(var a = 0; a < $("#selected-mineral option:selected").length; a++)
+   {
+   if($("#selected-mineral option:selected")[a].selected)
+    searchOptions.innerHTML += $("#selected-mineral option:selected")[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+}
+
+function clearMineral()
+{
+ var searchOptions = document.getElementById("search-options-minerals");
+ searchOptions.innerHTML = "";
+ $("#mineral-select .chosen-select").val('').trigger("chosen:updated");
 }
 
 function updateLocation()
@@ -949,7 +1012,7 @@ function clearAll()
  clearMetGrades();
  clearBounds();
  clearProvenance();
- clearMinerals();
+ clearMineral();
  
 }
 
@@ -1181,6 +1244,22 @@ function HomeControl(controlDiv, map) {
   });
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 General Search requirements

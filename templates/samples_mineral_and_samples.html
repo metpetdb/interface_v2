@@ -1,0 +1,87 @@
+<script>
+var json = "{{samples}}";
+console.log(json);
+</script>
+
+{% block body %}
+<div class = "table-responsive">
+  <table id="samplelist" class="table">
+    <thead>
+      <tr>
+        <th>Sample Number</th>
+        <th>Public Data</th>
+        <th>Subsamples</th>
+        <th>Chemical Analyses</th>
+        <th>Images</th>
+        <th>Username</th>
+        <th>Rock Type</th>
+        <th>Minerals</th>
+        <th>Date Collected</th>
+    </thead>
+    <tbody>
+      {% if samples %}
+      <p>Total: {{ samples|length }}</p>
+      {% endif %}
+      {% for sample in samples %}
+      <tr>
+        <td class="sample_label"><a href="{{ url_for('sample', id=sample.sample_id) }}" target="_blank">{{ sample.number }}</td>
+        <td td class="sample_value">{{ sample.public_data }}</td>
+        <td td class="sample_value">{{ sample.subsample_count }}</td>
+        <td td class="sample_value">{{ sample.chem_analyses_count }}</td>
+        <td td class="sample_value">{{ sample.image_count }}</td>
+        <td td class="sample_value">{{ sample.user__name }}</td>
+        <td td class="sample_value">{{ sample.rock_type__rock_type }}</td>
+        <td td class="sample_mineral sample_value">
+          {{ sample.mineral_list|truncate(30)}}
+          {% if sample.mineral_list %}
+            <div class = "full_list">{{ sample.mineral_list }}</span>
+          {% endif %}
+        </td>
+        <td td class="sample_value">{{ sample.collection_date }}</td>
+      </tr>
+      {%endfor%}
+    </tbody>
+    </thead>
+  </table>
+</div> <!-- table-responsive-->
+  &lt;&lt; <a class="samples-pagination" href="{{ first_page }}"> First </a>
+  {% if prev_url %}
+     &nbsp;  &nbsp; &lt; <a class="samples-pagination" href="{{ prev_url }}">Prev </a>
+  {% endif %}
+  {% if next_url %}
+     &nbsp;  &nbsp;<a class="samples-pagination" href="{{ next_url }}">Next</a> &gt;
+  {% endif %}
+   &nbsp;  &nbsp; <a class="samples-pagination" href="{{ last_page }}">Last </a>  &gt;&gt;
+
+<script>
+//Ajax call for first, last, next and previous samples
+$('.samples-pagination').click(function (event) 
+{ 
+ if(document.URL.indexOf("search") !== -1)
+ {
+  console.log(document.URL.indexOf("search"));
+   event.preventDefault(); 
+   var url = $(this).attr('href');
+    $('#spinner').show();
+        $.ajax({
+	    type: "GET",
+            url: url,
+            success: function (data) {
+                $("#results").html(data);
+                $('#spinner').hide();
+            },
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+        });
+        return false;
+  } //endif
+  else
+   window.location = url;
+ });
+</script>
+{% endblock %}
+
+
+

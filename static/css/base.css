@@ -1,3 +1,8 @@
+#mineral-and-or
+{
+ float:left;
+}
+
 #chemistry .elementoxidelist
 {
  width: 100px !important;
@@ -13,16 +18,16 @@
  margin-left: 10px;
 }
 
+.addFirst
+{
+ float: none !important;
+}
+
 .add
 {
  float: left;
  margin-top: -18px;
  margin-left: 20px;
-}
-
-.addFirst
-{
- float: none !important;
 }
 
 .jstree-default>.jstree-container-ul>.jstree-node
