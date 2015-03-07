@@ -614,7 +614,10 @@ var frm = $('#content');
                 $("#results").html("");
                 $("#results").html(data);
                 $('#spinner').hide();
-                //document.getElementsByTagName("header")[1].innerHTML = "";
+console.log("MINERAL CHOICE IS");
+console.log($('[name="mineralandor"]:checked').val());
+                if( $('[name="mineralandor"]:checked').val() === "or" )
+                 document.getElementsByTagName("header")[1].innerHTML = "";
 
             },
             error: function(data) {
