@@ -114,9 +114,6 @@
       </div>
       
       <div class="tab-pane" id="minerals"><br>
-       <!--<div id ="mineral-tree"></div><br>-->
-       <div id = "selected-minerals"></div>
-
        <label for="mineral-tree">Mineral: </label>
        <div id="mineral-select">
        <select multiple id="selected-mineral" name="minerals__in" onchange="updateMineral()" name="" class="chosen-select">
@@ -545,63 +542,6 @@ $(".chosen-select").chosen({
     width: "50%"
   });
 
-var mineralnodes = {{ mineral_nodes|safe }};
-console.log(mineralnodes);
-
-$('#mineral-tree').jstree({ 'core' : {
-    'data' : mineralnodes
-}
-,
-
-"checkbox" : {
-      "keep_selected_style" : false
-    },
-    "plugins" : [ "checkbox" ]
- });
-
-//mineral tree on change
-$('#mineral-tree').on("changed.jstree", function () 
-{
-  var mids = $('#mineral-tree').jstree('get_selected', true);
-  //console.log(data.selected);
-  document.getElementById("selected-minerals").innerHTML = "";
-  console.log(document.getElementById("selected-minerals").innerHTML );
-  var searchOptions = document.getElementById("search-options-minerals");
-  searchOptions.innerHTML = "";
-  if(mids.length > 0)
-   searchOptions.innerHTML = "<div class='summary-title'><h4>Minerals</h4><a onclick='clearMinerals()' class='clear-title'>Clear</a></div>";
-
-  for(var a = 0; a < mids.length; a++)
-  {
-   console.log(mids[a]);
-   if(mids[a].original.mineral_id)
-   {
-    document.getElementById("selected-minerals").innerHTML += "<input name='minerals__in' type='hidden' value=" + mids[a].original.mineral_id + " >";   
-    searchOptions.innerHTML += mids[a].id + ", ";
-   }
-  }
-});
-
-
-//CHEM MINERAL TREE
-$('#chem-mineral-tree').jstree({ 'core' : {
-    'data' : mineralnodes
-}
-,
-
-"checkbox" : {
-      "keep_selected_style" : false
-    },
-    "plugins" : [ "checkbox" ]
- });
-
-//mineral tree on change
-$('#chem-mineral-tree').on("changed.jstree", function () 
-{
- updateChemistry();
-});
-
-
 //Ajax call to update sample data
 var frm = $('#content');
     frm.submit(function () {
@@ -691,93 +631,6 @@ function updateBounds()
   updateLocation();
 }
 
-function updateChemistry()
-{
- //Chemistry search options, selected chemistry minerals
- var searchOptions = document.getElementById("search-options-chemistry");
- //var mids = $('#chem-mineral-tree').jstree('get_selected', true);
- var mineralSelected = false;
- //Update mineral
-  if($("#selected-mineral option:selected").length
-   /* && $("#selected-number option:selected").text() != "Select sample number"*/)
-  {
-   console.log("SELECTED MINERAL");
-   mineralSelected = true;
-  }
-
- //Clear search options summary
- searchOptions.innerHTML = "";
-
- //If elements, oxides, or minerals selected, update summary title
- //and set search-filter value to chemistry
- //else sest search-filter value to sample 
- if($("#selected-elements option:selected").length || $("#selected-oxides option:selected").length || mineralSelected)
- {
-  searchOptions.innerHTML = "<div class='summary-title'><h4>Chemistry</h4><a onclick='clearChemistry()' class='clear-title'>Clear</a></div>";
-  document.getElementById("search_filters").value = "chemical_analyses"; 
- }
- else
-  document.getElementById("search_filters").value = "samples"; 
-
-  //Update elements in search summary
-  var selectedElements = document.getElementById("selected-elements");
-  if($("#selected-elements option:selected").length)
-  {
-   searchOptions.innerHTML += "<b>Elements:</b> ";
-   for(var a = 0; a < selectedElements.options.length; a++)
-   {
-   if(selectedElements.options[a].selected)
-    searchOptions.innerHTML += selectedElements.options[a].innerHTML + ", ";
-   }
-   var s = searchOptions.innerHTML;
-   searchOptions.innerHTML = s.slice(0, -2);
-   searchOptions.innerHTML += "<br>";
-  }
-
-  //Update oxides in search summary
-  var selectedOxides = document.getElementById("selected-oxides");
-  if($("#selected-oxides option:selected").length)
-  {
-   searchOptions.innerHTML += "<b>Oxides:</b> ";
-   for(var a = 0; a < selectedOxides.options.length; a++)
-   {
-   if(selectedOxides.options[a].selected)
-    searchOptions.innerHTML += selectedOxides.options[a].innerHTML + ", ";
-   }
-   var s = searchOptions.innerHTML;
-   searchOptions.innerHTML = s.slice(0, -2);
-   searchOptions.innerHTML += "<br>";
-  }
-
-  //Update minerals in ssearch summary
-  /*document.getElementById("selected-chem-minerals").innerHTML = "";
-  console.log(document.getElementById("selected-chem-minerals").innerHTML );
-  if(mids.length > 0)
-  searchOptions.innerHTML += "<b>Minerals:</b> ";
-  for(var a = 0; a < mids.length; a++)
-  {
-   console.log(mids[a]);
-   if(mids[a].original.mineral_id)
-   {
-    document.getElementById("selected-chem-minerals").innerHTML += "<input name='minerals__in' type='hidden' value=" + mids[a].original.mineral_id + " >";   
-    searchOptions.innerHTML += mids[a].id + ", ";
-   }
-  }*///end mineral update
-
-  //Update mineral (NON TREE)
-  if($("#selected-mineral option:selected").length)
-  {
-   searchOptions.innerHTML += "<b>Mineral:</b> " + $("#mineral-select option:selected").text() + "<br> ";
-  }
-}
-
-function clearChemistry()
-{
- $("#chemistry .chosen-select").val('').trigger("chosen:updated");
- //clearChemMinerals();
- document.getElementById("search-options-chemistry").innerHTML = "";
-}
-
 function updateMineral()
 {
  var searchOptions = document.getElementById("search-options-minerals");
@@ -796,7 +649,6 @@ function updateMineral()
    searchOptions.innerHTML += "<br>";
   }
 }
-
 function clearMineral()
 {
  var searchOptions = document.getElementById("search-options-minerals");
