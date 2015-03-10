@@ -554,9 +554,7 @@ var frm = $('#content');
                 $("#results").html("");
                 $("#results").html(data);
                 $('#spinner').hide();
-console.log("MINERAL CHOICE IS");
-console.log($('[name="mineralandor"]:checked').val());
-                if( $('[name="mineralandor"]:checked').val() === "or" )
+                if(document.getElementsByTagName("header")[1])
                  document.getElementsByTagName("header")[1].innerHTML = "";
 
             },
