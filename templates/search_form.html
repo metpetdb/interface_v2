@@ -642,7 +642,10 @@ function updateMineral()
    for(var a = 0; a < $("#selected-mineral option:selected").length; a++)
    {
    if($("#selected-mineral option:selected")[a].selected)
-    searchOptions.innerHTML += $("#selected-mineral option:selected")[a].innerHTML + ", ";
+    var nextMineral = $("#selected-mineral option:selected")[a].innerHTML + ", ";
+    if(nextMineral !== ", ")
+      searchOptions.innerHTML += $("#selected-mineral option:selected")[a].innerHTML + ", ";
+    console.log("JUST ADDED " + nextMineral);
    }
    var s = searchOptions.innerHTML;
    searchOptions.innerHTML = s.slice(0, -2);
