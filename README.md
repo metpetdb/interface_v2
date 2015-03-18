@@ -47,7 +47,7 @@ Then reload apache service:
 
 	$ sudo service apache2 restart
 	
-## Python and virutalenv setup
+## Python and Virtualenvwrapper setup
 
 Virtualenv is probably what you want to use during development.
 What problem does virtualenv solve? If you want to use Python for other projects besides Flask-based web applications. it is very likely that you will be working with different versions of Python itself, or different versions of Python libraries. Quite often, libraries break backwards compatibility, and it’s unlikely that any serious application will have zero dependencies. So we create virtual environment to keep different project environments isolated if two or more of your projects have conflicting dependencies.
@@ -56,7 +56,7 @@ What problem does virtualenv solve? If you want to use Python for other projects
 
 If Python 2.7 is not installed, install it
 
-	$ sudo apt-get install python2.7
+`$ sudo apt-get install python2.7`
 	
 Install some required packages
 
@@ -68,23 +68,56 @@ Install pip for easy_install virtualenv and Flask later on
 
 Install virtualenv:
 
-	$ sudo pip install virtualenv
+	$ sudo pip install virtualenvwrapper
 	
-Once you have virtualenv installed, just fire up a shell and create your own environment. Create a project folder and a venv folder within:
+Check if virtualenvwrapper.sh and virtualenvwrapper_lazy.sh exist:
 
-	$ mkdir myproject
-	$ cd myproject
-	$ virtualenv metpetdb
-	New python executable in myproject/bin/python
+	$ which virtualenvwrapper.sh
+	/usr/local/bin/virtualenvwrapper.sh
+	
+	$ which virtualenvwrapper_lazy.sh
+	/usr/local/bin/virtualenvwrapper_lazy.sh
+	
+After this, we create a directory for the virtual evcironments:
+
+	$ mkdir ~/.virtualenvs
+	
+Then, add the folowing lines to ~/.bashrc:
+
+	$ sudo nano ~/.bashrc
+	
+	# copy and paste these two lines at the end of the ~/.bashrc
+	export WORKON_HOME=$HOME/.virtualenvs
+	source /usr/local/bin/virtualenvwrapper_lazy.sh
+	
+**Starting a New Virtual Environment**
+
+Virtualenvwrapper provides some nice commands we can use to play around with the environments.
+
+To create a new virtual environment:
+
+	$ mkvirtualenv metpetdb
+	New python executable in metpetdb/bin/python
 	Installing setuptools, pip...done.
-
-Now, whenever you want to work on a project, you only have to activate the corresponding environment
-
-	$ . metpetdb/bin/activate
-
-**note:** The complete dir is `~/myproject/metpetdb/bin/activate`. If you wish to have only `metpetdb` folder, just create a virtual environment in you home directory. `virtualenv metpetdb` will create a folder named "metpetdb" for it self.
 	
+As you mihgt notic, the command prompt contains the name before you username
+	
+	**(metpetdb)**user@xxxx:~$ python --version
+	Python 2.7.6
+
 To deactivate and exit the virtual environment, just do
 
 	$ deactivate
 	
+Tht next time you come back, start you environment by doing:
+
+	$ workon environment_name
+	
+Remove your current environment:
+
+	$ rmvirtualenv environment_name
+	Removing (environment_name)...
+
+Other usage command:
+- show a list of environments: `workon`
+
