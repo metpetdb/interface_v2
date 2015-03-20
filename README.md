@@ -19,6 +19,8 @@ We will now set up the system and virtual environment for a new/clean meachine, 
 	$ sudo apt-get update
 	$ sudo apt-get upgrade
 
+**Note: This setup instruction is tested on ubuntu 14.04. If you are using different release of Linux, pre-installed dependencies may vary according to your OS**
+	
 Apache web server installation
 ------------------------------
 
