@@ -328,6 +328,38 @@ def edit_chemical(id):
   response = get(url, params=payload)
   data = response.json()
 
+  filters = ast.literal_eval(json.dumps(request.args))
+  offset = request.args.get('offset', 0)
+  filters['offset'] = offset
+
+  data2 = api.chemical_analysis.get(params=filters)
+  next, previous, last, total_count = paginate_model('chemical_analyses',
+                                                      data2, filters)
+  chemical_analyses = data2.data['objects']
+
+#  for a in chemical_analyses:
+#    print a
+
+
+  #oxide_ids = (',').join(request.args.getlist('oxides__oxide_id__in'))
+  oxide_list=[]
+  element_list=[]
+  oxides = api.oxide.get(params={'limit': 0}).data['objects']
+
+  for oxide in oxides:
+      oxide_list.append(oxide)
+
+  #for x in oxide_list:
+#    print x['species']
+
+
+  elements = api.element.get(params={'limit': 0}).data['objects']
+  for element in elements:
+    element_list.append(element)
+    print element
+
+
+
   if form.validate_on_submit():
     data['chemical_analysis']['owner_name'] = form.owner.data
     data['chemical_analysis']['public_data'] = form.public.data
@@ -336,6 +368,9 @@ def edit_chemical(id):
     data['chemical_analysis']['total'] =form.total.data
     data['chemical_analysis']['stage_x']=form.StageX.data
     data['chemical_analysis']['stage_y']=form.StageY.data
+    #wordlist = []
+    #wordlist = json.loads(request.args.get('wordlist'))
+    #print wordlist
     return redirect(url_for('search'))
   else:
     form.owner.data = data['chemical_analysis']['owner_name']
@@ -345,9 +380,15 @@ def edit_chemical(id):
     form.total.data = data['chemical_analysis']['total']
     form.StageX.data = data['chemical_analysis']['stage_x']
     form.StageY.data = data['chemical_analysis']['stage_y']
+    wordlist = []
+    #wordlist = json.loads(request.args.get('wordlist'))
+    #print wordlist
   return render_template('edit_chemical.html',
                           form = form,
                           data = data,
+                          oxide_list = oxide_list,
+                          element_list = element_list,
+                          id = id,
                           api_key = api_key)
 
 @app.route('/edit_sample/<int:id>', methods = ['GET','POST'])
@@ -401,8 +442,8 @@ def edit_sample(id):
       node = {"id": m['child_mineral__name'], "parent": m['parent_mineral__name'], "text": m['child_mineral__name'], "mineral_id": m['child_mineral__mineral_id']}
       mineralnodes.append(node)
 
-  print mineralroots
-  print len(mineralroots)
+  #print mineralroots
+  #print len(mineralroots)
 
   metamorphic_grades = [metamorphic_grade['name'] for metamorphic_grade in sample['metamorphic_grades']]
   form.region.min_entries = len(regions)+1
@@ -414,6 +455,10 @@ def edit_sample(id):
   new_regions = []
 
   form.minerals.choices = [(mineral, mineral) for mineral in minerals]
+
+  #for n in minerals:
+  #  print n
+  #print mineralnodes
   #form.minerals.initial = [(mineral, mineral) for mineral in minerals]
 
 
@@ -438,6 +483,9 @@ def edit_sample(id):
       #fix regions
     #print sample2.data['user']['name']
     #print len(regions)
+    list_name = request.args.get("list_name")
+    #listx = get_list(list_name)
+    print list_name
     sample2 = api.sample.put(id, sample2.data)
 
     return redirect(url_for('search'))
@@ -465,8 +513,11 @@ def edit_sample(id):
                           rock_types = rock_type_list,
                           sample = sample,
                           mineral_roots = mineralroots,
+                          mineral_nodes = mineralnodes,
                           region_size = len(regions),
                           metamorphic_regions=(', ').join(metamorphic_regions),
+                          minerals = minerals,
+                          test=json.dumps(minerals),
                           api_key = api_key)
 
 @app.route('/sample/<int:id>')
