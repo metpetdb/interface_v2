@@ -5,7 +5,7 @@
 </a>
 </div>
 
-##metpetdb-interface
+##MetPetDB-interface
 
 Front-end application for the Meptetb system built using Flask.
 (metpetdb.rpi.edu)
@@ -17,7 +17,7 @@ We will now set up the system and virtual environment for a new/clean meachine, 
 **Before setting up everything:**
 
 	$ sudo apt-get update
-	$ sudo apt-get upgrade
+	$ sudo apt-get upgrade -y
 
 **Note: This setup instruction is tested on ubuntu 14.04. If you are using different release of Linux, pre-installed dependencies may vary according to your OS**
 	
@@ -25,25 +25,28 @@ Apache web server installation
 ------------------------------
 
 ####Install Apache
-    $ sudo apt-get install apache2
-    $ sudo apt-get install apache2-threaded-dev python2.7-dev
-
+    $ sudo apt-get install apache2 -y
+    $ sudo apt-get install apache2-threaded-dev python2.7-dev -y
+	
 ####Install mod_wsgi
-    $ wget http://modwsgi.googlecode.com/files/mod_wsgi-3.4.tar.gz && tar xvfz mod_wsgi-3.4.tar.gz
-    $ cd mod_wsgi-3.4
-    $ ./configure
-    $ make
-    $ sudo make install
-    $ echo "LoadModule wsgi_module /usr/lib/apache2/modules/mod_wsgi.so" | sudo tee /etc/apache2/mods-available/wsgi.load
-    $ sudo a2enmod wsgi
-    $ sudo a2dissite default
 
-**Note:**If you get error message:`ERROR: Site default does not exist!`
+Install pip to "easy_install" mod_wsgi, virtualenv and Flask later on
 
-1. Because the .conf under `/etc/apache2/sites-available/` maybe `000-default`. If so, we enter: `sudo a2dissite 000-default`
+	$ wget -c https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py
+	
 
-2. `ls /etc/apache2/sites-available/` You will have either `default` or `000-default` directory, inside the directory, we need to set `default/000-default` to `default.conf/000-default.conf` by:
-`sudo mv /etc/apache2/sites-available/default /etc/apache2/sites-available/default.conf`
+Now we can install an official release direct from PyPi, run:
+
+	$ sudo pip install mod_wsgi
+
+If you wish to use a version of Apache which is installed into a non standard location, you can set and export the APXS environment variable to the location of the Apache apxs script for your Apache installation before performing the installation.
+
+To verify that the installation was successful, run the mod_wsgi-express script with the start-server command:
+
+	$ mod_wsgi-express start-server
+	
+This will start up Apache/mod_wsgi on port 8000. You can then verify that the installation worked by pointing your browser at:
+	`http://localhost:8000/`. When started in this way, the Apache web server will stay in the foreground. To stop the Apache server, use CTRL-C.
 
 Then reload apache service:
 
@@ -63,10 +66,6 @@ If Python 2.7 is not installed, install it
 Install some required packages
 
 	$ sudo apt-get install python-dev libpq-dev libxml2-dev libproj-dev libgeos-dev libgdal-dev
-	
-Install pip for easy_install virtualenv and Flask later on
-
-	$ wget -c https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py
 
 Install virtualenv:
 
@@ -123,3 +122,46 @@ Remove your current environment:
 Other usage command:
 - show a list of environments: `workon`
 
+## Setting up MetpetDDB interface
+
+If you have create a virtual environment for MetpetDB interface and you have not yet fooled around with it, start the virtual environment: `workon environment_name` 
+
+If you are not sure, create a new clean virtual environment:
+	
+	# Deleting the previous virtual env is optional
+	# $ rmvirtualenv environment_name #env name was "metpetdb" if you strictly follow the instruction
+	
+	$ mkvirtualenv metpetdb
+	$ workon metpetdb
+	
+Create a directory for the project:
+
+	$ mkdir metpetdb
+	$ cd metpetdb
+	
+Under metpetdb directory, we are going to create our secret "app_variables.env" file that points to the API server.
+
+	$ sudo nano app_variables.env
+	# copy and paste the following keys into "app_variables.env"
+	--------------------------------------------------------
+	API_HOST=http://54.164.222.32
+	SECRET_KEY=qqqqqqqqqqjjhuk8jl9l99l9l;;0o0o;0'0'
+	--------------------------------------------------------
+	
+Then we clone the interface code from github, just do:
+	
+	$ sudo apt-get install git -y && git clone https://github.com/metpetdb/metpetdb_interface.git
+	
+Alright, we are so close to finishing setting up MetpetDB locally. Next, install required dependentcies for the interface.
+		
+	$ cd metpetdb_interface
+	$ pip install -r requirements_new_ubuntu_14.04.txt
+	
+Finally, run app.py to test if we have set up the interface properly:
+
+	$ python app.py
+
+Visit `http://127.0.0.1:5000/` or `localhost:5000/` to view the project.
+	
+
+	
