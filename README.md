@@ -21,7 +21,7 @@ We will now set up the system and virtual environment for a new/clean meachine, 
 
 **Note: This setup instruction is tested on ubuntu 14.04. If you are using different release of Linux, pre-installed dependencies may vary according to your OS**
 	
-Apache web server installation
+Apache Web Server Installation
 ------------------------------
 
 ####Install Apache
@@ -36,7 +36,7 @@ Now we install mod_wsgi by typing the following command
 
 To enable mod_wsgi, run the following command:
 
-	$sudo a2enmod wsgi 
+	$ sudo a2enmod wsgi 
 	
 Restart Apache to get mod_wsgi to work.
 
@@ -48,7 +48,7 @@ Restart Apache to get mod_wsgi to work.
 Virtualenv is probably what you want to use during development.
 What problem does virtualenv solve? If you want to use Python for other projects besides Flask-based web applications. it is very likely that you will be working with different versions of Python itself, or different versions of Python libraries. Quite often, libraries break backwards compatibility, and it’s unlikely that any serious application will have zero dependencies. So we create virtual environment to keep different project environments isolated if two or more of your projects have conflicting dependencies.
 
-**Python comes with the ubuntu 14.04, so there is no need to install python if you are using the newest ubuntu.**
+**Python comes with the ubuntu 14.04, so there is no need to install python if you are using the latest ubuntu.**
 
 If Python 2.7 is not installed, install it
 
@@ -56,7 +56,8 @@ If Python 2.7 is not installed, install it
 	
 Install some required packages
 
-	$ sudo apt-get install python-dev libpq-dev libxml2-dev libproj-dev libgeos-dev libgdal-dev -y
+	$ sudo apt-get install python-dev libpq-dev libxml2-dev -y
+	$ sudo apt-get install  libproj-dev libgeos-dev libgdal-dev -y
 	$ wget -c https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py
 
 Install virtualenv:
@@ -79,13 +80,13 @@ Then, add the folowing lines to ~/.bashrc:
 
 	$ sudo nano ~/.bashrc
 	
-	# copy and paste these two lines at the end of the ~/.bashrc
+	# add these two lines at the end of the ~/.bashrc
 	export WORKON_HOME=$HOME/.virtualenvs
 	source /usr/local/bin/virtualenvwrapper_lazy.sh
 	
 	$ source ~/.bashrc
 	
-**Starting a New Virtual Environment**
+####Starting a New Virtual Environment
 
 Virtualenvwrapper provides some nice commands we can use to play around with the environments.
 
@@ -107,23 +108,19 @@ To deactivate and exit the virtual environment, just do
 Tht next time you come back, start you environment by doing:
 
 	$ workon environment_name
-	
-Remove your current environment:
-
-	$ rmvirtualenv environment_name
-	Removing (environment_name)...
 
 Other usage command:
+- Remove your current environment: `rmvirtualenv environment_name`
 - show a list of environments: `workon`
 
-## Setting up MetpetDDB interface
+## Setting up MetpetDB interface
 
-If you have create a virtual environment for MetpetDB interface and you have not yet fooled around with it, start the virtual environment: `workon environment_name` 
+If you have created a virtual environment for MetpetDB interface and you have not yet fooled around with its setting and packages, start the virtual environment: `workon environment_name` 
 
 If you are not sure, create a new clean virtual environment:
 	
 	# Deleting the previous virtual env is optional
-	# $ rmvirtualenv environment_name #env name was "metpetdb" if you strictly follow the instruction
+	# $ rmvirtualenv environment_name #(env name was "metpetdb" if you strictly follow the instruction)
 	
 	$ mkvirtualenv metpetdb
 	$ workon metpetdb
@@ -133,7 +130,7 @@ Create a directory for the project:
 	$ mkdir metpetdb
 	$ cd metpetdb
 	
-Under metpetdb directory, we are going to create our secret "app_variables.env" file that points to the API server.
+Under metpetdb directory, where we place our secret "app_variables.env" file that points to the API server.
 
 	$ sudo nano app_variables.env
 	
@@ -159,11 +156,11 @@ Finally, run app.py to test if we have set up the interface properly:
 Visit `http://127.0.0.1:5000/` or `localhost:5000/` to view the project.
 	
 ## Configuring Apache to Serve the Application
-We are still in the virtual env, deactivate and exit the virtual environment first.
+We are still in the virtual env, deactivate and exit the virtual environment first by do `deactivate`
 
-**Configure and Enable a New Virtual Host**
+**Configure and Enable default or a New Virtual Host**
 	
-Open the .conf file of your virtual host, in here, we directly modify the default virtual host .conf. 
+Open the .conf file of your virtual host, in here, we directly modify the default virtual host's .conf. 
 
 	$ sudo nano /etc/apache2/sites-available/000-default.conf
 
@@ -189,7 +186,7 @@ Add the following lines of code to the file to configure the virtual host. Be su
 
 Save and close the file.
 
-**Create the .wsgi File**
+####Create the .wsgi File
 
 Make sure you are at `~/metpetdb`. We need to create the .wsgi script file for Apace to uses to serve the Flask app.
 	
@@ -201,6 +198,7 @@ Modify and add the following lines of conde to the metpetdb.wsgi according to yo
 
 	activate_this = '/home/ubuntu/.virtualenvs/metpetdb/bin/activate_this.py'
 	execfile(activate_this, dict(__file__=activate_this))
+	
 	import sys
 	import logging
 	logging.basicConfig(stream=sys.stderr)
@@ -223,7 +221,7 @@ Now your directory structure should look like this:
 	|----------------app_variables.env  
 	|----------------metpetdb.wsgi
 
-**Set Proper Permission**
+####Set Proper Permission
 
 Run the following commands to set permission.
 	
