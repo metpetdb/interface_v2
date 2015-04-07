@@ -30,28 +30,19 @@ Apache web server installation
 	
 ####Install mod_wsgi
 
-Install pip to "easy_install" mod_wsgi, virtualenv and Flask later on
+Now we install mod_wsgi by typing the following command
 
-	$ wget -c https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py
+	$ sudo apt-get install libapache2-mod-wsgi python-dev
+
+To enable mod_wsgi, run the following command:
+
+	$sudo a2enmod wsgi 
 	
-
-Now we can install an official release direct from PyPi, run:
-
-	$ sudo pip install mod_wsgi
-
-If you wish to use a version of Apache which is installed into a non standard location, you can set and export the APXS environment variable to the location of the Apache apxs script for your Apache installation before performing the installation.
-
-To verify that the installation was successful, run the mod_wsgi-express script with the start-server command:
-
-	$ mod_wsgi-express start-server
-	
-This will start up Apache/mod_wsgi on port 8000. You can then verify that the installation worked by pointing your browser at:
-	`http://localhost:8000/`. When started in this way, the Apache web server will stay in the foreground. To stop the Apache server, use CTRL-C.
-
-Then reload apache service:
+Restart Apache to get mod_wsgi to work.
 
 	$ sudo service apache2 restart
-	
+
+
 ## Python and Virtualenvwrapper setup
 
 Virtualenv is probably what you want to use during development.
@@ -65,7 +56,8 @@ If Python 2.7 is not installed, install it
 	
 Install some required packages
 
-	$ sudo apt-get install python-dev libpq-dev libxml2-dev libproj-dev libgeos-dev libgdal-dev
+	$ sudo apt-get install python-dev libpq-dev libxml2-dev libproj-dev libgeos-dev libgdal-dev -y
+	$ wget -c https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py
 
 Install virtualenv:
 
@@ -90,6 +82,8 @@ Then, add the folowing lines to ~/.bashrc:
 	# copy and paste these two lines at the end of the ~/.bashrc
 	export WORKON_HOME=$HOME/.virtualenvs
 	source /usr/local/bin/virtualenvwrapper_lazy.sh
+	
+	$ source ~/.bashrc
 	
 **Starting a New Virtual Environment**
 
@@ -142,6 +136,7 @@ Create a directory for the project:
 Under metpetdb directory, we are going to create our secret "app_variables.env" file that points to the API server.
 
 	$ sudo nano app_variables.env
+	
 	# copy and paste the following keys into "app_variables.env"
 	--------------------------------------------------------
 	API_HOST=http://54.164.222.32
@@ -163,5 +158,93 @@ Finally, run app.py to test if we have set up the interface properly:
 
 Visit `http://127.0.0.1:5000/` or `localhost:5000/` to view the project.
 	
+## Configuring Apache to Serve the Application
+We are still in the virtual env, deactivate and exit the virtual environment first.
 
+**Configure and Enable a New Virtual Host**
+	
+Open the .conf file of your virtual host, in here, we directly modify the default virtual host .conf. 
+
+	$ sudo nano /etc/apache2/sites-available/000-default.conf
+
+Add the following lines of code to the file to configure the virtual host. Be sure to change the ServerName to your domain or cloud server's IP address:
+	
+	<VirtualHost *:80>
+        #ServerName metpetdb.rpi.edu    #optional
+        ServerAdmin webmaster@localhost #change this
+
+        WSGIScriptAlias / /home/ubuntu/metpetdb/metpetdb.wsgi
+
+        <Directory /home/ubuntu/metpetdb/>
+                Order allow,deny
+                Allow from all
+                Require all granted
+        </Directory>
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        LogLevel warn
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+	</VirtualHost>
+
+Save and close the file.
+
+**Create the .wsgi File**
+
+Make sure you are at `~/metpetdb`. We need to create the .wsgi script file for Apace to uses to serve the Flask app.
+	
+	$ deactivate
+	$ cd ~/metpetdb/
+	$ sudo nano metpetdb.wsgi
+	
+Modify and add the following lines of conde to the metpetdb.wsgi according to you system setup
+
+	activate_this = '/home/ubuntu/.virtualenvs/metpetdb/bin/activate_this.py'
+	execfile(activate_this, dict(__file__=activate_this))
+	import sys
+	import logging
+	logging.basicConfig(stream=sys.stderr)
+	sys.path.insert(0,"/home/ubuntu/metpetdb/")
+	sys.path.insert(0,"/home/ubuntu/metpetdb/metpetdb_interface")
+	sys.path.insert(0,"/home/ubuntu/.virtualenvs/metpetdb/lib/python2.7/site-packag$
+
+	from metpetdb_interface import app as application
+
+Now your directory structure should look like this:
+
+	|--------metpetdb
+	|----------------metpetdb_interface
+	|-----------------------static
+	|-----------------------templates
+	|-----------------------api.py
+	|-----------------------app.py
+	|-----------------------...*.py
+	|-----------------------__init__.py
+	|----------------app_variables.env  
+	|----------------metpetdb.wsgi
+
+**Set Proper Permission**
+
+Run the following commands to set permission.
+	
+	$ sudo chmod -R o+rx ~/metpetdb
+	$ sudo chmod -R o+rx ~/.virtualenvs/metpetdb
+	
+## Restart Apache
+Restart Apache with the following command to apply the changes:
+
+	$ sudo service apache2 restart 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
