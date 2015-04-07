@@ -173,8 +173,6 @@ Add the following lines of code to the file to configure the virtual host. Be su
         WSGIScriptAlias / /home/ubuntu/metpetdb/metpetdb.wsgi
 
         <Directory /home/ubuntu/metpetdb/>
-                Order allow,deny
-                Allow from all
                 Require all granted
         </Directory>
 
