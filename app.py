@@ -1,15 +1,17 @@
 import ast
-import StringIO
-import os
-import sys
-import base64
 from urllib import urlencode
 from requests import get, post
 import json
-from itsdangerous import URLSafeTimedSerializer
 
-from flask import Flask, request, render_template, url_for, redirect, flash, \
-                  session
+from flask import (
+    Flask,
+    request,
+    render_template,
+    url_for,
+    redirect,
+    flash,
+    session
+)
 from flask_mail import Mail, Message
 import dotenv
 from getenv import env
