@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block body %}
+<!--<script src="/static/js/jquery-2.1.1.min.js"></script>-->
+<div class = "table-responsive">
+<table id="samplelist" class="table">
+
+<script>
+var json = {{can|safe}};
+var a;
+var rows = document.getElementById("rows");
+
+for (a = 0; a < json.length; a++)
+{
+ console.log(json[a].chemical_analysis_id);
+ var analyst = '';
+ var analysis_date = '';
+ if(json[a].analyst == null)
+  analyst = 'None';
+ if(json[a].analysis_date == null)
+  analysis_date = 'None';
+
+ rows.innerHTML += "<tr><td class='sample_value'>" + json[a].chemical_analysis_id + "</td><td class='sample_value'><a href='/chemical_analysis/" + json[a].chemical_analysis_id +  "' target='_blank' > " + json[a].spot_id + "</a></td><td class='sample_value'>" + json[a].public_data + "</td><td class='sample_value'>" + json[a].analysis_method + "</td><td class='sample_value'>" + json[a].mineral__name + "</td><td class='sample_value'>" + json[a].where_done + "</td><td class='sample_value'>" + analyst + "</td><td class='sample_value'>" + analysis_date + "</td><td class='sample_value'>" + json[a].reference_x + "</td><td class='sample_value'>" + json[a].reference_y + "</td><td class='sample_value'>" + json[a].total + "</td></tr>";
+
+
+
+}
+
+
+
+</script>
+
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Point Number</th>
+      <th>Public Data</th>
+      <th>Analysis Method</th>
+      <th>Analysis Material</th>
+      <th>Location</th>
+      <th>Analyst</th>
+      <th>Analysis Date</th>
+      <th>Reference X</th>
+      <th>Reference Y</th>
+      <th>Total</th>
+  </thead>
+  <tbody id ="rows">
+    {% if total %}
+      <p>Total: {{ total }}</p>
+    {% endif %}
+    
+  </tbody>
+
+</table>
+</div> <!-- table-responsive -->
+<!--    &lt;&lt; <a href="{{ first_page }}"> First </a>
+    {% if prev_url %}
+       &nbsp;  &nbsp; &lt; <a href="{{ prev_url }}">Prev </a>
+    {% endif %}
+    {% if next_url %}
+       &nbsp;  &nbsp;<a href="{{ next_url }}">Next</a> &gt;
+    {% endif %}
+     &nbsp;  &nbsp; <a href="{{ last_page }}">Last </a>  &gt;&gt;
+-->
+{% endblock %}

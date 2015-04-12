@@ -1,3 +1,62 @@
+#mineral-and-or
+{
+ float:left;
+}
+
+#chemistry .elementoxidelist
+{
+ width: 100px !important;
+ float: left;
+ margin-top: -20px;
+ margin-right: 10px;
+}
+
+.remove
+{
+ float: left;
+ margin-top: -18px;
+ margin-left: 10px;
+}
+
+.addFirst
+{
+ float: none !important;
+}
+
+.add
+{
+ float: left;
+ margin-top: -18px;
+ margin-left: 20px;
+}
+
+.jstree-default>.jstree-container-ul>.jstree-node
+{
+ margin-left: 20px !important;
+}
+
+.chem-mineral-tree
+{
+ margin-top: -18px;
+}
+
+.elementoroxide
+{
+ clear: none;
+ float:left;
+ width: 100px;
+ margin-right: 15px;
+}
+
+#chemistry .chosen-container
+{
+ width: 115px !important;
+ float: left;
+ margin-right: 10px;
+}
+
+#page_title { display:none; }
+
 #search-panel .accordion-toggle:after {
     /* symbol for "opening" panels */
     font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
