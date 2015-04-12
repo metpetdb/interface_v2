@@ -1,0 +1,1195 @@
+{% extends "base.html" %}
+{% block body %}
+<div id="spinner" class="spinner" style="display:none;">
+    <img id="img-spinner" src="/static/images/ajax-loader.gif" alt="Loading"/>
+</div>
+
+  <div id = "search-options" class="panel panel-default">
+    <div id = "search-panel" class="panel-heading">
+      <h4 class="panel-title">
+        <a class='accordion-toggle' data-toggle="collapse" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" data-parent="#accordion" href="">
+          Search Options
+        </a>
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in">
+      <div class="panel-body">
+        
+<ul class="nav nav-tabs" id="myTab">
+  <li class= "active"><a href="#chemistry">Chemistry</a></li>
+</ul>
+<div id = "form-container">
+    <form action="" method="get" id='content' class="tab-content">
+
+     
+
+   <div class="tab-pane active" id="chemistry" onchange="updateChemistry()"><br><br>
+        <div id = "selection-error"></div>
+        <div id="chemanalysisids">
+        <input type="hidden" name="treefrog" value="treefrog">
+        <input type="hidden" name="squirrel" value="squirrel">
+        </div>
+        
+        <div id = "chemistry-forms">
+       <label for="mineral-tree">Mineral: </label>
+       <div id="mineral-select">
+       <select name="minerals__in" onchange="" name="" class="chosen-select">
+       <option></option>
+        {% for m in minerals %}
+            <option value="{{ m.id }}">{{ m.name }}</option>
+        {% endfor %}
+       </select>
+       </div>
+       <br><br>
+
+<label for="mineral-tree">Elements and Oxides: </label>
+        <div id= "form1" class="chemistry-form">
+        <input type="hidden" name="squirrel" value="squirrel">
+        
+        <select class="elementoroxide">
+        <option selected="selected" value="element">Element</option>
+        <option value="oxide">Oxide</option>
+        </select>
+         <br class = "br">
+        <div class = "elementoxidelist">
+        <select name="elements__element_id__in" onchange="" class="chosen-select">
+        <option></option>
+        {% for element in elements %}
+             <option value="{{ element.element_id }}">{{ element.name }}</option>
+        {% endfor %}
+        </select>
+        </div>
+
+       <a class="add">Add</a>
+       <a class="remove">Remove</a>
+       <br>
+       </div> <!--end form1 -->
+       </div> <!--end chemistry-forms -->
+       
+
+       <div id = "selected-minerals"></div>
+
+      </div><!-- end chemistry-->
+
+
+
+
+
+<input type="hidden" id="search_filters" name="search_filters" value="samples">
+
+
+<div class="clear"></div>
+
+
+</div><!--end form container-->
+  {% if error %}
+      <p style="color: red;">Please submit a search term.</p>
+  {% endif %}
+      </div>
+    </div>
+  </div>
+
+<div id="search-summary" class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a class='accordion-toggle' data-toggle="collapse" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" data-parent="#accordion" href="">
+          Search Summary
+        </a>
+      </h4>
+      <a id= "clearAll" onclick="clearChemistry()">Clear All</a>
+    
+     </div>
+    <div id="collapseTwo" class="panel-collapse collapse in">
+       <div class="panel-body">
+          <p id= "instructions">Set your search criteria by selecting from the categories on the left.<br></p>
+          <div id = "search-options-rock-type"></div>
+          <div id = "search-options-metgrades"></div>
+          <div id = "search-options-location"></div>
+	  <div id = "search-options-minerals"></div>
+          <div id = "search-options-chemistry"></div>
+          <div id = "search-options-provenance"></div>
+                <div id = "form-submit">
+
+
+<div id = "resource" class = "text-center">
+    <div class="btn-group" data-toggle="buttons" style="margin:0 auto;">
+        <label class="btn btn-primary">
+            <input type="radio" name="resource" value="sample" id="option1" checked="checked"> View Samples
+        </label>
+        <label class="btn btn-primary active">
+            <input type="radio" name="resource" value="chemicalanalysis" id="option2"> View Chemical Analyses
+        </label>
+    </div>
+</div>
+
+</div>
+
+<br>
+       <input type="submit" value="Search">
+      </div>
+       </div>
+    </div><!--end collapsetwo -->
+</div>
+
+  </form>  <!-- tabs -->
+
+<div class="clear"></div>
+
+<div id = "results"></div>
+
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
+<script src="/static/js/jquery-2.1.1.min.js"></script>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="/static/css/chosen.min.css">
+<script src="/static/js/chosen.jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+<script src= "http://documentcloud.github.io/underscore/underscore.js"></script>
+
+
+<link rel="stylesheet" href="/static/css/style.min.css">
+<script src="/static/js/jstree.min.js"></script>
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+<link href="/static/css/bootstrap-switch.min.css" rel="stylesheet">
+<script src="/static/css/bootstrap-switch.min.js"></script>
+
+<script>
+$('#myTab a').click(function (e) {
+  e.preventDefault();
+  $(this).tab('show');
+});
+
+$('#location-tab a').click(function (e) {
+  e.preventDefault();
+  $(this).tab('show');
+});
+
+//GLOBAL VARS
+var currentOverlay = null;
+var chemistryRows = 2;
+
+//ON READY FUNCTION
+$(function()
+{
+var mineralnodes = {{ mineral_nodes|safe }};
+console.log(mineralnodes);
+
+$('#mineral-tree').jstree({ 'core' : {
+    'data' : mineralnodes
+}
+,
+
+"checkbox" : {
+      "keep_selected_style" : false
+    },
+    "plugins" : [ "checkbox" ]
+ });
+
+
+//mineral tree on change
+$('#mineral-tree').on("changed.jstree", function () 
+{
+  var mids = $('#mineral-tree').jstree('get_selected', true);
+  //console.log(data.selected);
+  /*
+  document.getElementById("selected-minerals").innerHTML = "";
+  console.log(document.getElementById("selected-minerals").innerHTML );
+  var searchOptions = document.getElementById("search-options-minerals");
+  searchOptions.innerHTML = "";
+  if(mids.length > 0)
+   searchOptions.innerHTML = "<div class='summary-title'><h4>Minerals</h4><a onclick='clearMinerals()' class='clear-title'>Clear</a></div>";
+*/
+  for(var a = 0; a < mids.length; a++)
+  {
+   //console.log(mids[a]);
+   if(mids[a].original.mineral_id)
+   {
+    document.getElementById("selected-minerals").innerHTML += "<input name='minerals__in' type='hidden' value=" + mids[a].original.mineral_id + " >";   
+    //searchOptions.innerHTML += mids[a].id + ", ";
+   }
+  }
+});
+
+//Ajax call to update sample data
+var frm = $('#content');
+    frm.submit(function (e) {
+e.preventDefault();
+
+$('#spinner').show();
+
+//START SET TIMEOUT
+setTimeout(function() {
+
+    //Clear error message
+    document.getElementById("selection-error").innerHTML = "";
+    var mineralSelected = false;
+    var oxideSelected = false;
+    var elementSelected = false;
+
+    //Proceed only if a mineral and at least one oxide/element are selected
+    var formList = document.getElementById("chemistry-forms").getElementsByClassName("chemistry-form");
+    var a;
+    for(a = 0; a < formList.length; a++)
+    {
+     var formId = formList.item(a).id;
+  if($("#" + formId + " .chosen-select :selected").text() != "")
+  {
+   if($("#" + formId + " .elementoroxide :selected").text() == "Oxide")
+    oxideSelected = true;
+   if($("#" + formId + " .elementoroxide :selected").text() == "Element")
+    elementSelected = true;
+  }
+ }
+ if($("#mineral-select .chosen-select :selected").text())
+    mineralSelected = true;
+
+   if(mineralSelected & (oxideSelected || elementSelected))
+   {
+     var resultJSON = []; 
+     var resultIDs = [];
+     
+        var formList = document.getElementById("chemistry-forms").getElementsByClassName("chemistry-form");
+        //Do for each row of elem+min / ox+min data
+
+        var a;
+        for(a = 0; a < formList.length; a++)
+        {
+         var formId = formList.item(a).id;
+         console.log("FORM ID IS " + formId);
+         var data = $('#' + formId + ' :input, #mineral-select :input, #resource :input').serialize();
+         console.log("DATA: " + data);
+         $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: data,
+            datatype: "json",
+            success: function (result) {
+                console.log(result);
+                console.log("FORM " + a + " DATA SUBMITTED");
+                var res = JSON.parse(result);
+                resultJSON.push(res);
+                $('#spinner').hide();
+            },
+            async: false,
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+         }); //end ajax function
+        } //end loop on chemistry rows
+
+        var a;
+        var resultIntersection;
+        if(resultJSON.length)
+         resultIntersection = resultJSON[0];
+
+
+        for(a = 1; a < resultJSON.length; a++)
+         resultIntersection = intersectionObjects(resultIntersection, resultJSON[a]);
+        console.log("RESULT FINAL: " + JSON.stringify(resultIntersection));
+
+        //Send result to template
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'), 
+            data: {"results": JSON.stringify(resultIntersection), "resource": $('#resource :input:checked').val()},
+            datatype: "json",
+            success: function (data) {
+                $("#results").html("");
+                $("#results").html(data);
+                $('#spinner').hide();
+                document.getElementsByTagName("header")[1].innerHTML = "";
+            },
+            async: false,
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+         }); //end ajax function
+
+        return false;
+     } //end mineral element selection check if
+     else
+     {
+      console.log("FIX SELECTION");
+      document.getElementById("selection-error").innerHTML = "<p>Select a mineral and at least one element or oxide.</p>";
+      $('#spinner').hide();
+     } //end mineral element selection check else
+
+}, 1000); //END SET TIMEOUT
+    }); //END form submit function
+
+//Intersection functions
+//Source : http://jsfiddle.net/luisperezphd/Tft23/
+// intersectionObjects() for the intersection of objects
+// using your equality function of choice
+
+    function intersectionObjects2(a, b, areEqualFunction) {
+        var Result = [];
+        
+        for(var i = 0; i < a.length; i++) {
+            var aElement = a[i];
+            var existsInB = _.any(b, function(bElement) { return areEqualFunction(bElement, aElement); });
+            if(existsInB) {
+                Result.push(aElement);
+            }
+        }
+        
+        return Result;
+    }
+    
+    function intersectionObjects() {
+        var Results = arguments[0];
+        var LastArgument = arguments[arguments.length - 1];
+        var ArrayCount = arguments.length;
+        var areEqualFunction = _.isEqual;
+        
+        if(typeof LastArgument === "function") {
+            areEqualFunction = LastArgument;
+            ArrayCount--;
+        }
+        
+        for(var i = 1; i < ArrayCount ; i++) {
+            var array = arguments[i];
+            Results = intersectionObjects2(Results, array, areEqualFunction);
+            if(Results.length === 0) break;
+        }
+        return Results;
+    } //end intersection functions
+
+$('.btn-toggle').click(function() {
+    $(this).find('.btn').toggleClass('active');  
+    
+
+   $(this).find('.btn').toggleClass('btn-primary');
+
+    $(this).find('.btn').toggleClass('btn-default');
+       
+});
+
+/*$('form').submit(function(){
+	alert($(this["options"]).val());
+    return false;
+});*/
+
+$("#form1 .chosen-select").chosen({
+    allow_single_deselect: true,
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
+
+$("#mineral-select .chosen-select").chosen({
+    allow_single_deselect: true,
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
+}); //END READY FUNCTION
+
+//UPDATE BOUNDS
+function updateBounds()
+{
+   var searchOptions = document.getElementById("search-options-location");
+   searchOptions.innerHTML = "";
+
+   var nelat = document.getElementById("ne-lat").value;
+   var nelong = document.getElementById("ne-long").value;
+   var swlat = document.getElementById("sw-lat").value;
+   var swlong = document.getElementById("sw-long").value;
+
+  if(!currentOverlay || $("#selected-regions option:selected").length || 
+     $("#selected-countries option:selected").length || 
+     $("#selected-metregions option:selected").length)
+   searchOptions.innerHTML = "<div class='summary-title'><h4>Location</h4><a onclick='clearBounds()' class='clear-title'>Clear</a></div>";
+
+  //Update Location
+  if(currentOverlay.map !== null && currentOverlay.bounds !== null)
+  {
+   console.log("HERE");
+   console.log("map is " + currentOverlay);
+   //Update POINT 4326 values to submit
+   //SRID=4326;POINT(-118.0488106 33.9346343)
+   //var upperbound = 'SRID=4326;POINT(' + nelat + ' ' +  nelong + ')';
+   //var lowerbound = 'SRID=4326;POINT(' + swlat + ' ' +  swlong + ')';
+   var upperbound = "{'type': 'Point', 'coordinates': [" + nelat + "," + nelong + "]}";
+   var lowerbound = "{'type': 'Point', 'coordinates': [" + swlat + "," + swlong + "]}";
+
+  //se.lat = sw.lat
+  //se.lng = ne.lng
+  //nw.lat = ne.lat
+  //nw.lng = sw.lng 
+
+  console.log("CHANGED BOUND IS");
+  console.log(polygon);
+  document.getElementById("location-bound").value = polygon;
+
+   searchOptions.innerHTML += "<b>NE:</b> [" + parseFloat(nelat).toFixed(2) + ", " + parseFloat(nelong).toFixed(2) + "] <b>SW:</b> [" + parseFloat(swlat).toFixed(2) + ", " + parseFloat(swlong).toFixed(2) + "]<br>";
+  }
+
+
+
+  updateLocation();
+}
+
+function updateChemistry()
+{
+ //Chemistry search options, selected chemistry minerals
+ var searchOptions = document.getElementById("search-options-chemistry");
+ var mids = $('#mineral-tree').jstree('get_selected', true);
+
+ //Clear search options summary
+ searchOptions.innerHTML = "";
+
+ //Are there any elements or oxides selected?
+ var elementSelected = false;
+ var oxideSelected = false;
+ var mineralSelected = false;
+ var formList = document.getElementById("chemistry-forms").getElementsByClassName("chemistry-form");
+ var a;
+ for(a = 0; a < formList.length; a++)
+ {
+  var formId = formList.item(a).id;
+  if($("#" + formId + " .chosen-select :selected").text() != "")
+  {
+   if($("#" + formId + " .elementoroxide :selected").text() == "Oxide")
+    oxideSelected = true;
+   if($("#" + formId + " .elementoroxide :selected").text() == "Element")
+    elementSelected = true;
+  }
+ }
+ if($("#mineral-select .chosen-select :selected").text())
+    mineralSelected = true;
+
+ //If elements, oxides, or minerals selected, update summary title
+ //and set search-filter value to chemistry
+ //else sest search-filter value to sample 
+ if(mineralSelected || elementSelected || oxideSelected)
+ {
+  searchOptions.innerHTML = "<div class='summary-title'><h4>Chemistry</h4><a onclick='clearChemistry()' class='clear-title'>Clear</a></div>";
+ }
+
+  //Update elements in search summary
+  if(elementSelected)
+  {
+   searchOptions.innerHTML += "<b>Elements:</b> ";
+   for(a = 0; a < formList.length; a++)
+   {
+    var formId = formList.item(a).id;
+    if($("#" + formId + " .chosen-select").length)
+    {
+     if($("#" + formId + " .elementoroxide :selected").text() == "Element")
+      searchOptions.innerHTML += $("#" + formId + " .chosen-select :selected").text() + ", ";
+    }
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update oxides in search summary
+  if(oxideSelected)
+  {
+   searchOptions.innerHTML += "<b>Oxides:</b> ";
+   for(a = 0; a < formList.length; a++)
+   {
+    var formId = formList.item(a).id;
+    if($("#" + formId + " .chosen-select").length)
+    {
+     if($("#" + formId + " .elementoroxide :selected").text() == "Oxide")
+      searchOptions.innerHTML += $("#" + formId + " .chosen-select :selected").text() + ", ";
+    }
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update minerals in search summary
+ /*
+  if(mids.length > 0)
+  searchOptions.innerHTML += "<b>Minerals:</b> ";
+  for(var a = 0; a < mids.length; a++)
+  {
+   console.log(mids[a]);
+   if(mids[a].original.mineral_id)
+    searchOptions.innerHTML += mids[a].id + ", ";
+  }
+  searchOptions.innerHTML = searchOptions.innerHTML.slice(0, -2);
+*/
+
+ if(mineralSelected)
+  searchOptions.innerHTML += "<b>Mineral:</b> ";
+    searchOptions.innerHTML += $("#mineral-select" + " .chosen-select :selected").text();
+
+}
+
+function clearChemistry()
+{
+ $("#chemistry .chosen-select").val('').trigger("chosen:updated");
+ $("#mineral-tree").jstree("deselect_all");
+ document.getElementById("search-options-chemistry").innerHTML = "";
+}
+
+function updateLocation()
+{
+ var searchOptions = document.getElementById("search-options-location");
+//Update Region
+  var selectedRegions = document.getElementById("selected-regions");
+  if($("#selected-regions option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Regions:</b> ";
+   for(var a = 0; a < selectedRegions.options.length; a++)
+   {
+   if(selectedRegions.options[a].selected)
+    searchOptions.innerHTML += selectedRegions.options[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update Countries
+  var selectedCountries = document.getElementById("selected-countries");
+  if($("#selected-countries option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Countries:</b> ";
+   for(var a = 0; a < selectedCountries.options.length; a++)
+   {
+   if(selectedCountries.options[a].selected)
+    searchOptions.innerHTML += selectedCountries.options[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update Met Regions
+  var selectedMetRegions = document.getElementById("selected-metregions");
+  if($("#selected-metregions option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Metamorphic Regions:</b> ";
+   for(var a = 0; a < selectedMetRegions.options.length; a++)
+   {
+   if(selectedMetRegions.options[a].selected)
+    searchOptions.innerHTML += selectedMetRegions.options[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+}
+
+//UPDATE ROCK TYPES
+function updateRockTypes()
+{
+ //Update Rock Types
+ var searchOptions = document.getElementById("search-options-rock-type");
+ searchOptions.innerHTML = "";
+ var checkBoxes = document.getElementsByName("rock_type__rock_type__in");
+
+ var checked = false;
+  for(var i=0; i < checkBoxes.length;i++)
+  if(checkBoxes[i].checked)         
+   checked=true;
+ if(checked)
+ {
+  searchOptions.innerHTML += "<div class = 'summary-title'><h4>Rock Types</h4><a onclick='clearRockTypes()' class='clear-title'>Clear</a></div>";
+  for(var i=0; i < checkBoxes.length;i++)
+  {  
+   if(checkBoxes[i].checked)
+   {         
+   checked=false;
+   console.log(checkBoxes[i].defaultValue);
+   searchOptions.innerHTML += checkBoxes[i].defaultValue + ", ";
+   }
+  }
+  var s = searchOptions.innerHTML;
+  searchOptions.innerHTML = s.slice(0, -2);
+ }
+}
+
+function updateMetGrades()
+{
+ //Update Metamorphic Grades
+ var searchOptions = document.getElementById("search-options-metgrades");
+ searchOptions.innerHTML = "";
+ var checkBoxes = document.getElementsByName("metamorphic_grades__name__in");
+ var checked = false;
+ for(var i=0; i < checkBoxes.length;i++)
+ if(checkBoxes[i].checked)         
+  checked=true;
+ if(checked)
+ {
+  searchOptions.innerHTML += "<div class = 'summary-title'><h4>Metamorphic Grades</h4><a onclick='clearMetGrades()' class='clear-title'>Clear</a></div>";
+  for(var i=0; i < checkBoxes.length;i++)
+  { 
+   if(checkBoxes[i].checked)
+   {         
+    console.log(checkBoxes[i].defaultValue);
+    searchOptions.innerHTML += checkBoxes[i].defaultValue;
+    searchOptions.innerHTML += ', ';
+   }
+  }
+  var s = searchOptions.innerHTML;
+  searchOptions.innerHTML = s.slice(0, -2);
+
+  console.log(s.slice(0, -1));
+ }
+}
+
+//UPDATE PROVENANCES
+function updateProvenance()
+{
+   var searchOptions = document.getElementById("search-options-provenance");
+   searchOptions.innerHTML = "";
+
+  if($("#selected-owners option:selected").length ||
+     $("#selected-collectors option:selected").length ||
+     $("#selected-reference option:selected").length ||
+     $("#selected-number option:selected").length ||
+     $("#selected-igsn option:selected").length ||
+     $('#startdatevalue').val() || $('#enddatevalue').val())
+   searchOptions.innerHTML += "<div class='summary-title'><h4>Provenance</h4><a onclick='clearProvenance()' class='clear-title'>Clear</a></div>";
+
+
+
+  //Update Owners
+  var selectedOwners = document.getElementById("selected-owners");
+  if($("#selected-owners option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Owners:<b> ";
+   for(var a = 0; a < selectedOwners.options.length; a++)
+   {
+   if(selectedOwners.options[a].selected)
+    searchOptions.innerHTML += selectedOwners.options[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update Collectors
+  var selectedCollectors = document.getElementById("selected-collectors");
+  if($("#selected-collectors option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>Collectors:</b> ";
+   for(var a = 0; a < selectedCollectors.options.length; a++)
+   {
+   if(selectedCollectors.options[a].selected)
+    searchOptions.innerHTML += selectedCollectors.options[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update References
+  var selectedReferences = document.getElementById("selected-references");
+  if($("#selected-references option:selected").length)
+  {
+   searchOptions.innerHTML += "<b>References:</b> ";
+   for(var a = 0; a < selectedReferences.options.length; a++)
+   {
+   if(selectedReferences.options[a].selected)
+    searchOptions.innerHTML += selectedReferences.options[a].innerHTML + ", ";
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  //Update Number
+  var selectedNumber = document.getElementById("selected-number");
+  if($("#selected-number option:selected").length
+    && $("#selected-number option:selected").text() != "Select sample number")
+  {
+   searchOptions.innerHTML += "<b>Number:</b> " + $("#selected-number option:selected").text() + "<br> ";
+  }
+
+  //Update IGSN
+  var selectedIGSN = document.getElementById("selected-igsn");
+  if($("#selected-igsn option:selected").length
+     && $("#selected-igsn option:selected").text() != "Select IGSN")
+  {
+   searchOptions.innerHTML += "<b>IGSN:</b> " + $("#selected-igsn option:selected").text() + "<br> ";
+  }
+
+  //Update Date
+  console.log($('#startdatevalue').val());
+  if($('#startdatevalue').val()) 
+   searchOptions.innerHTML += "<b>Start Date:</b> " + $('#date-start').val() + "<br>";
+  if($('#enddatevalue').val())
+   searchOptions.innerHTML += "<b>End Date:</b> " + $('#date-end').val() + "<br>"; 
+
+  //Update Access
+  var access = $('input[name=public_data]');
+  var accessVal = access.filter(':checked'); 
+  if(accessVal)
+  {
+   if(accessVal.val() == "")
+     searchOptions.innerHTML += "<b>Access:</b> " +  "No Preference<br>";
+   if(accessVal.val() == "Y")
+     searchOptions.innerHTML += "<b>Access:</b> " + "Public<br>";
+   if(accessVal.val() == "N")
+     searchOptions.innerHTML += "<b>Access:</b> " + "Private<br>"; 
+  }
+}
+
+function clearAll()
+{
+ clearRockTypes();
+ clearMetGrades();
+ clearBounds();
+ clearProvenance();
+ clearMinerals();
+ 
+}
+
+function clearRockTypes()
+{
+ var checkBoxes = document.getElementsByName("rock_type__rock_type__in");
+ for(var i=0; i < checkBoxes.length;i++)
+ { 
+ checkBoxes[i].checked = false;
+ }
+ document.getElementById("search-options-rock-type").innerHTML = "";
+}
+
+function clearMetGrades()
+{
+ var checkBoxes = document.getElementsByName("metamorphic_grades__name__in");
+ for(var i=0; i < checkBoxes.length;i++)
+ { 
+ checkBoxes[i].checked = false;
+ }
+ document.getElementById("search-options-metgrades").innerHTML = "";
+}
+
+function clearProvenance()
+{
+ $("#provenance .chosen-select").val('').trigger("chosen:updated");
+ if($('#date-start').val())
+  $.datepicker._clearDate('#date-start');
+ if($('#date-end').val())
+  $.datepicker._clearDate('#date-end');
+ $('#date-start').val('');
+ $('#date-end').val('');
+ $('#startdatevalue').attr('value', '');
+ $('#enddatevalue').attr('value', '');
+ 
+ $("input:radio[name='public_data']").each(function(i) { this.checked = false; });
+ document.getElementById("search-options-provenance").innerHTML = "";
+ 
+}
+
+function updateStartDate(input)
+{
+ var year = input.value.substr(-4);
+ var date = input.value.substr(3, 2);
+ var month = input.value.substr(0, 2);
+ var timestamp = year + "-" + month + "-" + date + " 00:00:00"; 
+ $('#startdatevalue').attr('value', timestamp);
+ console.log($('#startdatevalue').val());
+ updateProvenance();
+}
+
+function updateEndDate(input)
+{
+ var year = input.value.substr(-4);
+ var date = input.value.substr(3, 2);
+ var month = input.value.substr(0, 2);
+ var timestamp = year + "-" + month + "-" + date + " 00:00:00"; 
+ $('#enddatevalue').attr('value', timestamp);
+ console.log($('#enddatevalue').val());
+ updateProvenance();
+}
+
+function clearMinerals()
+{
+ var searchOptions = document.getElementById("search-options-minerals");
+ searchOptions.innerHTML = "";
+ $("#mineral-tree").jstree("deselect_all");
+ 
+}
+
+
+
+function clearBounds()
+{
+ //Update Location in search summary
+  document.getElementById("search-options-location").innerHTML = "";
+  document.getElementById("ne-lat").value = "";
+  document.getElementById("ne-long").value = "";
+  document.getElementById("sw-lat").value = "";
+  document.getElementById("sw-long").value = "";
+  document.getElementById("location-bound").value = '';
+
+  if(currentOverlay)
+    currentOverlay.setMap(null);
+
+$("#location .chosen-select").val('').trigger("chosen:updated");
+
+}
+
+function showChemicalAnalyses()
+{
+ console.log("SQUIRREL");
+ document.getElementById("sample-or-chem").value = "chemicalanalysis";
+ console.log(document.getElementById("sample-or-chem").value);
+ //Resubmit form data
+ var frm = document.getElementById('content');
+    frm.submit(function () {
+    $('#spinner').show();
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: frm.serialize(),
+            success: function (data) {
+                $("#results").html("");
+                $("#results").html(data);
+                $('#spinner').hide();
+                document.getElementsByTagName("header")[1].innerHTML = "";
+
+            },
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+        });
+        return false;
+    }); //END ajax
+}
+
+function showSamples()
+{
+ console.log("SQUIRREL");
+ document.getElementById("sample-or-chem").value = "sample";
+ console.log(document.getElementById("sample-or-chem").value);
+ //Resubmit form data
+ var frm = $('#content');
+    frm.submit(function () {
+    $('#spinner').show();
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: frm.serialize(),
+            success: function (data) {
+                $("#results").html("");
+                $("#results").html(data);
+                $('#spinner').hide();
+                document.getElementsByTagName("header")[1].innerHTML = "";
+
+            },
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+        });
+        return false;
+    }); //END ajax
+}
+
+function toggleResults()
+{
+ console.log("TOGGLE SQUIRREL");
+ //Resubmit form data
+ var frm = $('#content');
+    frm.submit(function () {
+    $('#spinner').show();
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: frm.serialize(),
+            success: function (data) {
+                $("#results").html("");
+                $("#results").html(data);
+                $('#spinner').hide();
+                document.getElementsByTagName("header")[1].innerHTML = "";
+
+            },
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+        });
+        return false;
+    }); //END ajax
+}
+
+function toggleToChemView()
+{
+ console.log("HERE");
+ var sampleorchem = document.getElementById("sample-or-chem").value;
+ sampleorchem = "chemicalanalysis";
+ console.log(document.getElementById("sample-or-chem").value);
+ //Resubmit form data
+ $('#content').submit();
+}
+
+function toggleToSampleView()
+{
+ console.log("HERE");
+ var sampleorchem = document.getElementById("sample-or-chem").value;
+ sampleorchem = "sample";
+ console.log(document.getElementById("sample-or-chem").value);
+ //Resubmit form data
+ $('#content').submit();
+}
+
+function addChemistryRow()
+{
+ var mineralnodes = {{ mineral_nodes|safe }};
+ var rows = document.getElementById("chemistry-forms");
+ var div = document.createElement("div");
+ div.id = "form" + chemistryRows;
+ div.className = "chemistry-form";
+
+ //Squirrel
+ //<input type="hidden" name="squirrel" value="squirrel">
+ var squirrel = document.createElement("input");
+ squirrel.value = "squirrel";
+ squirrel.type = "hidden";
+ squirrel.name = "squirrel";
+ div.appendChild(squirrel);
+
+ //Element Oxide select
+ var eloroxSelect = document.createElement("select");
+ eloroxSelect.className = "elementoroxide";
+ //eloroxSelect.onchange = renderElementOxideList(this);
+ var option1 = document.createElement("option");
+ var option1Text = document.createTextNode("Element");
+ var option2 = document.createElement("option");
+ var option2Text = document.createTextNode("Oxide");
+ option1.appendChild(option1Text);
+ option2.appendChild(option2Text);
+ eloroxSelect.appendChild(option1);
+ eloroxSelect.appendChild(option2);
+ div.appendChild(eloroxSelect);
+ var br = document.createElement("br");
+ br.className = "br";
+ div.appendChild(br);
+
+ //Element Oxide list
+ var innerDiv = document.createElement("div");
+ innerDiv.className = "elementoxidelist";
+ var valueSelect = document.createElement("select");
+ valueSelect.name = "elements__element_id__in";
+ valueSelect.onchange = "";
+ valueSelect.className = "chosen-select elorox";
+
+ {% for element in elements %}
+   var newOption = document.createElement("option");
+   var newOptionText = document.createTextNode("{{element.name}}");
+   newOption.value = "{{element.element_id}}";
+   newOption.appendChild(newOptionText);
+   valueSelect.appendChild(newOption);
+ {% endfor %}
+
+ innerDiv.appendChild(valueSelect);
+ div.appendChild(innerDiv);
+ 
+ //Add and Remove anchors
+ var add = document.createElement("a");
+ add.className = "add";
+ var addText = document.createTextNode("Add");
+ add.appendChild(addText);
+ div.appendChild(add);
+ 
+ var remove = document.createElement("a");
+ remove.className = "remove";
+ //remove.onclick = removeChemistryRow(this.parentNode.id);
+ var removeText = document.createTextNode("Remove");
+ remove.appendChild(removeText);
+ div.appendChild(remove);
+  var br2 = document.createElement("br");
+ div.appendChild(br2);
+
+ //Append new div to rows
+ rows.appendChild(div);
+  
+ 
+ //rows.innerHTML += "<div id= 'form" + chemistryRows + "'><select class='elementoroxide' onchange='renderElementOxideList(this)'><option selected='selected' value='element'>Element</option><option value='oxide'>Oxide</option></select><br><div class = 'elementoxidelist'><select name='elements__element_id__in' onchange='' class='chosen-select elorox'>{% for element in elements %}<option value='{{ element.element_id }}'>{{ element.name }}</option>{% endfor %}</select></div><a class='add' onclick='addChemistryRow()'>Add</a><a class='remove' onclick='removeChemistryRow(this.parentNode.id)'>Remove</a><br></div> <!--end form -->";
+
+console.log(chemistryRows);
+//Chosen-select plugin activate
+$("#form" + chemistryRows + " .chosen-select").chosen({
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
+
+chemistryRows++;
+}
+
+$('#chemistry').click(function(e){
+updateChemistry();
+});
+
+$('#chemistry-forms').click(function(e){
+       var elem = e.target;
+       if(elem.className == "add")
+        addChemistryRow();
+       else if(elem.className == "add addFirst")
+       {
+        removeAddFirst();
+        addChemistryRow();
+       }
+       else if(elem.className == "remove")
+        removeChemistryRow(elem.parentNode.id);
+});
+
+function removeAddFirst()
+{
+ var addFirst = document.getElementsByClassName("addFirst")[0];
+ addFirst.parentNode.removeChild(addFirst);
+}
+
+$('#chemistry-forms').change(function(e){
+       var elem = e.target;
+       if(elem.className == "elementoroxide")
+       {
+         console.log(elem.options[elem.selectedIndex].value);
+          var list = $($(elem).parent()[0]).find(".elementoxidelist")[0];
+          elem.parentNode.removeChild(list); 
+          var oldadd = $($(elem).parent()[0]).find(".add")[0];
+          elem.parentNode.removeChild(oldadd);
+          var oldremove = $($(elem).parent()[0]).find(".remove")[0];
+          elem.parentNode.removeChild(oldremove);
+          //var oldbr = $($(elem).parent()[0]).find(".br")[0];
+          //elem.parentNode.removeChild(oldbr);
+          var id = elem.parentNode.id;
+          $("#" + id + " br:lt(1)").remove();
+
+         //Element Oxide list
+         var innerDiv = document.createElement("div");
+         innerDiv.className = "elementoxidelist";
+         var valueSelect = document.createElement("select");
+         valueSelect.className = "chosen-select";
+
+         if(elem.options[elem.selectedIndex].text == "Oxide")
+         {
+          valueSelect.name = "oxides__oxide_id__in";
+          {% for oxide in oxides %}
+           var newOption = document.createElement("option");
+           var newOptionText = document.createTextNode("{{oxide.species}}");
+           newOption.value = "{{oxide.oxide_id}}";
+           newOption.appendChild(newOptionText);
+           valueSelect.appendChild(newOption);
+          {% endfor %}
+         }
+         else if(elem.options[elem.selectedIndex].text == "Element")
+         {
+          valueSelect.name = "elements__element_id__in";
+          {% for element in elements %}
+           var newOption = document.createElement("option");
+           var newOptionText = document.createTextNode("{{element.name}}");
+           newOption.value = "{{element.element_id}}";
+           newOption.appendChild(newOptionText);
+           valueSelect.appendChild(newOption);
+          {% endfor %}
+         }
+        innerDiv.appendChild(valueSelect);
+        elem.parentNode.appendChild(innerDiv);
+
+         //Add and Remove anchors
+         var add = document.createElement("a");
+         add.className = "add";
+         var addText = document.createTextNode("Add");
+         add.appendChild(addText);
+         elem.parentNode.appendChild(add);
+ 
+         var remove = document.createElement("a");
+         remove.className = "remove";
+         var removeText = document.createTextNode("Remove");
+         remove.appendChild(removeText);
+         elem.parentNode.appendChild(remove);
+         var br2 = document.createElement("br");
+         elem.parentNode.appendChild(br2);
+
+
+$(elem.parentNode).find(".chosen-select").chosen({
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
+       }
+});
+
+function renderElementOxideList(elem)
+{
+ //Clear element/oxide list
+ var list = $($(elem).parent()[0]).find(".elementoxidelist")[0];
+ console.log(list);
+ list.innerHTML = "";
+
+ //Render elements
+ if($(elem).val() == "element")
+  list.innerHTML = "<select name='elements__element_id__in' onchange='' class='chosen-select elorox'>{% for element in elements %}<option value='{{ element.element_id }}'>{{ element.name }}</option>{% endfor %}</select>";
+ //Render oxides
+ else if($(elem).val() == "oxide")
+  list.innerHTML = "<select name='oxides__oxide_id__in' onchange='' class='chosen-select elorox'>{% for oxide in oxides %}<option value='{{ oxide.oxide_id }}'>{{ oxide.species }}</option>{% endfor %}</select>";
+
+ //Call chosen plugin
+ //Chosen-select plugin activate
+/*$(list).find(".elorox").chosen({
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });*/
+}
+
+function removeChemistryRow(id)
+{
+ var element = document.getElementById(id);
+ element.parentNode.removeChild(element);
+
+ if(document.getElementsByClassName("elementoroxide").length < 1)
+ {
+  console.log("Add ADD button");
+  var chemistryForm = document.getElementById("chemistry-forms");
+  //Add ADD chemistry row button
+  var add = document.createElement("a");
+  add.className = "add";
+  add.className += " addFirst";
+  var addText = document.createTextNode("Add");
+  add.appendChild(addText);
+  chemistryForm.appendChild(add);
+  
+ }
+}
+
+function HomeControl(controlDiv, map) {
+
+  // Set CSS styles for the DIV containing the control
+  // Setting padding to 5 px will offset the control
+  // from the edge of the map
+
+  // Set CSS for the control border
+  var controlUI = document.createElement('div');
+  controlUI.style.backgroundColor = 'white';
+  controlUI.style.cursor = 'pointer';
+  controlUI.style.textAlign = 'center';
+  controlUI.title = 'Clear selection';
+  controlUI.id = 'clear-map';
+  controlDiv.appendChild(controlUI);
+
+  // Set CSS for the control interior
+  var controlText = document.createElement('div');
+  controlText.style.fontFamily = 'Arial,sans-serif';
+  controlText.style.fontSize = '12px';
+  controlText.style.paddingLeft = '4px';
+  controlText.style.paddingRight = '4px';
+  controlText.innerHTML = '<b>Clear </b>';
+  controlUI.appendChild(controlText);
+
+  // Setup the click event listeners: simply set the map to
+  // Chicago
+  google.maps.event.addDomListener(controlUI, 'click', function() {
+    clearBounds();
+  });
+
+}
+</script>
+
+{% endblock %}

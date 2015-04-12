@@ -73,12 +73,13 @@
         </tr>
       </table>
           <div id="chem_elements">
-            <h4>Elements</h4>
-            <table id="chem_elements_table" class="table">
+            <h4>Oxides</h4>
+            <table id="chem_oxides_table" class="table">
               <thead>
                 <tr>
                   <th>wt%</th>
                   <th>Oxide</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -86,9 +87,31 @@
                   <td>{{oxide.wt_percentage}}</td>
                   <td>{{oxide.name}}</td>
                 </tr>
+                <tr>
                   {%endfor%}
               </tbody>
             </table>
+
+            <h4>Elements</h4>
+            <table id="chem_elements_table" class="table">
+              <thead>
+                <tr>
+                   <th>wt%</th>
+                  <th>Element</th>
+                </tr>
+              </thead>
+              <tbody>
+		{%for element in data.chemical_analysis.elements%}
+                <tr>
+		<td>{{element.wt_percentage}}</td>
+		<td>{{element.name}}</td>
+		</tr>
+		{%endfor%}
+                <tr>
+
+              </tbody>
+            </table>
+
 </div> <!-- table-responsive -->
           </div>
       {% endblock %}
