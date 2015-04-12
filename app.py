@@ -564,7 +564,7 @@ def sample(id):
                                 aliases=(', ').join(aliases_str),
                                 subsamples=subsamples, sampleid = sampleid, api_key = api_key)
     else:
-        return HttpResponse("Sample does not Exist")
+        return ("Sample does not Exist", 404)
 
 
 @app.route('/subsample/<int:id>')
@@ -587,7 +587,7 @@ def subsample(id):
                                 chemical_analyses=chemical_analyses,
                                 sample_id=subsample['sample'].split('/')[-2])
     else:
-        return HttpResponse("Subsample does not Exist")
+        return ("Subsample does not Exist", 404)
 
 
 @app.route('/chemical_analyses/')
@@ -648,7 +648,7 @@ def user(id):
     if sample:
         return render_template('user.html', user=user)
     else:
-        return HttpResponse("User does not Exist")
+        return ("User does not Exist", 404)
 
 
 if __name__ == '__main__':
