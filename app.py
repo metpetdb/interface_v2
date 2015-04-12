@@ -72,10 +72,24 @@ def search():
             elif request.args.get('mineralandor') == 'and':
                 sample_results = []
                 for key in filter_dictionary:
-                    if key != "minerals__in" and key != "search_filters" and key != "fields" and key != "mineralandor":
+                    if (key != "minerals__in" and
+                       key != "search_filters" and key != "fields" and key !=
+                            "mineralandor"):
                         minerals = request.args.getlist('minerals__in')
                         for m in minerals:
-                            samples = api.sample.get(params={key : filter_dictionary[key], 'minerals__in': m,  'fields': 'sample_id,user__name,collector,number,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date', 'limit':0}).data['objects']
+                            samples = api.sample.get(
+                                params={key : filter_dictionary[key],
+                                        'minerals__in': m,
+                                        'fields': 'sample_id,user__name,'
+                                                  'collector,number,'
+                                                  'public_data,'
+                                                  'rock_type__rock_type,'
+                                                  'subsample_count,'
+                                                  'chem_analyses_count,'
+                                                  'image_count,'
+                                                  'minerals__name,'
+                                                  'collection_date',
+                                        'limit':0}).data['objects']
                             temp_list = [];
                             if not sample_results: 
                                 sample_results = samples
@@ -92,7 +106,8 @@ def search():
                     sample['mineral_list'] = (', ').join(mineral_names)
 
                 #Return data to samples template
-                return render_template('samples_mineral_and_samples.html', samples=sample_results)
+                return render_template('samples_mineral_and_samples.html',
+                                       samples=sample_results)
 
         #If no mineral, get samples with filters
         else:
@@ -287,10 +302,6 @@ def search_chemistry():
           if key != "resource":
             filter_dictionary[key] = ",".join(filters[key])
 
-    #Check resource
-    print "RESOURCE IS "
-    print request.args.get('resource')
-
     #If chem analysis data is passed, return results
     if request.args :
         if 'squirrel' not in request.args and request.args.get('resource') == 'chemicalanalysis':
@@ -311,55 +322,55 @@ def search_chemistry():
         cid_list = []
 
     #Get chemical analyses for (E, M)
-        if 'elements__element_id__in' in request.args and request.args.get('resource') == 'chemicalanalysis':
-            e_chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element, 'minerals__in': mineral_ids, 'fields': 'chemical_analysis_id,spot_id,public_data,analysis_method,mineral__name,where_done,analyst,analysis_date,reference_x,reference_y,total,chemical_analysis_id', 'limit': 0}).data['objects']
+    if 'elements__element_id__in' in request.args and request.args.get('resource') == 'chemicalanalysis':
+        e_chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element, 'minerals__in': mineral_ids, 'fields': 'chemical_analysis_id,spot_id,public_data,analysis_method,mineral__name,where_done,analyst,analysis_date,reference_x,reference_y,total,chemical_analysis_id', 'limit': 0}).data['objects']
 
-            for cid in e_chem_analysis_ids:
-                cid_list.append(cid)
-            return json.dumps(cid_list)
+        for cid in e_chem_analysis_ids:
+            cid_list.append(cid)
+        return json.dumps(cid_list)
 
-        #Get chemical analyses for (O, M)
-        elif 'oxides__oxide_id__in' in request.args and request.args.get('resource') == 'chemicalanalysis':
-            o_chem_analysis_ids = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide, 'minerals__in': mineral_ids, 'fields': 'chemical_analysis_id,spot_id,public_data,analysis_method,mineral__name,where_done,analyst,analysis_date,reference_x,reference_y,total,chemical_analysis_id', 'limit': 0}).data['objects']
-            for cid in o_chem_analysis_ids:
-                cid_list.append(cid)
-            return json.dumps(cid_list)
+    #Get chemical analyses for (O, M)
+    elif 'oxides__oxide_id__in' in request.args and request.args.get('resource') == 'chemicalanalysis':
+        o_chem_analysis_ids = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide, 'minerals__in': mineral_ids, 'fields': 'chemical_analysis_id,spot_id,public_data,analysis_method,mineral__name,where_done,analyst,analysis_date,reference_x,reference_y,total,chemical_analysis_id', 'limit': 0}).data['objects']
+        for cid in o_chem_analysis_ids:
+            cid_list.append(cid)
+        return json.dumps(cid_list)
 
-        #Get samples for (E, M)
-        elif 'elements__element_id__in' in request.args and request.args.get('resource') == 'sample':
-            subsample_resources = api.chemical_analysis.get(params={'elements__element_id__in': element, 'minerals__in': mineral_ids, 'fields': 'subsample', 'limit': 0}).data['objects']
-            subsample_ids = set()
-            for s in subsample_resources:
-                #Remove first 18 characters and trailing /
-                subsample_id = s['subsample'].replace("Subsample #", "")
-                subsample_ids.add(subsample_id)
-
-            sample_resources = api.subsample.get(params={'subsample_id__in': (',').join(str(s) for s in subsample_ids), 'fields': 'sample', 'limit':0}).data['objects']
-            sample_ids = set()
-            for s in sample_resources:
-                #Remove first 18 characters and trailing /
-                sample_id = s['sample'].replace("Sample #", "")
-                sample_ids.add(sample_id)
-            sample_results = api.sample.get(params={'sample_id__in': (',').join(str(s) for s in sample_ids), 'fields': 'sample_id,user__name,collector,number,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date', 'limit':0}).data['objects']
-            return json.dumps(sample_results)
-
-        #Get samples for (O, M)
-        elif 'oxides__oxide_id__in' in request.args and request.args.get('resource') == 'sample':
-            subsample_resources = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide, 'minerals__in': mineral_ids, 'fields': 'subsample', 'limit': 0}).data['objects']
-            subsample_ids = set()
+    #Get samples for (E, M)
+    elif 'elements__element_id__in' in request.args and request.args.get('resource') == 'sample':
+        subsample_resources = api.chemical_analysis.get(params={'elements__element_id__in': element, 'minerals__in': mineral_ids, 'fields': 'subsample', 'limit': 0}).data['objects']
+        subsample_ids = set()
         for s in subsample_resources:
             #Remove first 18 characters and trailing /
             subsample_id = s['subsample'].replace("Subsample #", "")
             subsample_ids.add(subsample_id)
 
-            sample_resources = api.subsample.get(params={'subsample_id__in': (',').join(str(s) for s in subsample_ids), 'fields': 'sample', 'limit':0}).data['objects']
-            sample_ids = set()
-            for s in sample_resources:
-                #Remove first 18 characters and trailing /
-                sample_id = s['sample'].replace("Sample #", "")
-                sample_ids.add(sample_id)
-            sample_results = api.sample.get(params={'sample_id__in': (',').join(str(s) for s in sample_ids), 'fields': 'sample_id,user__name,collector,number,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date', 'limit':0}).data['objects']
-            return json.dumps(sample_results)
+        sample_resources = api.subsample.get(params={'subsample_id__in': (',').join(str(s) for s in subsample_ids), 'fields': 'sample', 'limit':0}).data['objects']
+        sample_ids = set()
+        for s in sample_resources:
+            #Remove first 18 characters and trailing /
+            sample_id = s['sample'].replace("Sample #", "")
+            sample_ids.add(sample_id)
+        sample_results = api.sample.get(params={'sample_id__in': (',').join(str(s) for s in sample_ids), 'fields': 'sample_id,user__name,collector,number,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date', 'limit':0}).data['objects']
+        return json.dumps(sample_results)
+
+    #Get samples for (O, M)
+    elif 'oxides__oxide_id__in' in request.args and request.args.get('resource') == 'sample':
+        subsample_resources = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide, 'minerals__in': mineral_ids, 'fields': 'subsample', 'limit': 0}).data['objects']
+        subsample_ids = set()
+        for s in subsample_resources:
+            #Remove first 18 characters and trailing /
+            subsample_id = s['subsample'].replace("Subsample #", "")
+            subsample_ids.add(subsample_id)
+
+        sample_resources = api.subsample.get(params={'subsample_id__in': (',').join(str(s) for s in subsample_ids), 'fields': 'sample', 'limit':0}).data['objects']
+        sample_ids = set()
+        for s in sample_resources:
+            #Remove first 18 characters and trailing /
+            sample_id = s['sample'].replace("Sample #", "")
+            sample_ids.add(sample_id)
+        sample_results = api.sample.get(params={'sample_id__in': (',').join(str(s) for s in sample_ids), 'fields': 'sample_id,user__name,collector,number,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date', 'limit':0}).data['objects']
+        return json.dumps(sample_results)
 
     region_list = []
     rock_type_list = []
