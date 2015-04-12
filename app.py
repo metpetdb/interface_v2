@@ -1,8 +1,11 @@
 import ast
-from urllib import urlencode
+import dotenv
+import drest
+from getenv import env
 import json
-
 from requests import get, post
+from urllib import urlencode
+
 from flask import (
     Flask,
     request,
@@ -13,11 +16,7 @@ from flask import (
     session
 )
 from flask_mail import Mail, Message
-import dotenv
-from getenv import env
-import drest
 
-from lib.api import MetpetAPI
 from forms import (
     LoginForm,
     RequestPasswordResetForm,
@@ -25,6 +24,7 @@ from forms import (
     EditForm,
     EditChemForm
 )
+from lib.api import MetpetAPI
 from utilities import paginate_model
 
 
@@ -65,11 +65,12 @@ def search():
                 headers = {'email': email, 'api_key': api_key}
             else:
                 headers = None
-            response = request_obj.\
-                           make_request('GET',
+            response = (request_obj
+                        .make_request('GET',
                            '/get-chem-analyses-given-sample-filters/',
                            params=filter_dictionary,
-                           headers=headers)
+                           headers=headers
+                        ))
             ids = response.data['chemical_analysis_ids']
             url = (url_for('chemical_analyses') + '?' +
                   urlencode({'chemical_analysis_id__in': ids}))
