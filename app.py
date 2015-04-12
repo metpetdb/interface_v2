@@ -1,41 +1,48 @@
 import ast
-import StringIO
-import os
-import sys
-import base64
-from urllib import urlencode
-from requests import get, post
-import json
-from itsdangerous import URLSafeTimedSerializer
-
-from flask import Flask, request, render_template, url_for, redirect, flash, \
-                  session
-from flask_mail import Mail, Message
 import dotenv
-from getenv import env
 import drest
+from getenv import env
+import json
+from requests import get, post
+from urllib import urlencode
 
-from api import MetpetAPI
-from forms import LoginForm, RequestPasswordResetForm, PasswordResetForm, EditForm, EditChemForm
+from flask import (
+    Flask,
+    request,
+    render_template,
+    url_for,
+    redirect,
+    flash,
+    session
+)
+from flask_mail import Mail, Message
+
+from forms import (
+    LoginForm,
+    RequestPasswordResetForm,
+    PasswordResetForm,
+    EditForm,
+    EditChemForm
+)
+from lib.api import MetpetAPI
 from utilities import paginate_model
+
 
 mail = Mail()
 
-app = Flask(__name__)
-app.config.from_object('config')
-mail.init_app(app)
+metpet_ui = Flask(__name__)
+metpet_ui.config.from_object('config')
+mail.init_app(metpet_ui)
 #mail = Mail(app)
 
 
-@app.route('/')
+@metpet_ui.route('/')
 def index():
     return render_template('index.html')
 
 
-@app.route('/search/')
+@metpet_ui.route('/search/')
 def search():
-    print "REQ ARGS"
-    print request.args
     email = session.get('email', None)
     api_key = session.get('api_key', None)
     api = MetpetAPI(email, api_key).api
@@ -58,25 +65,34 @@ def search():
                 headers = {'email': email, 'api_key': api_key}
             else:
                 headers = None
-            response = request_obj.\
-                           make_request('GET',
+            response = (request_obj
+                        .make_request('GET',
                            '/get-chem-analyses-given-sample-filters/',
                            params=filter_dictionary,
-                           headers=headers)
+                           headers=headers
+                        ))
             ids = response.data['chemical_analysis_ids']
-            url = url_for('chemical_analyses') + '?' + \
-                  urlencode({'chemical_analysis_id__in': ids})
+            url = (url_for('chemical_analyses') + '?' +
+                  urlencode({'chemical_analysis_id__in': ids}))
             return redirect(url)
         else:
-            #url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
-            #return redirect(url)
-
-            element_ids = (',').join(request.args.getlist('elements__element_id__in'))
-            oxide_ids = (',').join(request.args.getlist('oxides__oxide_id__in'))
+            element_ids = (',').join(request.args
+                                     .getlist('elements__element_id__in'))
+            oxide_ids = (',').join(request.args
+                                   .getlist('oxides__oxide_id__in'))
             mineral_ids = (',').join(request.args.getlist('minerals__in'))
 
-            e_chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
-            o_chem_analysis_ids = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide_ids, 'minerals__in': mineral_ids, 'fields':'chemical_analysis_id'}).data['objects']
+            e_chem_analysis_ids = api.chemical_analysis.get(
+                params={'elements__element_id__in': element_ids,
+                        'minerals__in': mineral_ids,
+                        'fields':'chemical_analysis_id'}
+            ).data['objects']
+
+            o_chem_analysis_ids = api.chemical_analysis.get(
+                params={'oxides__oxide_id__in': oxide_ids,
+                        'minerals__in': mineral_ids,
+                        'fields':'chemical_analysis_id'}
+            ).data['objects']
 
             cid_list = []
             for cid in e_chem_analysis_ids:
@@ -84,13 +100,12 @@ def search():
             for cid in o_chem_analysis_ids:
                 cid_list.append(cid['chemical_analysis_id'])
             print cid_list
-            url = url_for('chemical_analyses') + '?' + \
-                  urlencode({'chemical_analysis_id__in': (',').join(str(c) for c in cid_list)})
-            #url = url_for('chemical_analyses') + '?' + \
-            #      urlencode({'elements__element_id__in': element_ids, 'minerals__in': mineral_ids})
+
+            query_params = urlencode({
+                'chemical_analysis_id__in': (',').join(str(c) for c in cid_list)})
+            url = url_for('chemical_analyses') + '?' + query_params
             return redirect(url)
 
-    owner_list = []
     region_list = []
     rock_type_list = []
     collector_list = []
@@ -105,21 +120,48 @@ def search():
 
     oxides = api.oxide.get(params={'limit': 0}).data['objects']
     elements = api.element.get(params={'limit': 0}).data['objects']
-    rock_types = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
-    regions = api.region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
-    references = api.reference.get(params={'order_by': 'name', 'limit': 0}).data['objects']
-    metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
-    metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
-    samples = api.sample.get(params={'fields': 'user__user_id,user__name,collector,number,sesar_number,country,public_data',
-                                     'limit': 0}).data['objects']
-    mineral_relationships = api.mineral_relationship.get(\
-                                params={'limit': 0,
-                                        'fields':'parent_mineral__mineral_id,parent_mineral__name,child_mineral__mineral_id,child_mineral__name'}).\
-                                                    data['objects']
 
-    mineralroots = []
+    rock_types = (api.rock_type.get(
+                      params={'order_by': 'rock_type',
+                              'limit': 0})
+                  .data['objects'])
+
+    regions = (api.region.get(
+                   params={'order_by': 'name',
+                           'limit': 0})
+                .data['objects'])
+
+    references = (api.reference.get(
+                      params={'order_by': 'name',
+                              'limit': 0})
+                  .data['objects'])
+
+    metamorphic_regions = (api.metamorphic_region.get(
+                              params={'order_by': 'name',
+                                      'limit': 0})
+                          .data['objects'])
+
+    metamorphic_grades = (api.metamorphic_grade.get(
+                             params={'limit': 0})
+                          .data['objects'])
+
+    samples = (api.sample.get(
+                   params={'fields': 'user__user_id,user__name,collector,'
+                                     'number,sesar_number,country,public_data',
+                           'limit': 0})
+               .data['objects'])
+
+    mineral_relationships = (api.mineral_relationship.get(
+                                params={'limit': 0,
+                                        'fields':'parent_mineral__mineral_id,'
+                                                 'parent_mineral__name,'
+                                                 'child_mineral__mineral_id,'
+                                                 'child_mineral__name'})
+                             .data['objects'])
+
     parents = set()
     children = set()
+
     for m in mineral_relationships:
         parents.add((m['parent_mineral__name'], m['parent_mineral__mineral_id']))
         children.add((m['child_mineral__name'], m['child_mineral__mineral_id']))
@@ -127,15 +169,26 @@ def search():
 
 
     mineralnodes = []
+
     for (name, mid) in mineralroots:
-        mineralnodes.append({"id": name, "parent": "#", "text": name, "mineral_id": mid})
+        mineralnodes.append({"id": name,
+                             "parent": "#",
+                             "text": name,
+                             "mineral_id": mid})
+
     for m in mineral_relationships:
-        node = {"id": m['child_mineral__name'], "parent": m['parent_mineral__name'], "text": m['child_mineral__name'], "mineral_id": m['child_mineral__mineral_id']}
+        node = {"id": m['child_mineral__name'],
+                "parent": m['parent_mineral__name'],
+                "text": m['child_mineral__name'],
+                "mineral_id": m['child_mineral__mineral_id']}
         mineralnodes.append(node)
+
     for element in elements:
         element_list.append(element)
+
     for oxide in oxides:
         oxide_list.append(oxide)
+
     for region in regions:
         region_list.append(region['name'])
 
@@ -152,10 +205,10 @@ def search():
         metamorphic_grade_list.append(mmg['name'])
 
     owner_dict = {}
-    #print mineralnodes
     if email:
-        logged_in_user = api.user.get(params={'email': email,
-                                              'fields': 'user_id,name'}).data['objects']
+        logged_in_user = (api.user.get(params={'email': email,
+                                              'fields': 'user_id,name'})
+                                     .data['objects'])
         owner_dict[logged_in_user[0]['user_id']] = logged_in_user[0]['name']
 
     for sample in samples:
@@ -173,23 +226,23 @@ def search():
     country_list = list(set (country_list))
     return render_template('search_form.html',
                             query='',
-			    elements=element_list,
-			    oxides=oxide_list,
+			                elements=element_list,
+			                oxides=oxide_list,
                             regions=region_list,
-			    mineralrelationships=json.dumps(mineral_relationships),
-			    mineral_nodes=json.dumps(mineralnodes),
+                            mineralrelationships=json.dumps(mineral_relationships),
+                            mineral_nodes=json.dumps(mineralnodes),
                             rock_types=rock_types,
                             provenances=collector_list,
                             references=reference_list,
-			    numbers=number_list,
+			                numbers=number_list,
                             igsns=igsn_list,
-			    countries=country_list,
-			    owners = owner_dict,
+                            countries=country_list,
+                            owners = owner_dict,
                             metamorphic_regions=metamorphic_region_list,
                             metamorphic_grades=metamorphic_grade_list)
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@metpet_ui.route('/login', methods=['GET', 'POST'])
 def login():
     if session.get('api_key'):
         return redirect(url_for('search'))
@@ -215,7 +268,7 @@ def login():
                             form=form)
 
 
-@app.route('/logout')
+@metpet_ui.route('/logout')
 def logout():
     session.pop('email', None)
     session.pop('api_key', None)
@@ -223,7 +276,7 @@ def logout():
     return redirect(url_for('search'))
 
 
-@app.route('/request-password-reset', methods=['GET', 'POST'])
+@metpet_ui.route('/request-password-reset', methods=['GET', 'POST'])
 def request_reset_password():
     form = RequestPasswordResetForm()
 
@@ -250,7 +303,7 @@ def request_reset_password():
     return render_template('request_password_reset.html', form=form)
 
 
-@app.route('/reset-password/<string:token>', methods=['GET', 'POST'])
+@metpet_ui.route('/reset-password/<string:token>', methods=['GET', 'POST'])
 def reset_password(token):
     form = PasswordResetForm()
     if form.validate_on_submit():
@@ -277,7 +330,7 @@ def reset_password(token):
     return redirect(url_for('request_reset_password'))
 
 
-@app.route('/samples/')
+@metpet_ui.route('/samples/')
 def samples():
     email = session.get('email', None)
     api_key = session.get('api_key', None)
@@ -316,7 +369,7 @@ def samples():
                             last_page=last)
 
 
-@app.route('/edit_chemical/<int:id>', methods = ['GET','POST'])
+@metpet_ui.route('/edit_chemical/<int:id>', methods = ['GET','POST'])
 def edit_chemical(id):
   form = EditChemForm()
   email = session.get('email', None)
@@ -335,23 +388,12 @@ def edit_chemical(id):
   data2 = api.chemical_analysis.get(params=filters)
   next, previous, last, total_count = paginate_model('chemical_analyses',
                                                       data2, filters)
-  chemical_analyses = data2.data['objects']
-
-#  for a in chemical_analyses:
-#    print a
-
-
-  #oxide_ids = (',').join(request.args.getlist('oxides__oxide_id__in'))
   oxide_list=[]
   element_list=[]
   oxides = api.oxide.get(params={'limit': 0}).data['objects']
 
   for oxide in oxides:
       oxide_list.append(oxide)
-
-  #for x in oxide_list:
-#    print x['species']
-
 
   elements = api.element.get(params={'limit': 0}).data['objects']
   for element in elements:
@@ -368,9 +410,6 @@ def edit_chemical(id):
     data['chemical_analysis']['total'] =form.total.data
     data['chemical_analysis']['stage_x']=form.StageX.data
     data['chemical_analysis']['stage_y']=form.StageY.data
-    #wordlist = []
-    #wordlist = json.loads(request.args.get('wordlist'))
-    #print wordlist
     return redirect(url_for('search'))
   else:
     form.owner.data = data['chemical_analysis']['owner_name']
@@ -380,9 +419,7 @@ def edit_chemical(id):
     form.total.data = data['chemical_analysis']['total']
     form.StageX.data = data['chemical_analysis']['stage_x']
     form.StageY.data = data['chemical_analysis']['stage_y']
-    wordlist = []
-    #wordlist = json.loads(request.args.get('wordlist'))
-    #print wordlist
+
   return render_template('edit_chemical.html',
                           form = form,
                           data = data,
@@ -391,7 +428,7 @@ def edit_chemical(id):
                           id = id,
                           api_key = api_key)
 
-@app.route('/edit_sample/<int:id>', methods = ['GET','POST'])
+@metpet_ui.route('/edit_sample/<int:id>', methods = ['GET','POST'])
 def edit_sample(id):
   form = EditForm(minerals=True)
   email = session.get('email', None)
@@ -403,30 +440,33 @@ def edit_sample(id):
   sample = api.sample.get(id).data
   sample2 = api.sample.get(id)
   rock_type_list = []
-  rock_type = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
+  rock_type = api.rock_type.get(
+      params={'order_by': 'rock_type', 'limit': 0}).data['objects']
   for rock in rock_type:
       rock_type_list.append(rock['rock_type'])
   form.rock_type.choices = [(rock,rock) for rock in rock_type_list]
 
   metamorphic_grade_list = []
-  metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
+  metamorphic_grades = api.metamorphic_grade.get(
+      params={'limit': 0}).data['objects']
+
   for mmg in metamorphic_grades:
       metamorphic_grade_list.append(mmg['name'])
   form.metamorphic_grades.choices = [(m,m) for m in metamorphic_grade_list]
 
   regions = [region['name'] for region in sample['regions']]
-  min_entries = len(regions)+1
   location = sample['location'].split(" ")
   longtitude = location[1].replace("(","")
   latitude = location[2].replace(")","")
   loc = [longtitude, latitude]
 
-
-  mineral_relationships = api.mineral_relationship.get(\
+  mineral_relationships = (api.mineral_relationship.get(
                               params={'limit': 0,
-                                      'fields':'parent_mineral__mineral_id,parent_mineral__name,child_mineral__mineral_id,child_mineral__name'}).\
-                                                  data['objects']
-  mineralroots = []
+                                      'fields':'parent_mineral__mineral_id,'
+                                               'parent_mineral__name,'
+                                               'child_mineral__mineral_id,'
+                                               'child_mineral__name'})
+                                                .data['objects'])
   parents = set()
   children = set()
   for m in mineral_relationships:
@@ -437,30 +477,27 @@ def edit_sample(id):
 
   mineralnodes = []
   for (name, mid) in mineralroots:
-      mineralnodes.append({"id": name, "parent": "#", "text": name, "mineral_id": mid})
+      mineralnodes.append({"id": name,
+                           "parent": "#",
+                           "text": name,
+                           "mineral_id": mid})
+
   for m in mineral_relationships:
-      node = {"id": m['child_mineral__name'], "parent": m['parent_mineral__name'], "text": m['child_mineral__name'], "mineral_id": m['child_mineral__mineral_id']}
+      node = {"id": m['child_mineral__name'],
+              "parent": m['parent_mineral__name'],
+              "text": m['child_mineral__name'],
+              "mineral_id": m['child_mineral__mineral_id']}
       mineralnodes.append(node)
 
-  #print mineralroots
-  #print len(mineralroots)
-
-  metamorphic_grades = [metamorphic_grade['name'] for metamorphic_grade in sample['metamorphic_grades']]
   form.region.min_entries = len(regions)+1
 
-  region_length = len(regions)
-  metamorphic_regions = [metamorphic_region['name'] for metamorphic_region in sample['metamorphic_regions']]
+  metamorphic_regions = [metamorphic_region['name']
+                         for metamorphic_region in sample['metamorphic_regions']]
 
   minerals = [mineral['name'] for mineral in sample['minerals']]
   new_regions = []
 
   form.minerals.choices = [(mineral, mineral) for mineral in minerals]
-
-  #for n in minerals:
-  #  print n
-  #print mineralnodes
-  #form.minerals.initial = [(mineral, mineral) for mineral in minerals]
-
 
   if form.validate_on_submit():
     sample2.data['user']['name'] = form.owner.data
@@ -520,7 +557,7 @@ def edit_sample(id):
                           test=json.dumps(minerals),
                           api_key = api_key)
 
-@app.route('/sample/<int:id>')
+@metpet_ui.route('/sample/<int:id>')
 def sample(id):
     email = session.get('email', None)
     api_key = session.get('api_key', None)
@@ -545,8 +582,10 @@ def sample(id):
     aliases_str = [alias['alias'] for alias in aliases]
 
     regions = [region['name'] for region in sample['regions']]
-    metamorphic_regions = [metamorphic_region['name'] for metamorphic_region in sample['metamorphic_regions']]
-    metamorphic_grades = [metamorphic_grade['name'] for metamorphic_grade in sample['metamorphic_grades']]
+    metamorphic_regions = [metamorphic_region['name']
+                           for metamorphic_region in sample['metamorphic_regions']]
+    metamorphic_grades = [metamorphic_grade['name']
+                          for metamorphic_grade in sample['metamorphic_grades']]
     references = [reference['name'] for reference in sample['references']]
     minerals = [mineral['name'] for mineral in sample['minerals']]
 
@@ -560,14 +599,16 @@ def sample(id):
                                 metamorphic_grades=(', ').join(metamorphic_grades),
                                 metamorphic_regions=(', ').join(metamorphic_regions),
                                 aliases=(', ').join(aliases_str),
-                                subsamples=subsamples, sampleid = sampleid, api_key = api_key)
+                                subsamples=subsamples,
+                                sampleid=sampleid,
+                                api_key=api_key)
     else:
-        return HttpResponse("Sample does not Exist")
+        return ("Sample does not Exist", 404)
 
 
-@app.route('/subsample/<int:id>')
+@metpet_ui.route('/subsample/<int:id>')
 def subsample(id):
-    # email = session.get('email', None)
+    email = session.get('email', None)
     api_key = session.get('api_key', None)
     api = MetpetAPI(email, api_key).api
 
@@ -585,10 +626,10 @@ def subsample(id):
                                 chemical_analyses=chemical_analyses,
                                 sample_id=subsample['sample'].split('/')[-2])
     else:
-        return HttpResponse("Subsample does not Exist")
+        return ("Subsample does not Exist", 404)
 
 
-@app.route('/chemical_analyses/')
+@metpet_ui.route('/chemical_analyses/')
 def chemical_analyses():
     email = session.get('email', None)
     api_key = session.get('api_key', None)
@@ -610,9 +651,12 @@ def chemical_analyses():
     del first_page_filters['offset']
 
     if filters:
-        first_page_url = url_for('chemical_analyses') + '?' + urlencode(first_page_filters)
+        first_page_url = (url_for('chemical_analyses')
+                          + '?'
+                          + urlencode(first_page_filters))
     else:
-        first_page_url = url_for('chemical_analyses') + urlencode(first_page_filters)
+        first_page_url = (url_for('chemical_analyses')
+                         + urlencode(first_page_filters))
 
     return render_template('chemical_analyses.html',
                             chemical_analyses=chemical_analyses,
@@ -623,7 +667,7 @@ def chemical_analyses():
                             last_page=last)
 
 
-@app.route('/chemical_analysis/<int:id>')
+@metpet_ui.route('/chemical_analysis/<int:id>')
 def chemical_analysis(id):
     email = session.get('email', None)
     api_key = session.get('api_key', None)
@@ -639,16 +683,16 @@ def chemical_analysis(id):
                             api_key = api_key, data=response.json())
 
 
-@app.route('/user/<int:id>')
+@metpet_ui.route('/user/<int:id>')
 def user(id):
     api = MetpetAPI(None, None).api
     user = api.user.get(id).data
     if sample:
         return render_template('user.html', user=user)
     else:
-        return HttpResponse("User does not Exist")
+        return ("User does not Exist", 404)
 
 
 if __name__ == '__main__':
     dotenv.read_dotenv('../app_variables.env')
-    app.run(debug=True)
+    metpet_ui.run(debug=True)
