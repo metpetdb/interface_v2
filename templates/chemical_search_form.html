@@ -5,9 +5,9 @@
 </div>
 
   <div id = "search-options" class="panel panel-default">
-    <div id = "search-panel" class="panel-heading">
+    <div id = "search-panel" class="panel-heading" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');">
       <h4 class="panel-title">
-        <a class='accordion-toggle' data-toggle="collapse" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" data-parent="#accordion" href="">
+        <a class='accordion-toggle' data-toggle="collapse" data-parent="#accordion" href="">
           Search Options
         </a>
       </h4>
@@ -21,8 +21,6 @@
 <div id = "form-container">
     <form action="" method="get" id='content' class="tab-content">
 
-     
-
    <div class="tab-pane active" id="chemistry" onchange="updateChemistry()"><br><br>
         <div id = "selection-error"></div>
         <div id="chemanalysisids">
@@ -30,7 +28,7 @@
         <input type="hidden" name="squirrel" value="squirrel">
         </div>
         
-        <div id = "chemistry-forms">
+        <div id="chemistry-forms">
        <label for="mineral-tree">Mineral: </label>
        <div id="mineral-select">
        <select name="minerals__in" onchange="" name="" class="chosen-select">
@@ -90,9 +88,9 @@
   </div>
 
 <div id="search-summary" class="panel panel-default">
-    <div class="panel-heading">
+    <div class="panel-heading" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');">
       <h4 class="panel-title">
-        <a class='accordion-toggle' data-toggle="collapse" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" data-parent="#accordion" href="">
+        <a class='accordion-toggle' data-toggle="collapse" data-parent="#accordion" href="">
           Search Summary
         </a>
       </h4>
@@ -114,10 +112,10 @@
 <div id = "resource" class = "text-center">
     <div class="btn-group" data-toggle="buttons" style="margin:0 auto;">
         <label class="btn btn-primary">
-            <input type="radio" name="resource" value="sample" id="option1" checked="checked"> View Samples
+            <input type="radio" name="resource" value="sample" id="option1"> View Samples
         </label>
         <label class="btn btn-primary active">
-            <input type="radio" name="resource" value="chemicalanalysis" id="option2"> View Chemical Analyses
+            <input type="radio" name="resource" value="chemicalanalysis" id="option2" checked="checked"> View Chemical Analyses
         </label>
     </div>
 </div>
@@ -125,7 +123,7 @@
 </div>
 
 <br>
-       <input type="submit" value="Search">
+       <input type="submit" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" value="Search">
       </div>
        </div>
     </div><!--end collapsetwo -->
@@ -312,6 +310,7 @@ setTimeout(function() {
      else
      {
       console.log("FIX SELECTION");
+      $('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');
       document.getElementById("selection-error").innerHTML = "<p>Select a mineral and at least one element or oxide.</p>";
       $('#spinner').hide();
      } //end mineral element selection check else

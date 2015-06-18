@@ -3,7 +3,7 @@
 
   <body>
       {% block title %}
-        <h3> Chemical Analysis {{data.chemical_analysis.pointnumber}}</h3>
+        <h3> Chemical Analysis {{data.pointnumber}}</h3>
       {% endblock %}
 
       {% block body %}
@@ -12,15 +12,15 @@
         <tbody>
           <tr>
             <td class="sample_label">Owner</td>
-              <td class="sample_value">{{data.chemical_analysis.owner_name}}</td>
+              <td class="sample_value">{{data.owner_name}}</td>
           </tr>
           <tr>
             <td class="sample_label">Point Number</td>
-              <td class="sample_value">{{data.chemical_analysis.pointnumber}}</td>
+              <td class="sample_value">{{data.pointnumber}}</td>
           </tr>
           <tr>
             <td class="sample_label">Public</td>
-              <td class="sample_value">{{data.chemical_analysis.public_data}}</td>
+              <td class="sample_value">{{data.public_data}}</td>
           </tr>
           <tr>
             <td class="sample_label">Image</td>
@@ -28,35 +28,35 @@
           </tr>
           <tr>
             <td class="sample_label">Analysis Method</td>
-              <td class="sample_value">{{data.chemical_analysis.analysis_method}}</td>
+              <td class="sample_value">{{data.analysis_method}}</td>
           </tr>
           <tr>
             <td class="sample_label">Analysis Location</td>
-              <td class="sample_value">{{data.chemical_analysis.analysis_location}}</td>
+              <td class="sample_value">{{data.analysis_location}}</td>
           </tr>
           <tr>
             <td class="sample_label">Analyst</td>
-              <td class="sample_value">{{data.chemical_analysis.analyst}}</td>
+              <td class="sample_value">{{data.analyst}}</td>
           </tr>
           <tr>
             <td class="sample_label">Description</td>
-              <td class="sample_value">{{data.chemical_analysis.description}}</td>
+              <td class="sample_value">{{data.description}}</td>
           </tr>
           <tr>
             <td class="sample_label">Analysis Material</td>
-              <td class="sample_value">{{data.chemical_analysis.analysis_material}}</td>
+              <td class="sample_value">{{data.analysis_material}}</td>
           </tr>
           <tr>
             <td class="sample_label">Total</td>
-              <td class="sample_value">{{data.chemical_analysis.analysis_material}}</td>
+              <td class="sample_value">{{data.analysis_material}}</td>
           </tr>
           <tr>
             <td class="sample_label">Stage X</td>
-              <td class="sample_value">{{data.chemical_analysis.stage_x}}</td>
+              <td class="sample_value">{{data.stage_x}}</td>
           </tr>
           <tr>
             <td class="sample_label">Stage Y</td>
-              <td class="sample_value">{{data.chemical_analysis.stage_y}}</td>
+              <td class="sample_value">{{data.stage_y}}</td>
           </tr>
           <tr>
             <td class="sample_label">Sample</td>
@@ -78,7 +78,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr> {%for oxide in data.chemical_analysis.oxides%}
+                <tr> {%for oxide in data.oxides%}
                   <td>{{oxide.wt_percentage}}</td>
                   <td>{{oxide.name}}</td>
                 </tr>
@@ -96,7 +96,7 @@
                 </tr>
               </thead>
               <tbody>
-		{%for element in data.chemical_analysis.elements%}
+		{%for element in data.elements%}
                 <tr>
 		<td>{{element.wt_percentage}}</td>
 		<td>{{element.name}}</td>

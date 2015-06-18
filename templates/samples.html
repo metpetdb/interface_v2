@@ -1,5 +1,3 @@
-{% extends "base.html" %}
-
 {% block body %}
 <div class = "table-responsive">
   <table id="samplelist" class="table">
@@ -41,14 +39,15 @@
     </thead>
   </table>
 </div> <!-- table-responsive-->
-  &lt;&lt; <a class="samples-pagination" href="{{ first_page }}"> First </a>
-  {% if prev_url %}
-     &nbsp;  &nbsp; &lt; <a class="samples-pagination" href="{{ prev_url }}">Prev </a>
-  {% endif %}
-  {% if next_url %}
-     &nbsp;  &nbsp;<a class="samples-pagination" href="{{ next_url }}">Next</a> &gt;
-  {% endif %}
-   &nbsp;  &nbsp; <a class="samples-pagination" href="{{ last_page }}">Last </a>  &gt;&gt;
+&lt;&lt; <a class="samples-pagination" href="{{ first_page }}">First</a>
+{% if prev_url %}
+  &nbsp;&nbsp;&lt; <a class="samples-pagination" href="{{ prev_url }}">Prev</a>
+{% endif %}
+&nbsp;&nbsp;|
+{% if next_url %}
+  &nbsp;&nbsp; <a class="samples-pagination" href="{{ next_url }}">Next</a> &gt;
+{% endif %}
+&nbsp;&nbsp; <a class="samples-pagination" href="{{ last_page }}">Last</a> &gt;&gt;
 
 <script>
 //Ajax call for first, last, next and previous samples
