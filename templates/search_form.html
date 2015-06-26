@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% block body %}
 <div id="spinner" class="spinner" style="display:none;">
-    <img id="img-spinner" src="/static/images/ajax-loader.gif" alt="Loading"/>
+  <img id="img-spinner" src="/static/images/ajax-loader.gif" alt="Loading"/>
 </div>
 
-  <div id = "search-options" class="panel panel-default">
-    <div id = "search-panel" class="panel-heading" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');">
-      <h4 class="panel-title">
-        <a class='accordion-toggle' data-toggle="collapse" data-parent="#accordion" href="">
-          Search Options
+<div id = "search-options" class="panel panel-default">
+  <div id = "search-panel" class="panel-heading" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');">
+    <h4 class="panel-title">
+      <a class='accordion-toggle' data-toggle="collapse" data-parent="#accordion" href="">
+        Search Options
         </a>
       </h4>
     </div>
@@ -20,6 +20,7 @@
   <li><a href="#metgrade">Metamorphic Grade</a></li>
   <li><a id = "location-tab" href="#location">Location</a></li>
   <li><a href="#minerals">Minerals</a></li>
+
   <li><a href="#provenance">Provenance</a></li>
 </ul>
 <div id = "form-container">
@@ -69,16 +70,16 @@
         <div id="map-canvas"></div>
         <p id ="map-instructions">Draw a selection on the map to toggle coordinates below.</p><br>
         <label for="bounds">NE Lat: </label>
-        <input type="text" onchange="updateBounds()" placeholder="Enter latitude value" id="ne-lat" class="latlong" > 
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="ne-lat" class="latlong" > 
         
         <label for="bounds">NE Long: </label>
-        <input type="text" onchange="updateBounds()" placeholder="Enter longitude value" id="ne-long" class="latlong" ><br>
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="ne-long" class="latlong" ><br>
 
         <label for="bounds">SW Lat: </label>
-        <input type="text" onchange="updateBounds()" placeholder="Enter latitude value" id="sw-lat" class="latlong" > 
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-lat" class="latlong" > 
 
         <label for="bounds">SW Long: </label>
-        <input type="text" onchange="updateBounds()" placeholder="Enter longitude value" id="sw-long" class="latlong" ><br><br>
+        <input type="text" onchange="updateBounds()" placeholder="Enter lat/long value" id="sw-long" class="latlong" ><br><br>
 
 <input type="hidden" id="location-bound" name="location__contained" value="">
 <!-- <input type="hidden" id="sw-location-bound" name="samples__location__contained" value=""> -->
@@ -126,11 +127,11 @@
 
        <div id="mineral-and-or" class = "text-center">
          <div class="btn-group" data-toggle="buttons" style="margin:0 auto;">
-          <label class="btn btn-primary">
-            <input type="radio" name="mineralandor" value="and"> AND
+          <label class="btn btn-primary active">
+            <input type="radio" name="mineralandor" value="and" checked="checked"> AND
         </label>
-        <label class="btn btn-primary active">
-            <input type="radio" name="mineralandor" value="or" checked="checked"> OR
+        <label class="btn btn-primary">
+            <input type="radio" name="mineralandor" value="or"> OR
         </label>
        </div>
       </div>
@@ -197,7 +198,6 @@
 
 </div><!--end form container-->
   {% if error %}
-      $('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');
       <p style="color: red;">Please submit a search term.</p>
   {% endif %}
       </div>
@@ -205,10 +205,10 @@
   </div>
 
 <div id="search-summary" class="panel panel-default">
-    <div class="panel-heading" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');">
-      <h4 class="panel-title">
-        <a class='accordion-toggle' data-toggle="collapse" data-parent="#accordion" href="">
-          Search Summary
+  <div class="panel-heading" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');">
+    <h4 class="panel-title">
+      <a class='accordion-toggle' data-toggle="collapse" data-parent="#accordion" href="">
+        Search Summary
         </a>
       </h4>
       <a id= "clearAll" onclick="clearAll()">Clear All</a>
@@ -220,39 +220,41 @@
           <div id = "search-options-rock-type"></div>
           <div id = "search-options-metgrades"></div>
           <div id = "search-options-location"></div>
-	        <div id = "search-options-minerals"></div>
+    <div id = "search-options-minerals"></div>
           <div id = "search-options-chemistry"></div>
           <div id = "search-options-provenance"></div>
+                <div id = "form-submit">
 
-<div id = "form-submit">
 
 <div class = "text-center">
     <div class="btn-group" data-toggle="buttons" style="margin:0 auto;">
         <label class="btn btn-primary active">
-            <input type="radio" name="resource" value="sample" id="option1" checked="checked"> View Samples
+            <input type="radio" name="resource" value="sample" id="option1" onchange="$('#collapseFour').collapse('toggle');" checked="checked"> View Samples
         </label>
         <label class="btn btn-primary">
-            <input type="radio" name="resource" value="chemicalanalysis" id="option2"> View Chemical Analyses
+            <input type="radio" name="resource" value="chemicalanalysis" onchange="$('#collapseFour').collapse('toggle'); $('#collapseThree').collapse();" id="option2"> View Chemical Analyses
         </label>
     </div>
 </div>
 
 </div>
 
-<br>
-       <input type="submit" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" value="Search">
-      </div>
-       </div>
-    </div><!--end collapsetwo -->
+<div id="collapseFour" class="panel-collapse collapse in">
+  <br>
+  <input type="checkbox" name="all_results" value="yes">Display all results</input>&nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="checkbox" id="showmap" onchange="$('#collapseThree').collapse('toggle');" name="showmap" value="ofcourse">Show on map</input>
 </div>
+<br>
+<input type="submit" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" value="Search">
+    </div>
+  </div>
+</div><!--end collapsetwo -->
 
-  </form>  <!-- tabs -->
+  </div>
+</form>  <!-- tabs -->
 
 <div class="clear"></div>
-
-<div id = "results"></div>
-
-<div id ="result_map_canvas"></div>
+<div id="results"></div>
 
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 <script src="/static/js/jquery-2.1.1.min.js"></script>
@@ -261,7 +263,6 @@
 <link rel="stylesheet" href="/static/css/chosen.min.css">
 <script src="/static/js/chosen.jquery.min.js"></script>
 <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
-
 
 <link rel="stylesheet" href="/static/css/style.min.css">
 <script src="/static/js/jstree.min.js"></script>
@@ -577,7 +578,7 @@ $('.btn-toggle').click(function() {
 });
 
 /*$('form').submit(function(){
-	alert($(this["options"]).val());
+  alert($(this["options"]).val());
     return false;
 });*/
 
@@ -1100,22 +1101,6 @@ function HomeControl(controlDiv, map) {
   });
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /*
 General Search requirements

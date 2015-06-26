@@ -5,9 +5,9 @@
 </div>
 
   <div id = "search-options" class="panel panel-default">
-    <div id = "search-panel" class="panel-heading" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');">
+    <div id = "search-panel" class="panel-heading" data-toggle="collapse" data-parent="#accordion"  onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');">
       <h4 class="panel-title">
-        <a class='accordion-toggle' data-toggle="collapse" data-parent="#accordion" href="">
+        <a class='accordion-toggle' href="">
           Search Options
         </a>
       </h4>
@@ -121,9 +121,8 @@
 </div>
 
 </div>
-
-<br>
-       <input type="submit" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" value="Search">
+  <br>
+  <input type="submit" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" value="Search">
       </div>
        </div>
     </div><!--end collapsetwo -->

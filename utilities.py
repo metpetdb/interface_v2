@@ -19,8 +19,7 @@ def paginate_model(model_name, data, filters):
             previous = previous + '&' + urlencode(new_filters)
 
     total_count = data.data['meta']['total_count']
-    last = url_for(model_name) + '?' + 'offset={0}'.format(\
-                  total_count - total_count%20)
+    last = url_for(model_name) + '?offset={0}'.format(total_count - total_count%20)
     if new_filters:
         last = last + '&' + urlencode(new_filters)
 

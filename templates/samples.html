@@ -1,4 +1,45 @@
 {% block body %}
+{% if showmap %}
+<script src="https://maps.googleapis.com/maps/api/js"></script>
+<script>
+  function initialize() {
+    var mapOptions = {
+      center: new google.maps.LatLng(0,0),
+      zoom: 5,
+      mapTypeId: google.maps.MapTypeId.HYBRID
+    }
+    var map = new google.maps.Map(document.getElementById('res-map-canvas'), mapOptions)
+    var markers = [];
+    var samples = JSON.parse('{{ samples|tojson }}');
+    var lat;
+    var lon;
+    for (var i = 0; i < samples.length; i++) {
+      lat = parseFloat(samples[i]['lat']);
+      lon = parseFloat(samples[i]['lon']);
+      var url = '/sample/'+samples[i]['sample_id'];
+      var marker = new google.maps.Marker( {
+        position: new google.maps.LatLng(lat,lon),
+        map: map,
+        title: samples[i]['number']+
+          '\nSubsamples: '+samples[i]['subsample_count']+
+          '\nChemical Analyses: '+samples[i]['chem_analyses_count'],
+        url: url
+      });
+      google.maps.event.addListener(marker, 'click', function() {
+        window.open(this.url,'_blank');
+      });
+      markers.push(marker);
+    }
+    map.fitBounds(markers.reduce(function(bounds, marker) {
+      return bounds.extend(marker.getPosition());
+    }, new google.maps.LatLngBounds()));
+  }
+  google.maps.event.addDomListenerOnce(window, 'mouseover', initialize);
+</script>
+<div id="collapseThree" class="panel-collapse collapse in">
+  <div id="res-map-canvas" style='width:600px;height:500px;margin:20px'></div>
+</div>
+{% endif %}
 <div class = "table-responsive">
   <table id="samplelist" class="table">
     <thead>
@@ -16,10 +57,12 @@
     <tbody>
       {% if total %}
       <p>Total: {{ total }}</p>
+      {% elif runningtotal %}
+      <p>Running total: {{ runningtotal }}</p>
       {% endif %}
       {% for sample in samples %}
       <tr>
-        <td class="sample_label"><a href="{{ url_for('sample', id=sample.sample_id) }}" target="_blank">{{ sample.number }}</td>
+        <td id="url" class="sample_label"><a href="{{ url_for('sample', id=sample.sample_id) }}" target="_blank">{{ sample.number }}</td>
         <td td class="sample_value">{{ sample.public_data }}</td>
         <td td class="sample_value">{{ sample.subsample_count }}</td>
         <td td class="sample_value">{{ sample.chem_analyses_count }}</td>
@@ -41,13 +84,13 @@
 </div> <!-- table-responsive-->
 &lt;&lt; <a class="samples-pagination" href="{{ first_page }}">First</a>
 {% if prev_url %}
-  &nbsp;&nbsp;&lt; <a class="samples-pagination" href="{{ prev_url }}">Prev</a>
+  &nbsp;&nbsp;&lt; <a class="samples-pagination" name="prev" value="sure" href="{{ prev_url }}">Prev</a>
 {% endif %}
 &nbsp;&nbsp;|
 {% if next_url %}
   &nbsp;&nbsp; <a class="samples-pagination" href="{{ next_url }}">Next</a> &gt;
 {% endif %}
-&nbsp;&nbsp; <a class="samples-pagination" href="{{ last_page }}">Last</a> &gt;&gt;
+&nbsp;&nbsp; <a class="samples-pagination" name="prev" value="last" href="{{ last_page }}">Last</a> &gt;&gt;
 
 <script>
 //Ajax call for first, last, next and previous samples
@@ -77,7 +120,5 @@ $('.samples-pagination').click(function (event)
    window.location = url;
  });
 </script>
+
 {% endblock %}
-
-
-

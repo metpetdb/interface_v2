@@ -1,5 +1,4 @@
 {% block body %}
-<script src="/static/js/jquery-2.1.1.min.js"></script>
 <div class = "table-responsive">
   <table id="samplelist" class="table">
     <thead>
@@ -17,7 +16,10 @@
     </thead>
     <tbody>
       {% if total %}
-        <p>Total: {{ total }}</p>
+      <p>Total: {{ total }}</p>
+      {% endif %}
+      {% if runningtotal %}
+      <p>Running total: {{ runningtotal }}</p>
       {% endif %}
       {% for analysis in chemical_analyses %}
       <tr>

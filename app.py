@@ -1,4 +1,4 @@
-import ast, StringIO, base64, json, unicodedata
+import ast, StringIO, base64, json
 from urllib import urlencode
 from requests import get, post
 from itsdangerous import URLSafeTimedSerializer
@@ -16,19 +16,11 @@ app = Flask(__name__)
 app.config.from_object('config')
 mail = Mail(app)
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
-def getAPIres(params, api_call):
-    results = []
-    params['offset'] = 0
-    l = -1
-    while len(results)-l > 0:
-        l = len(results)
-        results += api_call.get(params=params).data['objects']
-        params['offset'] += 1000
-    return results
 
 @app.route('/search/')
 def search():
@@ -42,50 +34,111 @@ def search():
     filter_dictionary = {}
     for key in filters:
         if filters[key][0]:
-          if key != "resource":
+          if key != "resource" and key != "all_results" and key != "prev" and key != "total":
             filter_dictionary[key] = (',').join(filters[key])
 
     #If minerals and AND are selected, intersect samples for each mineral with other filters
-    if request.args.getlist('minerals__in') and len(request.args.getlist('minerals__in')) > 1 and request.args.get('mineralandor') == 'and':
-        fields = 'sample_id'
+    all_results = 'all_results' in filters.keys()
+    if all_results or (request.args.getlist('minerals__in') and len(request.args.getlist('minerals__in')) > 1 and request.args.get('mineralandor') == 'and'):
+        showmap = 'showmap' in filter_dictionary.keys()
+        prev = 'prev' in filters.keys()
+        total = int(request.args.get('total',0))
+        offset = request.args.get('offset','0')
+        url = request.url.replace("&all_results=True","").replace("&prev=True","").replace("&offset="+offset,"").replace("&total="+str(total),"")
+        minerals = [m for m in request.args.getlist('minerals__in') if m != '']
+        fields = 'sample_id,minerals__mineral_id'
         if request.args.get('resource') == 'sample':
             fields += ',user__name,collector,number,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date'
-        params = {'fields': fields, 'limit': 0}
+        if showmap:
+            fields += ',location'
+
+        params = {'fields': fields, 'limit': 100}
         for key in filter_dictionary:
             if key != "minerals__in" and key != "search_filters" and key != "fields" and key != "mineralandor":
                 params[key] = filter_dictionary[key]
-        sample_res_ids = set()
+        params['offset'] = int(offset)
+        max_res = 20
+        if all_results:
+            params['offset'] = 0
+            max_res = 20000
+            del params['limit']
+        elif prev:
+            params['offset'] -= 100
+        if minerals:
+            params['minerals__in'] = int(minerals[0])
+
         sample_results = []
-        first = True
-        for m in request.args.getlist('minerals__in'):
-            params['minerals__in'] = m
-            samples = getAPIres(params, api.sample)
-            if first:
-                sample_results = samples
-                first = False
+        while len(sample_results) < max_res:
+            samples = api.sample.get(params=params).data['objects']
+            while prev and not samples:
+                params['offset'] -= 100
+                samples = api.sample.get(params=params).data['objects']
+            if not samples:
+                break
+            if prev:
+                samples.reverse()
+            i = 0
+            while i < len(samples):
+                good = True
+                for m in minerals:
+                    if 'minerals__mineral_id' not in samples[i].keys() or int(m) not in samples[i]['minerals__mineral_id']:
+                        good = False
+                if good:
+                    sample_results.append(samples[i])
+                    if len(sample_results) == max_res:
+                        offset = str(params['offset'])
+                        break
+                i += 1
+            if not prev:
+                params['offset'] += i+1
             else:
-                #intersect samples and sample_results
-                sample_results = [s for s in samples if s['sample_id'] in sample_res_ids]
-                sample_res_ids = set()
-            for s in sample_results:
-                sample_res_ids.add(s['sample_id'])
+                params['offset'] = max(params['offset']-i,0)
+
+        total += len(sample_results)
+        if prev:
+            sample_results.reverse()
+            params['offset'] = request.args.get("offset",'0')
+            total = None
+        prev_url = next_url = None
+        if offset != '0':
+            prev_url = url+"&prev=True&offset="+offset
+        if offset != '10000':
+            next_url = url+"&offset="+str(params['offset'])+"&total="+str(total)
 
         if request.args.get('resource') == 'sample':
             #Build mineral list string for rendering results
+            locations = []
             for s in sample_results:
                 s['mineral_list'] = (', ').join(s['minerals__name'])
-            return render_template('samples_mineral_and_samples.html', samples=sample_results)
+                if showmap:
+                    pos = s['location'].split(" ")
+                    s['lat'] = float(pos[2].replace(")",""))
+                    s['lon'] = float(pos[1].replace("(",""))
+                    del s['location']
+            return render_template('samples.html',
+                samples=sample_results,
+                showmap=showmap,
+                runningtotal=total,
+                first_page=url,
+                prev_url=prev_url,
+                next_url=next_url,
+                last_page=url+"&prev=True&offset=10000")
 
         elif request.args.get('resource') == 'chemicalanalysis':
             #Get subsample IDs using sample IDs
-            sample_resources = ((',').join(str(s['sample_id']) for s in sample_results))
-            subsamples = getAPIres({'sample__in': sample_resources, 'fields': 'subsample_id', 'limit': 0}, api.subsample)
-            subsample_resources = ((',').join(str(s['subsample_id']) for s in subsamples))
+            samples = ((',').join(str(s['sample_id']) for s in sample_results))
+            subsamples = api.subsample.get(params={'sample__in': samples, 'fields': 'subsample_id', 'limit': 0}).data['objects']
+            subsamples = ((',').join(str(s['subsample_id']) for s in subsamples))
             #Get chemical analyses using subsample IDs
-            chemical_analyses_results = getAPIres({'subsample__in': subsample_resources,
-                'fields': 'chemical_analysis_id,spot_id,public_data,analysis_method,where_done,analyst,analysis_date,reference_x,reference_y,total,mineral',
-                'limit': 0}, api.chemical_analysis)
-            return render_template('samples_mineral_and_chemical_analyses.html', chemical_analyses=chemical_analyses_results)
+            fields = 'chemical_analysis_id,spot_id,public_data,analysis_method,where_done,analyst,analysis_date,reference_x,reference_y,total,mineral'
+            chem_results = api.chemical_analysis.get(params={'subsample__in': subsamples, 'fields': fields, 'limit': 0}).data['objects']
+            return render_template('chemical_analyses.html',
+                chemical_analyses=chem_results,
+                runningtotal=total,
+                first_page=url,
+                prev_url=prev_url,
+                next_url=next_url,
+                last_page=url+"&prev=True&offset=10000")
 
     #If one or no minerals or OR selected
     if request.args.get('resource') == 'sample':
@@ -99,19 +152,28 @@ def search():
         headers = None
         if email and api_key:
             headers = {'email': email, 'api_key': api_key}
-        #only returns 1000 ids: how to fix?
-        response = request_obj.make_request('GET','/get-chem-analyses-given-sample-filters/',
-            params=filter_dictionary,headers=headers)
-        ids = response.data['chemical_analysis_ids']
+        ids = request_obj.make_request('GET','/get-chem-analyses-given-sample-filters/',params=filter_dictionary,headers=headers).data['chemical_analysis_ids']
         url = url_for('chemical_analyses') + '?' + urlencode({'chemical_analysis_id__in': ids})
         return redirect(url)
 
     rock_types = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
     regions = api.region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
-    references = getAPIres({'order_by': 'name', 'limit': 0}, api.reference)
+    references = []
+    params = {'order_by': 'name', 'offset': 0, 'limit': 0}
+    l = -1
+    while len(references)-l > 0:
+        l = len(references)
+        references += api.reference.get(params=params).data['objects']
+        params['offset'] += 10000
     metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name', 'limit': 0}).data['objects']
     metamorphic_grades = api.metamorphic_grade.get(params={'order_by': 'name', 'limit': 0}).data['objects']
-    samples = getAPIres({'fields': 'user__user_id,user__name,collector,number,sesar_number,country,public_data', 'limit': 0}, api.sample)
+    samples = []
+    params = {'fields': 'user__user_id,user__name,collector,number,sesar_number,country,public_data', 'offset': 0, 'limit': 0}
+    l = -1
+    while len(samples)-l > 0:
+        l = len(samples)
+        samples += api.sample.get(params=params).data['objects']
+        params['offset'] += 10000
     mineral_relationships = api.mineral_relationship.get(params={'limit': 0, 
         'fields': 'parent_mineral__mineral_id,parent_mineral__name,child_mineral__mineral_id,child_mineral__name'}).data['objects']
 
@@ -197,87 +259,55 @@ def search_chemistry():
 
     #If chem analysis data is passed, return results
     if 'squirrel' not in request.args:
+        results = []
+        if 'results' in filter_dictionary.keys():
+            results = json.loads(filter_dictionary['results'])
         if request.args.get('resource') == 'chemicalanalysis':
-            if request.args.get("results"):
-                filter_dictionary['results'] = eval(unicodedata.normalize('NFKD', filter_dictionary['results']).encode('ascii','ignore').replace("null","None"))
-                return render_template('chemical_analyses.html', chemical_analyses=filter_dictionary['results'])
-            else:
-                return render_template('chemical_analyses.html')
+            return render_template('chemical_analyses.html',
+                chemical_analyses=results,
+                total=len(results))
+        elif request.args.get('resource') == 'sample':
+            return render_template('samples.html',
+                samples=results,
+                total=len(results))
+
+    #If chemistry row data is passed
+    if request.args.get('squirrel') == 'squirrel':
+        minerals = (',').join(request.args.getlist('minerals__in'))
+        fields = ''
+        if request.args.get('resource') == 'chemicalanalysis':
+            fields = 'chemical_analysis_id,spot_id,public_data,analysis_method,mineral__name,where_done,analyst,analysis_date,reference_x,reference_y,total,chemical_analysis_id'
+        elif request.args.get('resource') == 'sample':
+            fields = 'subsample'
+
+        params = {'minerals__in': minerals, 'fields': fields, 'limit': 0}
+        if 'elements__element_id__in' in request.args:
+            params['elements__element_id__in'] = request.args.get('elements__element_id__in')
+        elif 'oxides__oxide_id__in' in request.args:
+            params['oxides__oxide_id__in'] = request.args.get('oxides__oxide_id__in')
+
+        ids = api.chemical_analysis.get(params=params).data['objects']
+        if request.args.get('resource') == 'chemicalanalysis':
+            return json.dumps(ids)
 
         elif request.args.get('resource') == 'sample':
-            if request.args.get("results"):
-                filter_dictionary['results'] = eval(unicodedata.normalize('NFKD', filter_dictionary['results']).encode('ascii','ignore').replace("null","None"))
-                return render_template('samples.html', samples=filter_dictionary['results'])
-            else:
-                return render_template('samples.html')
+            subsamples = set()
+            for i in ids:
+                subsamples.add(i['subsample'].replace("Subsample #", ""))
+            subsamples = (',').join(str(s) for s in subsamples)
 
-    #If chemistry row data is passed, get (M, E1) / (M, O1)
-    if request.args.get('squirrel') == 'squirrel':
-        if 'elements__element_id__in' in request.args:
-            element = request.args.get('elements__element_id__in')
-        elif 'oxides__oxide_id__in' in request.args:
-            oxide = request.args.get('oxides__oxide_id__in')
-        mineral_ids = (',').join(request.args.getlist('minerals__in'))            
-        cid_list = []
+            params = {'subsample_id__in': subsamples, 'fields': 'sample', 'limit': 0}
+            ids = api.subsample.get(params=params).data['objects']
+            samples = set()
+            for i in ids:
+                samples.add(i['sample'].replace("Sample #", ""))
+            samples = (',').join(str(s) for s in samples)
 
-    #Get chemical analyses for (E, M)
-        if 'elements__element_id__in' in request.args and request.args.get('resource') == 'chemicalanalysis':
-            e_chem_analysis_ids = api.chemical_analysis.get(params={'elements__element_id__in': element, 'minerals__in': mineral_ids, 'fields': 'chemical_analysis_id,spot_id,public_data,analysis_method,mineral__name,where_done,analyst,analysis_date,reference_x,reference_y,total,chemical_analysis_id', 'limit': 0}).data['objects']
-
-            for cid in e_chem_analysis_ids:
-                cid_list.append(cid)
-            return json.dumps(cid_list)
-    
-    #Get chemical analyses for (O, M)
-        elif 'oxides__oxide_id__in' in request.args and request.args.get('resource') == 'chemicalanalysis':
-            o_chem_analysis_ids = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide, 'minerals__in': mineral_ids, 'fields': 'chemical_analysis_id,spot_id,public_data,analysis_method,mineral__name,where_done,analyst,analysis_date,reference_x,reference_y,total,chemical_analysis_id', 'limit': 0}).data['objects']
-            for cid in o_chem_analysis_ids:
-                cid_list.append(cid)
-            return json.dumps(cid_list)
-
-    #Get samples for (E, M)
-    elif 'elements__element_id__in' in request.args and request.args.get('resource') == 'sample':
-        subsample_resources = api.chemical_analysis.get(params={'elements__element_id__in': element, 'minerals__in': mineral_ids, 'fields': 'subsample', 'limit': 0}).data['objects']
-        subsample_ids = set()
-        for s in subsample_resources:
-            #Remove first 18 characters and trailing /
-            subsample_id = s['subsample'].replace("Subsample #", "")
-            subsample_ids.add(subsample_id)
-        print subsample_ids
-
-        sample_resources = api.subsample.get(params={'subsample_id__in': (',').join(str(s) for s in subsample_ids), 'fields': 'sample', 'limit':0}).data['objects']
-        sample_ids = set()
-        for s in sample_resources:
-            #Remove first 18 characters and trailing /
-            sample_id = s['sample'].replace("Sample #", "")
-            sample_ids.add(sample_id)
-        print sample_ids
-        sample_results = api.sample.get(params={'sample_id__in': (',').join(str(s) for s in sample_ids), 'fields': 'sample_id,user__name,collector,number,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date', 'limit':0}).data['objects']
-        print "S RESULTS"
-        print sample_results
-        return json.dumps(sample_results)
-
-    #Get samples for (O, M)
-    elif 'oxides__oxide_id__in' in request.args and request.args.get('resource') == 'sample':
-        subsample_resources = api.chemical_analysis.get(params={'oxides__oxide_id__in': oxide, 'minerals__in': mineral_ids, 'fields': 'subsample', 'limit': 0}).data['objects']
-        subsample_ids = set()
-        for s in subsample_resources:
-            #Remove first 18 characters and trailing /
-            subsample_id = s['subsample'].replace("Subsample #", "")
-            subsample_ids.add(subsample_id)
-        print subsample_ids
-
-        sample_resources = api.subsample.get(params={'subsample_id__in': (',').join(str(s) for s in subsample_ids), 'fields': 'sample', 'limit':0}).data['objects']
-        sample_ids = set()
-        for s in sample_resources:
-            #Remove first 18 characters and trailing /
-            sample_id = s['sample'].replace("Sample #", "")
-            sample_ids.add(sample_id)
-        print sample_ids
-        sample_results = api.sample.get(params={'sample_id__in': (',').join(str(s) for s in sample_ids), 'fields': 'sample_id,user__name,collector,number,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date', 'limit':0}).data['objects']
-        print "S RESULTS"
-        print sample_results
-        return json.dumps(sample_results)
+            del params['subsample_id__in']
+            params['sample_id__in'] = samples
+            params['fields'] = 'sample_id,user__name,collector,number,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date'
+            sample_results = api.sample.get(params=params).data['objects']
+            return json.dumps(sample_results)
 
     oxides = api.oxide.get(params={'limit': 0}).data['objects']
     elements = api.element.get(params={'limit': 0}).data['objects']
@@ -394,18 +424,28 @@ def samples():
     filters['offset'] = offset
     filters['fields'] = 'sample_id,number,user__name,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date'
 
+    showmap = 'showmap' in filters.keys()
+    if showmap:
+        filters['fields'] += ',location'
+
     data = api.sample.get(params=filters)
     next, previous, last, total_count = paginate_model('samples', data, filters)
 
+    locations = []
     samples = data.data['objects']
-    for sample in samples:
-        mineral_names = [str(m) for m in sample['minerals__name']]
-        sample['mineral_list'] = (', ').join(mineral_names)
+    for s in samples:
+        s['mineral_list'] = (', ').join(s['minerals__name'])
+        if showmap:
+            pos = s['location'].split(" ")
+            s['lat'] = float(pos[2].replace(")",""))
+            s['lon'] = float(pos[1].replace("(",""))
+            del s['location']
 
     first_page_url = url_for('samples') + '?' + urlencode(filters)
 
     return render_template('samples.html',
         samples=samples,
+        showmap=showmap,
         next_url=next,
         prev_url=previous,
         total=total_count,
