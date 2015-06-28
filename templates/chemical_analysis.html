@@ -3,7 +3,7 @@
 
   <body>
       {% block title %}
-        <h3> Chemical Analysis {{data.pointnumber}}</h3>
+        <h3> Chemical Analysis {{data.spot_id}}</h3>
       {% endblock %}
 
       {% block body %}
@@ -12,11 +12,11 @@
         <tbody>
           <tr>
             <td class="sample_label">Owner</td>
-              <td class="sample_value">{{data.owner_name}}</td>
+              <td class="sample_value">{{userdata.name}}</td>
           </tr>
           <tr>
             <td class="sample_label">Point Number</td>
-              <td class="sample_value">{{data.pointnumber}}</td>
+              <td class="sample_value">{{data.spot_id}}</td>
           </tr>
           <tr>
             <td class="sample_label">Public</td>
@@ -32,7 +32,7 @@
           </tr>
           <tr>
             <td class="sample_label">Analysis Location</td>
-              <td class="sample_value">{{data.analysis_location}}</td>
+              <td class="sample_value"></td>
           </tr>
           <tr>
             <td class="sample_label">Analyst</td>
@@ -48,7 +48,7 @@
           </tr>
           <tr>
             <td class="sample_label">Total</td>
-              <td class="sample_value">{{data.analysis_material}}</td>
+              <td class="sample_value">{{data.total}}</td>
           </tr>
           <tr>
             <td class="sample_label">Stage X</td>
@@ -60,12 +60,17 @@
           </tr>
           <tr>
             <td class="sample_label">Sample</td>
-              <td class="sample_value"><a href="{{ url_for('sample', id=data.sample_id) }}" target="_blank">{{ data.sample_id }}</a></td>
+              <td class="sample_value"><a href="{{ url_for('sample', id=sampledata.sample_id) }}" target="_blank">{{ sampledata.sample_id }}</a></td>
           </tr>
           <tr>
             <td class="sample_label">Subsample</td>
-              <td class="sample_value"><a href="{{ url_for('subsample', id=data.subsample_id) }}" target="_blank">{{ data.subsample_id }}</a></td>
+              <td class="sample_value"><a href="{{ url_for('subsample', id=subdata.subsample_id) }}" target="_blank">{{ subdata.subsample_id }}</a></td>
           </tr>
+          <tr>
+            {%if api_key%}
+              <p><a href="{{ url_for('edit_chemical', id = data.chemical_analysis_id) }}" target="_blank">Edit</a></p>
+            {%endif%}
+        </tr>
       </table>
           <div id="chem_elements">
             <h4>Oxides</h4>
@@ -78,9 +83,9 @@
                 </tr>
               </thead>
               <tbody>
-                <tr> {%for oxide in data.oxides%}
-                  <td>{{oxide.wt_percentage}}</td>
-                  <td>{{oxide.name}}</td>
+                <tr> {%for oxide in oxide_list%}
+                  <td>{{oxide.weight}}</td>
+                  <td>{{oxide.species}}</td>
                 </tr>
                 <tr>
                   {%endfor%}
@@ -96,12 +101,12 @@
                 </tr>
               </thead>
               <tbody>
-		{%for element in data.elements%}
-                <tr>
-		<td>{{element.wt_percentage}}</td>
-		<td>{{element.name}}</td>
-		</tr>
-		{%endfor%}
+            {%for element in element_list%}
+                        <tr>
+            <td>{{element.weight}}</td>
+            <td>{{element.name}}</td>
+            </tr>
+            {%endfor%}
                 <tr>
 
               </tbody>

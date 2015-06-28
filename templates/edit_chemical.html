@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+  <body>
+      {% block title %}
+        <h3> Chemical Analysis {{data.spot_id}}</h3>
+      {% endblock %}
+
+      {% block body %}
+<script src="/static/js/jquery-2.1.1.min.js"></script>
+<form action="" method="post" name="edit">
+{{form.hidden_tag()}}
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="/static/css/chosen.min.css">
+<script src="/static/js/chosen.jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+
+
+<link rel="stylesheet" href="/static/css/style.min.css">
+<script src="/static/js/jstree.min.js"></script>
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+
+<div class = "table-responsive">
+  <form action="" method="post" name = "edit">
+      <table id="chemicalanalysisview_table" class="table">
+        <tbody>
+          <tr>
+            <td class="sample_label">Owner</td>
+              <td class="sample_value">{{form.owner(size=32)}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Point Number</td>
+              <td class="sample_value">{{data.spot_id}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Public</td>
+              <td class="sample_value">{{form.public(size=32)}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Image</td>
+              <td class="sample_value">No Image</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Analysis Method</td>
+              <td class="sample_value">{{data.analysis_method}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Analysis Location</td>
+              <td class="sample_value">{{data.analysis_location}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Analyst</td>
+              <td class="sample_value">{{form.analyst(size=32)}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Description</td>
+              <td class="sample_value">{{data.description}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Analysis Material</td>
+              <td class="sample_value">{{form.analysis_material(size=32)}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Total</td>
+              <td class="sample_value">{{form.total(size=32)}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Stage X</td>
+              <td class="sample_value">{{form.StageX(size=32)}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Stage Y</td>
+              <td class="sample_value">{{form.StageY(size=32)}}</td>
+          </tr>
+          <tr>
+            <td class="sample_label">Sample</td>
+              <td class="sample_value"><a href="{{ url_for('sample', id=sampledata.sample_id) }}" target="_blank">{{ sampledata.sample_id }}</a></td>
+          </tr>
+          <tr>
+            <td class="sample_label">Subsample</td>
+              <td class="sample_value"><a href="{{ url_for('subsample', id=subdata.subsample_id) }}" target="_blank">{{ subdata.subsample_id }}</a></td>
+          </tr>
+        </table>
+            <div id="chem_elements">
+              <h4>Elements</h4>
+              <table id="chem_elements_table" class="table">
+                <thead>
+                  <tr>
+                    <th>wt%</th>
+                    <!--<th>Type</th>--> <!--optional-->
+                    <th>Oxide</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id = "body">
+                  <script type = "text/javascript", methods = GET, POST>
+                  var alloxides = {{oxide_list|tojson}};
+                  var selectedox = {{selected_oxide_list|tojson}};
+                  var allelements = {{element_list|tojson}};
+                  var id = {{id|tojson}}
+                  $(document).ready(function()  {
+                    console.log(allelements.length);
+                    /*for (var a = 0; a < selectedox.length; a++) {
+                      //console.log(selectedox[a]["name"]);
+                      var curr = "choose-" + selectedox[a]["name"];
+                      var v = document.getElementById(curr);
+                      var q = v.innerHTML;
+                      q = "";
+                      for (var b = 0; b < alloxides.length; b++)  {
+                        if (alloxides[b]["species"] == selectedox[a]["name"]) {
+                          q+="<option value = '" + alloxides[b]["species"] + "' selected>" + alloxides[b]["species"] + "</option>";
+                        }
+                        else {
+                          q+="<option value = '" + alloxides[b]["species"] + "'>" + alloxides[b]["species"] + "</option>";
+                        }
+                      }
+                      v.innerHTML = q;
+                    }*/
+                  });
+                  function deleteOxide(oxide, wt)  {
+                    var curr = document.getElementById(oxide.name);
+                    console.log(curr);
+                    curr.remove();
+                    for (var a = selectedox.length-1; a >= 0; a--) {
+                      if (selectedox[a]["name"] == oxide.name)  {
+                        selectedox.splice(a, 1)
+                      }
+                    }
+                    //console.log(ind);
+                    //console.log(selectedox[ind]);
+                  }
+                  function deleteOxide2(){
+                    var curr = document.getElementById("oxide_name");
+                    var curr2 = document.getElementById("name");
+                    curr.remove();
+                    for (var a = selectedox.length-1; a>= 0; a--) {
+                      if (selectedox[a]["name"] == curr2.innerText) {
+                        selectedox.splice(a,1);
+                      }
+                    }
+                  }
+                  function addOxide() {
+                    var options = "";
+                    for (var a = 0; a < alloxides.length; a++)  {
+                      //console.log(alloxides[a]['species']);
+                      options+="<option value = '" + alloxides[a]["species"] + "'>" + alloxides[a]["species"] + "</option>";
+                    }
+                    var c = document.getElementById("body");
+                    //console.log(c);
+                    //c.innerHTML="";
+                    var z = "";
+                    z+="<tr id = 'oxide_name'><td><input type = 'text' id = 'oxide_wt' value = 0></td>";
+                    z+="<td><select id = 'choose-oxide'>" + options + "</select></td>";
+                    z+="<td><button name = 'oxide' id = 'delete-oxide' type = 'button' onClick='deleteOxide2()'>Delete Oxide</td></tr>";
+                    c.innerHTML+=z;
+                    //console.log(c);
+                    //c+="<td><input type = 'text' id = 'oxide_wt' value = 0></td>";
+                  }
+                  function getParams()  {
+                    console.log("value changed");
+                    var z = document.getElementById("choose-elem-ox");
+                    if (z.value == "Element") {
+                      //console.log("elem");
+                      var x = document.getElementById("choose-elox");
+                      x.innerHTML="";
+                      var op2 = "";
+                      for (var a = 0; a < allelements.length; a++){
+                        op2+="<option value = '" + allelements[a]["symbol"] + "'>" + allelements[a]["symbol"] + "</option>";
+                      }
+                      x.innerHTML+="<td><select id = 'choose-elox'>" + op2 + "</select></td>";
+                    }
+                    else if (z.value == "Oxide")  {
+                      //console.log("ox");
+                      //var x = document.getElementById("add");
+                      var x = document.getElementById("choose-elox");
+                      x.innerHTML="";
+                      var op2 = "";
+                      for (var a = 0; a < alloxides.length; a++)  {
+                        op2+="<option value = '" + alloxides[a]["species"] + "'>" + alloxides[a]["species"] + "</option>";
+                      }
+                      x.innerHTML += "<td><select id = 'choose-elox'>" + op2 + "</select></td>";
+                    }
+                  }
+                  function addAnalysis()  {
+                    //console.log(selectedox);
+
+                    console.log("adding analysis");
+                    var add_info = document.getElementById("add");
+                    //console.log(add_info);
+                    var name = document.getElementById("choose-elox").value;
+                    console.log(name);
+                    var findcurr = selectedox.indexOf(name);
+                    var found = false;
+                    for (var a = 0; a < selectedox.length; a++) {
+                      if (selectedox[a]["species"] == name)  {
+                        found = true;
+                      }
+                    }
+                    var iselem = -1;
+                    var isox = -1;
+                    console.log(allelements[0]);
+                    for (var a = 0; a < allelements.length; a++)  {
+                      if (allelements[a]["symbol"] == name) {
+                        iselem = a;
+                      }
+                    }
+                    for (var a = 0; a < alloxides.length; a++)  {
+                      if (alloxides[a]["species"] == name)  {
+                        isox = a;
+                      }
+                    }
+                    //console.log(iselem);
+                    //console.log(isox);
+
+                    if (iselem == -1)  {
+                      console.log(isox);
+                      var addit = alloxides[isox]["species"];
+                    }
+                    else {
+                      var addit = allelements[iselem]["symbol"];
+                    }
+                    //console.log(addit);
+                    //if (findcurr == -1) {
+                    var additnow = {"species": addit, "weight": 0.0};
+                    if (!found) {
+                      var e = "";
+                      e+="<tr id = 'oxide_name'>";
+                      e+="<td><input type = 'text' id = 'weight' value = '0.0'></td>";
+                      e+="<td id = 'name' value = '" + name + "'>"+name+"</td>";
+                      e+="<td><button name = '"+name+"'id='delete-"+name+"'type = 'button' onClick='deleteOxide2()'>Delete Oxide</td>";
+                      e+="</tr>";
+                      var  add_to = document.getElementById("body");
+                      body.innerHTML+=e;
+                      selectedox.push(additnow);
+                    }
+                    //console.log(typeof name);
+                    //console.log(selectedox);
+                  }
+                  $(document).ready(function()  {
+                    var v = document.getElementById("add");
+                    //console.log(v);
+                    var q = "";
+                    var options = "";
+                    options+="<option value = 'Element'>Element</option>";
+                    options+="<option value = 'Oxide'>Oxide</option>";
+                    q+="<td><select id = 'choose-elem-ox' onchange = 'getParams()'>" + options + "</select></td>";
+                    v.innerHTML+=q;
+
+                    $(document).ready(function()  {
+                      //console.log("here");
+                      var z = document.getElementById("choose-elem-ox");
+
+                      //console.log(z.value);
+                      if (z.value === "Element") {
+                        var x = document.getElementById("add");
+                        var op2 = "";
+                        //console.log(allelements.size);
+                        for (var a = 0; a < allelements.length; a++) {
+                          //console.log(allelements[a]["name"]);
+                          op2+="<option value = '"+allelements[a]["symbol"]+"'>" + allelements[a]["symbol"] + "</option>";
+                        }
+                        var op3 = "<td><select id = 'choose-elox'>" + op2 + "</select></td>"
+                        x.innerHTML += op3;
+                      }
+                      var list = [];
+                      list.push("element");
+                      list.push("oxide");
+                      var qq = "oxide";
+                      var list2 = JSON.stringify(list);
+                      var s = 'http://127.0.0.1:5000/edit_chemical/' + id;
+                      /*$.getJSON(s, {
+                        wordlist: JSON.stringify(qq)
+                      }, function(data) {
+                        console.log(typeof wordlist);
+                        console.log(data.result);
+                        $("#result").text(data.result);
+                      })*/
+                      /*var url = $(this).attr('href');
+                       $('#spinner').show();
+                           $.ajax({
+                         type: "GET",
+                               url: url,
+                               success: function (data) {
+                                   $("#results").html(data);
+                                   $('#spinner').hide();
+                                   console.log("success");
+                               },
+                               error: function(data) {
+                                   $("#results").html("Error");
+                                   $('#spinner').hide();
+                               }
+                           });
+                           return false;*/
+                    })
+                  })
+                  </script>
+
+                  <tr id = "oxides">
+                      {%for oxide in selected_oxide_list%}
+                      <tr id = {{oxide.species}}>
+                      <td><input type = "text" id = "{{oxide.weight}}" value = "{{oxide.weight}}"></td>
+                      <td>
+                        <!--<select id = "choose-{{oxide.name}}">
+                          {%for ox in oxide_list%}
+                          <option value = "{{ox['species']}}">{{ox.species}}</option>
+                          {%endfor%}
+                        </select>-->
+                        {{oxide.species}}
+                      </td>
+                      <!--<td><input type = "text" id = "chem_analysis_ox" value = "{{oxide.name}}"></td>-->
+                      <td><button name = "{{oxide.species}}" id = "delete-{{oxide.species}}" type ="button" onClick="deleteOxide({{oxide.species}}, {{oxide.weight}})">Delete Oxide</td>
+                    </tr>
+                  </tr>
+
+                    {%endfor%}
+
+                </tbody>
+                <tr id = "add">
+                  <td><button name = "addmore" id = "addmore" type = "button" onClick = "addAnalysis()">Add Oxide</td>
+                </tr>
+              </table>
+      <tr>
+        <tr>
+          <td></td>
+          <td><input type="submit" value="Save Changes"></td>
+        </tr>
+      </tr>
+{% endblock %}
