@@ -65,11 +65,9 @@ def search():
         minerals = [m for m in request.args.getlist('minerals__in') if m != '']
         fields = 'sample_id,minerals__mineral_id'
         if request.args.get('resource') == 'sample':
-            fields += ',user__name,collector,number,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date'
-        if showmap:
-            fields += ',location'
+            fields += ',collector,number,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date,location'
 
-        params = {'fields': fields, 'limit': 100}
+        params = {'fields': fields, 'limit': 20}
         for key in filter_dictionary:
             if key != "minerals__in" and key != "search_filters" and key != "fields" and key != "mineralandor":
                 params[key] = filter_dictionary[key]
@@ -80,7 +78,7 @@ def search():
             max_res = 20000
             del params['limit']
         elif prev:
-            params['offset'] -= 100
+            params['offset'] -= 20
         if minerals:
             params['minerals__in'] = minerals[0]
 
@@ -88,7 +86,7 @@ def search():
         while len(sample_results) < max_res:
             samples = api.sample.get(params=params).data['objects']
             while prev and not samples:
-                params['offset'] -= 100
+                params['offset'] -= 20
                 samples = api.sample.get(params=params).data['objects']
             if not samples:
                 break
@@ -111,32 +109,29 @@ def search():
                 if not all_results:
                     params['offset'] += 1
             else:
-                params['offset'] = max(params['offset']-i,0)
+                params['offset'] -= i
 
-        total += len(sample_results)
         if prev:
             sample_results.reverse()
             params['offset'] = request.args.get("offset",'0')
-            total = None
         prev_url = next_url = None
         if offset != '0':
             prev_url = url+"&prev=True&offset="+offset
-        if offset != '10000':
+        if offset != '10000' and not all_results:
             next_url = url+"&offset="+str(params['offset'])+"&total="+str(total)
 
         if request.args.get('resource') == 'sample':
             #Build mineral list string for rendering results
             for s in sample_results:
                 s['mineral_list'] = (', ').join(s['minerals__name'])
-                if showmap:
-                    pos = s['location'].split(" ")
-                    s['lat'] = float(pos[2].replace(")",""))
-                    s['lon'] = float(pos[1].replace("(",""))
-                    del s['location']
+                pos = s['location'].split(" ")
+                s['lat'] = float(pos[2].replace(")",""))
+                s['lon'] = float(pos[1].replace("(",""))
+                del s['location']
             return render_template('samples.html',
                 samples=sample_results,
                 showmap=showmap,
-                runningtotal=total,
+                runningtotal=total+len(sample_results),
                 first_page=url,
                 prev_url=prev_url,
                 next_url=next_url,
@@ -152,7 +147,7 @@ def search():
             chem_results = api.chemical_analysis.get(params={'subsample__in': subsamples, 'fields': fields, 'limit': 0}).data['objects']
             return render_template('chemical_analyses.html',
                 chemical_analyses=chem_results,
-                runningtotal=total,
+                runningtotal=total+len(chem_results),
                 first_page=url,
                 prev_url=prev_url,
                 next_url=next_url,
@@ -260,7 +255,7 @@ def search():
         rock_types=rock_types)
 
 
-@app.route('/search-chemistry/')
+@app.route('/search_chemistry/')
 def search_chemistry():
     print "REQ ARGS"
     print request.args
@@ -272,51 +267,102 @@ def search_chemistry():
     filter_dictionary = {}
     for key in filters:
         if filters[key][0]:
-          if key != "resource":
+          if key != "resource" and key != "all_results" and key != "prev" and key != "total":
             filter_dictionary[key] = (",").join(filters[key])
 
-    if 'resource' in request.args:
-        showmap = 'showmap' in filter_dictionary.keys()
+    all_results = 'all_results' in filters.keys()
+    elements = [e for e in request.args.getlist('elements__element_id__in') if e != '']
+    oxides = [o for o in request.args.getlist('oxides__oxide_id__in') if o != '']
+    if all_results or len(elements) + len(oxides) > 1:
         minerals = [m for m in request.args.getlist('minerals__in') if m != '']
-        elements = [e for e in request.args.getlist('elements__element_id__in') if e != '']
-        oxides = [o for o in request.args.getlist('oxides__oxide_id__in') if o != '']
-        fields = 'elements__element_id,oxides__oxide_id'
+        prev = 'prev' in filters.keys()
+        total = int(request.args.get('total',0))
+        offset = request.args.get('offset','0')
+        url = request.url.replace("&all_results=True","").replace("&prev=True","").replace("&offset="+offset,"").replace("&total="+str(total),"")
+        fields = 'elements__element_id,oxides__oxide_id,subsample'
         if request.args.get('resource') == 'chemicalanalysis':
-            fields += ',chemical_analysis_id,spot_id,public_data,analysis_method,mineral__name,where_done,analyst,analysis_date,reference_x,reference_y,total'
-        elif request.args.get('resource') == 'sample':
-            fields += ',subsample'
-        params = {'fields': fields, 'limit': 0}
+            fields += ',chemical_analysis_id,analysis_method,mineral__name,analyst,analysis_date,reference_x,reference_y,total'
+        params = {'fields': fields, 'limit': 20}
         if elements:
             params['elements__element_id__in'] = elements[0]
         if oxides:
             params['oxides__oxide_id__in'] = oxides[0]
         if not minerals:
-            minerals.append((",").join([str(i) for i in range(184)]))
+            minerals = [str(i) for i in range(184)]
+        params['offset'] = int(offset)
+        max_res = 20
+        if all_results:
+            params['offset'] = 0
+            max_res = 20000
+            del params['limit']
+        elif prev:
+            params['offset'] -= 20
+            minerals.reverse()
 
         chem_results = []
-        for i in range(len(minerals)):
-            params['minerals__in'] = minerals[i]
-            chem = api.chemical_analysis.get(params=params).data['objects']
-            for i in range(len(chem)):
+        while len(chem_results) < max_res:
+            chem = []
+            for i in range(len(minerals)):
+                params['minerals__in'] = minerals[i]
+                c = api.chemical_analysis.get(params=params).data['objects']
+                while prev and not c:
+                    params['offset'] -= 20
+                    c = api.chemical_analysis.get(params=params).data['objects']
+                chem += c
+            if not chem:
+                break
+            if prev:
+                chem.reverse()
+            j = 0
+            while j < len(chem):
                 good = True
                 for e in elements:
-                    if 'elements__element_id' not in chem[i].keys() or int(e) not in chem[i]['elements__element_id']:
+                    if 'elements__element_id' not in chem[j].keys() or int(e) not in chem[j]['elements__element_id']:
                         good = False
                 for o in oxides:
-                    if 'oxides__oxide_id' not in chem[i].keys() or int(o) not in chem[i]['oxides__oxide_id']:
+                    if 'oxides__oxide_id' not in chem[j].keys() or int(o) not in chem[j]['oxides__oxide_id']:
                         good = False
                 if good:
-                    chem_results.append(chem[i])
+                    chem[j]['subsample'] = chem[j]['subsample'].replace("Subsample #", "")
+                    chem_results.append(chem[j])
+                    if len(chem_results) == max_res:
+                        offset = str(params['offset'])
+                        break
+                j += 1
+            if not prev:
+                params['offset'] += j
+                if not all_results:
+                    params['offset'] += 1
+            else:
+                params['offset'] -= i
+
+        if prev:
+            chem_results.reverse()
+            params['offset'] = request.args.get("offset",'0')
+        prev_url = next_url = None
+        if offset != '0':
+            prev_url = url+"&prev=True&offset="+offset
+        if offset != '10000' and not all_results:
+            next_url = url+"&offset="+str(params['offset'])+"&total="+str(total)
 
         if request.args.get('resource') == 'chemicalanalysis':
+            for c in chem_results:
+                sample_id = api.subsample.get(c['subsample']).data['sample'][15:-1]
+                c['sample_number'] = api.sample.get(sample_id).data['number']
             return render_template('chemical_analyses.html',
                 chemical_analyses=chem_results,
-                total=len(chem_results))
+                runningtotal=len(chem_results),
+                first_page=url,
+                prev_url=prev_url,
+                next_url=next_url,
+                last_page=url+"&prev=True&offset=10000")
 
         elif request.args.get('resource') == 'sample':
+            showmap = 'showmap' in filter_dictionary.keys()
+
             subsamples = set()
             for c in chem_results:
-                subsamples.add(c['subsample'].replace("Subsample #", ""))
+                subsamples.add(c['subsample'])
             subsamples = (',').join(str(s) for s in subsamples)
 
             params = {'subsample_id__in': subsamples, 'fields': 'sample', 'limit': 0}
@@ -328,22 +374,34 @@ def search_chemistry():
 
             del params['subsample_id__in']
             params['sample_id__in'] = samples
-            params['fields'] = 'sample_id,user__name,collector,number,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date'
-            if showmap:
-                params['fields'] += ',location'
+            params['fields'] = 'sample_id,collector,number,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date,location'
             sample_results = api.sample.get(params=params).data['objects']
 
-            if showmap:
-                for s in sample_results:
-                    pos = s['location'].split(" ")
-                    s['lat'] = float(pos[2].replace(")",""))
-                    s['lon'] = float(pos[1].replace("(",""))
-                    del s['location']
+            for s in sample_results:
+                pos = s['location'].split(" ")
+                s['lat'] = round(float(pos[2].replace(")","")),5)
+                s['lon'] = round(float(pos[1].replace("(","")),5)
+                del s['location']
 
             return render_template('samples.html',
                 samples=sample_results,
                 showmap=showmap,
-                total=len(sample_results))
+                runningtotal=len(sample_results),
+                first_page=url,
+                prev_url=prev_url,
+                next_url=next_url,
+                last_page=url+"&prev=True&offset=10000")
+
+    #If one or no elements/oxides
+    if request.args.get('resource') == 'sample':
+        #get samples with filters
+        url = url_for('samples') + '?' + urlencode(filter_dictionary)
+        return redirect(url)
+
+    elif request.args.get('resource') == 'chemicalanalysis':
+        #get chemical analyses with get-chem-analyses-given-sample-filters
+        url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
+        return redirect(url)
 
     oxides = api.oxide.get(params={'limit': 0}).data['objects']
     elements = api.element.get(params={'limit': 0}).data['objects']
@@ -375,80 +433,6 @@ def search_chemistry():
         mineral_nodes=json.dumps(sorted(mineralnodes, key=lambda k: k['text'])))
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if session.get('api_key'):
-        return redirect(url_for('search'))
-    form = LoginForm()
-    if form.validate_on_submit():
-        payload = {'email': form.email.data, 'password': form.password.data}
-        response =  post(env('API_HOST') + '/authenticate/', data=payload)
-        if response.status_code == 200:
-            data = json.loads(response.text)
-            session['email'] = data['email']
-            session['api_key'] = data['api_key']
-            flash('Login successful!')
-            return redirect(url_for('search'))
-        else:
-            flash('Authentication failed. Please try again.')
-
-    return render_template('login.html', form=form)
-
-
-@app.route('/logout')
-def logout():
-    session.pop('email', None)
-    session.pop('api_key', None)
-    flash('Logout successful.')
-    return redirect(url_for('search'))
-
-
-@app.route('/request-password-reset', methods=['GET', 'POST'])
-def request_reset_password():
-    form = RequestPasswordResetForm()
-    if form.validate_on_submit():
-        payload = {'email': form.email.data}
-        response = post(env('API_HOST') + '/reset-password/', data=payload)
-        if response.status_code == 200:
-            data = json.loads(response.text)
-            message = Message("Metpetdb: Reset Password", sender=env('DEFAULT_MAIL_SENDER'), recipients=[form.email.data])
-            reset_url = url_for('reset_password', token=data['reset_token'], _external=True)
-            message.body = render_template('reset_password_email.html', reset_url=reset_url)
-            mail.send(message)
-            flash('Please check your email for a link to reset your password')
-            return redirect(url_for('login'))
-        else:
-            flash("Invalid email. Please try again.")
-
-    return render_template('request_password_reset.html', form=form)
-
-
-@app.route('/reset-password/<string:token>', methods=['GET', 'POST'])
-def reset_password(token):
-    form = PasswordResetForm()
-    if form.validate_on_submit():
-        payload = {'token': form.token.data, 'password': form.password.data}
-        response = post(env('API_HOST') + '/reset-password/', data=payload)
-        if response.status_code == 200:
-            data = json.loads(response.text)
-            session['email'] = data['email']
-            session['api_key'] = data['api_key']
-            flash('Password reset successful!')
-            return redirect(url_for('search'))
-        else:
-            flash('Password reset failed. Please try again.')
-            return redirect(url_for('request_reset_password'))
-
-    if token:
-        response = get(env('API_HOST') + '/reset-password/' + token)
-        if response.status_code == 200:
-            form = PasswordResetForm(token=token)
-            return render_template('reset_password.html', form=form)
-
-    flash('Password reset failed. Please try again.')
-    return redirect(url_for('request_reset_password'))
-
-
 @app.route('/samples/')
 def samples():
     email = session.get('email', None)
@@ -458,30 +442,26 @@ def samples():
     filters = ast.literal_eval(json.dumps(request.args))
     offset = request.args.get('offset', 0)
     filters['offset'] = offset
-    filters['fields'] = 'sample_id,number,user__name,public_data,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date'
-
-    showmap = 'showmap' in filters.keys()
-    if showmap:
-        filters['fields'] += ',location'
+    filters['fields'] = 'sample_id,number,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date,location'
 
     data = api.sample.get(params=filters)
     next, previous, last, total_count = paginate_model('samples', data, filters)
 
-    locations = []
     samples = data.data['objects']
     for s in samples:
         s['mineral_list'] = (', ').join(s['minerals__name'])
-        if showmap:
-            pos = s['location'].split(" ")
-            s['lat'] = float(pos[2].replace(")",""))
-            s['lon'] = float(pos[1].replace("(",""))
-            del s['location']
+        pos = s['location'].split(" ")
+        s['lat'] = round(float(pos[2].replace(")","")),5)
+        s['lon'] = round(float(pos[1].replace("(","")),5)
+        del s['location']
+        if s['collection_date']:
+            s['collection_date'] = s['collection_date'][:-9]
 
     first_page_url = url_for('samples') + '?' + urlencode(filters)
 
     return render_template('samples.html',
         samples=samples,
-        showmap=showmap,
+        showmap='showmap' in filters.keys(),
         next_url=next,
         prev_url=previous,
         total=total_count,
@@ -498,8 +478,8 @@ def sample(id):
     sample = api.sample.get(id).data
 
     location = sample['location'].split(" ")
-    longtitude = location[1].replace("(","")
-    latitude = location[2].replace(")","")
+    longtitude = round(float(location[1].replace("(","")),5)
+    latitude = round(float(location[2].replace(")","")),5)
     loc = [longtitude, latitude]
 
     filter = {"sample__sample_id": sample['sample_id'], "limit": "0"}
@@ -512,6 +492,9 @@ def sample(id):
     metamorphic_grades = [metamorphic_grade['name'] for metamorphic_grade in sample['metamorphic_grades']]
     references = [reference['name'] for reference in sample['references']]
     minerals = [mineral['name'] for mineral in sample['minerals']]
+
+    if sample['collection_date']:
+        sample['collection_date'] = sample['collection_date'][:-9]
 
     if sample:
         return render_template('sample.html',
@@ -810,20 +793,17 @@ def chemical_analyses():
     next, previous, last, total_count = paginate_model('chemical_analyses', data, filters)
     chemical_analyses = data.data['objects']
 
-    first_page_filters = filters
-    del first_page_filters['offset']
+    for c in chemical_analyses:
+        sample_id = api.subsample.get(c['subsample'][18:-1]).data['sample'][15:-1]
+        c['sample_number'] = api.sample.get(sample_id).data['number']
 
-    if filters:
-        first_page_url = url_for('chemical_analyses') + '?' + urlencode(first_page_filters)
-    else:
-        first_page_url = url_for('chemical_analyses') + urlencode(first_page_filters)
-
+    del filters['offset']
     return render_template('chemical_analyses.html',
         chemical_analyses=chemical_analyses,
         next_url=next,
         prev_url=previous,
         total=total_count,
-        first_page=first_page_url,
+        first_page=url_for('chemical_analyses') + '?' + urlencode(filters),
         last_page=last)
 
 
@@ -834,12 +814,19 @@ def chemical_analysis(id):
     api = MetpetAPI(email, api_key).api
     
     response = api.chemical_analysis.get(id).data
-    if 'subsample_id' not in response.keys():
-        response['subsample_id'] = response['subsample'][18:-1]
-    if 'sample_id' not in response.keys():
-        response['sample_id'] = api.subsample.get(response['subsample_id']).data['sample'][15:-1]
+    response['subsample_id'] = response['subsample'][18:-1]
+    subsample = api.subsample.get(response['subsample_id']).data
+    response['subsample_number'] = subsample['name']
+    response['sample_id'] = subsample['sample'][15:-1]
+    response['sample_number'] = api.sample.get(response['sample_id']).data['number']
 
-    return render_template('chemical_analysis.html', data=response)
+    elements = []
+    oxides = []
+
+    return render_template('chemical_analysis.html',
+        data=response,
+        element_list=elements,
+        oxide_list=oxides)
 
 
 @app.route('/edit_chemical/<int:id>', methods = ['GET','POST'])
@@ -956,6 +943,80 @@ def new_chemical():
         oxide_list = oxide_list,
         element_list = element_list,
         api_key = api_key)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if session.get('api_key'):
+        return redirect(url_for('search'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        payload = {'email': form.email.data, 'password': form.password.data}
+        response =  post(env('API_HOST') + '/authenticate/', data=payload)
+        if response.status_code == 200:
+            data = json.loads(response.text)
+            session['email'] = data['email']
+            session['api_key'] = data['api_key']
+            flash('Login successful!')
+            return redirect(url_for('search'))
+        else:
+            flash('Authentication failed. Please try again.')
+
+    return render_template('login.html', form=form)
+
+
+@app.route('/logout')
+def logout():
+    session.pop('email', None)
+    session.pop('api_key', None)
+    flash('Logout successful.')
+    return redirect(url_for('search'))
+
+
+@app.route('/request_password_reset', methods=['GET', 'POST'])
+def request_password_reset():
+    form = RequestPasswordResetForm()
+    if form.validate_on_submit():
+        payload = {'email': form.email.data}
+        response = post(env('API_HOST') + '/reset_password/', data=payload)
+        if response.status_code == 200:
+            data = json.loads(response.text)
+            message = Message("Metpetdb: Reset Password", sender=env('DEFAULT_MAIL_SENDER'), recipients=[form.email.data])
+            reset_url = url_for('reset_password', token=data['reset_token'], _external=True)
+            message.body = render_template('reset_password_email.html', reset_url=reset_url)
+            mail.send(message)
+            flash('Please check your email for a link to reset your password')
+            return redirect(url_for('login'))
+        else:
+            flash("Invalid email. Please try again.")
+
+    return render_template('request_password_reset.html', form=form)
+
+
+@app.route('/reset_password/<string:token>', methods=['GET', 'POST'])
+def reset_password(token):
+    form = PasswordResetForm()
+    if form.validate_on_submit():
+        payload = {'token': form.token.data, 'password': form.password.data}
+        response = post(env('API_HOST') + '/reset_password/', data=payload)
+        if response.status_code == 200:
+            data = json.loads(response.text)
+            session['email'] = data['email']
+            session['api_key'] = data['api_key']
+            flash('Password reset successful!')
+            return redirect(url_for('index'))
+        else:
+            flash('Password reset failed. Please try again.')
+            return redirect(url_for('request_password_reset'))
+
+    if token:
+        response = get(env('API_HOST') + '/reset_password/' + token)
+        if response.status_code == 200:
+            form = PasswordResetForm(token=token)
+            return render_template('reset_password.html', form=form)
+
+    flash('Password reset failed. Please try again.')
+    return redirect(url_for('request_reset_password'))
 
 
 @app.route('/user/<int:id>')

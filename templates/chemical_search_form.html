@@ -100,16 +100,16 @@
             <input type="radio" name="resource" value="sample" onchange="$('#collapseFour').collapse('toggle');" id="option1"> View Samples
         </label>
         <label class="btn btn-primary active">
-            <input type="radio" name="resource" value="chemicalanalysis" onchange="$('#collapseFour').collapse('toggle'); $('#collapseThree').collapse(); //document.getElementById('showall').checked=false;" id="option2" checked="checked"> View Chemical Analyses
+            <input type="radio" name="resource" value="chemicalanalysis" onchange="$('#collapseFour').collapse('toggle');" id="option2" checked="checked"> View Chemical Analyses
         </label>
     </div>
 </div>
 
 </div>
-<div id="collapseFour" class="panel-collapse collapse out">
+<div id="collapseFour" class="panel-collapse collapse in">
   <br>
-  <!-- <input type="checkbox" id="showall" name="all_results" value="yes">Display all results</input>&nbsp;&nbsp;&nbsp;&nbsp; -->
-  <input type="checkbox" id="showmap" onchange="$('#collapseThree').collapse('toggle');" name="showmap" value="ofcourse">Show on map</input>
+  <input type="checkbox" id="showall" name="all_results" value="yes">Display all results</input>&nbsp;&nbsp;&nbsp;&nbsp;
+  <!-- <input type="checkbox" id="showmap" onchange="$('#collapseThree').collapse('toggle');" name="showmap" value="ofcourse">Show on map</input> -->
 </div>
   <br>
   <input type="submit" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" value="Search">
@@ -124,6 +124,7 @@
 
 <div id = "results"></div>
 
+
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 <script src="/static/js/jquery-2.1.1.min.js"></script>
 
@@ -131,8 +132,6 @@
 <link rel="stylesheet" href="/static/css/chosen.min.css">
 <script src="/static/js/chosen.jquery.min.js"></script>
 <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
-<script src= "http://documentcloud.github.io/underscore/underscore.js"></script>
-
 
 <link rel="stylesheet" href="/static/css/style.min.css">
 <script src="/static/js/jstree.min.js"></script>
@@ -226,10 +225,15 @@ function updateChemistry()
  //Chemistry search options, selected chemistry minerals
   var searchOptions = document.getElementById("search-options-chemistry");
  searchOptions.innerHTML = "";
+
+ if ($("#selected-elements option:selected").length || $("#selected-oxides option:selected").length)
+  searchOptions.innerHTML += "<div class = 'summary-title'><h4>Chemistry (all) </h4><a onclick='clearChemistry()' class='clear-title'>Clear</a></div>";
+
+ if ($("#selected-elements option:selected").length + $("#selected-oxides option:selected").length > 1)
+  document.getElementById("showall").checked = "checked";
  
  if($("#selected-elements option:selected").length)
   {
-   searchOptions.innerHTML += "<div class = 'summary-title'><h4>Chemistry</h4><a onclick='clearChemistry()' class='clear-title'>Clear</a></div>";
    for(var a = 0; a < $("#selected-elements option:selected").length; a++)
    {
    if($("#selected-elements option:selected")[a].selected)
@@ -245,8 +249,6 @@ function updateChemistry()
 
   if($("#selected-oxides option:selected").length)
   {
-    if (searchOptions.innerHTML == "")
-      searchOptions.innerHTML += "<div class='summary-title'><h4>Chemistry</h4><a onclick='clearChemistry()' class='clear-title'>Clear</a></div>";
    for(var a = 0; a < $("#selected-oxides option:selected").length; a++)
    {
    if($("#selected-oxides option:selected")[a].selected)
@@ -275,7 +277,7 @@ function updateMineral()
  
  if($("#selected-mineral option:selected").length)
   {
-   searchOptions.innerHTML += "<div class = 'summary-title'><h4>Mineral</h4><a onclick='clearMineral()' class='clear-title'>Clear</a></div>";
+   searchOptions.innerHTML += "<div class = 'summary-title'><h4>Mineral (any) </h4><a onclick='clearMineral()' class='clear-title'>Clear</a></div>";
    for(var a = 0; a < $("#selected-mineral option:selected").length; a++)
    {
    if($("#selected-mineral option:selected")[a].selected)

@@ -1,6 +1,22 @@
 from flask.ext.wtf import Form
-from wtforms import widgets, TextField, PasswordField, HiddenField, FormField, FieldList, RadioField, DateField, SelectField, BooleanField, SelectMultipleField
-from wtforms.validators import Required, Email, EqualTo
+from wtforms import (
+  widgets,
+  TextField,
+  PasswordField,
+  HiddenField,
+  FormField,
+  FieldList,
+  RadioField,
+  DateField,
+  SelectField,
+  BooleanField,
+  SelectMultipleField
+)
+from wtforms.validators import (
+  Required,
+  Email,
+  EqualTo
+)
 
 class LoginForm(Form):
   email = TextField('email', validators = [Required(), Email()])
@@ -34,15 +50,6 @@ class EditForm(Form):
                                   widget=widgets.ListWidget(prefix_label=False))
   mineral2 = BooleanField('Minerals')
 
-class EditChemForm(Form):
-  owner = TextField('Owner', validators=[Required()])
-  public = RadioField('Public', choices=[('Y','Y'), ('N','N')])
-  analyst = TextField('Analyst')
-  analysis_material = TextField('Analyst')
-  total = TextField('Total')
-  StageX = TextField('Stage X')
-  StageY = TextField('Stage Y')
-
 class NewSample(Form):
   owner = TextField('Owner')#, validators=[Required()])
   isgn = TextField('ISGN')
@@ -59,6 +66,15 @@ class NewSample(Form):
   public = RadioField('Public', choices=[('Y','Y'),('N','N')])
   met_region = TextField('Metamorphic Regions')
   pub_references = TextField('Publication References')
+
+class EditChemForm(Form):
+  owner = TextField('Owner', validators=[Required()])
+  public = RadioField('Public', choices=[('Y','Y'), ('N','N')])
+  analyst = TextField('Analyst')
+  analysis_material = TextField('Analyst')
+  total = TextField('Total')
+  StageX = TextField('Stage X')
+  StageY = TextField('Stage Y')
 
 class NewChem(Form):
   owner = TextField('Owner')

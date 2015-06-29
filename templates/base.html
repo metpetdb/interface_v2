@@ -30,18 +30,15 @@
 
           <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
-               <li><a id="samples" href="{{ url_for('search') }}">
-Search Samples</a></li>
-<li><a id="chemistry-search" href="{{ url_for('search_chemistry') }}">
-Search Chemistry</a></li>
-          <li><a id="about" href="#">About</a></li>
-          <li><a id="help" href="#">Help</a></li>
-
-          {% if session['api_key'] %}
-            <li><a href="{{ url_for('logout') }}"><b>Logout</b></a></li>
-          {% else %}
-            <li><a href="{{ url_for('login') }}"><b>Login</b></a></li>
-          {% endif %}
+              <li><a id="samples" href="{{ url_for('search') }}">Search Samples</a></li>
+              <li><a id="chemistry-search" href="{{ url_for('search_chemistry') }}">Search Chemistry</a></li>
+              <li><a id="about" href="#">About</a></li>
+              <li><a id="help" href="#">Help</a></li>
+              {% if session['api_key'] %}
+                <li><a href="{{ url_for('logout') }}"><b>Logout</b></a></li>
+              {% else %}
+                <li><a href="{{ url_for('login') }}"><b>Login</b></a></li>
+              {% endif %}
             </ul>
           </div><!--/.nav-collapse -->
 </div><!-- navbar inner --></div>

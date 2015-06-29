@@ -3,75 +3,97 @@
 
   <body>
       {% block title %}
-        <h3> Chemical Analysis {{data.spot_id}}</h3>
+        <h3> Chemical Analysis {{data.spot_id}}</h3><!-- <a style="float:right" href="{{ url_for('edit_chemical', id=data.chemical_analysis_id) }}">Edit Chemical</a> -->
       {% endblock %}
 
       {% block body %}
 <div class = "table-responsive">
       <table id="chemicalanalysisview_table" class="table">
         <tbody>
+          {% if data.sample_id %}
+          <tr>
+            <td class="sample_label">Sample</td>
+              <td class="sample_value"><a href="{{ url_for('sample', id=data.sample_id) }}" target="_blank">{{ data.sample_number }}</a></td>
+          </tr>
+          {% endif %}
+          {% if data.subsample_id %}
+          <tr>
+            <td class="sample_label">Subsample</td>
+              <td class="sample_value"><a href="{{ url_for('subsample', id=data.subsample_id) }}" target="_blank">{{ data.subsample_number }}</a></td>
+          </tr>
+          {% endif %}
+          {% if data.username %}
           <tr>
             <td class="sample_label">Owner</td>
-              <td class="sample_value">{{userdata.name}}</td>
+              <td class="sample_value">{{data.username}}</td>
           </tr>
+          {% endif %}
+          {% if data.spot_id %}
           <tr>
             <td class="sample_label">Point Number</td>
               <td class="sample_value">{{data.spot_id}}</td>
           </tr>
+          {% endif %}
+          {% if data.public_data %}
           <tr>
             <td class="sample_label">Public</td>
               <td class="sample_value">{{data.public_data}}</td>
           </tr>
+          {% endif %}
+          {% if data %}
           <tr>
             <td class="sample_label">Image</td>
               <td class="sample_value">No Image</td>
           </tr>
+          {% endif %}
+          {% if data.analysis_method %}
           <tr>
             <td class="sample_label">Analysis Method</td>
               <td class="sample_value">{{data.analysis_method}}</td>
           </tr>
-          <tr>
-            <td class="sample_label">Analysis Location</td>
-              <td class="sample_value"></td>
-          </tr>
+          {% endif %}
+          {% if data.analyst %}
           <tr>
             <td class="sample_label">Analyst</td>
               <td class="sample_value">{{data.analyst}}</td>
           </tr>
+          {% endif %}
+          {% if data.description %}
           <tr>
             <td class="sample_label">Description</td>
               <td class="sample_value">{{data.description}}</td>
           </tr>
+          {% endif %}
+          {% if data.analysis_material %}
           <tr>
             <td class="sample_label">Analysis Material</td>
               <td class="sample_value">{{data.analysis_material}}</td>
           </tr>
+          {% endif %}
+          {% if data.total %}
           <tr>
             <td class="sample_label">Total</td>
               <td class="sample_value">{{data.total}}</td>
           </tr>
+          {% endif %}
+          {% if data.stage_x %}
           <tr>
             <td class="sample_label">Stage X</td>
               <td class="sample_value">{{data.stage_x}}</td>
           </tr>
+          {% endif %}
+          {% if data.stage_y %}
           <tr>
             <td class="sample_label">Stage Y</td>
               <td class="sample_value">{{data.stage_y}}</td>
           </tr>
+          {% endif %}
+          {% if api_key %}
           <tr>
-            <td class="sample_label">Sample</td>
-              <td class="sample_value"><a href="{{ url_for('sample', id=sampledata.sample_id) }}" target="_blank">{{ sampledata.sample_id }}</a></td>
-          </tr>
-          <tr>
-            <td class="sample_label">Subsample</td>
-              <td class="sample_value"><a href="{{ url_for('subsample', id=subdata.subsample_id) }}" target="_blank">{{ subdata.subsample_id }}</a></td>
-          </tr>
-          <tr>
-            {%if api_key%}
               <p><a href="{{ url_for('edit_chemical', id = data.chemical_analysis_id) }}" target="_blank">Edit</a></p>
-            {%endif%}
-        </tr>
-      </table>
+          </tr>
+          {% endif %}
+        </table>
           <div id="chem_elements">
             <h4>Oxides</h4>
             <table id="chem_oxides_table" class="table">
@@ -79,16 +101,15 @@
                 <tr>
                   <th>wt%</th>
                   <th>Oxide</th>
-
                 </tr>
               </thead>
               <tbody>
-                <tr> {%for oxide in oxide_list%}
+                {%for oxide in oxide_list%}
+                <tr>
                   <td>{{oxide.weight}}</td>
                   <td>{{oxide.species}}</td>
                 </tr>
-                <tr>
-                  {%endfor%}
+                {%endfor%}
               </tbody>
             </table>
 
@@ -96,19 +117,17 @@
             <table id="chem_elements_table" class="table">
               <thead>
                 <tr>
-                   <th>wt%</th>
+                  <th>wt%</th>
                   <th>Element</th>
                 </tr>
               </thead>
               <tbody>
-            {%for element in element_list%}
-                        <tr>
-            <td>{{element.weight}}</td>
-            <td>{{element.name}}</td>
-            </tr>
-            {%endfor%}
+                {%for element in element_list%}
                 <tr>
-
+                  <td>{{element.weight}}</td>
+                  <td>{{element.name}}</td>
+                </tr>
+                {%endfor%}
               </tbody>
             </table>
 

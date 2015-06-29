@@ -3,11 +3,9 @@
   <table id="samplelist" class="table">
     <thead>
       <tr>
-        <th>Point Number</th>
-        <th>Public Data</th>
+        <th>Sample</th>
         <th>Analysis Method</th>
         <th>Analysis Material</th>
-        <th>Location</th>
         <th>Analyst</th>
         <th>Analysis Date</th>
         <th>Reference X</th>
@@ -23,18 +21,14 @@
       {% endif %}
       {% for analysis in chemical_analyses %}
       <tr>
-        <td td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.chemical_analysis_id) }}" target="_blank" >{{ analysis.spot_id }}</a></td>
-        <td class="sample_value">{{ analysis.public_data }}</td>
-        <td class="sample_value">{{ analysis.analysis_method }}</td>
-        <td class="sample_value">{{ analysis.mineral__name }}</td>
-        <td class="sample_value">{{ analysis.where_done }}</td>
-        <td class="sample_value">{{ analysis.analyst }}</td>
-        {% if analysis.analysis_date != '' %}
-          <td class="sample_value">{{ analysis.analysis_date }}</td>
-        {% endif %}
-        <td class="sample_value">{{ analysis.reference_x }}</td>
-        <td class="sample_value">{{ analysis.reference_y }}</td>
-        <td class="sample_value">{{ analysis.total }}</td>
+        <td td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.chemical_analysis_id) }}" target="_blank" >{% if analysis.sample_number %}{{ analysis.sample_number }}{% endif %}</a></td>
+        <td class="sample_value">{% if analysis.analysis_method %}{{ analysis.analysis_method }}{% endif %}</td>
+        <td class="sample_value">{% if analysis.minerals %}{{ analysis.minerals.name }}{% elif analysis.mineral__name %}{{ analysis.mineral__name }}{% endif %}</td>
+        <td class="sample_value">{% if analysis.analyst %}{{ analysis.analyst }}{% endif %}</td>
+        <td class="sample_value">{% if analysis.analysis_date %}{{ analysis.analysis_date }}{% endif %}</td>
+        <td class="sample_value">{% if analysis.reference_x != None %}{{ analysis.reference_x }}{% endif %}</td>
+        <td class="sample_value">{% if analysis.reference_y != None %}{{ analysis.reference_y }}{% endif %}</td>
+        <td class="sample_value">{% if analysis.total %}{{ analysis.total }}{% endif %}</td>
       </tr>
       {%endfor%}
     </tbody>
