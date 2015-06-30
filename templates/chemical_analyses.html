@@ -16,9 +16,6 @@
       {% if total %}
       <p>Total: {{ total }}</p>
       {% endif %}
-      {% if runningtotal %}
-      <p>Running total: {{ runningtotal }}</p>
-      {% endif %}
       {% for analysis in chemical_analyses %}
       <tr>
         <td td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.chemical_analysis_id) }}" target="_blank" >{% if analysis.sample_number %}{{ analysis.sample_number }}{% endif %}</a></td>

@@ -14,8 +14,8 @@
     var lat;
     var lon;
     for (var i = 0; i < samples.length; i++) {
-      lat = parseFloat(samples[i]['lat']);
-      lon = parseFloat(samples[i]['lon']);
+      lat = parseFloat(samples[i]['location'][0]);
+      lon = parseFloat(samples[i]['location'][1]);
       var url = '/sample/'+samples[i]['sample_id'];
       var marker = new google.maps.Marker( {
         position: new google.maps.LatLng(lat,lon),
@@ -58,8 +58,6 @@
     <tbody>
       {% if total %}
       <p>Total: {{ total }}</p>
-      {% elif runningtotal %}
-      <p>Running total: {{ runningtotal }}</p>
       {% endif %}
       {% for sample in samples %}
       <tr>
@@ -74,8 +72,8 @@
             <div class = "full_list">{{ sample.mineral_list }}</span>
           {% endif %}
         </td>
-        <td td class="sample_value">{% if sample.lat %}{{ sample.lat }}{% endif %}</td>
-        <td td class="sample_value">{% if sample.lon %}{{ sample.lon }}{% endif %}</td>
+        <td td class="sample_value">{% if sample.location %}{{ sample.location.0 }}{% endif %}</td>
+        <td td class="sample_value">{% if sample.location %}{{ sample.location.1 }}{% endif %}</td>
         <td td class="sample_value">{% if sample.collection_date %}{{ sample.collection_date }}{% endif %}</td>
       </tr>
       {%endfor%}

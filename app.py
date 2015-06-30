@@ -51,47 +51,31 @@ def search():
     filter_dictionary = {}
     for key in filters:
         if filters[key][0]:
-          if key != "resource" and key != "all_results" and key != "prev" and key != "total":
+          if key != "resource" and key != "all_results":
             filter_dictionary[key] = (',').join(filters[key])
 
     #If minerals and AND are selected, intersect samples for each mineral with other filters
     all_results = 'all_results' in filters.keys()
     if all_results or (request.args.getlist('minerals__in') and len(request.args.getlist('minerals__in')) > 1 and request.args.get('mineralandor') == 'and'):
         showmap = 'showmap' in filter_dictionary.keys()
-        prev = 'prev' in filters.keys()
-        total = int(request.args.get('total',0))
-        offset = request.args.get('offset','0')
-        url = request.url.replace("&all_results=True","").replace("&prev=True","").replace("&offset="+offset,"").replace("&total="+str(total),"")
         minerals = [m for m in request.args.getlist('minerals__in') if m != '']
         fields = 'sample_id,minerals__mineral_id'
         if request.args.get('resource') == 'sample':
             fields += ',collector,number,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date,location'
 
-        params = {'fields': fields, 'limit': 20}
+        params = {'fields': fields}
         for key in filter_dictionary:
-            if key != "minerals__in" and key != "search_filters" and key != "fields" and key != "mineralandor":
+            if key != "search_filters" and key != "fields" and key != "mineralandor":
                 params[key] = filter_dictionary[key]
-        params['offset'] = int(offset)
-        max_res = 20
-        if all_results:
-            params['offset'] = 0
-            max_res = 20000
-            del params['limit']
-        elif prev:
-            params['offset'] -= 20
+        params['offset'] = 0
         if minerals:
             params['minerals__in'] = minerals[0]
 
         sample_results = []
-        while len(sample_results) < max_res:
+        while True:
             samples = api.sample.get(params=params).data['objects']
-            while prev and not samples:
-                params['offset'] -= 20
-                samples = api.sample.get(params=params).data['objects']
             if not samples:
                 break
-            if prev:
-                samples.reverse()
             i = 0
             while i < len(samples):
                 good = True
@@ -100,42 +84,21 @@ def search():
                         good = False
                 if good:
                     sample_results.append(samples[i])
-                    if len(sample_results) == max_res:
-                        offset = str(params['offset'])
-                        break
                 i += 1
-            if not prev:
-                params['offset'] += i
-                if not all_results:
-                    params['offset'] += 1
-            else:
-                params['offset'] -= i
-
-        if prev:
-            sample_results.reverse()
-            params['offset'] = request.args.get("offset",'0')
-        prev_url = next_url = None
-        if offset != '0':
-            prev_url = url+"&prev=True&offset="+offset
-        if offset != '10000' and not all_results:
-            next_url = url+"&offset="+str(params['offset'])+"&total="+str(total)
+            params['offset'] += i
 
         if request.args.get('resource') == 'sample':
             #Build mineral list string for rendering results
             for s in sample_results:
                 s['mineral_list'] = (', ').join(s['minerals__name'])
                 pos = s['location'].split(" ")
-                s['lat'] = float(pos[2].replace(")",""))
-                s['lon'] = float(pos[1].replace("(",""))
-                del s['location']
+                s['location'] = [round(float(pos[2].replace(")","")),5),round(float(pos[1].replace("(","")),5)]
             return render_template('samples.html',
                 samples=sample_results,
                 showmap=showmap,
-                runningtotal=total+len(sample_results),
-                first_page=url,
-                prev_url=prev_url,
-                next_url=next_url,
-                last_page=url+"&prev=True&offset=10000")
+                total=len(sample_results),
+                first_page=request.url,
+                last_page=request.url)
 
         elif request.args.get('resource') == 'chemicalanalysis':
             #Get subsample IDs using sample IDs
@@ -147,11 +110,9 @@ def search():
             chem_results = api.chemical_analysis.get(params={'subsample__in': subsamples, 'fields': fields, 'limit': 0}).data['objects']
             return render_template('chemical_analyses.html',
                 chemical_analyses=chem_results,
-                runningtotal=total+len(chem_results),
-                first_page=url,
-                prev_url=prev_url,
-                next_url=next_url,
-                last_page=url+"&prev=True&offset=10000")
+                total=total+len(chem_results),
+                first_page=request.url,
+                last_page=request.url)
 
     #If one or no minerals or OR selected
     if request.args.get('resource') == 'sample':
@@ -267,54 +228,35 @@ def search_chemistry():
     filter_dictionary = {}
     for key in filters:
         if filters[key][0]:
-          if key != "resource" and key != "all_results" and key != "prev" and key != "total":
+          if key != "resource" and key != "all_results":
             filter_dictionary[key] = (",").join(filters[key])
 
-    all_results = 'all_results' in filters.keys()
     elements = [e for e in request.args.getlist('elements__element_id__in') if e != '']
     oxides = [o for o in request.args.getlist('oxides__oxide_id__in') if o != '']
-    if all_results or len(elements) + len(oxides) > 1:
-        minerals = [m for m in request.args.getlist('minerals__in') if m != '']
-        prev = 'prev' in filters.keys()
-        total = int(request.args.get('total',0))
-        offset = request.args.get('offset','0')
-        url = request.url.replace("&all_results=True","").replace("&prev=True","").replace("&offset="+offset,"").replace("&total="+str(total),"")
+    minerals = [m for m in request.args.getlist('minerals__in') if m != '']
+    params = {'limit': 0}
+    if elements:
+        params['elements__element_id__in'] = elements[0]
+    if oxides:
+        params['oxides__oxide_id__in'] = oxides[0]
+    if minerals:
+        params['minerals__in'] = (',').join(minerals)
+    chem_results = []
+
+    if 'all_results' in filters.keys() or len(elements) > 1 or len(oxides) > 1:
         fields = 'elements__element_id,oxides__oxide_id,subsample'
         if request.args.get('resource') == 'chemicalanalysis':
             fields += ',chemical_analysis_id,analysis_method,mineral__name,analyst,analysis_date,reference_x,reference_y,total'
-        params = {'fields': fields, 'limit': 20}
-        if elements:
-            params['elements__element_id__in'] = elements[0]
-        if oxides:
-            params['oxides__oxide_id__in'] = oxides[0]
+        params['fields'] = fields
+        params['offset'] = 0
         if not minerals:
-            minerals = [str(i) for i in range(184)]
-        params['offset'] = int(offset)
-        max_res = 20
-        if all_results:
-            params['offset'] = 0
-            max_res = 20000
-            del params['limit']
-        elif prev:
-            params['offset'] -= 20
-            minerals.reverse()
+            params['minerals__in'] = (',').join(str(i) for i in range(185))
 
-        chem_results = []
-        while len(chem_results) < max_res:
-            chem = []
-            for i in range(len(minerals)):
-                params['minerals__in'] = minerals[i]
-                c = api.chemical_analysis.get(params=params).data['objects']
-                while prev and not c:
-                    params['offset'] -= 20
-                    c = api.chemical_analysis.get(params=params).data['objects']
-                chem += c
+        while True:
+            chem = api.chemical_analysis.get(params=params).data['objects']
             if not chem:
                 break
-            if prev:
-                chem.reverse()
-            j = 0
-            while j < len(chem):
+            for j in range(len(chem)):
                 good = True
                 for e in elements:
                     if 'elements__element_id' not in chem[j].keys() or int(e) not in chem[j]['elements__element_id']:
@@ -323,84 +265,38 @@ def search_chemistry():
                     if 'oxides__oxide_id' not in chem[j].keys() or int(o) not in chem[j]['oxides__oxide_id']:
                         good = False
                 if good:
-                    chem[j]['subsample'] = chem[j]['subsample'].replace("Subsample #", "")
                     chem_results.append(chem[j])
-                    if len(chem_results) == max_res:
-                        offset = str(params['offset'])
-                        break
-                j += 1
-            if not prev:
-                params['offset'] += j
-                if not all_results:
-                    params['offset'] += 1
-            else:
-                params['offset'] -= i
-
-        if prev:
-            chem_results.reverse()
-            params['offset'] = request.args.get("offset",'0')
-        prev_url = next_url = None
-        if offset != '0':
-            prev_url = url+"&prev=True&offset="+offset
-        if offset != '10000' and not all_results:
-            next_url = url+"&offset="+str(params['offset'])+"&total="+str(total)
+            params['offset'] += 1000
 
         if request.args.get('resource') == 'chemicalanalysis':
             for c in chem_results:
-                sample_id = api.subsample.get(c['subsample']).data['sample'][15:-1]
+                sample_id = api.subsample.get(c['subsample'].replace("Subsample #","")).data['sample'][15:-1]
                 c['sample_number'] = api.sample.get(sample_id).data['number']
             return render_template('chemical_analyses.html',
                 chemical_analyses=chem_results,
-                runningtotal=len(chem_results),
-                first_page=url,
-                prev_url=prev_url,
-                next_url=next_url,
-                last_page=url+"&prev=True&offset=10000")
-
-        elif request.args.get('resource') == 'sample':
-            showmap = 'showmap' in filter_dictionary.keys()
-
-            subsamples = set()
-            for c in chem_results:
-                subsamples.add(c['subsample'])
-            subsamples = (',').join(str(s) for s in subsamples)
-
-            params = {'subsample_id__in': subsamples, 'fields': 'sample', 'limit': 0}
-            ids = api.subsample.get(params=params).data['objects']
-            samples = set()
-            for i in ids:
-                samples.add(i['sample'].replace("Sample #", ""))
-            samples = (',').join(str(s) for s in samples)
-
-            del params['subsample_id__in']
-            params['sample_id__in'] = samples
-            params['fields'] = 'sample_id,collector,number,rock_type__rock_type,subsample_count,chem_analyses_count,image_count,minerals__name,collection_date,location'
-            sample_results = api.sample.get(params=params).data['objects']
-
-            for s in sample_results:
-                pos = s['location'].split(" ")
-                s['lat'] = round(float(pos[2].replace(")","")),5)
-                s['lon'] = round(float(pos[1].replace("(","")),5)
-                del s['location']
-
-            return render_template('samples.html',
-                samples=sample_results,
-                showmap=showmap,
-                runningtotal=len(sample_results),
-                first_page=url,
-                prev_url=prev_url,
-                next_url=next_url,
-                last_page=url+"&prev=True&offset=10000")
+                total=len(chem_results),
+                first_page=request.url,
+                last_page=request.url)
 
     #If one or no elements/oxides
-    if request.args.get('resource') == 'sample':
-        #get samples with filters
-        url = url_for('samples') + '?' + urlencode(filter_dictionary)
+    if request.args.get('resource') == 'chemicalanalysis':
+        url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
         return redirect(url)
 
-    elif request.args.get('resource') == 'chemicalanalysis':
-        #get chemical analyses with get-chem-analyses-given-sample-filters
-        url = url_for('chemical_analyses') + '?' + urlencode(filter_dictionary)
+    elif request.args.get('resource') == 'sample':
+        all_results = False
+        if not chem_results:
+            params['fields'] = 'subsample'
+            chem_results = api.chemical_analysis.get(params=params).data['objects']
+            all_results = True
+
+        subsamples = (',').join(c['subsample'].replace("Subsample #","") for c in chem_results)
+
+        params = {'subsample_id__in': subsamples, 'fields': 'sample', 'offset': 0, 'limit': 0}
+        samples = api.subsample.get(params=params).data['objects']
+        sample_results = (',').join(s['sample'].replace("Sample #", "") for s in samples)
+
+        url = url_for('samples') + '?' + urlencode({'sample_id__in':sample_results})
         return redirect(url)
 
     oxides = api.oxide.get(params={'limit': 0}).data['objects']
@@ -451,13 +347,9 @@ def samples():
     for s in samples:
         s['mineral_list'] = (', ').join(s['minerals__name'])
         pos = s['location'].split(" ")
-        s['lat'] = round(float(pos[2].replace(")","")),5)
-        s['lon'] = round(float(pos[1].replace("(","")),5)
-        del s['location']
+        s['location'] = [round(float(pos[2].replace(")","")),5),round(float(pos[1].replace("(","")),5)]
         if s['collection_date']:
             s['collection_date'] = s['collection_date'][:-9]
-
-    first_page_url = url_for('samples') + '?' + urlencode(filters)
 
     return render_template('samples.html',
         samples=samples,
@@ -465,7 +357,7 @@ def samples():
         next_url=next,
         prev_url=previous,
         total=total_count,
-        first_page=first_page_url,
+        first_page=url_for('samples')+'?'+urlencode(filters),
         last_page=last)
 
 
@@ -476,39 +368,36 @@ def sample(id):
     api = MetpetAPI(email, api_key).api
 
     sample = api.sample.get(id).data
+    if not sample:
+        return HttpResponse("Sample does not exist")
 
-    location = sample['location'].split(" ")
-    longtitude = round(float(location[1].replace("(","")),5)
-    latitude = round(float(location[2].replace(")","")),5)
-    loc = [longtitude, latitude]
+    pos = sample['location'].split(" ")
+    location = [round(float(pos[2].replace(")","")),5), round(float(pos[1].replace("(","")),5)]
 
     filter = {"sample__sample_id": sample['sample_id'], "limit": "0"}
     subsamples = api.subsample.get(params=filter).data['objects']
-    aliases = api.sample_alias.get(params=filter).data['objects']
-    aliases_str = [alias['alias'] for alias in aliases]
+    alias_list = api.sample_alias.get(params=filter).data['objects']
+    aliases = (', ').join([alias['alias'] for alias in alias_list])
 
-    regions = [region['name'] for region in sample['regions']]
-    metamorphic_regions = [metamorphic_region['name'] for metamorphic_region in sample['metamorphic_regions']]
-    metamorphic_grades = [metamorphic_grade['name'] for metamorphic_grade in sample['metamorphic_grades']]
-    references = [reference['name'] for reference in sample['references']]
-    minerals = [mineral['name'] for mineral in sample['minerals']]
+    regions = (', ').join([region['name'] for region in sample['regions']])
+    metamorphic_regions = (', ').join([metamorphic_region['name'] for metamorphic_region in sample['metamorphic_regions']])
+    metamorphic_grades = (', ').join([metamorphic_grade['name'] for metamorphic_grade in sample['metamorphic_grades']])
+    references = (', ').join([reference['name'] for reference in sample['references']])
+    minerals = (', ').join([mineral['name'] for mineral in sample['minerals']])
 
     if sample['collection_date']:
         sample['collection_date'] = sample['collection_date'][:-9]
 
-    if sample:
-        return render_template('sample.html',
-            sample=sample,
-            location=loc,
-            minerals=(', ').join(minerals),
-            regions=(', ').join(regions),
-            references=(', ').join(references),
-            metamorphic_grades=(', ').join(metamorphic_grades),
-            metamorphic_regions=(', ').join(metamorphic_regions),
-            aliases=(', ').join(aliases_str),
-            subsamples=subsamples)
-    else:
-        return HttpResponse("Sample does not Exist")
+    return render_template('sample.html',
+        sample=sample,
+        location=location,
+        minerals=minerals,
+        regions=regions,
+        references=references,
+        metamorphic_grades=metamorphic_grades,
+        metamorphic_regions=metamorphic_regions,
+        aliases=aliases,
+        subsamples=subsamples)
 
 
 @app.route('/subsample/<int:id>')
@@ -518,265 +407,28 @@ def subsample(id):
     api = MetpetAPI(email, api_key).api
 
     subsample = api.subsample.get(id).data
-    user = api.user.get(subsample['user']['user_id']).data
+    if not subsample:
+        return HttpResponse("Subsample does not exist")
 
+    user = api.user.get(subsample['user']['user_id']).data
     filter = {"subsample__subsample_id": subsample['subsample_id'], "limit": "0"}
     chemical_analyses = api.chemical_analysis.get(params=filter).data['objects']
 
-    if subsample:
-        return render_template('subsample.html',
-            subsample=subsample,
-            user=user,
-            chemical_analyses=chemical_analyses,
-            sample_id=subsample['sample'].split('/')[-2])
-    else:
-        return HttpResponse("Subsample does not Exist")
+    return render_template('subsample.html',
+        subsample=subsample,
+        user=user,
+        chemical_analyses=chemical_analyses,
+        sample_id=subsample['sample'].split('/')[-2])
 
 
-@app.route('/edit_sample/<int:id>', methods = ['GET','POST'])
+@app.route('/edit_sample/<int:id>')
 def edit_sample(id):
-    form = EditForm(minerals=True)
-    email = session.get('email', None)
-    api_key = session.get('api_key', None)
-    api = MetpetAPI(email,api_key).api
-    api.auth(user=email,api_key=api_key)
-
-    sample = api.sample.get(id).data
-    sample2 = api.sample.get(id)
-    rock_type_list = []
-    rock_type = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
-    for rock in rock_type:
-        rock_type_list.append(rock['rock_type'])
-    form.rock_type.choices = [(rock,rock) for rock in rock_type_list]
-
-    metamorphic_grade_list = []
-    metamorphic_grades = api.metamorphic_grade.get(
-      params={'limit': 0}).data['objects']
-
-    for mmg in metamorphic_grades:
-        metamorphic_grade_list.append(mmg['name'])
-    form.metamorphic_grades.choices = [(m,m) for m in metamorphic_grade_list]
-
-    regions = [region['name'] for region in sample['regions']]
-    location = sample['location'].split(" ")
-    longtitude = location[1].replace("(","")
-    latitude = location[2].replace(")","")
-    loc = [longtitude, latitude]
-    test = "POINT (" + str(longtitude) + " " + str(latitude) + ")"
-    print test, sample['location']
-    if (test == sample['location']):
-        print "same"
-
-    mineral_relationships = (api.mineral_relationship.get(
-                              params={'limit': 0,
-                                      'fields':'parent_mineral__mineral_id,'
-                                               'parent_mineral__name,'
-                                               'child_mineral__mineral_id,'
-                                               'child_mineral__name'})
-                                                .data['objects'])
-    parents = set()
-    children = set()
-    for m in mineral_relationships:
-        parents.add((m['parent_mineral__name'], m['parent_mineral__mineral_id']))
-        children.add((m['child_mineral__name'], m['child_mineral__mineral_id']))
-    mineralroots = set(parents) - set(children)
-
-    mineralnodes = []
-    for (name, mid) in mineralroots:
-        mineralnodes.append({"id": name,
-                           "parent": "#",
-                           "text": name,
-                           "mineral_id": mid})
-
-    for m in mineral_relationships:
-        node = {"id": m['child_mineral__name'],
-              "parent": m['parent_mineral__name'],
-              "text": m['child_mineral__name'],
-              "mineral_id": m['child_mineral__mineral_id']}
-        mineralnodes.append(node)
-
-    form.region.min_entries = len(regions)+1
-
-    metamorphic_regions = [metamorphic_region['name'] for metamorphic_region in sample['metamorphic_regions']]
-
-    minerals = [mineral['name'] for mineral in sample['minerals']]
-    new_regions = []
-
-    form.minerals.choices = [(mineral, mineral) for mineral in minerals]
-
-    print sample2.data['rock_type']
-    print sample2.data['rock_type']['rock_type']
-
-    if form.validate_on_submit():
-        sample2.data['user']['name'] = form.owner.data
-        sample2.data['public_data'] = form.public.data
-        sample2.data['location_text'] = form.location_text.data
-        sample2.data['collector'] = form.collector.data
-
-        rocktype = form.rock_type.data
-        value = ''
-        for rock in rock_type:
-            if (rock['rock_type'] == rocktype):
-                value = rock
-        sample2.data['rock_type'] = value
-
-        sample2.data['country'] = form.country.data
-        print sample2.data['collection_date']
-        if (form.date_collected.data != ""):
-            sample2.data['collection_date'] = form.date_collected.data
-        else:
-            sample2.data['collection_date'] = None
-        print sample2.data['rock_type']['rock_type']
-
-        metgrade = form.metamorphic_grades.data
-        value = []
-        metamorphic_grades2 = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
-        for met in metamorphic_grades2:
-            if (metgrade == met['name']):
-                value = []
-                value.append(met)
-        print sample2.data['metamorphic_grades']
-        for x in sample2.data['metamorphic_grades']:
-            del x
-        print value
-        #sample2.data['metamorphic_grades']
-        sample2.data['metamorphic_grades'] = value
-
-        print sample2.data['metamorphic_grades']
-        loc[0] = form.longitude.data
-        loc[1] = form.latitude.data
-        new_loc = "POINT (" + str(longtitude) + " " + str(latitude) + ")"
-        sample2.data['location'] = new_loc
-        '''sample2.data['user']['name'] = form.owner.data
-        sample2.data['public_data'] = form.public.data
-        sample2.data['location_text'] = form.location_text.data
-        sample2.data['collector'] = form.collector.data
-        sample2.data['rock_type']['rock_type'] = form.rock_type.data
-        sample2.data['metamorphic_grades'][0]['name'] = form.metamorphic_grades.data
-        sample2.data['country'] = form.country.data
-        sample2.data['collection_date'] = form.date_collected.data
-        minerals = form.minerals.data
-        print minerals
-        for x in range(0,len(form.region)):
-            new_regions.append(form.region.pop_entry())
-        loc[0] = form.longitude.data
-        loc[1] = form.latitude.data
-        regions = []
-        for r in new_regions:
-            regions.append(r)
-            #fix regions
-        #print sample2.data['user']['name']
-        #print len(regions)
-        list_name = request.args.get("list_name")
-        #listx = get_list(list_name)
-        print list_name'''
-        #sample2 = api.sample.put(id, sample2.data)
-        sample2 = api.sample.put(id, sample2.data)
-        print sample2
-        redurl = '/sample/4999'
-        return redirect(url_for('sample', id=id))
-    else:
-        form.owner.data = sample['user']['name']
-        form.public.data = sample['public_data']
-        form.location_text.data = sample['location_text']
-        form.collector.data = sample['collector']
-        form.rock_type.data = sample['rock_type']['rock_type']
-        if (sample['metamorphic_grades']):
-            form.metamorphic_grades.data = sample['metamorphic_grades'][0]['name']
-        form.country.data = sample['country']
-        form.date_collected.data = sample['collection_date']
-        form.longitude.data = loc[0]
-        form.minerals.data = minerals
-        for r in regions:
-            form.region.append_entry(r)
-        form.latitude.data = loc[1]
-
-    #change location in sample
-    return render_template('edit_sample.html',
-        form = form,
-        region_list = regions,
-        location = loc,
-        rock_types = rock_type_list,
-        sample = sample,
-        mineral_roots = mineralroots,
-        mineral_nodes = mineralnodes,
-        region_size = len(regions),
-        metamorphic_regions=(', ').join(metamorphic_regions),
-        minerals = minerals,
-        test=json.dumps(minerals),
-        api_key = api_key)
+    return render_template('index.html')
 
 
-@app.route('/new_sample/', methods = ['GET', 'POST'])
+@app.route('/new_sample/')
 def new_sample():
-    form = NewSample();
-    email = session.get('email', None)
-    api_key = session.get('api_key', None)
-    api = MetpetAPI(email, api_key).api
-    rock_type_list = []
-    rock_type = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
-    for rock in rock_type:
-        rock_type_list.append(rock['rock_type'])
-    form.rock_type.choices = [(rock,rock) for rock in rock_type_list]
-
-    metamorphic_grade_list = []
-    metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
-    for mmg in metamorphic_grades:
-        metamorphic_grade_list.append(mmg['name'])
-    form.metamorphic_grades.choices = [(m,m) for m in metamorphic_grade_list]
-
-    mineral_relationships = api.mineral_relationship.get(\
-                              params={'limit': 0,
-                                      'fields':'parent_mineral__mineral_id,parent_mineral__name,child_mineral__mineral_id,child_mineral__name'}).\
-                                                  data['objects']
-
-    mineralroots = []
-    parents = set()
-    children = set()
-    for m in mineral_relationships:
-        parents.add((m['parent_mineral__name'], m['parent_mineral__mineral_id']))
-        children.add((m['child_mineral__name'], m['child_mineral__mineral_id']))
-    mineralroots = set(parents) - set(children)
-
-    mineralnodes = []
-    for (name, mid) in mineralroots:
-        mineralnodes.append({"id": name, "parent": "#", "text": name, "mineral_id": mid})
-    for m in mineral_relationships:
-        node = {"id": m['child_mineral__name'], "parent": m['parent_mineral__name'], "text": m['child_mineral__name'], "mineral_id": m['child_mineral__mineral_id']}
-        mineralnodes.append(node)
-
-    if form.validate():
-        print "validated"
-    print form.errors
-
-    '''
-    {u'rock_type_id': 10, u'rock_type': u'Amphibolite', u'resource_uri': u'/api/v1/rock_type/10/'}
-    '''
-    if form.validate_on_submit():
-        sample_data = {}
-        sample_data[u'user'] = form.owner.data
-        sample_data[u'public_data'] = form.public.data
-        longitude = form.longitude.data
-        latitude = form.latitude.data
-        new_loc = u"POINT (" + str(longitude) + " " + str(latitude) + ")"
-        sample_data[u'location'] = new_loc
-        sample_data[u'location_text'] = form.location_text.data
-        rock_type = {}
-        rock_type[u'rock_type_id'] = 10
-        rock_type[u'rock_type'] = u'Amphibolite'
-        rock_type[u'resource_uri'] = u'/api/v1/rock_type/10/'
-        sample_data[u'rock_type'] = rock_type
-        sample_data[u'collection_date'] = form.date_collected.data
-        print sample_data
-        #print sample_data['user']
-        sample_data = api.sample.post(sample_data)
-        return redirect(url_for('search'))
-
-    #change location in sample
-    return render_template('new_sample.html',
-        form = form,
-        mineral_nodes =mineralnodes,
-        api_key = api_key)
+    return render_template('index.html')
 
 
 @app.route('/chemical_analyses/')
@@ -796,6 +448,8 @@ def chemical_analyses():
     for c in chemical_analyses:
         sample_id = api.subsample.get(c['subsample'][18:-1]).data['sample'][15:-1]
         c['sample_number'] = api.sample.get(sample_id).data['number']
+        if c['analysis_date']:
+            c['analysis_date'] = c['analysis_date'][:-9]
 
     del filters['offset']
     return render_template('chemical_analyses.html',
@@ -814,6 +468,9 @@ def chemical_analysis(id):
     api = MetpetAPI(email, api_key).api
     
     response = api.chemical_analysis.get(id).data
+    if not response:
+        return HttpResponse("Chemical analysis does not exist")
+
     response['subsample_id'] = response['subsample'][18:-1]
     subsample = api.subsample.get(response['subsample_id']).data
     response['subsample_number'] = subsample['name']
@@ -829,120 +486,14 @@ def chemical_analysis(id):
         oxide_list=oxides)
 
 
-@app.route('/edit_chemical/<int:id>', methods = ['GET','POST'])
+@app.route('/edit_chemical/<int:id>')
 def edit_chemical(id):
-    form = EditChemForm()
-    email = session.get('email', None)
-    api_key = session.get('api_key', None)
-    api = MetpetAPI(email,api_key).api
-    payload = {'email': email, 'api_key': api_key}
-
-    url = env('API_HOST') + 'api/v1/chemical_analysis/{0}'.format(id)
-    url+='?format=json'
-    response = get(url, params=payload)
-    data = response.json()
-
-    filters = ast.literal_eval(json.dumps(request.args))
-    offset = request.args.get('offset', 0)
-    filters['offset'] = offset
-
-    data2 = api.chemical_analysis.get(params=filters)
-    next, previous, last, total_count = paginate_model('chemical_analyses',
-                                                     data2, filters)
-    chemical_analyses = data2.data['objects']
-
-    sample2 = api.chemical_analysis.get(id)
-    print sample2.data
-
-    oxide_list=[]
-    element_list=[]
-    oxides = api.oxide.get(params={'limit': 0}).data['objects']
-
-    for oxide in oxides:
-        oxide_list.append(oxide)
-
-    elements = api.element.get(params={'limit': 0}).data['objects']
-    for element in elements:
-        element_list.append(element)
-
-    selected_oxide_list = []
-    for o in data['oxides']:
-        oxideurl = env('API_HOST') + o + '?format=json'
-        oxideresponse = get(oxideurl, params=payload)
-        oxidedata = oxideresponse.json()
-        selected_oxide_list.append(oxidedata)
-
-    suburl = env('API_HOST') + data['subsample'] + '?format=json'
-    response2 = get(suburl, params=payload)
-    subdata = response2.json()
-
-    sampleurl = env('API_HOST') + subdata['sample'] + '?format=json'
-    sampleresponse = get(sampleurl, params=payload)
-    sampledata = sampleresponse.json()
-
-    userurl = env('API_HOST') + data['user'] + '?format=json'
-    response3 = get(userurl, params=payload)
-    userdata = response3.json()
-
-    if form.validate_on_submit():
-        #userdata['name'] = form.owner.data
-        sample2.data['public_data'] = form.public.data
-        sample2.data['analyst'] = form.analyst.data
-        sample2.data['total'] = form.total.data
-        sample2.data['stage_x'] = form.StageX.data
-        sample2.data['stage_y'] = form.StageY.data
-        sample2 = api.chemical_analysis.put(id, sample2.data)
-        return redirect(url_for('chemical_analysis', id=id))
-    else:
-        form.owner.data = userdata['name']
-        form.public.data = data['public_data']
-        form.analyst.data = data['analyst']
-        #form.analysis_material.data = data['analysis_material']
-        form.total.data = data['total']
-        form.StageX.data = data['stage_x']
-        form.StageY.data = data['stage_y']
-
-    return render_template('edit_chemical.html',
-        form = form,
-        data = data,
-        subdata = subdata,
-        sampledata = sampledata,
-        userdata = userdata,
-        selected_oxide_list = selected_oxide_list,
-        oxide_list = oxide_list,
-        element_list = element_list,
-        id = id,
-        api_key = api_key)
+    return render_template('index.html')
 
 
-@app.route('/new_chemical/', methods = ['GET', 'POST'])
+@app.route('/new_chemical/')
 def new_chemical():
-    form = NewChem()
-    email = session.get('email', None)
-    api_key = session.get('api_key', None)
-    api = MetpetAPI(email, api_key).api
-    filters = ast.literal_eval(json.dumps(request.args))
-    offset = request.args.get('offset',0)
-    filters['offset'] = offset
-
-    data = api.chemical_analysis.get(params=filters)
-    oxide_list = []
-    element_list = []
-    oxides = api.oxide.get(params={'limit':0}).data['objects']
-
-    for oxide in oxides:
-        oxide_list.append(oxide)
-    elements = api.element.get(params={'limit':0}).data['objects']
-    for element in elements:
-        element_list.append(element)
-
-    print data.data
-
-    return render_template('new_chemical.html',
-        form = form,
-        oxide_list = oxide_list,
-        element_list = element_list,
-        api_key = api_key)
+    return render_template('index.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -1023,10 +574,9 @@ def reset_password(token):
 def user(id):
     api = MetpetAPI(None, None).api
     user = api.user.get(id).data
-    if user:
-        return render_template('user.html', user=user)
-    else:
-        return HttpResponse("User does not Exist")
+    if not user:
+        return HttpResponse("User does not exist")
+    return render_template('user.html', user=user)
 
 
 if __name__ == '__main__':

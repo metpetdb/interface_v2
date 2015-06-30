@@ -26,7 +26,6 @@
        <label for="mineral-tree">Mineral: </label>
        <div id="mineral-select">
        <select multiple id="selected-mineral" name="minerals__in" onchange="updateMineral()" class="chosen-select">
-         <option></option>
           {% for m in minerals %}
               <option value="{{ m.id }}">{{ m.name }}</option>
           {% endfor %}
@@ -39,7 +38,6 @@
       <label for="mineral-tree">Elements: </label>
        <div id="mineral-select">
        <select multiple id="selected-elements" name="elements__element_id__in" onchange="updateChemistry()" class="chosen-select">
-         <option></option>
           {% for e in elements %}
               <option value="{{ e.element_id }}">{{ e.name }}</option>
           {% endfor %}
@@ -50,7 +48,6 @@
        <label for="mineral-tree">Oxides: </label>
        <div id="mineral-select">
        <select multiple id="selected-oxides" name="oxides__oxide_id__in" onchange="updateChemistry()" class="chosen-select">
-         <option></option>
           {% for o in oxides %}
               <option value="{{ o.oxide_id }}">{{ o.species }}</option>
           {% endfor %}
@@ -97,21 +94,19 @@
 <div id = "resource" class = "text-center">
     <div class="btn-group" data-toggle="buttons" style="margin:0 auto;">
         <label class="btn btn-primary">
-            <input type="radio" name="resource" value="sample" onchange="$('#collapseFour').collapse('toggle');" id="option1"> View Samples
+            <input type="radio" name="resource" value="sample" onchange="document.getElementById('showmap').disabled=false;" id="option1"> View Samples
         </label>
         <label class="btn btn-primary active">
-            <input type="radio" name="resource" value="chemicalanalysis" onchange="$('#collapseFour').collapse('toggle');" id="option2" checked="checked"> View Chemical Analyses
+            <input type="radio" name="resource" value="chemicalanalysis" onchange="document.getElementById('showmap').disabled=true;" id="option2" checked="checked"> View Chemical Analyses
         </label>
     </div>
 </div>
 
 </div>
-<div id="collapseFour" class="panel-collapse collapse in">
   <br>
-  <input type="checkbox" id="showall" name="all_results" value="yes">Display all results</input>&nbsp;&nbsp;&nbsp;&nbsp;
-  <!-- <input type="checkbox" id="showmap" onchange="$('#collapseThree').collapse('toggle');" name="showmap" value="ofcourse">Show on map</input> -->
-</div>
-  <br>
+  <input type="checkbox" id="showall" name="all_results" value="yes" checked>Display all results&nbsp;&nbsp;&nbsp;&nbsp;
+  <input hidden type="checkbox" id="showmap" onchange="$('#collapseThree').collapse('toggle');" name="showmap" value="ofcourse" disabled><!-- Show on map -->
+  <br><br>
   <input type="submit" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" value="Search">
       </div>
        </div>
@@ -229,8 +224,12 @@ function updateChemistry()
  if ($("#selected-elements option:selected").length || $("#selected-oxides option:selected").length)
   searchOptions.innerHTML += "<div class = 'summary-title'><h4>Chemistry (all) </h4><a onclick='clearChemistry()' class='clear-title'>Clear</a></div>";
 
- if ($("#selected-elements option:selected").length + $("#selected-oxides option:selected").length > 1)
-  document.getElementById("showall").checked = "checked";
+ if ($("#selected-elements option:selected").length + $("#selected-oxides option:selected").length > 1) {
+  document.getElementById("showall").checked="checked";
+  document.getElementById("showall").disabled="disabled";
+ }
+ else
+  document.getElementById("showall").disabled=false;
  
  if($("#selected-elements option:selected").length)
   {

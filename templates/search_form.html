@@ -128,10 +128,10 @@
        <div id="mineral-and-or" class = "text-center">
          <div class="btn-group" data-toggle="buttons" style="margin:0 auto;">
           <label class="btn btn-primary">
-            <input type="radio" name="mineralandor" value="and" onchange="document.getElementById('showall').checked=true"> AND
+            <input type="radio" name="mineralandor" value="and" onchange="updateMineral()" id="minand"> AND
         </label>
         <label class="btn btn-primary active">
-            <input type="radio" name="mineralandor" value="or" onchange="document.getElementById('showall').checked=false" checked="checked"> OR
+            <input type="radio" name="mineralandor" value="or" onchange="updateMineral()" checked> OR
         </label>
        </div>
       </div>
@@ -229,22 +229,20 @@
 <div class = "text-center">
     <div class="btn-group" data-toggle="buttons" style="margin:0 auto;">
         <label class="btn btn-primary active">
-            <input type="radio" name="resource" value="sample" id="option1" onchange="$('#collapseFour').collapse('toggle');" checked="checked"> View Samples
+            <input type="radio" name="resource" value="sample" id="option1" onchange="document.getElementById('showmap').disabled=false;" checked="checked"> View Samples
         </label>
         <label class="btn btn-primary">
-            <input type="radio" name="resource" value="chemicalanalysis" onchange="$('#collapseFour').collapse('toggle'); $('#collapseThree').collapse(); document.getElementById('showall').checked=false;" id="option2"> View Chemical Analyses
+            <input type="radio" name="resource" value="chemicalanalysis" onchange="$('#collapseThree').collapse(); document.getElementById('showmap').checked=false; document.getElementById('showmap').disabled=true;" id="option2"> View Chemical Analyses
         </label>
     </div>
 </div>
 
 </div>
 
-<div id="collapseFour" class="panel-collapse collapse in">
   <br>
-  <input type="checkbox" id="showall" name="all_results" value="yes">Display all results</input>&nbsp;&nbsp;&nbsp;&nbsp;
-  <input type="checkbox" id="showmap" onchange="$('#collapseThree').collapse('toggle');" name="showmap" value="ofcourse">Show on map</input>
-</div>
-<br>
+  <input type="checkbox" id="showall" onclick="" name="all_results" value="yes">Display all results&nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="checkbox" id="showmap" onchange="$('#collapseThree').collapse('toggle');" name="showmap" value="ofcourse">Show on map
+<br><br>
 <input type="submit" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" value="Search">
     </div>
   </div>
@@ -590,7 +588,14 @@ function updateMineral()
 {
  var searchOptions = document.getElementById("search-options-minerals");
  searchOptions.innerHTML = "";
- 
+ if($("#selected-mineral option:selected").length > 1 && document.getElementById("minand").checked)
+ {
+  document.getElementById("showall").checked="checked";
+  document.getElementById("showall").disabled="disabled";
+ }
+ else
+  document.getElementById("showall").disabled=false;
+
  if($("#selected-mineral option:selected").length)
   {
    searchOptions.innerHTML += "<div class = 'summary-title'><h4>Mineral</h4><a onclick='clearMineral()' class='clear-title'>Clear</a></div>";
