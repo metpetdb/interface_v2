@@ -253,6 +253,7 @@
 
 <div class="clear"></div>
 <div id="results"></div>
+<div id='result_map_canvas'></div>
 
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 <script src="/static/js/jquery-2.1.1.min.js"></script>
@@ -363,21 +364,17 @@ $(function()
 function initialize()
 {
  var mapCenter;
-
  var map = new google.maps.Map(document.getElementById('map-canvas'), {
     zoom: 5,
     center: new google.maps.LatLng(44, -74),
     mapTypeId: google.maps.MapTypeId.ROADMAP
  });
-
 var resultmapCenter;
-
  var resultmap = new google.maps.Map(document.getElementById('result_map_canvas'), {
     zoom: 5,
     center: new google.maps.LatLng(44, -74),
     mapTypeId: google.maps.MapTypeId.ROADMAP
  });
-
  if (navigator.geolocation) {
      navigator.geolocation.getCurrentPosition(function (position) {
          initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
@@ -385,11 +382,9 @@ var resultmapCenter;
          resultmap.setCenter(initialLocation);
      });
  }
-
  google.maps.event.addListenerOnce(map, 'idle', function() {
     google.maps.event.trigger(map, 'resize');
 });
-
 //SET UP DRAWING MANAGER
 var drawingManager = new google.maps.drawing.DrawingManager({
   drawingMode: google.maps.drawing.OverlayType.MARKER,
@@ -409,24 +404,18 @@ var drawingManager = new google.maps.drawing.DrawingManager({
     editable: true
   }
 }); //end drawing manager  
-
 drawingManager.setMap(map); 
-
 currentOverlay = new google.maps.Rectangle({
     bounds: null,
     editable: true,
     draggable: true
   });
-
   currentOverlay.setMap(map);
-
 //Clear map button
 var homeControlDiv = document.createElement('div');
   var homeControl = new HomeControl(homeControlDiv, map);
-
   homeControlDiv.index = 1;
   map.controls[google.maps.ControlPosition.TOP_RIGHT].push(homeControlDiv);
-
 //DRAW COMPLETE LISTENER
 google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event) {
   if (event.type == google.maps.drawing.OverlayType.RECTANGLE) {
@@ -434,14 +423,11 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
    //Set draggable and editable
    event.overlay.setEditable(true);
    event.overlay.setDraggable(true);
-
    //Remove last overlay
    if(currentOverlay)
     currentOverlay.setMap(null);
-
    //Set current overlay
    currentOverlay = event.overlay;
-
    //Update bounds for drag and edit
    google.maps.event.addListener(currentOverlay, "bounds_changed", function() 
    {
@@ -452,19 +438,14 @@ google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event)
    document.getElementById("ne-long").value = ne.lng().toString();
    document.getElementById("sw-lat").value = sw.lat().toString();
    document.getElementById("sw-long").value = sw.lng().toString();
-
    document.getElementById("location-bound").value = sw.lng() + "," + sw.lat() + ","+ ne.lng() + "," + ne.lat();
-
 updateLocation(); 
   //Update Location in search summary
   var searchOptions = document.getElementById("search-options-location");
   searchOptions.innerHTML = "<div class='summary-title'><h4>Location</h4><a onclick='clearBounds()' class='clear-title'>Clear</a></div>";
-
   searchOptions.innerHTML += "<b>NE:</b> [" + ne.lat().toFixed(2).toString() + ", " + ne.lng().toFixed(2).toString() + "] <b>SW:</b> [" + sw.lat().toFixed(2).toString() + ", " + sw.lng().toFixed(2).toString() + "]<br>";
-
   updateLocation();
    });
-
    //Update bounds for creation
    var ne = event.overlay.getBounds().getNorthEast();
    var sw = event.overlay.getBounds().getSouthWest();
@@ -472,33 +453,24 @@ updateLocation();
    document.getElementById("ne-long").value = ne.lng().toString();
    document.getElementById("sw-lat").value = sw.lat().toString();
    document.getElementById("sw-long").value = sw.lng().toString();
-
    document.getElementById("location-bound").value = sw.lng() + "," + sw.lat() + ","+ ne.lng() + "," + ne.lat();
-
   //Update Location in search summary
   var searchOptions = document.getElementById("search-options-location");
   searchOptions.innerHTML = "";
   searchOptions.innerHTML = "<div class='summary-title'><h4>Location</h4><a onclick='clearBounds()' class='clear-title'>Clear</a></div>";
-
-
   searchOptions.innerHTML += "<b>NE:</b> [" + ne.lat().toFixed(2).toString() + ", " + ne.lng().toFixed(2).toString() + "] <b>SW:</b> [" + sw.lat().toFixed(2).toString() + ", " + sw.lng().toFixed(2).toString() + "]<br>";
-
   updateLocation();
-
   //http://stackoverflow.com/questions/15536241/how-to-get-4-vertex-coordinates-from-gmaps-rectangle-overlay
   var nw = new google.maps.LatLng(ne.lat(),sw.lng());
   var se = new google.maps.LatLng(sw.lat(),ne.lng());
   var polygon =  sw.lng().toString() + ',' + sw.lat().toString() + ',' + ne.lng().toString() + ',' + ne.lat().toString();
-
+  
    document.getElementById("location-bound").value = polygon;
    console.log(polygon);
-
   }
-
   }
 });
 }
-
 //Initialize map listener
 google.maps.event.addDomListener(document.getElementById("location-tab"), 'click', initialize);
 google.maps.event.addDomListener(window, 'load', initialize);
