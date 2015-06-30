@@ -110,7 +110,7 @@ def search():
             chem_results = api.chemical_analysis.get(params={'subsample__in': subsamples, 'fields': fields, 'limit': 0}).data['objects']
             return render_template('chemical_analyses.html',
                 chemical_analyses=chem_results,
-                total=total+len(chem_results),
+                total=len(chem_results),
                 first_page=request.url,
                 last_page=request.url)
 
