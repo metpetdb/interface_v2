@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-  <h3>Sample {{sample.number}}</h3><!-- <a style="float:right" href="{{ url_for('edit_sample', id=sample.sample_id) }}">Edit Sample</a> -->
+  <h3>Sample {{sample.number}}</h3>
 {% endblock %}
 
 {% block body %}
@@ -9,109 +9,79 @@
 
 <div class = "table-responsive">
   <table id="sampleview_table" class="table">
-
     <tbody>
-      {% if sample.user.name %}
       <tr>
         <td class="sample_label">Owner</td>
-        <td class="sample_value">{{sample.user.name}}</td>
-      </tr>
-      {% endif %}
-      {% if sample.collector %}
-      <tr>
-        <td class="sample_label">Collector</td>
-        <td class="sample_value">{{sample.collector}}</td>
-      </tr>
-      {% endif %}
-      {% if location.1 %}
-      <tr>
-        <td class="sample_label">Latitude</td>
-        <td class="sample_value">{{location.0}}</td>
-      </tr>
-      {% endif %}
-      {% if location.0 %}
-      <tr>
-        <td class="sample_label">Longitude</td>
-        <td class="sample_value">{{location.1}}</td>
-      </tr>
-      {% endif %}
-      {% if sample.country %}
-      <tr>
-        <td class="sample_label">Country</td>
-        <td class="sample_value">{{sample.country}}</td>
-      </tr>
-      {% endif %}
-      {% if regions %}
-      <tr>
-        <td class="sample_label">Region</td>
-        <td class="sample_value">{{ regions }}</td>
-      </tr>
-      {% endif %}
-      {% if metamorphic_regions %}
-      <tr>
-        <td class="sample_label">Metamorphic Region</td>
-        <td class="sample_value">{{ metamorphic_regions }}</td>
-      </tr>
-      {% endif %}
-      {% if metamorphic_grades %}
-      <tr>
-        <td class="sample_label">Metamorphic Grade</td>
-        <td class="sample_value">{{ metamorphic_grades }}</td>
-      </tr>
-      {% endif %}
-      {% if sample.rock_type.rock_type %}
-      <tr>
-        <td class="sample_label">Rock Type</td>
-        <td class="sample_value">{{sample.rock_type.rock_type}}</td>
-      </tr>
-      {% endif %}
-      {% if minerals %}
-      <tr>
-        <td class="sample_label">Minerals</td>
-        <td class="sample_value">{{ minerals }}</td>
-      </tr>
-      {% endif %}
-      {% if sample.sesar_number %}
+        <td class="sample_value">{% if sample.user.name %}{{sample.user.name}}{% endif %}</td>      
       <tr>
         <td class="sample_label">IGSN</td>
-        <td class="sample_value">{{sample.sesar_number}}</td>
-      </tr>
-      {% endif %}
-      {% if aliases %}
+        <td class="sample_value">{% if sample.sesar_number %}{{sample.sesar_number}}{% endif %}</td>
+      </tr>      
       <tr>
         <td class="sample_label">Aliases</td>
-        <td class="sample_value">{{ aliases }}</td>
-      </tr>
-      {% endif %}
-      {% if sample.location_text %}
-      <tr>
-        <td class="sample_label">Present Location</td>
-        <td class="sample_value">{{sample.location_text}}</td>
-      </tr>
-      {% endif %}
-      {% if sample.collection_date %}
+        <td class="sample_value">{% if aliases %}{{aliases}}{% endif %}</td>
+      </tr>      
       <tr>
         <td class="sample_label">Date Collected</td>
-        <td class="sample_value">{{sample.collection_date}}</td>
-      </tr>
-      {% endif %}
-      {% if sample.public_data %}
+        <td class="sample_value">{% if sample.collection_date %}{{sample.collection_date}}{% endif %}</td>
+      </tr>      
+      <tr>
+        <td class="sample_label">Rock Type</td>
+        <td class="sample_value">{% if sample.rock_type.rock_type %}{{sample.rock_type.rock_type}}{% endif %}</td>
+      </tr>      
       <tr>
         <td class="sample_label">Public Data</td>
-        <td class="sample_value">{{sample.public_data}}</td>
-      </tr>
-      {% endif %}
-      {% if references %}
+        <td class="sample_value">{% if sample.public_data %}{{sample.public_data}}{% endif %}</td>
+      </tr>      
+      <tr>
+        <td class="sample_label">Latitude</td>
+        <td class="sample_value">{% if location.0 %}{{location.0}}{% endif %}</td>
+      </tr>      
+      <tr>
+        <td class="sample_label">Longitude</td>
+        <td class="sample_value">{% if location.1 %}{{location.1}}{% endif %}</td>
+      </tr>      
+      <tr>
+        <td class="sample_label">Country</td>
+        <td class="sample_value">{% if sample.country %}{{sample.country}}{% endif %}</td>
+      </tr>      
+      <tr>
+        <td class="sample_label">Collector</td>
+        <td class="sample_value">{% if sample.collector %}{{sample.collector}}{% endif %}</td>
+      </tr>      
+      <tr>
+        <td class="sample_label">Present Location</td>
+        <td class="sample_value">{% if sample.location_text %}{{sample.location_text}}{% endif %}</td>
+      </tr>      
+      <tr>
+        <td class="sample_label">Region</td>
+        <td class="sample_value">{% if regions %}{{ regions }}{% endif %}</td>
+      </tr>      
+      <tr>
+        <td class="sample_label">Metamorphic Region</td>
+        <td class="sample_value">{% if metamorphic_regions %}{{ metamorphic_regions }}{% endif %}</td>
+      </tr>      
+      <tr>
+        <td class="sample_label">Metamorphic Grade</td>
+        <td class="sample_value">{% if metamorphic_grades %}{{ metamorphic_grades }}{% endif %}</td>
+      </tr>      
       <tr>
         <td class="sample_label">Publication References</td>
-        <td class="sample_value">{{ references }}</td>
+        <td class="sample_value">{% if references %}{{ references }}{% endif %}</td>
       </tr>
-      {% endif %}
-      {% if api_key %}
+      <tr>
+        <td class="sample_label">Abstracts</td>
+        <td class="sample_value"></td>
+      </tr>
+      <tr>
+        <td class="sample_label">Minerals</td>
+        <td class="sample_value">{% if minerals %}{{ minerals }}{% endif %}</td>
+      </tr>
+      <!-- {% if api_key %}
       <tr>
         <p><a href="{{ url_for('edit_sample', id = sample.sample_id) }}" target="_blank">Edit</a></p>
       </tr>
-      {% endif %}
+      {% endif %} -->
     </tbody>
   </table>
 </div> <!-- table-responsive -->
