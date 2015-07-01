@@ -2,39 +2,39 @@
 {% if showmap %}
 <script src="https://maps.googleapis.com/maps/api/js"></script>
 <script>
-  function initialize() {
-    var mapOptions = {
-      center: new google.maps.LatLng(0,0),
-      zoom: 5,
-      mapTypeId: google.maps.MapTypeId.HYBRID
-    }
-    var map = new google.maps.Map(document.getElementById('res-map-canvas'), mapOptions)
-    var markers = [];
-    var samples = JSON.parse('{{ samples|tojson }}');
-    var lat;
-    var lon;
-    for (var i = 0; i < samples.length; i++) {
-      lat = parseFloat(samples[i]['location'][0]);
-      lon = parseFloat(samples[i]['location'][1]);
-      var url = '/sample/'+samples[i]['sample_id'];
-      var marker = new google.maps.Marker( {
-        position: new google.maps.LatLng(lat,lon),
-        map: map,
-        title: samples[i]['number']+
-          '\nSubsamples: '+samples[i]['subsample_count']+
-          '\nChemical Analyses: '+samples[i]['chem_analyses_count'],
-        url: url
-      });
-      google.maps.event.addListener(marker, 'click', function() {
-        window.open(this.url,'_blank');
-      });
-      markers.push(marker);
-    }
-    map.fitBounds(markers.reduce(function(bounds, marker) {
-      return bounds.extend(marker.getPosition());
-    }, new google.maps.LatLngBounds()));
+function initialize() {
+  var mapOptions = {
+    center: new google.maps.LatLng(0,0),
+    zoom: 5,
+    mapTypeId: google.maps.MapTypeId.HYBRID
   }
-  google.maps.event.addDomListenerOnce(window, 'mouseover', initialize);
+  var map = new google.maps.Map(document.getElementById('res-map-canvas'), mapOptions)
+  var markers = [];
+  var samples = JSON.parse('{{ samples|tojson }}');
+  var lat;
+  var lon;
+  for (var i = 0; i < samples.length; i++) {
+    lat = parseFloat(samples[i]['location'][0]);
+    lon = parseFloat(samples[i]['location'][1]);
+    var url = '/sample/'+samples[i]['sample_id'];
+    var marker = new google.maps.Marker( {
+      position: new google.maps.LatLng(lat,lon),
+      map: map,
+      title: samples[i]['number']+
+        '\nSubsamples: '+samples[i]['subsample_count']+
+        '\nChemical Analyses: '+samples[i]['chem_analyses_count'],
+      url: url
+    });
+    google.maps.event.addListener(marker, 'click', function() {
+      window.open(this.url,'_blank');
+    });
+    markers.push(marker);
+  }
+  map.fitBounds(markers.reduce(function(bounds, marker) {
+    return bounds.extend(marker.getPosition());
+  }, new google.maps.LatLngBounds()));
+}
+google.maps.event.addDomListenerOnce(window, 'mouseover', initialize);
 </script>
 <div id="collapseThree" class="panel-collapse collapse in">
   <div id="res-map-canvas" style='width:600px;height:500px;margin:20px'></div>
@@ -55,15 +55,15 @@
         <th>Date Collected</th>
     </thead>
     <tbody>
-      {% if total %}
-      <p>Total: {{ total }}</p>
-      {% endif %}
+      <span>{% if total %}Total: {{ total }}{% endif %}</span>
+      <span style="float:right"><a onclick="exportToCsv()">Export data to CSV file</a></span>
+      <br>
       {% for sample in samples %}
       <tr>
         <td id="url" class="sample_label"><a href="{{ url_for('sample', id=sample.sample_id) }}" target="_blank">{% if sample.number %}{{ sample.number }}{% endif %}</td>
-        <td td class="sample_value">{% if sample.subsample_count %}{{ sample.subsample_count }}{% endif %}</td>
-        <td td class="sample_value">{% if sample.chem_analyses_count %}{{ sample.chem_analyses_count }}{% endif %}</td>
-        <td td class="sample_value">{% if sample.image_count %}{{ sample.image_count }}{% endif %}</td>
+        <td td class="sample_value">{% if sample.subsample_count != None %}{{ sample.subsample_count }}{% endif %}</td>
+        <td td class="sample_value">{% if sample.chem_analyses_count != None %}{{ sample.chem_analyses_count }}{% endif %}</td>
+        <td td class="sample_value">{% if sample.image_count != None %}{{ sample.image_count }}{% endif %}</td>
         <td td class="sample_value">{% if sample.rock_type__rock_type %}{{ sample.rock_type__rock_type }}{% endif %}</td>
         <td td class="sample_mineral sample_value">
           {{ sample.mineral_list|truncate(30)}}
@@ -116,7 +116,47 @@ $('.samples-pagination').click(function (event)
   } //endif
   else
    window.location = url;
- });
+});
+function exportToCsv() {
+  var filename = prompt("Please enter a filename:","search_results.csv");
+  if (filename.substring(filename.length-4) != ".csv")
+    filename += ".csv";
+
+  var csvFile = '';
+  var table = document.getElementById("samplelist");
+  for (var i = 0, row; row = table.rows[i]; i++) {
+    for (var j = 0, cell; cell = row.cells[j]; j++) {
+      var innerdata = cell.innerText.toString();
+      var k = innerdata.indexOf("...");
+      if (k >= 0)
+        innerdata = innerdata.substring(k+4);
+      if (innerdata.search(/("|,|\n)/g) >= 0)
+        innerdata = '"' + innerdata + '"';
+      if (j > 0)
+        csvFile += ',';
+      csvFile += innerdata;
+    }
+    csvFile += '\n';
+  }
+
+  var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+  if (navigator.msSaveBlob) { // IE 10+
+    navigator.msSaveBlob(blob, filename);
+  }
+  else {
+    var link = document.createElement("a");
+    if (link.download !== undefined) { // feature detection
+      // Browsers that support HTML5 download attribute
+      var url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+}
 </script>
 
 {% endblock %}

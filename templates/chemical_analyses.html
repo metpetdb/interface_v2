@@ -13,9 +13,8 @@
         <th>Total</th>
     </thead>
     <tbody>
-      {% if total %}
-      <p>Total: {{ total }}</p>
-      {% endif %}
+      <span>{% if total %}Total: {{ total }}{% endif %}</span>
+      <span style="float:right"><a onclick="exportToCsv()">Export data to CSV file</a></span>
       {% for analysis in chemical_analyses %}
       <tr>
         <td td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.chemical_analysis_id) }}" target="_blank" >{% if analysis.sample_number %}{{ analysis.sample_number }}{% endif %}</a></td>
@@ -25,7 +24,7 @@
         <td class="sample_value">{% if analysis.analysis_date %}{{ analysis.analysis_date }}{% endif %}</td>
         <td class="sample_value">{% if analysis.reference_x != None %}{{ analysis.reference_x }}{% endif %}</td>
         <td class="sample_value">{% if analysis.reference_y != None %}{{ analysis.reference_y }}{% endif %}</td>
-        <td class="sample_value">{% if analysis.total %}{{ analysis.total }}{% endif %}</td>
+        <td class="sample_value">{% if analysis.total != None %}{{ analysis.total }}{% endif %}</td>
       </tr>
       {%endfor%}
     </tbody>
@@ -69,5 +68,45 @@ $('.chem-analyses-pagination').click(function (event)
   else
    window.location = url;
  });
+function exportToCsv() {
+  var filename = prompt("Please enter a filename:","search_results.csv");
+  if (filename.substring(filename.length-4) != ".csv")
+    filename += ".csv";
+
+  var csvFile = '';
+  var table = document.getElementById("samplelist");
+  for (var i = 0, row; row = table.rows[i]; i++) {
+    for (var j = 0, cell; cell = row.cells[j]; j++) {
+      var innerdata = cell.innerText.toString();
+      var k = innerdata.indexOf("...");
+      if (k >= 0)
+        innerdata = innerdata.substring(k+4);
+      if (innerdata.search(/("|,|\n)/g) >= 0)
+        innerdata = '"' + innerdata + '"';
+      if (j > 0)
+        csvFile += ',';
+      csvFile += innerdata;
+    }
+    csvFile += '\n';
+  }
+
+  var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+  if (navigator.msSaveBlob) { // IE 10+
+    navigator.msSaveBlob(blob, filename);
+  }
+  else {
+    var link = document.createElement("a");
+    if (link.download !== undefined) { // feature detection
+      // Browsers that support HTML5 download attribute
+      var url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+}
 </script>
 {% endblock %}
