@@ -423,256 +423,256 @@ def subsample(id):
         sample_id=subsample['sample'].split('/')[-2])
 
 
-@metpet_ui.route('/edit_sample/<int:id>', methods = ['GET','POST'])
-def edit_sample(id):
-  form = EditForm(minerals=True)
-  email = session.get('email', None)
-  api_key = session.get('api_key', None)
-  api = MetpetAPI(email,api_key).api
-  api.auth(user=email,
-           api_key=api_key)
+# @metpet_ui.route('/edit_sample/<int:id>', methods = ['GET','POST'])
+# def edit_sample(id):
+#   form = EditForm(minerals=True)
+#   email = session.get('email', None)
+#   api_key = session.get('api_key', None)
+#   api = MetpetAPI(email,api_key).api
+#   api.auth(user=email,
+#            api_key=api_key)
 
-  sample = api.sample.get(id).data
-  sample2 = api.sample.get(id)
-  rock_type_list = []
-  rock_type = api.rock_type.get(
-      params={'order_by': 'rock_type', 'limit': 0}).data['objects']
-  for rock in rock_type:
-      rock_type_list.append(rock['rock_type'])
-  form.rock_type.choices = [(rock,rock) for rock in rock_type_list]
+#   sample = api.sample.get(id).data
+#   sample2 = api.sample.get(id)
+#   rock_type_list = []
+#   rock_type = api.rock_type.get(
+#       params={'order_by': 'rock_type', 'limit': 0}).data['objects']
+#   for rock in rock_type:
+#       rock_type_list.append(rock['rock_type'])
+#   form.rock_type.choices = [(rock,rock) for rock in rock_type_list]
 
-  metamorphic_grade_list = []
-  metamorphic_grades = api.metamorphic_grade.get(
-      params={'limit': 0}).data['objects']
+#   metamorphic_grade_list = []
+#   metamorphic_grades = api.metamorphic_grade.get(
+#       params={'limit': 0}).data['objects']
 
-  for mmg in metamorphic_grades:
-      metamorphic_grade_list.append(mmg['name'])
-  form.metamorphic_grades.choices = [(m,m) for m in metamorphic_grade_list]
+#   for mmg in metamorphic_grades:
+#       metamorphic_grade_list.append(mmg['name'])
+#   form.metamorphic_grades.choices = [(m,m) for m in metamorphic_grade_list]
 
-  regions = [region['name'] for region in sample['regions']]
-  location = sample['location'].split(" ")
-  longtitude = location[1].replace("(","")
-  latitude = location[2].replace(")","")
-  loc = [longtitude, latitude]
-  test = "POINT (" + str(longtitude) + " " + str(latitude) + ")"
-  print test, sample['location']
-  if (test == sample['location']):
-      print "same"
+#   regions = [region['name'] for region in sample['regions']]
+#   location = sample['location'].split(" ")
+#   longtitude = location[1].replace("(","")
+#   latitude = location[2].replace(")","")
+#   loc = [longtitude, latitude]
+#   test = "POINT (" + str(longtitude) + " " + str(latitude) + ")"
+#   print test, sample['location']
+#   if (test == sample['location']):
+#       print "same"
 
-  mineral_relationships = (api.mineral_relationship.get(
-                              params={'limit': 0,
-                                      'fields':'parent_mineral__mineral_id,'
-                                               'parent_mineral__name,'
-                                               'child_mineral__mineral_id,'
-                                               'child_mineral__name'})
-                                                .data['objects'])
-  parents = set()
-  children = set()
-  for m in mineral_relationships:
-      parents.add((m['parent_mineral__name'], m['parent_mineral__mineral_id']))
-      children.add((m['child_mineral__name'], m['child_mineral__mineral_id']))
-  mineralroots = set(parents) - set(children)
-
-
-  mineralnodes = []
-  for (name, mid) in mineralroots:
-      mineralnodes.append({"id": name,
-                           "parent": "#",
-                           "text": name,
-                           "mineral_id": mid})
-
-  for m in mineral_relationships:
-      node = {"id": m['child_mineral__name'],
-              "parent": m['parent_mineral__name'],
-              "text": m['child_mineral__name'],
-              "mineral_id": m['child_mineral__mineral_id']}
-      mineralnodes.append(node)
-
-  form.region.min_entries = len(regions)+1
-
-  metamorphic_regions = [metamorphic_region['name']
-                         for metamorphic_region in sample['metamorphic_regions']]
-
-  minerals = [mineral['name'] for mineral in sample['minerals']]
-  new_regions = []
-
-  form.minerals.choices = [(mineral, mineral) for mineral in minerals]
-
-  print sample2.data['rock_type']
-  print sample2.data['rock_type']['rock_type']
-
-  if form.validate_on_submit():
-    sample2.data['user']['name'] = form.owner.data
-    sample2.data['public_data'] = form.public.data
-    sample2.data['location_text'] = form.location_text.data
-    sample2.data['collector'] = form.collector.data
-
-    rocktype = form.rock_type.data
-    value = ''
-    for rock in rock_type:
-        if (rock['rock_type'] == rocktype):
-            value = rock
-    sample2.data['rock_type'] = value
-
-    sample2.data['country'] = form.country.data
-    print sample2.data['collection_date']
-    if (form.date_collected.data != ""):
-        sample2.data['collection_date'] = form.date_collected.data
-    else:
-        sample2.data['collection_date'] = None
-    print sample2.data['rock_type']['rock_type']
-
-    metgrade = form.metamorphic_grades.data
-    value = []
-    metamorphic_grades2 = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
-    for met in metamorphic_grades2:
-        if (metgrade == met['name']):
-            value = []
-            value.append(met)
-    print sample2.data['metamorphic_grades']
-    for x in sample2.data['metamorphic_grades']:
-        del x
-    print value
-    #sample2.data['metamorphic_grades']
-    sample2.data['metamorphic_grades'] = value
-
-    print sample2.data['metamorphic_grades']
-    loc[0] = form.longitude.data
-    loc[1] = form.latitude.data
-    new_loc = "POINT (" + str(longtitude) + " " + str(latitude) + ")"
-    sample2.data['location'] = new_loc
-    '''sample2.data['user']['name'] = form.owner.data
-    sample2.data['public_data'] = form.public.data
-    sample2.data['location_text'] = form.location_text.data
-    sample2.data['collector'] = form.collector.data
-    sample2.data['rock_type']['rock_type'] = form.rock_type.data
-    sample2.data['metamorphic_grades'][0]['name'] = form.metamorphic_grades.data
-    sample2.data['country'] = form.country.data
-    sample2.data['collection_date'] = form.date_collected.data
-    minerals = form.minerals.data
-    print minerals
-    for x in range(0,len(form.region)):
-      new_regions.append(form.region.pop_entry())
-    loc[0] = form.longitude.data
-    loc[1] = form.latitude.data
-    regions = []
-    for r in new_regions:
-      regions.append(r)
-      #fix regions
-    #print sample2.data['user']['name']
-    #print len(regions)
-    list_name = request.args.get("list_name")
-    #listx = get_list(list_name)
-    print list_name'''
-    #sample2 = api.sample.put(id, sample2.data)
-    sample2 = api.sample.put(id, sample2.data)
-    print sample2
-    redurl = '/sample/4999'
-    return redirect(url_for('sample', id=id))
-  else:
-    form.owner.data = sample['user']['name']
-    form.public.data = sample['public_data']
-    form.location_text.data = sample['location_text']
-    form.collector.data = sample['collector']
-    form.rock_type.data = sample['rock_type']['rock_type']
-    if (sample['metamorphic_grades']):
-        form.metamorphic_grades.data = sample['metamorphic_grades'][0]['name']
-    form.country.data = sample['country']
-    form.date_collected.data = sample['collection_date']
-    form.longitude.data = loc[0]
-    form.minerals.data = minerals
-    for r in regions:
-      form.region.append_entry(r)
-    form.latitude.data = loc[1]
+#   mineral_relationships = (api.mineral_relationship.get(
+#                               params={'limit': 0,
+#                                       'fields':'parent_mineral__mineral_id,'
+#                                                'parent_mineral__name,'
+#                                                'child_mineral__mineral_id,'
+#                                                'child_mineral__name'})
+#                                                 .data['objects'])
+#   parents = set()
+#   children = set()
+#   for m in mineral_relationships:
+#       parents.add((m['parent_mineral__name'], m['parent_mineral__mineral_id']))
+#       children.add((m['child_mineral__name'], m['child_mineral__mineral_id']))
+#   mineralroots = set(parents) - set(children)
 
 
-  #change location in sample
-  return render_template('edit_sample.html',
-                          form = form,
-                          region_list = regions,
-                          location = loc,
-                          rock_types = rock_type_list,
-                          sample = sample,
-                          mineral_roots = mineralroots,
-                          mineral_nodes = mineralnodes,
-                          region_size = len(regions),
-                          metamorphic_regions=(', ').join(metamorphic_regions),
-                          minerals = minerals,
-                          test=json.dumps(minerals),
-                          api_key = api_key)
+#   mineralnodes = []
+#   for (name, mid) in mineralroots:
+#       mineralnodes.append({"id": name,
+#                            "parent": "#",
+#                            "text": name,
+#                            "mineral_id": mid})
 
-@metpet_ui.route('/new_sample/', methods = ['GET', 'POST'])
-def new_sample():
-  form = NewSample();
-  email = session.get('email', None)
-  api_key = session.get('api_key', None)
-  api = MetpetAPI(email, api_key).api
-  rock_type_list = []
-  rock_type = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
-  for rock in rock_type:
-      rock_type_list.append(rock['rock_type'])
-  form.rock_type.choices = [(rock,rock) for rock in rock_type_list]
+#   for m in mineral_relationships:
+#       node = {"id": m['child_mineral__name'],
+#               "parent": m['parent_mineral__name'],
+#               "text": m['child_mineral__name'],
+#               "mineral_id": m['child_mineral__mineral_id']}
+#       mineralnodes.append(node)
 
-  metamorphic_grade_list = []
-  metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
-  for mmg in metamorphic_grades:
-      metamorphic_grade_list.append(mmg['name'])
-  form.metamorphic_grades.choices = [(m,m) for m in metamorphic_grade_list]
+#   form.region.min_entries = len(regions)+1
 
-  mineral_relationships = api.mineral_relationship.get(\
-                              params={'limit': 0,
-                                      'fields':'parent_mineral__mineral_id,parent_mineral__name,child_mineral__mineral_id,child_mineral__name'}).\
-                                                  data['objects']
+#   metamorphic_regions = [metamorphic_region['name']
+#                          for metamorphic_region in sample['metamorphic_regions']]
 
-  mineralroots = []
-  parents = set()
-  children = set()
-  for m in mineral_relationships:
-      parents.add((m['parent_mineral__name'], m['parent_mineral__mineral_id']))
-      children.add((m['child_mineral__name'], m['child_mineral__mineral_id']))
-  mineralroots = set(parents) - set(children)
+#   minerals = [mineral['name'] for mineral in sample['minerals']]
+#   new_regions = []
 
-  mineralnodes = []
-  for (name, mid) in mineralroots:
-      mineralnodes.append({"id": name, "parent": "#", "text": name, "mineral_id": mid})
-  for m in mineral_relationships:
-      node = {"id": m['child_mineral__name'], "parent": m['parent_mineral__name'], "text": m['child_mineral__name'], "mineral_id": m['child_mineral__mineral_id']}
-      mineralnodes.append(node)
+#   form.minerals.choices = [(mineral, mineral) for mineral in minerals]
 
-  if form.validate():
-        print "validated"
-  print form.errors
+#   print sample2.data['rock_type']
+#   print sample2.data['rock_type']['rock_type']
 
-  '''
-  {u'rock_type_id': 10, u'rock_type': u'Amphibolite', u'resource_uri': u'/api/v1/rock_type/10/'}
-  '''
+#   if form.validate_on_submit():
+#     sample2.data['user']['name'] = form.owner.data
+#     sample2.data['public_data'] = form.public.data
+#     sample2.data['location_text'] = form.location_text.data
+#     sample2.data['collector'] = form.collector.data
 
-  if form.validate_on_submit():
-    sample_data = {}
-    sample_data[u'user'] = form.owner.data
-    sample_data[u'public_data'] = form.public.data
-    longitude = form.longitude.data
-    latitude = form.latitude.data
-    new_loc = u"POINT (" + str(longitude) + " " + str(latitude) + ")"
-    sample_data[u'location'] = new_loc
-    sample_data[u'location_text'] = form.location_text.data
-    rock_type = {}
-    rock_type[u'rock_type_id'] = 10
-    rock_type[u'rock_type'] = u'Amphibolite'
-    rock_type[u'resource_uri'] = u'/api/v1/rock_type/10/'
-    sample_data[u'rock_type'] = rock_type
-    sample_data[u'collection_date'] = form.date_collected.data
-    print sample_data
-    #print sample_data['user']
-    sample_data = api.sample.post(sample_data)
-    return redirect(url_for('search'))
+#     rocktype = form.rock_type.data
+#     value = ''
+#     for rock in rock_type:
+#         if (rock['rock_type'] == rocktype):
+#             value = rock
+#     sample2.data['rock_type'] = value
+
+#     sample2.data['country'] = form.country.data
+#     print sample2.data['collection_date']
+#     if (form.date_collected.data != ""):
+#         sample2.data['collection_date'] = form.date_collected.data
+#     else:
+#         sample2.data['collection_date'] = None
+#     print sample2.data['rock_type']['rock_type']
+
+#     metgrade = form.metamorphic_grades.data
+#     value = []
+#     metamorphic_grades2 = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
+#     for met in metamorphic_grades2:
+#         if (metgrade == met['name']):
+#             value = []
+#             value.append(met)
+#     print sample2.data['metamorphic_grades']
+#     for x in sample2.data['metamorphic_grades']:
+#         del x
+#     print value
+#     #sample2.data['metamorphic_grades']
+#     sample2.data['metamorphic_grades'] = value
+
+#     print sample2.data['metamorphic_grades']
+#     loc[0] = form.longitude.data
+#     loc[1] = form.latitude.data
+#     new_loc = "POINT (" + str(longtitude) + " " + str(latitude) + ")"
+#     sample2.data['location'] = new_loc
+#     '''sample2.data['user']['name'] = form.owner.data
+#     sample2.data['public_data'] = form.public.data
+#     sample2.data['location_text'] = form.location_text.data
+#     sample2.data['collector'] = form.collector.data
+#     sample2.data['rock_type']['rock_type'] = form.rock_type.data
+#     sample2.data['metamorphic_grades'][0]['name'] = form.metamorphic_grades.data
+#     sample2.data['country'] = form.country.data
+#     sample2.data['collection_date'] = form.date_collected.data
+#     minerals = form.minerals.data
+#     print minerals
+#     for x in range(0,len(form.region)):
+#       new_regions.append(form.region.pop_entry())
+#     loc[0] = form.longitude.data
+#     loc[1] = form.latitude.data
+#     regions = []
+#     for r in new_regions:
+#       regions.append(r)
+#       #fix regions
+#     #print sample2.data['user']['name']
+#     #print len(regions)
+#     list_name = request.args.get("list_name")
+#     #listx = get_list(list_name)
+#     print list_name'''
+#     #sample2 = api.sample.put(id, sample2.data)
+#     sample2 = api.sample.put(id, sample2.data)
+#     print sample2
+#     redurl = '/sample/4999'
+#     return redirect(url_for('sample', id=id))
+#   else:
+#     form.owner.data = sample['user']['name']
+#     form.public.data = sample['public_data']
+#     form.location_text.data = sample['location_text']
+#     form.collector.data = sample['collector']
+#     form.rock_type.data = sample['rock_type']['rock_type']
+#     if (sample['metamorphic_grades']):
+#         form.metamorphic_grades.data = sample['metamorphic_grades'][0]['name']
+#     form.country.data = sample['country']
+#     form.date_collected.data = sample['collection_date']
+#     form.longitude.data = loc[0]
+#     form.minerals.data = minerals
+#     for r in regions:
+#       form.region.append_entry(r)
+#     form.latitude.data = loc[1]
 
 
-  #change location in sample
-  return render_template('new_sample.html',
-                          form = form,
-                          mineral_nodes =mineralnodes,
-                          api_key = api_key)
+#   #change location in sample
+#   return render_template('edit_sample.html',
+#                           form = form,
+#                           region_list = regions,
+#                           location = loc,
+#                           rock_types = rock_type_list,
+#                           sample = sample,
+#                           mineral_roots = mineralroots,
+#                           mineral_nodes = mineralnodes,
+#                           region_size = len(regions),
+#                           metamorphic_regions=(', ').join(metamorphic_regions),
+#                           minerals = minerals,
+#                           test=json.dumps(minerals),
+#                           api_key = api_key)
+
+# @metpet_ui.route('/new_sample/', methods = ['GET', 'POST'])
+# def new_sample():
+#   form = NewSample();
+#   email = session.get('email', None)
+#   api_key = session.get('api_key', None)
+#   api = MetpetAPI(email, api_key).api
+#   rock_type_list = []
+#   rock_type = api.rock_type.get(params={'order_by': 'rock_type', 'limit': 0}).data['objects']
+#   for rock in rock_type:
+#       rock_type_list.append(rock['rock_type'])
+#   form.rock_type.choices = [(rock,rock) for rock in rock_type_list]
+
+#   metamorphic_grade_list = []
+#   metamorphic_grades = api.metamorphic_grade.get(params={'limit': 0}).data['objects']
+#   for mmg in metamorphic_grades:
+#       metamorphic_grade_list.append(mmg['name'])
+#   form.metamorphic_grades.choices = [(m,m) for m in metamorphic_grade_list]
+
+#   mineral_relationships = api.mineral_relationship.get(\
+#                               params={'limit': 0,
+#                                       'fields':'parent_mineral__mineral_id,parent_mineral__name,child_mineral__mineral_id,child_mineral__name'}).\
+#                                                   data['objects']
+
+#   mineralroots = []
+#   parents = set()
+#   children = set()
+#   for m in mineral_relationships:
+#       parents.add((m['parent_mineral__name'], m['parent_mineral__mineral_id']))
+#       children.add((m['child_mineral__name'], m['child_mineral__mineral_id']))
+#   mineralroots = set(parents) - set(children)
+
+#   mineralnodes = []
+#   for (name, mid) in mineralroots:
+#       mineralnodes.append({"id": name, "parent": "#", "text": name, "mineral_id": mid})
+#   for m in mineral_relationships:
+#       node = {"id": m['child_mineral__name'], "parent": m['parent_mineral__name'], "text": m['child_mineral__name'], "mineral_id": m['child_mineral__mineral_id']}
+#       mineralnodes.append(node)
+
+#   if form.validate():
+#         print "validated"
+#   print form.errors
+
+#   '''
+#   {u'rock_type_id': 10, u'rock_type': u'Amphibolite', u'resource_uri': u'/api/v1/rock_type/10/'}
+#   '''
+
+#   if form.validate_on_submit():
+#     sample_data = {}
+#     sample_data[u'user'] = form.owner.data
+#     sample_data[u'public_data'] = form.public.data
+#     longitude = form.longitude.data
+#     latitude = form.latitude.data
+#     new_loc = u"POINT (" + str(longitude) + " " + str(latitude) + ")"
+#     sample_data[u'location'] = new_loc
+#     sample_data[u'location_text'] = form.location_text.data
+#     rock_type = {}
+#     rock_type[u'rock_type_id'] = 10
+#     rock_type[u'rock_type'] = u'Amphibolite'
+#     rock_type[u'resource_uri'] = u'/api/v1/rock_type/10/'
+#     sample_data[u'rock_type'] = rock_type
+#     sample_data[u'collection_date'] = form.date_collected.data
+#     print sample_data
+#     #print sample_data['user']
+#     sample_data = api.sample.post(sample_data)
+#     return redirect(url_for('search'))
+
+
+#   #change location in sample
+#   return render_template('new_sample.html',
+#                           form = form,
+#                           mineral_nodes =mineralnodes,
+#                           api_key = api_key)
 
 
 @app.route('/chemical_analyses/')
@@ -730,120 +730,120 @@ def chemical_analysis(id):
         oxide_list=oxides)
 
 
-@metpet_ui.route('/new_chemical/', methods = ['GET', 'POST'])
-def new_chemical():
-    form = NewChem()
-    email = session.get('email', None)
-    api_key = session.get('api_key', None)
-    api = MetpetAPI(email, api_key).api
-    filters = ast.literal_eval(json.dumps(request.args))
-    offset = request.args.get('offset',0)
-    filters['offset'] = offset
+# @metpet_ui.route('/new_chemical/', methods = ['GET', 'POST'])
+# def new_chemical():
+#     form = NewChem()
+#     email = session.get('email', None)
+#     api_key = session.get('api_key', None)
+#     api = MetpetAPI(email, api_key).api
+#     filters = ast.literal_eval(json.dumps(request.args))
+#     offset = request.args.get('offset',0)
+#     filters['offset'] = offset
 
-    data = api.chemical_analysis.get(params=filters)
-    oxide_list = []
-    element_list = []
-    oxides = api.oxide.get(params={'limit':0}).data['objects']
+#     data = api.chemical_analysis.get(params=filters)
+#     oxide_list = []
+#     element_list = []
+#     oxides = api.oxide.get(params={'limit':0}).data['objects']
 
-    for oxide in oxides:
-        oxide_list.append(oxide)
-    elements = api.element.get(params={'limit':0}).data['objects']
-    for element in elements:
-        element_list.append(element)
+#     for oxide in oxides:
+#         oxide_list.append(oxide)
+#     elements = api.element.get(params={'limit':0}).data['objects']
+#     for element in elements:
+#         element_list.append(element)
 
-    print data.data
+#     print data.data
 
 
-    return render_template('new_chemical.html',
-                            form = form,
-                            oxide_list = oxide_list,
-                            element_list = element_list,
-                            api_key = api_key)
+#     return render_template('new_chemical.html',
+#                             form = form,
+#                             oxide_list = oxide_list,
+#                             element_list = element_list,
+#                             api_key = api_key)
 
-@app.route('/edit_chemical/<int:id>', methods = ['GET','POST'])
-def edit_chemical(id):
-    form = EditChemForm()
-    email = session.get('email', None)
-    api_key = session.get('api_key', None)
-    api = MetpetAPI(email,api_key).api
-    payload = {'email': email, 'api_key': api_key}
+# @app.route('/edit_chemical/<int:id>', methods = ['GET','POST'])
+# def edit_chemical(id):
+#     form = EditChemForm()
+#     email = session.get('email', None)
+#     api_key = session.get('api_key', None)
+#     api = MetpetAPI(email,api_key).api
+#     payload = {'email': email, 'api_key': api_key}
 
-    url = env('API_HOST') + 'api/v1/chemical_analysis/{0}'.format(id)
-    url+='?format=json'
-    response = get(url, params=payload)
-    data = response.json()
+#     url = env('API_HOST') + 'api/v1/chemical_analysis/{0}'.format(id)
+#     url+='?format=json'
+#     response = get(url, params=payload)
+#     data = response.json()
 
-    filters = ast.literal_eval(json.dumps(request.args))
-    offset = request.args.get('offset', 0)
-    filters['offset'] = offset
+#     filters = ast.literal_eval(json.dumps(request.args))
+#     offset = request.args.get('offset', 0)
+#     filters['offset'] = offset
 
-    data2 = api.chemical_analysis.get(params=filters)
-    next, previous, last, total_count = paginate_model('chemical_analyses',
-                                                     data2, filters)
-    chemical_analyses = data2.data['objects']
+#     data2 = api.chemical_analysis.get(params=filters)
+#     next, previous, last, total_count = paginate_model('chemical_analyses',
+#                                                      data2, filters)
+#     chemical_analyses = data2.data['objects']
 
-    sample2 = api.chemical_analysis.get(id)
-    print sample2.data
+#     sample2 = api.chemical_analysis.get(id)
+#     print sample2.data
 
-    oxide_list=[]
-    element_list=[]
-    oxides = api.oxide.get(params={'limit': 0}).data['objects']
+#     oxide_list=[]
+#     element_list=[]
+#     oxides = api.oxide.get(params={'limit': 0}).data['objects']
 
-    for oxide in oxides:
-        oxide_list.append(oxide)
+#     for oxide in oxides:
+#         oxide_list.append(oxide)
 
-    elements = api.element.get(params={'limit': 0}).data['objects']
-    for element in elements:
-        element_list.append(element)
+#     elements = api.element.get(params={'limit': 0}).data['objects']
+#     for element in elements:
+#         element_list.append(element)
 
-    selected_oxide_list = []
-    for o in data['oxides']:
-        oxideurl = env('API_HOST') + o + '?format=json'
-        oxideresponse = get(oxideurl, params=payload)
-        oxidedata = oxideresponse.json()
-        selected_oxide_list.append(oxidedata)
+#     selected_oxide_list = []
+#     for o in data['oxides']:
+#         oxideurl = env('API_HOST') + o + '?format=json'
+#         oxideresponse = get(oxideurl, params=payload)
+#         oxidedata = oxideresponse.json()
+#         selected_oxide_list.append(oxidedata)
 
-    suburl = env('API_HOST') + data['subsample'] + '?format=json'
-    response2 = get(suburl, params=payload)
-    subdata = response2.json()
+#     suburl = env('API_HOST') + data['subsample'] + '?format=json'
+#     response2 = get(suburl, params=payload)
+#     subdata = response2.json()
 
-    sampleurl = env('API_HOST') + subdata['sample'] + '?format=json'
-    sampleresponse = get(sampleurl, params=payload)
-    sampledata = sampleresponse.json()
+#     sampleurl = env('API_HOST') + subdata['sample'] + '?format=json'
+#     sampleresponse = get(sampleurl, params=payload)
+#     sampledata = sampleresponse.json()
 
-    userurl = env('API_HOST') + data['user'] + '?format=json'
-    response3 = get(userurl, params=payload)
-    userdata = response3.json()
+#     userurl = env('API_HOST') + data['user'] + '?format=json'
+#     response3 = get(userurl, params=payload)
+#     userdata = response3.json()
 
-    if form.validate_on_submit():
-        #userdata['name'] = form.owner.data
-        sample2.data['public_data'] = form.public.data
-        sample2.data['analyst'] = form.analyst.data
-        sample2.data['total'] = form.total.data
-        sample2.data['stage_x'] = form.StageX.data
-        sample2.data['stage_y'] = form.StageY.data
-        sample2 = api.chemical_analysis.put(id, sample2.data)
-        return redirect(url_for('chemical_analysis', id=id))
-    else:
-        form.owner.data = userdata['name']
-        form.public.data = data['public_data']
-        form.analyst.data = data['analyst']
-        #form.analysis_material.data = data['analysis_material']
-        form.total.data = data['total']
-        form.StageX.data = data['stage_x']
-        form.StageY.data = data['stage_y']
+#     if form.validate_on_submit():
+#         #userdata['name'] = form.owner.data
+#         sample2.data['public_data'] = form.public.data
+#         sample2.data['analyst'] = form.analyst.data
+#         sample2.data['total'] = form.total.data
+#         sample2.data['stage_x'] = form.StageX.data
+#         sample2.data['stage_y'] = form.StageY.data
+#         sample2 = api.chemical_analysis.put(id, sample2.data)
+#         return redirect(url_for('chemical_analysis', id=id))
+#     else:
+#         form.owner.data = userdata['name']
+#         form.public.data = data['public_data']
+#         form.analyst.data = data['analyst']
+#         #form.analysis_material.data = data['analysis_material']
+#         form.total.data = data['total']
+#         form.StageX.data = data['stage_x']
+#         form.StageY.data = data['stage_y']
 
-    return render_template('edit_chemical.html',
-        form = form,
-        data = data,
-        subdata = subdata,
-        sampledata = sampledata,
-        userdata = userdata,
-        selected_oxide_list = selected_oxide_list,
-        oxide_list = oxide_list,
-        element_list = element_list,
-        id = id,
-        api_key = api_key)
+#     return render_template('edit_chemical.html',
+#         form = form,
+#         data = data,
+#         subdata = subdata,
+#         sampledata = sampledata,
+#         userdata = userdata,
+#         selected_oxide_list = selected_oxide_list,
+#         oxide_list = oxide_list,
+#         element_list = element_list,
+#         id = id,
+#         api_key = api_key)
 
 
 @app.route('/login', methods=['GET', 'POST'])
