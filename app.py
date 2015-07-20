@@ -3,7 +3,6 @@ import dotenv
 import drest
 from getenv import env
 import json
-from pathlib import Path
 from requests import get, post
 from urllib import urlencode
 
@@ -929,5 +928,5 @@ def user(id):
 
 
 if __name__ == '__main__':
-    dotenv.read_dotenv(Path.cwd().joinpath('app_variables.env').as_posix())
+    dotenv.read_dotenv('../app_variables.env')
     metpet_ui.run(debug=True)
