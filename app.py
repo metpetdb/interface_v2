@@ -3,6 +3,7 @@ import dotenv
 import drest
 from getenv import env
 import json
+from pathlib import Path
 from requests import get, post
 from urllib import urlencode
 
@@ -22,27 +23,26 @@ from forms import (
     RequestPasswordResetForm,
     PasswordResetForm,
     EditForm,
-    EditChemForm,
-    NewSample,
-    NewChem
+    EditChemForm
 )
-from api import MetpetAPI
+from lib.api import MetpetAPI
 from utilities import paginate_model
 
-app = Flask(__name__)
-app.config.from_object('config')
-mail = Mail(app)
+mail = Mail()
+
+metpet_ui = Flask(__name__)
+metpet_ui.config.from_object('config')
+mail.init_app(metpet_ui)
+#mail = Mail(app)
 
 
-@app.route('/')
+@metpet_ui.route('/')
 def index():
     return render_template('index.html')
 
 
-@app.route('/search/')
+@metpet_ui.route('/search/')
 def search():
-    print "REQ ARGS"
-    print request.args
     email = session.get('email', None)
     api_key = session.get('api_key', None)
     api = MetpetAPI(email, api_key).api
@@ -119,7 +119,6 @@ def search():
     #If one or no minerals or OR selected
     if request.args.get('resource') == 'sample':
         #get samples with filters
-        print filter_dictionary
         url = url_for('samples') + '?' + urlencode(filter_dictionary)
         return redirect(url)
 
@@ -219,10 +218,8 @@ def search():
         rock_types=rock_types)
 
 
-@app.route('/search_chemistry/')
+@metpet_ui.route('/search-chemistry/')
 def search_chemistry():
-    print "REQ ARGS"
-    print request.args
     email = session.get('email', None)
     api_key = session.get('api_key', None)
     api = MetpetAPI(email, api_key).api
@@ -332,7 +329,7 @@ def search_chemistry():
         mineral_nodes=json.dumps(sorted(mineralnodes, key=lambda k: k['text'])))
 
 
-@app.route('/samples/')
+@metpet_ui.route('/samples/')
 def samples():
     email = session.get('email', None)
     api_key = session.get('api_key', None)
@@ -364,7 +361,7 @@ def samples():
         last_page=last)
 
 
-@app.route('/sample/<int:id>')
+@metpet_ui.route('/sample/<int:id>')
 def sample(id):
     email = session.get('email', None)
     api_key = session.get('api_key', None)
@@ -403,7 +400,7 @@ def sample(id):
         subsamples=subsamples)
 
 
-@app.route('/subsample/<int:id>')
+@metpet_ui.route('/subsample/<int:id>')
 def subsample(id):
     email = session.get('email', None)
     api_key = session.get('api_key', None)
@@ -676,7 +673,7 @@ def subsample(id):
 #                           api_key = api_key)
 
 
-@app.route('/chemical_analyses/')
+@metpet_ui.route('/chemical_analyses/')
 def chemical_analyses():
     email = session.get('email', None)
     api_key = session.get('api_key', None)
@@ -706,7 +703,7 @@ def chemical_analyses():
         last_page=last)
 
 
-@app.route('/chemical_analysis/<int:id>')
+@metpet_ui.route('/chemical_analysis/<int:id>')
 def chemical_analysis(id):
     email = session.get('email', None)
     api_key = session.get('api_key', None)
@@ -731,37 +728,7 @@ def chemical_analysis(id):
         oxide_list=oxides)
 
 
-# @metpet_ui.route('/new_chemical/', methods = ['GET', 'POST'])
-# def new_chemical():
-#     form = NewChem()
-#     email = session.get('email', None)
-#     api_key = session.get('api_key', None)
-#     api = MetpetAPI(email, api_key).api
-#     filters = ast.literal_eval(json.dumps(request.args))
-#     offset = request.args.get('offset',0)
-#     filters['offset'] = offset
-
-#     data = api.chemical_analysis.get(params=filters)
-#     oxide_list = []
-#     element_list = []
-#     oxides = api.oxide.get(params={'limit':0}).data['objects']
-
-#     for oxide in oxides:
-#         oxide_list.append(oxide)
-#     elements = api.element.get(params={'limit':0}).data['objects']
-#     for element in elements:
-#         element_list.append(element)
-
-#     print data.data
-
-
-#     return render_template('new_chemical.html',
-#                             form = form,
-#                             oxide_list = oxide_list,
-#                             element_list = element_list,
-#                             api_key = api_key)
-
-# @app.route('/edit_chemical/<int:id>', methods = ['GET','POST'])
+# @metpet_ui.route('/edit_chemical/<int:id>', methods = ['GET','POST'])
 # def edit_chemical(id):
 #     form = EditChemForm()
 #     email = session.get('email', None)
@@ -847,7 +814,38 @@ def chemical_analysis(id):
 #         api_key = api_key)
 
 
-@app.route('/login', methods=['GET', 'POST'])
+# @metpet_ui.route('/new_chemical/', methods = ['GET', 'POST'])
+# def new_chemical():
+#     form = NewChem()
+#     email = session.get('email', None)
+#     api_key = session.get('api_key', None)
+#     api = MetpetAPI(email, api_key).api
+#     filters = ast.literal_eval(json.dumps(request.args))
+#     offset = request.args.get('offset',0)
+#     filters['offset'] = offset
+
+#     data = api.chemical_analysis.get(params=filters)
+#     oxide_list = []
+#     element_list = []
+#     oxides = api.oxide.get(params={'limit':0}).data['objects']
+
+#     for oxide in oxides:
+#         oxide_list.append(oxide)
+#     elements = api.element.get(params={'limit':0}).data['objects']
+#     for element in elements:
+#         element_list.append(element)
+
+#     print data.data
+
+
+#     return render_template('new_chemical.html',
+#                             form = form,
+#                             oxide_list = oxide_list,
+#                             element_list = element_list,
+#                             api_key = api_key)
+
+
+@metpet_ui.route('/login', methods=['GET', 'POST'])
 def login():
     if session.get('api_key'):
         return redirect(url_for('search'))
@@ -867,7 +865,7 @@ def login():
     return render_template('login.html', form=form)
 
 
-@app.route('/logout')
+@metpet_ui.route('/logout')
 def logout():
     session.pop('email', None)
     session.pop('api_key', None)
@@ -875,7 +873,7 @@ def logout():
     return redirect(url_for('search'))
 
 
-@app.route('/request_password_reset', methods=['GET', 'POST'])
+@metpet_ui.route('/request_password_reset', methods=['GET', 'POST'])
 def request_password_reset():
     form = RequestPasswordResetForm()
     if form.validate_on_submit():
@@ -895,7 +893,7 @@ def request_password_reset():
     return render_template('request_password_reset.html', form=form)
 
 
-@app.route('/reset_password/<string:token>', methods=['GET', 'POST'])
+@metpet_ui.route('/reset_password/<string:token>', methods=['GET', 'POST'])
 def reset_password(token):
     form = PasswordResetForm()
     if form.validate_on_submit():
@@ -921,7 +919,7 @@ def reset_password(token):
     return redirect(url_for('request_reset_password'))
 
 
-@app.route('/user/<int:id>')
+@metpet_ui.route('/user/<int:id>')
 def user(id):
     api = MetpetAPI(None, None).api
     user = api.user.get(id).data
@@ -931,5 +929,5 @@ def user(id):
 
 
 if __name__ == '__main__':
-    dotenv.read_dotenv('../app_variables.env')
-    app.run(debug=True)
+    dotenv.read_dotenv(Path.cwd().joinpath('app_variables.env').as_posix())
+    metpet_ui.run(debug=True)
