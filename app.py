@@ -119,6 +119,7 @@ def search():
     #If one or no minerals or OR selected
     if request.args.get('resource') == 'sample':
         #get samples with filters
+        print filter_dictionary
         url = url_for('samples') + '?' + urlencode(filter_dictionary)
         return redirect(url)
 
