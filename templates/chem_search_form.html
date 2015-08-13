@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+{% block body %}
+<div id="spinner" class="spinner" style="display:none;">
+    <img id="img-spinner" src="/static/images/ajax-loader.gif" alt="Loading"/>
+</div>
+
+  <div id = "search-options" class="panel panel-default">
+    <div id = "search-panel" class="panel-heading" data-toggle="collapse" data-parent="#accordion"  onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');">
+      <h4 class="panel-title">
+        <a class='accordion-toggle' href="">
+          Search Options
+        </a>
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in">
+      <div class="panel-body">
+        
+<ul class="nav nav-tabs" id="myTab">
+  <li class= "active"><a href="#minerals">Minerals</a></li>
+  <li><a href="#chemistry">Elements and Oxides</a></li>
+</ul>
+<div id = "form-container">
+    <form action="" method="get" id='content' class="tab-content">
+
+    <div class="tab-pane active" id="minerals"><br>
+       <label for="mineral-tree">Mineral: </label>
+       <div id="mineral-select">
+       <select multiple id="selected-mineral" name="minerals" onchange="updateMineral()" class="chosen-select">
+          {% for m in minerals %}
+              <option value="{{ m.name }}">{{ m.name }}</option>
+          {% endfor %}
+       </select>
+       </div>
+    </div>
+
+   <div class="tab-pane" id="chemistry"><br><br>
+    <div style="float:left;margin-top:-20px">
+      <label for="mineral-tree">Elements: </label>
+       <div id="mineral-select">
+       <select multiple id="selected-elements" name="elements" onchange="updateChemistry()" class="chosen-select">
+          {% for e in elements %}
+              <option value="{{ e.name }}">{{ e.name }}</option>
+          {% endfor %}
+       </select>
+       </div>
+    </div>
+    <div style="margin-left:40px;float:left;margin-top:-20px">
+       <label for="mineral-tree">Oxides: </label>
+       <div id="mineral-select">
+       <select multiple id="selected-oxides" name="oxides" onchange="updateChemistry()" class="chosen-select">
+          {% for o in oxides %}
+              <option value="{{ o.species }}">{{ o.species }}</option>
+          {% endfor %}
+       </select>
+       </div>
+    </div>
+
+       </div> <!--end form1 -->
+       </div> <!--end chemistry-forms -->
+       
+
+       <div id = "selected-minerals"></div>
+
+      </div><!-- end chemistry-->
+
+<div class="clear"></div>
+
+</div><!--end form container-->
+  {% if error %}
+      <p style="color: red;">Please submit a search term.</p>
+  {% endif %}
+      </div>
+    </div>
+  </div>
+
+<div id="search-summary" class="panel panel-default">
+    <div class="panel-heading" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');">
+      <h4 class="panel-title">
+        <a class='accordion-toggle' data-toggle="collapse" data-parent="#accordion" href="">
+          Search Summary
+        </a>
+      </h4>
+      <a id= "clearAll" onclick="clearAll()">Clear All</a>
+    
+     </div>
+    <div id="collapseTwo" class="panel-collapse collapse in">
+       <div class="panel-body">
+          <p id= "instructions">Set your search criteria by selecting from the categories on the left.<br></p>
+          <div id = "search-options-minerals"></div>
+          <div id = "search-options-chemistry"></div>
+                <div id = "form-submit">
+
+
+<div id = "resource" class = "text-center">
+    <div class="btn-group" data-toggle="buttons" style="margin:0 auto;">
+        <label class="btn btn-primary">
+            <input type="radio" name="resource" value="sample" onchange="document.getElementById('showmap').disabled=false;" id="option1"> Samples
+        </label>
+        <label class="btn btn-primary active">
+            <input type="radio" name="resource" value="chemicalanalysis" onchange="document.getElementById('showmap').disabled=true;" id="option2" checked="checked"> Chemical Analyses
+        </label>
+    </div>
+</div>
+
+</div>
+  <br>
+  <input type="checkbox" id="showall" name="all_results" value="yes" checked>Display all results&nbsp;&nbsp;&nbsp;&nbsp;
+  <input hidden type="checkbox" id="showmap" onchange="$('#collapseThree').collapse('toggle');" name="showmap" value="ofcourse" disabled><!-- Show on map -->
+  <br><br>
+  <input type="submit" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');" value="Search">
+      </div>
+       </div>
+    </div><!--end collapsetwo -->
+</div>
+
+  </form>  <!-- tabs -->
+
+<div class="clear"></div>
+
+<div id = "results"></div>
+
+
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
+<script src="/static/js/jquery-2.1.1.min.js"></script>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="/static/css/chosen.min.css">
+<script src="/static/js/chosen.jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+
+<link rel="stylesheet" href="/static/css/style.min.css">
+<script src="/static/js/jstree.min.js"></script>
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+<link href="/static/css/bootstrap-switch.min.css" rel="stylesheet">
+<script src="/static/css/bootstrap-switch.min.js"></script>
+
+<script>
+$('#myTab a').click(function (e) {
+  e.preventDefault();
+  $(this).tab('show');
+});
+
+//ON READY FUNCTION
+$(function()
+{
+//Ajax call to update sample data
+var frm = $('#content');
+    frm.submit(function () {
+    $('#spinner').show();
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: frm.serialize(),
+            success: function (data) {
+                $("#results").html("");
+                $("#results").html(data);
+                $('#spinner').hide();
+                if(document.getElementsByTagName("header")[1])
+                 document.getElementsByTagName("header")[1].innerHTML = "";
+            },
+            error: function(data) {
+                $("#results").html("Error");
+                $('#spinner').hide();
+            }
+        });
+        return false;
+    }); //END ajax
+
+$('.btn-toggle').click(function() {
+    $(this).find('.btn').toggleClass('active');  
+    
+
+   $(this).find('.btn').toggleClass('btn-primary');
+
+    $(this).find('.btn').toggleClass('btn-default');
+       
+});
+
+$("#form1 .chosen-select").chosen({
+    allow_single_deselect: true,
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
+
+$("#mineral-select .chosen-select").chosen({
+    allow_single_deselect: true,
+    disable_search_threshold: 10,
+    no_results_text: "Oops, nothing found!",
+    width: "50%"
+  });
+}); //END READY FUNCTION
+
+function updateMineral()
+{
+ var searchOptions = document.getElementById("search-options-minerals");
+ searchOptions.innerHTML = "";
+ 
+ if($("#selected-mineral option:selected").length)
+  {
+   searchOptions.innerHTML += "<div class = 'summary-title'><h4>Mineral (any) </h4><a onclick='clearMineral()' class='clear-title'>Clear</a></div>";
+   for(var a = 0; a < $("#selected-mineral option:selected").length; a++)
+   {
+   if($("#selected-mineral option:selected")[a].selected)
+    var nextMineral = $("#selected-mineral option:selected")[a].innerHTML + ", ";
+    if(nextMineral !== ", ")
+      searchOptions.innerHTML += $("#selected-mineral option:selected")[a].innerHTML + ", ";
+    console.log("JUST ADDED " + nextMineral);
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+}
+function clearMineral()
+{
+ var searchOptions = document.getElementById("search-options-minerals");
+ searchOptions.innerHTML = "";
+ $("#mineral-select .chosen-select").val('').trigger("chosen:updated");
+}
+
+function updateChemistry()
+{
+ //Chemistry search options, selected chemistry minerals
+  var searchOptions = document.getElementById("search-options-chemistry");
+ searchOptions.innerHTML = "";
+
+ if ($("#selected-elements option:selected").length || $("#selected-oxides option:selected").length)
+  searchOptions.innerHTML += "<div class = 'summary-title'><h4>Chemistry (all) </h4><a onclick='clearChemistry()' class='clear-title'>Clear</a></div>";
+
+ if ($("#selected-elements option:selected").length + $("#selected-oxides option:selected").length > 1) {
+  document.getElementById("showall").checked="checked";
+  document.getElementById("showall").disabled="disabled";
+ }
+ else
+  document.getElementById("showall").disabled=false;
+ 
+ if($("#selected-elements option:selected").length)
+  {
+   for(var a = 0; a < $("#selected-elements option:selected").length; a++)
+   {
+   if($("#selected-elements option:selected")[a].selected)
+    var nextMineral = $("#selected-elements option:selected")[a].innerHTML + ", ";
+    if(nextMineral !== ", ")
+      searchOptions.innerHTML += $("#selected-elements option:selected")[a].innerHTML + ", ";
+    console.log("JUST ADDED " + nextMineral);
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+
+  if($("#selected-oxides option:selected").length)
+  {
+   for(var a = 0; a < $("#selected-oxides option:selected").length; a++)
+   {
+   if($("#selected-oxides option:selected")[a].selected)
+    var nextMineral = $("#selected-oxides option:selected")[a].innerHTML + ", ";
+    if(nextMineral !== ", ")
+      searchOptions.innerHTML += $("#selected-oxides option:selected")[a].innerHTML + ", ";
+    console.log("JUST ADDED " + nextMineral);
+   }
+   var s = searchOptions.innerHTML;
+   searchOptions.innerHTML = s.slice(0, -2);
+   searchOptions.innerHTML += "<br>";
+  }
+}
+function clearChemistry()
+{
+ var searchOptions = document.getElementById("search-options-chemistry");
+ searchOptions.innerHTML = "";
+ $("#chemistry .chosen-select").val('').trigger("chosen:updated");
+}
+
+function clearAll()
+{
+ clearMineral();
+ clearChemistry();
+}
+</script>
+
+{% endblock %}

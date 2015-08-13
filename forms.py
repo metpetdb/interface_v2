@@ -15,69 +15,52 @@ from wtforms import (
 from wtforms.validators import (
   Required,
   Email,
-  EqualTo
+  EqualTo,
+  NumberRange
 )
 
 class LoginForm(Form):
-  email = TextField('email', validators = [Required(), Email()])
+  email = TextField('email', validators=[Required(), Email()])
   password = PasswordField('password')
 
 class RequestPasswordResetForm(Form):
-  email = TextField('email', validators = [Required(), Email()])
+  email = TextField('email', validators=[Required(), Email()])
 
 class PasswordResetForm(Form):
   token = HiddenField()
-  password = PasswordField('password', validators = [
+  password = PasswordField('password', validators=[
     Required(),
     EqualTo('confirm', message='Passwords must match')
   ])
   confirm = PasswordField('confirm')
 
 class EditForm(Form):
-  owner = TextField('Owner', validators = [Required()])
+  owner = TextField('Owner', validators=[Required()])
+  igsn = TextField('ISGN')
   aliases = TextField('Aliases')
   date_collected = TextField('Date Collected')
-  rock_type = SelectField('Rock Type', validators = [Required()])
-  public = RadioField('Public', choices=[('Y','Y'), ('N','N')], validators = [Required()])
+  rock_type = SelectField('Rock Type', validators=[Required()])
+  public = RadioField('Public', choices=[('Y','Y'), ('N','N')], validators=[Required()])
   country = TextField('Country')
   location_text = TextField('Location')
   collector = TextField('Collector')
   region = FieldList(TextField('Region'))
+  metamorphic_regions = SelectField('Metamorphic Region')
   metamorphic_grades = SelectField('Metamorphic Grade')
-  longitude = TextField('Longitude', validators = [Required()])
-  latitude = TextField('Latitude', validators = [Required()])
+  longitude = TextField('Longitude', validators=[
+    Required(),
+    NumberRange(min=-180, max=180, message="Please enter a number between -180 and 180")
+  ])
+  latitude = TextField('Latitude', validators=[
+    Required(),
+    NumberRange(min=-90, max=90, message="Please enter a number between -90 and 90")
+  ])
   minerals = SelectMultipleField('Minerals', option_widget=widgets.CheckboxInput(),
-                                  widget=widgets.ListWidget(prefix_label=False))
-  mineral2 = BooleanField('Minerals')
-
-class NewSample(Form):
-  owner = TextField('Owner')#, validators=[Required()])
-  isgn = TextField('ISGN')
-  aliases = TextField('Aliases')
-  date_collected = TextField('Date Collected')
-  rock_type = SelectField('Rock Type')#, validators = [Required()])
-  country = TextField('Country')
-  location_text = TextField('Location')
-  collector = TextField('Collector')
-  region = FieldList(TextField('Region'))
-  metamorphic_grades = SelectField('Metamorphic Grade')
-  longitude = TextField('Longitude')#, validators = [Required()])
-  latitude = TextField('Latitude')#, validators = [Required()])
-  public = RadioField('Public', choices=[('Y','Y'),('N','N')])
-  met_region = TextField('Metamorphic Regions')
+    widget=widgets.ListWidget(prefix_label=False))
   pub_references = TextField('Publication References')
 
 class EditChemForm(Form):
   owner = TextField('Owner', validators=[Required()])
-  public = RadioField('Public', choices=[('Y','Y'), ('N','N')])
-  analyst = TextField('Analyst')
-  analysis_material = TextField('Analyst')
-  total = TextField('Total')
-  StageX = TextField('Stage X')
-  StageY = TextField('Stage Y')
-
-class NewChem(Form):
-  owner = TextField('Owner')
   point_number = TextField('Point Number')
   public = RadioField('Public', choices=[('Y','Y'),('N','N')])
   analysis_method = TextField('Analysis Method')
@@ -85,6 +68,9 @@ class NewChem(Form):
   analysis_location = TextField('Analysis Location')
   description = TextField('Description')
   analysis_material = TextField('Analysis Material')
+  minerals = SelectField('Mineral')
+  oxides = FieldList(TextField('Oxides'))
+  elements = FieldList(TextField('Elements'))
   total = TextField('Total')
   StageX = TextField('Stage X')
   StageY = TextField('Stage Y')

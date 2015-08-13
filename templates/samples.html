@@ -1,7 +1,62 @@
 {% block body %}
 {% if showmap %}
+<div id="collapseThree" class="panel-collapse collapse in">
+  <div id="res-map-canvas" style='width:600px;height:500px;margin:20px'></div>
+</div>
+{% endif %}
+<div class="table-responsive">
+  <table id="samplelist" class="table">
+    <thead>
+      <tr>
+        <th>Sample Number</th>
+        <th>Subsamples</th>
+        <th>Chemical Analyses</th>
+        <th>Images</th>
+        <th>Rock Type</th>
+        <th>Minerals</th>
+        <th>Latitude</th>
+        <th>Longitute</th>
+        <th>Date Collected</th>
+      </tr>
+    </thead>
+    <tbody>
+      <span>Total: {{ total }}</span>
+      <span style="float:right"><a onclick="exportToCsv()">Export data to CSV file</a></span>
+      {% for sample in samples %}
+      <tr>
+        <td id="url" class="sample_label"><a href="{{ url_for('sample', id=sample.id) }}" target="_blank">{% if sample.number %}{{ sample.number }}{% endif %}</td>
+        <td td class="sample_value">{% if sample.subsample_count != None %}{{ sample.subsample_count }}{% endif %}</td>
+        <td td class="sample_value">{% if sample.chem_analyses_count != None %}{{ sample.chem_analyses_count }}{% endif %}</td>
+        <td td class="sample_value">{% if sample.image_count != None %}{{ sample.image_count }}{% endif %}</td>
+        <td td class="sample_value">{% if sample.rock_type %}{{ sample.rock_type.name }}{% endif %}</td>
+        <td td class="sample_mineral sample_value">{{ sample.minerals|truncate(30)}}
+          {% if sample.minerals %}
+          <div class = "full_list">{{ sample.minerals }}</span>
+          {% endif %}
+        </td>
+        <td td class="sample_value">{% if sample.location_coords %}{{ sample.location_coords.0 }}{% endif %}</td>
+        <td td class="sample_value">{% if sample.location_coords %}{{ sample.location_coords.1 }}{% endif %}</td>
+        <td td class="sample_value">{% if sample.collection_date %}{{ sample.collection_date }}{% endif %}</td>
+      </tr>
+      {%endfor%}
+    </tbody>
+  </table>
+</div>
+
+&lt;&lt; <a class="samples-pagination" href="{{ first_page }}">First</a>
+{% if prev_url %}
+  &nbsp;&nbsp;&lt; <a class="samples-pagination" name="prev" value="sure" href="{{ prev_url }}">Prev</a>
+{% endif %}
+&nbsp;&nbsp;|
+{% if next_url %}
+  &nbsp;&nbsp; <a class="samples-pagination" href="{{ next_url }}">Next</a> &gt;
+{% endif %}
+&nbsp;&nbsp; <a class="samples-pagination" name="prev" value="last" href="{{ last_page }}">Last</a> &gt;&gt;
+
+{% if showmap %}
 <script src="https://maps.googleapis.com/maps/api/js"></script>
 <script>
+// SHOW SAMPLES ON MAP
 function initialize() {
   var mapOptions = {
     center: new google.maps.LatLng(0,0),
@@ -10,13 +65,13 @@ function initialize() {
   }
   var map = new google.maps.Map(document.getElementById('res-map-canvas'), mapOptions)
   var markers = [];
-  var samples = JSON.parse('{{ samples|tojson }}');
+  var samples = {{ samples|tojson }};
   var lat;
   var lon;
   for (var i = 0; i < samples.length; i++) {
-    lat = parseFloat(samples[i]['location'][0]);
-    lon = parseFloat(samples[i]['location'][1]);
-    var url = '/sample/'+samples[i]['sample_id'];
+    lat = parseFloat(samples[i]['location_coords'][0]);
+    lon = parseFloat(samples[i]['location_coords'][1]);
+    var url = '/sample/'+samples[i]['id'];
     var marker = new google.maps.Marker( {
       position: new google.maps.LatLng(lat,lon),
       map: map,
@@ -36,87 +91,36 @@ function initialize() {
 }
 google.maps.event.addDomListenerOnce(window, 'mouseover', initialize);
 </script>
-<div id="collapseThree" class="panel-collapse collapse in">
-  <div id="res-map-canvas" style='width:600px;height:500px;margin:20px'></div>
-</div>
 {% endif %}
-<div class = "table-responsive">
-  <table id="samplelist" class="table">
-    <thead>
-      <tr>
-        <th>Sample Number</th>
-        <th>Subsamples</th>
-        <th>Chemical Analyses</th>
-        <th>Images</th>
-        <th>Rock Type</th>
-        <th>Minerals</th>
-        <th>Latitude</th>
-        <th>Longitute</th>
-        <th>Date Collected</th>
-    </thead>
-    <tbody>
-      <span>{% if total %}Total: {{ total }}{% endif %}</span>
-      <span style="float:right"><a onclick="exportToCsv()">Export data to CSV file</a></span>
-      <br>
-      {% for sample in samples %}
-      <tr>
-        <td id="url" class="sample_label"><a href="{{ url_for('sample', id=sample.sample_id) }}" target="_blank">{% if sample.number %}{{ sample.number }}{% endif %}</td>
-        <td td class="sample_value">{% if sample.subsample_count != None %}{{ sample.subsample_count }}{% endif %}</td>
-        <td td class="sample_value">{% if sample.chem_analyses_count != None %}{{ sample.chem_analyses_count }}{% endif %}</td>
-        <td td class="sample_value">{% if sample.image_count != None %}{{ sample.image_count }}{% endif %}</td>
-        <td td class="sample_value">{% if sample.rock_type__rock_type %}{{ sample.rock_type__rock_type }}{% endif %}</td>
-        <td td class="sample_mineral sample_value">
-          {{ sample.mineral_list|truncate(30)}}
-          {% if sample.mineral_list %}
-            <div class = "full_list">{{ sample.mineral_list }}</span>
-          {% endif %}
-        </td>
-        <td td class="sample_value">{% if sample.location %}{{ sample.location.0 }}{% endif %}</td>
-        <td td class="sample_value">{% if sample.location %}{{ sample.location.1 }}{% endif %}</td>
-        <td td class="sample_value">{% if sample.collection_date %}{{ sample.collection_date }}{% endif %}</td>
-      </tr>
-      {%endfor%}
-    </tbody>
-    </thead>
-  </table>
-</div> <!-- table-responsive-->
-&lt;&lt; <a class="samples-pagination" href="{{ first_page }}">First</a>
-{% if prev_url %}
-  &nbsp;&nbsp;&lt; <a class="samples-pagination" name="prev" value="sure" href="{{ prev_url }}">Prev</a>
-{% endif %}
-&nbsp;&nbsp;|
-{% if next_url %}
-  &nbsp;&nbsp; <a class="samples-pagination" href="{{ next_url }}">Next</a> &gt;
-{% endif %}
-&nbsp;&nbsp; <a class="samples-pagination" name="prev" value="last" href="{{ last_page }}">Last</a> &gt;&gt;
 
 <script>
-//Ajax call for first, last, next and previous samples
+// AJAX PAGINATION CALLS
 $('.samples-pagination').click(function (event) 
 { 
- if(document.URL.indexOf("search") !== -1)
- {
-  console.log(document.URL.indexOf("search"));
-   event.preventDefault(); 
-   var url = $(this).attr('href');
+  if(document.URL.indexOf("search") !== -1)
+  {
+    event.preventDefault(); 
+    var url = $(this).attr('href');
     $('#spinner').show();
-        $.ajax({
+    $.ajax({
 	    type: "GET",
-            url: url,
-            success: function (data) {
-                $("#results").html(data);
-                $('#spinner').hide();
-            },
-            error: function(data) {
-                $("#results").html("Error");
-                $('#spinner').hide();
-            }
-        });
-        return false;
-  } //endif
+      url: url,
+      success: function (data) {
+        $("#results").html(data);
+        $('#spinner').hide();
+      },
+      error: function(data) {
+        $("#results").html("Error");
+        $('#spinner').hide();
+      }
+    });
+    return false;
+  }
   else
-   window.location = url;
+    window.location = url;
 });
+
+// EXPORT DATA TO CSV
 function exportToCsv() {
   var filename = prompt("Please enter a filename:","search_results.csv");
   if (filename.substring(filename.length-4) != ".csv")
@@ -145,8 +149,7 @@ function exportToCsv() {
   }
   else {
     var link = document.createElement("a");
-    if (link.download !== undefined) { // feature detection
-      // Browsers that support HTML5 download attribute
+    if (link.download !== undefined) {
       var url = URL.createObjectURL(blob);
       link.setAttribute("href", url);
       link.setAttribute("download", filename);

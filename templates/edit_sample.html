@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-  <h3>Sample {{sample.number}}</h3>
+  <h3>Sample {{id}}</h3>
 {% endblock %}
 
 {% block body %}
@@ -21,7 +21,7 @@
       </tr>
       <tr>
         <td class="sample_label">IGSN</td>
-        <td class="sample_value">{{sample.sesar_number}}</td>
+        <td class="sample_value">{{form.igsn()}}</td>
       </tr>
       <tr>
         <td class="sample_label">Aliases</td>
@@ -65,74 +65,37 @@
         <td class="sample_value">{{ form.region(size=32) }}</td>
         <script type="text/javascript">
          function addTextField()  {
-           //var list = document.getElementById();
-           var list;
-           //document.form.region.append_entry();
-           /*for (unsigned int i = 0; i < form.region.size(); i++)  {
-             var str = i.toString();
-             var x = "region-";
-             var total = x+str;
-             list.appendChild(document.getElementById(total));
-           }*/
            var list = document.getElementById("region");
            var newListElement = document.createElement("li");
            var newInput = document.createElement("input");
-           var label = document.createElement("Label");
-           //var string = "region-" + region_size;
-           label.htmlFor = 'region';
-           //var for_label = "region-" + region_Si;
-           //label.setAttribute("for", "region-"+list.size());
-           label.innerHTML = "Region ";
-           //label.appendChild(newInput);
+           var label = document.createElement("label");
+           var element = document.getElementById("addreg");
+           var i = 0;
+           while (document.getElementById('region-'+i.toString()) != null)
+            i++;
+           label.htmlFor = 'region-'+i.toString();
+           label.innerHTML = "Region  ";
            newInput.type = "text";
-           newInput.id = "region";
+           newInput.id = "region-"+i.toString();
            newInput.name = "region";
-           //newInput.name = "region-"+region_size;
+           newInput.value = element.options[element.selectedIndex].value;
            newListElement.appendChild(label);
            newListElement.appendChild(newInput);
            list.appendChild(newListElement);
          }
-
-        </script>
-
-        <td class="sample_value"><button name = "addmore" type = "button" onClick="addTextField()">Add Entry</a></p></td>
-      </tr>
-      <!--
-      <tr>
-        <td class="sample_label">Region</td>
-        <script type = "text/javascript">
-        $(document).ready(function() {
-          var max_fields      = 10; //maximum input boxes allowed
-          var wrapper         = $(".input_fields_wrap"); //Fields wrapper
-          var add_button      = $(".add_field_button"); //Add button ID
-
-          var x = 1; //initlal text box count
-          $(add_button).click(function(e){ //on add input button click
-              e.preventDefault();
-              //if(x < max_fields){ //max input box allowed
-              x++; //text box increment
-              $(wrapper).append('<div><input type="text" name="mytext[]"/><a href="#" class="remove_field">Remove</a></div>'); //add input box
-              //}
-          });
-
-          $(wrapper).on("click",".remove_field", function(e){ //user click on remove text
-              e.preventDefault(); $(this).parent('div').remove(); x--;
-            })
-          });
         </script>
         <td class="sample_value">
-          <div class="input_fields_wrap">
-            <button class="add_field_button">Add Region</button>
-            {%for r in region_list%}
-              <div><input type="text" name="mytext[]" value = "{{r}}"></div>
-            {%endfor%}
-          </div>
+          <select id="addreg" type = "button" onChange="addTextField()">
+            <option>Add Entry</option>
+            {% for r in regions %}
+              <option name="region" value="{{r.name}}">{{r.name}}</option>
+            {% endfor %}
+          </select>
         </td>
       </tr>
-    -->
       <tr>
         <td class="sample_label">Metamorphic Region</td>
-        <td class="sample_value">{{ metamorphic_regions }}</td>
+        <td class="sample_value">{{ form.metamorphic_regions() }}</td>
       </tr>
       <tr>
         <td class="sample_label">Metamorphic Grade</td>
@@ -146,234 +109,40 @@
         <td class="sample_label">Abstracts</td>
         <td class="sample_value"></td>
       </tr>
-      <!--together with below <tr>
-        <td class="sample_label">Minerals</td>
-        <td class="sample_value">{{form.minerals(size=10)}}</td>-->
-        <!--{%for m in mineral_roots%}
-          <td class="sample_value">{{m}}{{form.mineral2()}}</td>
-        {%endfor%}-->
-      <!--</tr>-->
       <tr>
-        <!--<script type = "text/javascript">
-        /*function remove_minerals(m)  {
-          var options = {};
-          //var inputs = document.getElementById(m);
-          if (m)  {
-            var x = m.value;
-            console.log(m);
-            console.log(typeof m);
-            m.remove();
-          }*/
-          //else {
-          //  console.log("here");
-            /*var checkboxes = document.getElementsByName("mineral");
-            console.log(typeof checkboxes);
-            for (var a = 0; a < checkboxes.length; a++) {
-              if (checkboxes[a].checked == false) {
-                console.log(checkboxes[a]);
-              }
-            }*/
-            /*var checkboxes = document.getElementsByName("mineral");
-            //console.log(checkboxes);
-            for (var a = 0; a < checkboxes.length; a++) {
-              if (checkboxes[a].checked == false) {
-                console.log(checkboxes[a]);
-                //console.log(checkboxes[a].value);
-                var y = checkboxes[a].value;
-                var unchecked = document.getElementById(checkboxes[a].value);
-                console.log(unchecked);
-                unchecked.remove();
-              }
-            }*/
-            /*var checkboxes = document.getElementsByClassName("check");
-            for (var a = 0; a < checkboxes.length; a++) {
-              //console.log(typeof checkboxes[a].id);
-              if (checkboxes[a].checked == false) {
-                console.log(checkboxes[a]);
-                checkboxes[a].remove();
-              }
-            }
-          }*/
-        //}
-        </script>-->
         <td class = "sample_label">Minerals</td>
-        <td class = "sample_value" id = "mins">
-        {%for m in minerals%}
-          <div class = "original" id = {{m}}>
-          <input type="checkbox" onchange = "remove_minerals({{m}})" id = "mineral" name = "mineral" value = "mineral" checked>
-          {{m}}
-        </div>
-        {%endfor%}
-        <div class = "checked_values" id = "checked_minerals">
-      </div>
-        <!--<script type = "text/javascript" src = "static.js.jstree.min.js"></script>-->
-        <div id = "jstree" class = "jstree jstree-1 jstree-default jstree-checkbox-no-clicked" role = "tree">
-        </div>
-        <!--script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script-->
-        <script src="/static/js/jstree.min.js"></script>
-        <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
-        <link rel="stylesheet" href="/static/css/chosen.min.css">
-        <script src="/static/js/chosen.jquery.min.js"></script>
-        <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+        <td class = "sample_value">{{ form.minerals() }}</td>
 
-
-        <link rel="stylesheet" href="/static/css/style.min.css">
-        <script src="/static/js/jstree.min.js"></script>
-        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
-        <script type=text/javascript>
-          $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+        <script type="text/javascript">
+         function addMineralField()  {
+           var list = document.getElementById("minerals");
+           var newListElement = document.createElement("li");
+           var newInput = document.createElement("input");
+           var label = document.createElement("label");
+           var element = document.getElementById("addmin");
+           var i = 0;
+           while (document.getElementById('minerals-'+i.toString()) != null)
+            i++;
+           label.htmlFor = 'minerals-'+i.toString();
+           label.innerHTML = "  "+element.options[element.selectedIndex].value;
+           newInput.type = "checkbox";
+           newInput.id = "minerals-"+i.toString();
+           newInput.name = "minerals";
+           newInput.checked = true;
+           newInput.value = element.options[element.selectedIndex].value;
+           newListElement.appendChild(newInput);
+           newListElement.appendChild(label);
+           list.appendChild(newListElement);
+         }
         </script>
-        <script type = "text/javascript">
-        var counts = {{minerals|tojson}};
-        var countslength = counts.length;
-
-        function remove_minerals(m)  {
-          var options = {};
-          if (m)  {
-            var x = m.id;
-            //console.log(m);
-            //console.log(typeof m);
-            m.remove();
-            /*var index = counts.indexOf(x);
-            console.log(index, x);
-            delete counts[index];*/
-          }
-        }
-        //console.log(counts);
-        //console.log("before");
-        var mineralnodes = {{mineral_nodes|tojson}};
-
-        $(document).ready(function()  {
-          $("#addmore").click(function () {
-            var minCollection = [{"id": mineralnodes[0]["id"], "parent": mineralnodes[0]["parent"], "text": mineralnodes[0]["text"]}];
-            for (var i = 1; i < mineralnodes.length; i++) {
-              var q = counts.indexOf(mineralnodes[i]["id"]);
-              if (q == -1)  {
-                var x = {"id": mineralnodes[i]["id"], "parent": mineralnodes[i]["parent"], "text": mineralnodes[i]["text"]};
-              }
-              else {
-                var z = document.getElementsByClassName("original");
-                var save = 0;
-                for (var e = 0; e < z.length; e++)  {
-                  if (z[e].id == mineralnodes[i]["id"]) {
-                    save = z[e];
-                  }
-                }
-                remove_minerals(save);
-                var x = {"id": mineralnodes[i]["id"], "parent": mineralnodes[i]["parent"], "text": mineralnodes[i]["text"], "state" : { 'opened' : false, 'selected' : true }};
-                //console.log(mineralnodes[i]["id"]);
-              }
-              if (mineralnodes[i]["text"] == "Ilmenite")  {
-                console.log(mineralnodes[i]["parent"]);
-              }
-              //if (minCollection.indexOf(x) != -1) {}
-              minCollection.push(x);
-            }
-            /*$('#jstree').bind('check_node.jstree', function (e, data) { //check all parent nodes
-                //var currentNode = data.rslt.obj.attr("id");
-                    var parentNode =  data.rslt.obj.attr("parent_id")
-                    console.log(parentNode);
-                    $('#demo').jstree('check_node', '#'+parentNode);
-            })
-            .bind('uncheck_node.jstree', function (e, data) {//uncheck all child nodes
-                var allChildNodes = data.inst._get_children(data.rslt.obj);
-                    allChildNodes.each(function(idx, listItem) {
-                        $('#demo').jstree('uncheck_node', '#'+$(listItem).attr("id"));
-                    });
-            })*/
-
-            $('#jstree').jstree({
-
-              'core' : {
-                //'data' : mineralnodes,
-                'data': minCollection,
-                "attr": { "id": "node id", "class":"jstree-checked" },
-              },
-              "ui" : {
-                "select_limit" : 2,
-                "select_multiple_modifier" : "alt",
-                "selected_parent_close" : "select_parent",
-                "initially_select" : [ "phtml_2" ]
-              },
-
-              "checkbox" : {
-                  //"keep_selected_style" : true,
-                   //get_selected: counts,
-                  "three_state": false,
-                  "real_checkboxes": true,
-                    "two_state": true,
-                    "checked_parent_open": true,
-                    "override_ui":true
-                },
-                "plugins" : [ "checkbox", "ui" ]
-
-             //}).bind('check_node.jstree', function (e, data) { //check all parent nodes
-    //var currentNode = data.rslt.obj.attr("id");
-        //var parentNode =  data.rslt.obj.attr("parent_id")
-        //$('#demo').jstree('check_node', '#'+parentNode);
-})
-
-
-          });
-          $('#jstree').on("changed.jstree", function ()
-          {
-            var mids = $('#jstree').jstree('get_selected', true);
-            //console.log(mids.length);
-            //console.log(mids);
-            var newcounts = counts;
-            newcounts.clear;
-            document.getElementById("checked_minerals").innerHTML = "";
-            var curr = document.getElementById("checked_minerals").innerHTML;
-
-            var myArray = [];
-
-            if (mids.length > 0)  {
-              for (var a = 0; a < mids.length; a++) {
-                var found = false;
-                if (myArray.indexOf(mids[a].id) != -1)  {
-                  found = true;
-                }
-                /*myArray.push(mids[a].id);
-                for (var z = 0; z < mids.length; z++) {
-                  if (mids[a].id == mids[z].id && (a!=z) && myArray.indexOf(mids[a].id) != -1) {
-                    found = true;
-                    console.log(mids[a].id);
-                  }
-                }*/
-                if (!found) {
-                  myArray.push(mids[a].id);
-                  document.getElementById("checked_minerals").innerHTML += "<div class = 'check' name = 'checkboxes' id = " + mids[a].id + " ><input type='checkbox' id = 'mineral' name = 'mineral' value = '" + mids[a].id + "' checked> " + mids[a].id + "</div>";
-                }
-                console.log(myArray);
-              }
-            }
-
-            /*if (mids.length > 0)  {
-              for (var a = 0; a < mids.length; a++) {
-                var found = false;
-                for (var b = 0; b < newcounts.length; b++) {
-                  if (newcounts[b] == mids[a].id)  {
-                    found = true;
-                  }
-
-                }
-                document.getElementById("checked_minerals").innerHTML += "<div class = 'check' name = 'checkboxes' id = " + mids[a].id + " ><input type='checkbox' id = 'mineral' name = 'mineral' value = '" + mids[a].id + "' checked> " + mids[a].id + "</div>";
-              }
-
-              //console.log(mids);
-              //console.log(newcounts[8]);
-            }*/
-
-          });
-
-        });
-        //});
-        </script>
-        <!--<td class="sample_value" id = "addmore"><button name = "addminerals" type = "button" onClick="addMinerals()">Add Minerals</a></p></td>-->
-
-        <td class="sample_value" id = "addmore"><button name = "addminerals" type = "button">Add Minerals</a></p></td>
-
-      </td>
+        <td class="sample_value">
+          <select id="addmin" type = "button" onChange="addMineralField()">
+            <option>Add Mineral</option>
+            {% for m in minerals %}
+              <option name="mineral" value="{{m.name}}">{{m.name}}</option>
+            {% endfor %}
+          </select>
+        </td>
       </tr>
       <tr>
         <div class="flyout-parents">

@@ -1,9 +1,9 @@
 {% block body %}
-<div class = "table-responsive">
+<div class="table-responsive">
   <table id="samplelist" class="table">
     <thead>
       <tr>
-        <th>Sample</th>
+        <th>Sample Number</th>
         <th>Analysis Method</th>
         <th>Analysis Material</th>
         <th>Analyst</th>
@@ -11,15 +11,16 @@
         <th>Reference X</th>
         <th>Reference Y</th>
         <th>Total</th>
+      </tr>
     </thead>
     <tbody>
-      <span>{% if total %}Total: {{ total }}{% endif %}</span>
+      <span>Total: {{ total }}</span>
       <span style="float:right"><a onclick="exportToCsv()">Export data to CSV file</a></span>
       {% for analysis in chemical_analyses %}
       <tr>
-        <td td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.chemical_analysis_id) }}" target="_blank" >{% if analysis.sample_number %}{{ analysis.sample_number }}{% endif %}</a></td>
+        <td td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}" target="_blank" >{% if analysis.sample %}{{ analysis.sample.number }}{% endif %}</a></td>
         <td class="sample_value">{% if analysis.analysis_method %}{{ analysis.analysis_method }}{% endif %}</td>
-        <td class="sample_value">{% if analysis.minerals %}{{ analysis.minerals.name }}{% elif analysis.mineral__name %}{{ analysis.mineral__name }}{% endif %}</td>
+        <td class="sample_value">{% if analysis.mineral %}{{ analysis.mineral.name }}{% endif %}</td>
         <td class="sample_value">{% if analysis.analyst %}{{ analysis.analyst }}{% endif %}</td>
         <td class="sample_value">{% if analysis.analysis_date %}{{ analysis.analysis_date }}{% endif %}</td>
         <td class="sample_value">{% if analysis.reference_x != None %}{{ analysis.reference_x }}{% endif %}</td>
@@ -28,46 +29,47 @@
       </tr>
       {%endfor%}
     </tbody>
-    </thead>
   </table>
-</div> <!-- table-responsive -->
-&lt;&lt; <a class="chem-analyses-pagination" href="{{ first_page }}">First</a>
+</div>
+
+&lt;&lt; <a class="samples-pagination" href="{{ first_page }}">First</a>
 {% if prev_url %}
-  &nbsp;&nbsp;&lt; <a class="chem-analyses-pagination" href="{{ prev_url }}">Prev</a>
+  &nbsp;&nbsp;&lt; <a class="samples-pagination" name="prev" value="sure" href="{{ prev_url }}">Prev</a>
 {% endif %}
 &nbsp;&nbsp;|
 {% if next_url %}
-  &nbsp;&nbsp; <a class="chem-analyses-pagination" href="{{ next_url }}">Next</a> &gt;
+  &nbsp;&nbsp; <a class="samples-pagination" href="{{ next_url }}">Next</a> &gt;
 {% endif %}
-&nbsp;&nbsp; <a class="chem-analyses-pagination" href="{{ last_page }}">Last</a> &gt;&gt;
+&nbsp;&nbsp; <a class="samples-pagination" name="prev" value="last" href="{{ last_page }}">Last</a> &gt;&gt;
 
 <script>
-//Ajax call for first, last, next and previous chem analyses
-$('.chem-analyses-pagination').click(function (event) 
-{
- if(document.URL.indexOf("search") !== -1)
- {
-  console.log(document.URL.indexOf("search"));
-   event.preventDefault(); 
-   var url = $(this).attr('href');
+// AJAX PAGINATION CALLS
+$('.samples-pagination').click(function (event) 
+{ 
+  if(document.URL.indexOf("search") !== -1)
+  {
+    event.preventDefault(); 
+    var url = $(this).attr('href');
     $('#spinner').show();
-        $.ajax({
+    $.ajax({
       type: "GET",
-            url: url,
-            success: function (data) {
-                $("#results").html(data);
-                $('#spinner').hide();
-            },
-            error: function(data) {
-                $("#results").html("Error");
-                $('#spinner').hide();
-            }
-        });
-        return false;
-  } //endif
+      url: url,
+      success: function (data) {
+        $("#results").html(data);
+        $('#spinner').hide();
+      },
+      error: function(data) {
+        $("#results").html("Error");
+        $('#spinner').hide();
+      }
+    });
+    return false;
+  }
   else
-   window.location = url;
- });
+    window.location = url;
+});
+
+// EXPORT DATA TO CSV
 function exportToCsv() {
   var filename = prompt("Please enter a filename:","search_results.csv");
   if (filename.substring(filename.length-4) != ".csv")
@@ -96,8 +98,7 @@ function exportToCsv() {
   }
   else {
     var link = document.createElement("a");
-    if (link.download !== undefined) { // feature detection
-      // Browsers that support HTML5 download attribute
+    if (link.download !== undefined) {
       var url = URL.createObjectURL(blob);
       link.setAttribute("href", url);
       link.setAttribute("download", filename);

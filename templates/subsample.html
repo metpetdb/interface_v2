@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
 {% block title %}
-  <h3 id = "subsample_title">Subsample {{subsample.subsample_id}}</h3>
+  <h3>Subsample {{subsample.name}}</h3>
 {% endblock %}
 
 {% block body %}
-<div class = "table-responsive">
+<div class="table-responsive">
   <table id="subsampleview_table" class="table">
     <tbody>
       <tr>
         <td class="subsample_label">Owner</td>
-        <td class="subsample_value">{{user.name}}</td>
+        <td class="subsample_value">{{subsample.sample.owner.name}}</td>
       </tr>
       <tr>
         <td class="subsample_label">Name</td>
@@ -22,16 +22,15 @@
       </tr>
       <tr>
         <td class="subsample_label">Sample</td>
-        <td class="subsample_value"><a href="{{ url_for('sample', id=sample_id) }}" target="_blank">{{ sample_id }}</a></td>
+        <td class="subsample_value"><a href="{{ url_for('sample', id=subsample.sample.id) }}" target="_blank">{{ subsample.sample.number }}</a></td>
       </tr>
     </tbody>
   </table>
-</div> <!-- table-responsive -->
-  <hr>
+</div>
 
-
-  <h4 id="ss_images">Subsample Images</h4>
-  <div class = "table-responsive">
+<hr>
+<h4>Subsample Images</h4>
+<div class="table-responsive">
   <table id="subsampleviewimg_canvas">
     <thead>
       <tr>
@@ -39,16 +38,16 @@
         <th>filename</th>
         <th>Image Type</th>
         <th>Collector</th>
-
       </tr>
     </thead>
     <tbody>
       {%for image in images%}
-      <tr id="thumb_row"><!-- images pointing to the file locations in the server, cant change this to generic as of now-->
-        <td><a href="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_half}}" rel="lightbox"
-          title="Image type: {{ image.image_type }} <br>
-            File name: {{ image.filename }} <br>
-            <a href='http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum}}' target='_blank'>View Original</a>"><img src="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_64x64}}"></a></td>
+      <tr id="thumb_row">
+        <td>
+          <a href="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_half}}" rel="lightbox" title="Image type: {{ image.image_type }} <br> File name: {{ image.filename }} <br> <a href='http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum}}' target='_blank'>View Original</a>">
+            <img src="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_64x64}}">
+          </a>
+        </td>
         <td>{{image.filename}}</td>
         <td>{{image.image_type}}</td>
         <td>{{image.collector}}</td>
@@ -56,11 +55,11 @@
       {%endfor%}
     </tbody>
   </table>
-</div><!-- table-responsive -->
+</div>
 
-  <hr>
-  <h4 id="chemtable">Chemical Analyses</h4>
-  <div class = "table-responsive">
+<hr>
+<h4>Chemical Analyses</h4>
+<div class="table-responsive">
   <table id="chemtable_canvas">
     <thead>
       <tr>
@@ -78,11 +77,11 @@
     </thead>
     <tbody>
       {%for analysis in chemical_analyses%}
-      <tr><!-- URL needs to be changed to named url+ generic view type -->
-        <td><a href="{{ url_for('chemical_analysis', id=analysis.chemical_analysis_id) }}" target="_blank">{{analysis.spot_id}}</td>
+      <tr>
+        <td><a href="{{ url_for('chemical_analysis', id=analysis.id) }}" target="_blank">{{analysis.spot_id}}</td>
         <td>{{analysis.public_data}}</td>
         <td>{{analysis.analysis_method}}</td>
-        <td>{{analysis.minerals.name}}</td>
+        <td>{{analysis.mineral.name}}</td>
         <td>{{analysis.where_done}}</td>
         <td>{{analysis.analyst}}</td>
         <td>{{analysis.analysis_date}}</td>
@@ -93,21 +92,17 @@
       {%endfor%}
     </tbody>
   </table>
-</div> <!-- table-responsive -->
+</div>
 
-<!-- JS for the page elements -->
+<script src="/static/js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
 
-
-  <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
-  <script type="text/javascript">
-
-    $(document).ready(function() {
-        $('#chemtable_canvas').dataTable();
-        $('#subsampleviewimg_canvas').dataTable({
-          'fnDrawCallback': function() {$('#thumb_row td a').lightBox()}
-        });
-    } );
-  </script>
+<script>
+$(document).ready(function() {
+  $('#chemtable_canvas').dataTable();
+  $('#thumb_row td a').lightbox();
+});
+</script>
 
 {% endblock %}
 

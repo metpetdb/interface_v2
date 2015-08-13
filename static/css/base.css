@@ -558,7 +558,7 @@ hr
 /*------------------ CSS for chemicalanalysisView ------------------*/
 
 #chemicalanalysisview_table{
-background-color: rgb(235, 235, 235);
+    background-color: rgb(235, 235, 235);
     width: 550px;
     margin-bottom: 50px;
     float: left;
@@ -566,9 +566,10 @@ background-color: rgb(235, 235, 235);
 
 #chem_elements
 {
-    width: 400px;
-    float: right;
-
+    background-color: rgb(235, 235, 235);
+    width: 35%;
+    margin-bottom: 50px;
+    float: left;
 }
 
 #chem_elements h5
@@ -626,8 +627,7 @@ background-color: rgb(235, 235, 235);
 
  #chem_elements
  {
-  float: none;
-  margin: 0 auto;
+  text-align: center;
  }
 
  #map_canvas
