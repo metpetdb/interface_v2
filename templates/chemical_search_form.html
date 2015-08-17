@@ -138,6 +138,7 @@ $(function()
   $('#content').submit(function () {
     $('#collapseOne').collapse('toggle');
     $('#collapseTwo').collapse('toggle');
+    $('#spinner').show();
     var url = "resource=";
     if (document.getElementsByName("resource")[0].checked)
       url += "sample";
@@ -155,7 +156,6 @@ $(function()
     for(var a = 0; a < elements.length; a++)
       if(elements[a].selected && elements[a].value !== "")
         url += "&elements="+elements[a].value;
-    $('#spinner').show();
     $.ajax({
       type: $('#content').attr('method'),
       url: $('#content').attr('action'),

@@ -14,7 +14,6 @@
 
     <div id="collapseOne" class="panel-collapse collapse in">
       <div class="panel-body">
-        <!-- Search Option Tabs -->
         <ul class="nav nav-tabs" id="myTab">
           <li class="active"><a href="#rocktypes">Rock Types</a></li>
           <li><a href="#metgrade">Metamorphic Grade</a></li>
@@ -32,7 +31,6 @@
                 {% for rock_type in rock_types %}
                 <input type="checkbox" class="rocktype" onchange="updateRockTypes()" name="rock_types" value="{{rock_type.name}}">{{ rock_type.name }}
                 {% endfor %}
-                <br><br>
               </div>
             </ul>
           </div>
@@ -41,9 +39,9 @@
           <div class="tab-pane" id="metgrade">
             <ul>
               <h3>Metamorphic Grade</h3>
-              <div id = "metgrade-checkboxes">
-                {% for grade in metamorphic_grades %}
-                <input type="checkbox" class="metgrade" onchange="updateMetGrades()" name="metamorphic_grade" value="{{ grade }}">{{ grade }}
+              <div id="metgrade-checkboxes">
+                {% for mmg in metamorphic_grades %}
+                <input type="checkbox" class="metgrade" onchange="updateMetGrades()" name="metamorphic_grade" value="{{ mmg.name }}">{{ mmg.name }}
                 {% endfor %}
               </div>
             </ul>
@@ -53,15 +51,12 @@
           <div class="tab-pane" id="location">
             <ul>
               <h3>Location</h3>
-
-              <!-- Location Tabs -->
               <ul id="myTab" class="nav nav-tabs">
                 <li class="active"><a href="#mapselect" data-toggle="tab">Map</a></li>
                 <li><a  href="#location-regions" data-toggle="tab">Region</a></li>
               </ul>
 
               <div class="tab-content">
-
                 <!-- MAP SELECT -->
                 <div class="tab-pane active" id="mapselect"><br><br>
                   <div id="map-canvas"></div>
@@ -97,8 +92,8 @@
 
                   <label for="metamophic_regions">Metamorphic Regions: </label><br>
                   <select onchange="updateBounds()" multiple class="chosen-select" id = "selected-metregions" name="metamorphic_regions">
-                    {% for region in metamorphic_regions %}
-                    <option value="{{ region }}">{{ region }}</option>
+                    {% for mmr in metamorphic_regions %}
+                    <option value="{{ mmr.name }}">{{ mmr.name }}</option>
                     {% endfor %}
                   </select>
                 </div>
@@ -141,21 +136,21 @@
               </select><br>
 
               <label class="provenance-label" for="collector">Collector: </label>
-              <select id="selected-collectors" onchange="updateProvenance()" multiple name="collector" class="chosen-select">
-                {% for col in provenances %}
-                <option value="{{ col }}">{{ col }}</option>
+              <select id="selected-collectors" onchange="updateProvenance()" multiple name="collectors" class="chosen-select">
+                {% for c in collectors %}
+                <option value="{{ c.name }}">{{ c.name }}</option>
                 {% endfor %}
               </select><br>
 
               <label class="provenance-label" for="references">Reference: </label>
               <select id="selected-references" onchange="updateProvenance()" multiple class="chosen-select" name="references">
-                {% for ref in references %}
-                <option value="{{ ref.name }}">{{ ref.name }}</option>
+                {% for r in references %}
+                <option value="{{ r.name }}">{{ r.name }}</option>
                 {% endfor %}
               </select><br>
 
               <label class="provenance-label" for="number">Number: </label>
-              <select id="selected-number" onchange="updateProvenance()" name="number" class="chosen-select">
+              <select id="selected-number" onchange="updateProvenance()" name="numbers" class="chosen-select">
                 <option value="" disabled selected>Select sample number</option>
                 {% for n in numbers %}
                 <option value="{{ n }}">{{ n }}</option>
@@ -179,8 +174,8 @@
               <label class="provenance-label" for="access">Access: </label><br>
               <div style="padding-left: 30px;" id = "access-buttons">
                 <input type="radio" onchange="updateProvenance()" name="public_data" value="">No Preference<br>
-                <input type="radio" onchange="updateProvenance()" name="public_data" value="true">Public Access<br>
-                <input type="radio" onchange="updateProvenance()" name="public_data" value="false">Private Access<br>
+                <input type="radio" onchange="updateProvenance()" name="public_data" value="True">Public Access<br>
+                <input type="radio" onchange="updateProvenance()" name="public_data" value="False">Private Access<br>
               </div>
             </ul>
           </div>
@@ -450,8 +445,8 @@ $(function()
 
   // AJAX CALL TO UPDATE SAMPLE DATA
   $('#content').submit(function () {
-    $('#collapseOne').collapse();
-    $('#collapseTwo').collapse();
+    $('#collapseOne').collapse('toggle');
+    $('#collapseTwo').collapse('toggle');
     $('#spinner').show();
     $.ajax({
       type: $('#content').attr('method'),
@@ -762,14 +757,14 @@ function updateProvenance()
     searchOptions.innerHTML += "<b>End Date:</b> " + $('#date-end').val() + "<br>"; 
 
   var access = $('input[name=public_data]');
-  var accessVal = access.filter(':checked'); 
+  var accessVal = access.filter(':checked');
   if(accessVal)
   {
     if(accessVal.val() == "")
       searchOptions.innerHTML += "<b>Access:</b> " +  "No Preference<br>";
-    if(accessVal.val() == "Y")
+    if(accessVal.val() == "True")
       searchOptions.innerHTML += "<b>Access:</b> " + "Public<br>";
-    if(accessVal.val() == "N")
+    if(accessVal.val() == "False")
       searchOptions.innerHTML += "<b>Access:</b> " + "Private<br>"; 
   }
 }

@@ -10,7 +10,7 @@
     <tbody>
       <tr>
         <td class="sample_label">Sample</td>
-        <td class="sample_value"><a href="{{ url_for('sample', id=analysis.subsample.sample) }}" target="_blank">{% if analysis.sample.number %}{{ analysis.sample.number }}{% endif %}</a></td>
+        <td class="sample_value"><a href="{{ url_for('sample', id=analysis.subsample.sample) }}" target="_blank">{% if analysis.sample %}{{ analysis.sample.number }}{% endif %}</a></td>
       </tr>          
       <tr>
         <td class="sample_label">Subsample</td>

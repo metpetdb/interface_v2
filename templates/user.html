@@ -1,55 +1,55 @@
 {% extends "base.html" %}
 
-<body>
-  {% block title %}
-    <h3>{{user.name}}</h3>
-  {% endblock %}
+{% block title %}
+  <h3>{{user.name}}</h3>
+{% endblock %}
 
-  {% block body %}
-
-
+{% block body %}
+<div class="table-responsive">
   <table id="user_details_table" class="table">
     <tbody>
       <tr>
         <td>Email Address</td>
-        <td>{{user.email}}</td>
+        <td>{% if user.email %}{{user.email}}{% endif %}</td>
       </tr>
       <tr>
         <td>Name</td>
-        <td>{{user.name}}</td>
+        <td>{% if user.name %}{{user.name}}{% endif %}</td>
       </tr>
       <tr>
         <td>Street Address</td>
-        <td>{{user.address}}</td>
+        <td>{% if user.address %}{{user.address}}{% endif %}</td>
       </tr>
       <tr>
         <td>City</td>
-        <td>{{user.city}}</td>
+        <td>{% if user.city %}{{user.city}}{% endif %}</td>
       </tr>
       <tr>
         <td>State/Province</td>
-        <td>{{user.province}}</td>
+        <td>{% if user.province %}{{user.province}}{% endif %}</td>
       </tr>
       <tr>
         <td>Country</td>
-        <td>{{user.country}}</td>
+        <td>{% if user.country %}{{user.country}}{% endif %}</td>
       </tr>
       <tr>
         <td>Postal Code</td>
-        <td>{{user.postal_code}}</td>
+        <td>{% if user.postal_code %}{{user.postal_code}}{% endif %}</td>
       </tr>
       <tr>
         <td>Institution</td>
-        <td>{{user.institution}}</td>
+        <td>{% if user.institution %}{{user.institution}}{% endif %}</td>
       </tr>
       <tr>
         <td>Professional URL</td>
-        <td>{{user.professional_url}}</td>
+        <td>{% if user.professional_url %}{{user.professional_url}}{% endif %}</td>
+      </tr>
+      <tr>
+        <td>Research Interests</td>
+        <td>{% if user.research_interests %}{{user.research_interests}}{% endif %}</td>
       </tr>
     </tbody>
   </table>
-  {{subsample}}
-  <hr>
-
+</div>
+<hr>
 {% endblock %}
-

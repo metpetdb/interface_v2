@@ -1,9 +1,10 @@
 import dotenv
-import drest
+import json
+from ast import literal_eval
 from getenv import env
-import ast, urllib2, json
 from requests import get, post
 from urllib import urlencode
+from urllib2 import urlopen
 from flask import (
     Flask,
     request,
@@ -39,6 +40,7 @@ def index():
 def search():
     email = session.get('email', None)
     api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
 
     filters = {}
     for key in dict(request.args):
@@ -52,36 +54,33 @@ def search():
 
     if request.args.get('resource') == 'chemicalanalysis':
         #get chemical analyses given sample filters
+        if 'minerals_and' in filters:
+            del filters['minerals_and']
         url = url_for('chemical_analyses')+'?'+urlencode(filters)+'&sample_filters=True'
         return redirect(url)
 
-    rock_types = json.loads(urllib2.urlopen('http://104.236.74.79/rock_types/?fields=name&page_size=40&format=json').read())['results']
-    regions = json.loads(urllib2.urlopen('http://104.236.74.79/regions/?fields=name&page_size=2000&format=json').read())['results']
-    minerals = json.loads(urllib2.urlopen('http://104.236.74.79/minerals/?fields=name&page_size=200&format=json').read())['results']
-    references = json.loads(urllib2.urlopen('http://104.236.74.79/references/?fields=name&page_size=1100&format=json').read())['results']
+    rock_types = json.loads(urlopen(env('API_DRF_HOST')+'/rock_types/?fields=name&page_size=40&format=json').read())['results']
+    regions = json.loads(urlopen(env('API_DRF_HOST')+'/regions/?fields=name&page_size=2000&format=json').read())['results']
+    minerals = json.loads(urlopen(env('API_DRF_HOST')+'/minerals/?fields=name&page_size=200&format=json').read())['results']
+    references = json.loads(urlopen(env('API_DRF_HOST')+'/references/?fields=name&page_size=1100&format=json').read())['results']
+    metamorphic_regions = json.loads(urlopen(env('API_DRF_HOST')+'/metamorphic_regions/?fields=name&page_size=240&format=json').read())['results']
+    metamorphic_grades = json.loads(urlopen(env('API_DRF_HOST')+'/metamorphic_grades/?fields=name&page_size=30&format=json').read())['results']
+    collectors = json.loads(urlopen(env('API_DRF_HOST')+'/collectors/?fields=name&page_size=140&format=json').read())['results']
 
-    metamorphic_regions = set()
-    metamorphic_grades = set()
-    collectors = set()
     countries = set()
     igsns = set()
     numbers = set()
     owners = set()
-    fields = 'metamorphic_regions,metamorphic_grades,collector_name,country,sesar_number,number,public_data,owner'
-    api_samples = json.loads(urllib2.urlopen('http://104.236.74.79/samples/?fields='+fields+'&page_size=2000&format=json').read())
+    fields = 'country,sesar_number,number,public_data,owner'
+    api_samples = json.loads(urlopen(env('API_DRF_HOST')+'/samples/?fields='+fields+'&page_size=2000&format=json').read())
     #while api_samples['next']:
     for sample in api_samples['results']:
-        for mmr in sample['metamorphic_regions']:
-            metamorphic_regions.add(mmr['name'])
-        for mmg in sample['metamorphic_grades']:
-            metamorphic_grades.add(mmg['name'])
-        collectors.add(sample['collector_name'])
         countries.add(sample['country'])
         igsns.add(sample['sesar_number'])
         numbers.add(sample['number'])
         if sample['public_data']:
             owners.add(sample['owner']['name'])
-    #    api_samples = json.loads(urllib2.urlopen(api_samples['next']).read())
+    #    api_samples = json.loads(urlopen(api_samples['next']).read())
 
     #if email:
     #    logged_in_user = api.user.get(params={'email': email, 'fields': 'user_id,name'}).data['results']
@@ -95,7 +94,7 @@ def search():
         minerals=minerals,
         numbers=numbers,
         owners=owners,
-        provenances=collectors,
+        collectors=collectors,
         references=references,
         regions=regions,
         rock_types=rock_types
@@ -106,6 +105,7 @@ def search():
 def search_chemistry():
     email = session.get('email', None)
     api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
 
     filters = {}
     for key in dict(request.args):
@@ -120,33 +120,23 @@ def search_chemistry():
         filters['fields'] = 'subsample'
         chem_results = []
         if 'all_results' in filters:
-            chemicals = json.loads(urllib2.urlopen('http://104.236.74.79/chemical_analyses/?'+urlencode(filters)+'&page_size=2000&format=json').read())
+            chemicals = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?'+urlencode(filters)+'&page_size=2000&format=json').read())
             chem_results = chemicals['results']
             while chemicals['next']:
-                chemicals = json.loads(urllib2.urlopen(chemicals['next']).read())
+                chemicals = json.loads(urlopen(chemicals['next']).read())
                 chem_results += chemicals['results']
         else:
-            chem_results = json.loads(urllib2.urlopen('http://104.236.74.79/chemical_analyses/?'+urlencode(filters)+'&format=json').read())['results']
+            chem_results = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?'+urlencode(filters)+'&format=json').read())['results']
         
-        sample_ids = set()
+        numbers = set()
         for c in chem_results:
-            sample_ids.add(c['subsample']['sample'])
-        url = url_for('samples')+'?'+urlencode({'id': sample_ids})+'&format=json'
+            numbers.add(c['subsample']['sample'])#need number not id
+        url = url_for('samples')+'?'+urlencode({'numbers': numbers})
         return redirect(url)
 
-    minerals = json.loads(urllib2.urlopen('http://104.236.74.79/minerals/?fields=name&page_size=200&format=json').read())['results']
-    oxides = []#json.loads(urllib2.urlopen('http://104.236.74.79/oxides/?fields=species&page_size=50&format=json').read())['results']
-    elements = []#json.loads(urllib2.urlopen('http://104.236.74.79/elements/?fields=name,symbol&page_size=50&format=json').read())['results']
-    chemicals = json.loads(urllib2.urlopen('http://104.236.74.79/chemical_analyses/?fields=elements,oxides&page_size=1000&format=json').read())
-    #while chemicals['next']:
-    for c in chemicals['results']:
-        for o in c['oxides']:
-            if {'species': o['species']} not in oxides:
-                oxides.append({'species': o['species']})
-        for e in c['elements']:
-            if {'name': e['name'], 'symbol': e['symbol']} not in elements:
-                elements.append({'name': e['name'], 'symbol': e['symbol']})
-    #    chemicals = json.loads(urllib2.urlopen(chemicals['next']).read())
+    minerals = json.loads(urlopen(env('API_DRF_HOST')+'/minerals/?fields=name&page_size=200&format=json').read())['results']
+    oxides = json.loads(urlopen(env('API_DRF_HOST')+'/oxides/?fields=species&page_size=100&format=json').read())['results']
+    elements = json.loads(urlopen(env('API_DRF_HOST')+'/elements/?fields=name,symbol&page_size=120&format=json').read())['results']
 
     return render_template('chemical_search_form.html',
         elements=elements,
@@ -158,20 +148,21 @@ def search_chemistry():
 def samples():
     email = session.get('email', None)
     api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
 
     next = previous = last = total_count = None
-    filters = ast.literal_eval(json.dumps(request.args))
+    filters = literal_eval(json.dumps(request.args))
 
     sample_results = []
     if 'all_results' in filters:
-        samples = json.loads(urllib2.urlopen('http://104.236.74.79/samples/?'+urlencode(filters)+'&page_size=2000&format=json').read())
+        samples = json.loads(urlopen(env('API_DRF_HOST')+'/samples/?'+urlencode(filters)+'&page_size=2000&format=json').read())
         sample_results = samples['results']
         while samples['next']:
-            samples = json.loads(urllib2.urlopen(samples['next']).read())
-            samlpe_results += samples['results']
+            samples = json.loads(urlopen(samples['next']).read())
+            sample_results += samples['results']
         next, previous, last, total_count = None, None, url_for('samples')+'?'+urlencode(filters), samples['count']
     else:
-        samples = json.loads(urllib2.urlopen('http://104.236.74.79/samples/?'+urlencode(filters)+'&format=json').read())
+        samples = json.loads(urlopen(env('API_DRF_HOST')+'/samples/?'+urlencode(filters)+'&format=json').read())
         sample_results = samples['results']
         next, previous, last, total_count = paginate_model('samples', samples, filters)
 
@@ -196,8 +187,9 @@ def samples():
 def sample(id):
     email = session.get('email', None)
     api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
 
-    sample = json.loads(urllib2.urlopen('http://104.236.74.79/samples/'+id+'?format=json').read())
+    sample = json.loads(urlopen(env('API_DRF_HOST')+'/samples/'+id+'?format=json').read())
     if not sample:
         return HttpResponse("Sample does not exist")
 
@@ -212,7 +204,7 @@ def sample(id):
     if sample['collection_date']:
         sample['collection_date'] = sample['collection_date'][:-10]
 
-    subsamples = json.loads(urllib2.urlopen('http://104.236.74.79/subsamples/?'+urlencode({"sample_id": sample['id']})+'&format=json').read())['results']
+    subsamples = json.loads(urlopen(env('API_DRF_HOST')+'/subsamples/?'+urlencode({"samples": sample['id']})+'&format=json').read())['results']
 
     return render_template('sample.html',
         sample=sample,
@@ -223,13 +215,14 @@ def sample(id):
 def subsample(id):
     email = session.get('email', None)
     api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
 
-    subsample = json.loads(urllib2.urlopen('http://104.236.74.79/subsamples/'+id+'?format=json').read())
+    subsample = json.loads(urlopen(env('API_DRF_HOST')+'/subsamples/'+id+'?format=json').read())
     if not subsample:
         return HttpResponse("Subsample does not exist")
 
-    subsample['sample']['number'] = json.loads(urllib2.urlopen('http://104.236.74.79/samples/'+subsample['sample']['id']+'?fields=number&format=json').read())['number']
-    chemical_analyses = json.loads(urllib2.urlopen('http://104.236.74.79/chemical_analyses/?'+urlencode({"subsample_id": subsample['id']})+'&format=json').read())['results']
+    subsample['sample']['number'] = json.loads(urlopen(env('API_DRF_HOST')+'/samples/'+subsample['sample']['id']+'?fields=number&format=json').read())['number']
+    chemical_analyses = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?'+urlencode({"subsample_id": subsample['id']})+'&format=json').read())['results']
 
     return render_template('subsample.html',
         subsample=subsample,
@@ -242,25 +235,28 @@ def edit_sample(id):
     form = EditForm()
     email = session.get('email', None)
     api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
 
-    sample = api.samples.get(id).data
-    regions = [region['name'] for region in sample['regions']]
-    minerals = [mineral['name'] for mineral in sample['minerals']]
+    sample = json.loads(urlopen(env('API_DRF_HOST')+'/samples/'+id+'?format=json').read())
 
-    rock_types = api.rock_types.get(params={'order_by': 'rock_type'}).data['results']
-    metamorphic_grades = api.metamorphic_grades.get(params={'order_by': 'name'}).data['results']
-    metamorphic_regions = api.metamorphic_regions.get(params={'order_by': 'name'}).data['results']
-    api_minerals = api.minerals.get(params={'order_by':'name'}).data['results']
-    api_reg = api.regions.get(params={'order_by': 'name'}).data
-    api_regions = []
-    while api_reg['next']:
-        api_reg = api.regions.get(params={'order_by': 'name'}).data['next']
-        api_regions += api_reg.data['results']
+    rock_types = json.loads(urlopen(env('API_DRF_HOST')+'/rock_types/?fields=name&page_size=40&format=json').read())['results']
+    api_regions = json.loads(urlopen(env('API_DRF_HOST')+'/regions/?fields=name&page_size=2000&format=json').read())['results']
+    api_minerals = json.loads(urlopen(env('API_DRF_HOST')+'/minerals/?fields=name&page_size=200&format=json').read())['results']
 
-    location = sample['location'].split(" ")
-    loc = [location[1].replace("(",""), location[2].replace(")","")]
+    metamorphic_regions = set()
+    metamorphic_grades = set()
+    api_samples = json.loads(urlopen(env('API_DRF_HOST')+'/samples/?fields=metamorphic_regions,metamorphic_grades&page_size=2000&format=json').read())
+    #while api_samples['next']:
+    for sample in api_samples['results']:
+        for mmr in sample['metamorphic_regions']:
+            metamorphic_regions.add(mmr['name'])
+        for mmg in sample['metamorphic_grades']:
+            metamorphic_grades.add(mmg['name'])
+    #    api_samples = json.loads(urlopen(api_samples['next']).read())
 
-    form.owner.data = sample['user']['name']
+    location = sample['location_coords'].split(" ")
+
+    form.owner.data = sample['owner']['name']
     form.public.data = sample['public_data']
     form.location_text.data = sample['location_text']
     form.collector.data = sample['collector']
@@ -268,15 +264,15 @@ def edit_sample(id):
     form.rock_type.choices = [(r['rock_type'],r['rock_type']) for r in rock_types]
     form.country.data = sample['country']
     form.date_collected.data = sample['collection_date']
-    form.longitude.data = loc[0]
-    form.latitude.data = loc[1]
-    form.minerals.data = minerals
+    form.longitude.data = location[1].replace("(","")
+    form.latitude.data = location[2].replace(")","")
+    form.minerals.data = [mineral['name'] for mineral in sample['minerals']]
     form.minerals.choices = [(m, m) for m in minerals]
     form.metamorphic_grades.choices = [(m['name'],m['name']) for m in metamorphic_grades]
     form.metamorphic_regions.choices = [(m['name'],m['name']) for m in metamorphic_regions]
     for r in range(len(form.region.entries)):
         form.region.pop_entry()
-    for r in regions:
+    for r in [region['name'] for region in sample['regions']]:
         form.region.append_entry(r)
     if sample['metamorphic_grades']:
         form.metamorphic_grades.data = sample['metamorphic_grades'][0]['name']
@@ -308,7 +304,7 @@ def edit_sample(id):
             if r['name'] in region_select:
                 regs.append(r)
 
-        new_sample = api.sample.get(id)
+        new_sample = json.loads(urlopen(env('API_DRF_HOST')+'/samples/'+id+'?format=json').read())
         new_sample.data['rock_type'] = rock
         new_sample.data['metamorphic_grades'] = met_grades
         new_sample.data['minerals'] = mins
@@ -341,16 +337,22 @@ def new_sample():
     form = EditForm();
     email = session.get('email', None)
     api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
 
-    rock_types = api.rock_type.get(params={'order_by': 'rock_type'}).data['results']
-    metamorphic_grades = api.metamorphic_grade.get(params={'order_by': 'name'}).data['results']
-    metamorphic_regions = api.metamorphic_region.get(params={'order_by': 'name'}).data['results']
-    api_minerals = api.minerals.get(params={'order_by':'name'}).data['results']
-    api_reg = api.regions.get(params={'order_by': 'name'}).data
-    api_regions = []
-    while api_reg['next']:
-        api_reg = api.regions.get(params={'order_by': 'name'}).data['next']
-        api_regions += api_reg.data['results']
+    rock_types = json.loads(urlopen(env('API_DRF_HOST')+'/rock_types/?fields=name&page_size=40&format=json').read())['results']
+    api_regions = json.loads(urlopen(env('API_DRF_HOST')+'/regions/?fields=name&page_size=2000&format=json').read())['results']
+    api_minerals = json.loads(urlopen(env('API_DRF_HOST')+'/minerals/?fields=name&page_size=200&format=json').read())['results']
+
+    metamorphic_regions = set()
+    metamorphic_grades = set()
+    api_samples = json.loads(urlopen(env('API_DRF_HOST')+'/samples/?fields=metamorphic_regions,metamorphic_grades&page_size=2000&format=json').read())
+    #while api_samples['next']:
+    for sample in api_samples['results']:
+        for mmr in sample['metamorphic_regions']:
+            metamorphic_regions.add(mmr['name'])
+        for mmg in sample['metamorphic_grades']:
+            metamorphic_grades.add(mmg['name'])
+    #    api_samples = json.loads(urlopen(api_samples['next']).read())
 
     form.rock_type.choices = [(r['rock_type'],r['rock_type']) for r in rock_types]
     form.metamorphic_grades.choices = [(m['name'],m['name']) for m in metamorphic_grades]
@@ -411,26 +413,27 @@ def new_sample():
 def chemical_analyses():
     email = session.get('email', None)
     api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
 
     next = previous = last = total_count = None
-    filters = ast.literal_eval(json.dumps(request.args))
+    filters = literal_eval(json.dumps(request.args))
     filters['fields'] = 'subsample,id,analysis_method,mineral,analyst,analysis_date,reference_x,reference_y,total'
 
     chem_results = []
     if 'all_results' in filters:
-        chemicals = json.loads(urllib2.urlopen('http://104.236.74.79/chemical_analyses/?'+urlencode(filters)+'&page_size=2000&format=json').read())
+        chemicals = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?'+urlencode(filters)+'&page_size=2000&format=json').read())
         chem_results = chemicals['results']
         while chemicals['next']:
-            chemicals = json.loads(urllib2.urlopen(chemicals['next']).read())
+            chemicals = json.loads(urlopen(chemicals['next']).read())
             chem_results += chemicals['results']
-        next, previous, last, total_count = None, None, url_for('chemical_analyses') + '?' + urlencode(filters), chemicals['count']
+        next, previous, last, total_count = None, None, url_for('chemical_analyses')+'?'+urlencode(filters), chemicals['count']
     else:
-        chemicals = json.loads(urllib2.urlopen('http://104.236.74.79/chemical_analyses/?'+urlencode(filters)+'&format=json').read())
+        chemicals = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?'+urlencode(filters)+'&format=json').read())
         chem_results = chemicals['results']
         next, previous, last, total_count = paginate_model('chemical_analyses', chemicals, filters)
 
     for c in chem_results:
-        c['sample'] = json.loads(urllib2.urlopen('http://104.236.74.79/samples/'+c['subsample']['sample']+'?fields=number&format=json').read())
+        c['sample'] = json.loads(urlopen(env('API_DRF_HOST')+'/samples/'+c['subsample']['sample']+'?fields=number&format=json').read())
         if c['analysis_date']:
             c['analysis_date'] = c['analysis_date'][:-10]
 
@@ -439,7 +442,7 @@ def chemical_analyses():
         next_url=next,
         prev_url=previous,
         total=total_count,
-        first_page=url_for('chemical_analyses') + '?' + urlencode(filters),
+        first_page=url_for('chemical_analyses')+'?'+urlencode(filters),
         last_page=last
     )
 
@@ -448,11 +451,12 @@ def chemical_analyses():
 def chemical_analysis(id):
     email = session.get('email', None)
     api_key = session.get('api_key', None)
+    api = MetpetAPI(email, api_key).api
     
-    analysis = json.loads(urllib2.urlopen('http://104.236.74.79/chemical_analyses/'+id+'?format=json').read())
+    analysis = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/'+id+'?format=json').read())
     if not analysis:
         return HttpResponse("Chemical analysis does not exist")
-    analysis['sample'] = json.loads(urllib2.urlopen('http://104.236.74.79/samples/'+analysis['subsample']['sample']+'?fields=number&format=json').read())
+    analysis['sample'] = json.loads(urlopen(env('API_DRF_HOST')+'/samples/'+analysis['subsample']['sample']+'?fields=number&format=json').read())
 
     return render_template('chemical_analysis.html',
         analysis=analysis
@@ -464,24 +468,34 @@ def edit_chemical(id):
     form = EditChemForm()
     email = session.get('email', None)
     api_key = session.get('api_key', None)
-    api = MetpetAPI(email,api_key).api
+    api = MetpetAPI(email, api_key).api
     api.auth(user=email,api_key=api_key)
 
-    chemical = api.chemical_analysis.get(id).data
+    chemical = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/'+id+'?format=json').read())
 
-    api_elements = api.elements.get(params={'order_by': 'name'}).data['results']
-    api_oxides = api.oxides.get(params={'order_by': 'species'}).data['results']
-    api_minerals = api.minerals.get(params={'order_by':'name'}).data['results']
+    api_minerals = json.loads(urlopen(env('API_DRF_HOST')+'/minerals/?fields=name&page_size=200&format=json').read())['results']
+    api_oxides = []#json.loads(urlopen(env('API_DRF_HOST')+'/oxides/?fields=species&page_size=50&format=json').read())['results']
+    api_elements = []#json.loads(urlopen(env('API_DRF_HOST')+'/elements/?fields=name,symbol&page_size=50&format=json').read())['results']
+    chemicals = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?fields=elements,oxides&page_size=1000&format=json').read())
+    #while chemicals['next']:
+    for c in chemicals['results']:
+        for o in c['oxides']:
+            if {'species': o['species']} not in api_oxides:
+                api_oxides.append({'species': o['species']})
+        for e in c['elements']:
+            if {'name': e['name'], 'symbol': e['symbol']} not in api_elements:
+                api_elements.append({'name': e['name'], 'symbol': e['symbol']})
+    #    chemicals = json.loads(urlopen(chemicals['next']).read())
 
     elements = [e['name'] for e in api_elements if e['resource_uri'] in chemical['elements']]
     oxides = [o['species'] for o in api_oxides if o['resource_uri'] in chemical['oxides']]
 
     params = {'email': email, 'api_key': api_key}
-    pre = env('API_HOST_DRF')
+    pre = env('API_DRF_HOST')
     suf = '?format=json'
     user = get(pre+chemical['user']+suf, params=params).json()
-    subsample = get(pre+chemical['subsample']+suf, params=params).json()
-    sample = get(pre+subsample['sample']+suf, params=params).json()
+    subsample = json.loads(urlopen(env('API_DRF_HOST')+'/subsamples/'+chemical['subsample']['id']+'?format=json').read())
+    sample = json.loads(urlopen(env('API_DRF_HOST')+'/samples/'+chemical['subsample']['sample']+'?format=json').read())
 
     form.owner.data = user['name']
     form.point_number.data = chemical['spot_id']
@@ -502,7 +516,7 @@ def edit_chemical(id):
         form.elements[i].label = elements[i]
 
     if form.validate_on_submit():
-        new_sample = api.chemical_analysis.get(id)
+        new_sample = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/'+id+'?format=json').read())
 
         elements = [e for e in api_elements if e['name'] in form.elements.data]
         oxides = [o for o in api_oxides if o['species'] in form.oxides.data]
@@ -548,12 +562,22 @@ def new_chemical():
     form = EditChemForm()
     email = session.get('email', None)
     api_key = session.get('api_key', None)
-    api = MetpetAPI(email,api_key).api
+    api = MetpetAPI(email, api_key).api
     api.auth(user=email,api_key=api_key)
 
-    api_elements = api.elements.get(params={'order_by': 'name'}).data['results']
-    api_oxides = api.oxides.get(params={'order_by': 'species'}).data['results']
-    api_minerals = api.minerals.get(params={'order_by':'name'}).data['results']
+    api_minerals = json.loads(urlopen(env('API_DRF_HOST')+'/minerals/?fields=name&page_size=200&format=json').read())['results']
+    api_oxides = []#json.loads(urlopen(env('API_DRF_HOST')+'/oxides/?fields=species&page_size=50&format=json').read())['results']
+    api_elements = []#json.loads(urlopen(env('API_DRF_HOST')+'/elements/?fields=name,symbol&page_size=50&format=json').read())['results']
+    chemicals = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?fields=elements,oxides&page_size=1000&format=json').read())
+    #while chemicals['next']:
+    for c in chemicals['results']:
+        for o in c['oxides']:
+            if {'species': o['species']} not in api_oxides:
+                api_oxides.append({'species': o['species']})
+        for e in c['elements']:
+            if {'name': e['name'], 'symbol': e['symbol']} not in api_elements:
+                api_elements.append({'name': e['name'], 'symbol': e['symbol']})
+    #    chemicals = json.loads(urlopen(chemicals['next']).read())
 
     form.minerals.choices = [(m,m) for m in api_minerals]
 
@@ -603,7 +627,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         payload = {'email': form.email.data, 'password': form.password.data}
-        response =  post(env('API_HOST') + '/authenticate/', data=payload)
+        response =  post(env('API_DRF_HOST') + '/authenticate/', data=payload)
         if response.status_code == 200:
             data = json.loads(response.text)
             session['email'] = data['email']
@@ -612,7 +636,6 @@ def login():
             return redirect(url_for('search'))
         else:
             flash('Authentication failed. Please try again.')
-
     return render_template('login.html', form=form)
 
 
@@ -629,7 +652,7 @@ def request_password_reset():
     form = RequestPasswordResetForm()
     if form.validate_on_submit():
         payload = {'email': form.email.data}
-        response = post(env('API_HOST') + '/reset_password/', data=payload)
+        response = post(env('API_DRF_HOST') + '/reset_password/', data=payload)
         if response.status_code == 200:
             data = json.loads(response.text)
             message = Message("Metpetdb: Reset Password", sender=env('DEFAULT_MAIL_SENDER'), recipients=[form.email.data])
@@ -640,7 +663,6 @@ def request_password_reset():
             return redirect(url_for('login'))
         else:
             flash("Invalid email. Please try again.")
-
     return render_template('request_password_reset.html', form=form)
 
 
@@ -649,7 +671,7 @@ def reset_password(token):
     form = PasswordResetForm()
     if form.validate_on_submit():
         payload = {'token': form.token.data, 'password': form.password.data}
-        response = post(env('API_HOST') + '/reset_password/', data=payload)
+        response = post(env('API_DRF_HOST') + '/reset_password/', data=payload)
         if response.status_code == 200:
             data = json.loads(response.text)
             session['email'] = data['email']
@@ -661,19 +683,17 @@ def reset_password(token):
             return redirect(url_for('request_password_reset'))
 
     if token:
-        response = get(env('API_HOST') + '/reset_password/' + token)
+        response = get(env('API_DRF_HOST') + '/reset_password/' + token)
         if response.status_code == 200:
             form = PasswordResetForm(token=token)
             return render_template('reset_password.html', form=form)
-
     flash('Password reset failed. Please try again.')
     return redirect(url_for('request_reset_password'))
 
 
 @metpet_ui.route('/user/<string:id>')
 def user(id):
-    api = MetpetAPI(None, None).api
-    user = api.user.get(id).data
+    user = json.loads(urlopen(env('API_DRF_HOST')+'/users/'+id+'?format=json').read())
     if not user:
         return HttpResponse("User does not exist")
     return render_template('user.html', user=user)

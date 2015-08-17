@@ -5,159 +5,146 @@
 {% endblock %}
 
 {% block body %}
-<script src="/static/js/jquery-2.1.1.min.js"></script>
-
 <form action="" method="post" name="edit">
-{{form.hidden_tag()}}
-
-<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
-<div class = "table-responsive">
-  <form action="" method="post" name = "edit">
-  <table id="sampleview_table" class="table">
-    <tbody>
-      <tr>
-        <td class="sample_label">Owner{% if form.owner.flags.required %}*{% endif %}</td>
-        <td class="sample_value">{{form.owner(size=32)}}</td>
-      </tr>
-      <tr>
-        <td class="sample_label">IGSN</td>
-        <td class="sample_value">{{form.igsn()}}</td>
-      </tr>
-      <tr>
-        <td class="sample_label">Aliases</td>
-        <td class="sample_value">{{ form.aliases(size=32) }}</td>
-      </tr>
-      <tr>
-        <td class="sample_label">Date Collected</td>
-        <td class="sample_value">{{form.date_collected(size=32)}}</td>
-      </tr>
-      <tr>
-        <td class="sample_label">Rock Type{% if form.rock_type.flags.required %}*{% endif %}</td>
-        <td class="sample value">{{form.rock_type()}}</td>
-      </tr>
-      <tr>
-        <td class="sample_label">Public{% if form.public.flags.required %}*{% endif %}</td>
-        <td class="sample_value">{{form.public(size=32)}}</td>
-      </tr>
-      <tr>
-        <td class="sample_label">Latitude{% if form.latitude.flags.required %}*{% endif %}</td>
-        <td class="sample_value">{{form.latitude(size=32)}}</td>
-      </tr>
-      <tr>
-        <td class="sample_label">Longitude{% if form.longitude.flags.required %}*{% endif %}</td>
-        <td class="sample_value">{{form.longitude(size=32)}}</td>
-      </tr>
-      <tr>
-        <td class="sample_label">Country</td>
-        <td class="sample_value">{{form.country(size=32)}}</td>
-      </tr>
-      <tr>
-        <td class="sample_label">Collector</td>
-        <td class="sample_value">{{form.collector(size=32)}}</td>
-      </tr>
-      <tr>
-        <td class="sample_label">Present Sample Location</td>
-        <td class="sample_value">{{form.location_text(size=32)}}</td>
-      </tr>
-
-      <tr>
-        <td class="sample_label">Region</td>
-        <td class="sample_value">{{ form.region(size=32) }}</td>
-        <script type="text/javascript">
-         function addTextField()  {
-           var list = document.getElementById("region");
-           var newListElement = document.createElement("li");
-           var newInput = document.createElement("input");
-           var label = document.createElement("label");
-           var element = document.getElementById("addreg");
-           var i = 0;
-           while (document.getElementById('region-'+i.toString()) != null)
-            i++;
-           label.htmlFor = 'region-'+i.toString();
-           label.innerHTML = "Region  ";
-           newInput.type = "text";
-           newInput.id = "region-"+i.toString();
-           newInput.name = "region";
-           newInput.value = element.options[element.selectedIndex].value;
-           newListElement.appendChild(label);
-           newListElement.appendChild(newInput);
-           list.appendChild(newListElement);
-         }
-        </script>
-        <td class="sample_value">
-          <select id="addreg" type = "button" onChange="addTextField()">
-            <option>Add Entry</option>
-            {% for r in regions %}
+  {{form.hidden_tag()}}
+  <div class="table-responsive">
+    <table id="sampleview_table" class="table">
+      <tbody>
+        <tr>
+          <td class="sample_label">Owner{% if form.owner.flags.required %}*{% endif %}</td>
+          <td class="sample_value">{{form.owner(size=32)}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">IGSN</td>
+          <td class="sample_value">{{form.igsn()}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Aliases</td>
+          <td class="sample_value">{{ form.aliases(size=32) }}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Date Collected</td>
+          <td class="sample_value">{{form.date_collected(size=32)}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Rock Type{% if form.rock_type.flags.required %}*{% endif %}</td>
+          <td class="sample value">{{form.rock_type()}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Public{% if form.public.flags.required %}*{% endif %}</td>
+          <td class="sample_value">{{form.public(size=32)}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Latitude{% if form.latitude.flags.required %}*{% endif %}</td>
+          <td class="sample_value">{{form.latitude(size=32)}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Longitude{% if form.longitude.flags.required %}*{% endif %}</td>
+          <td class="sample_value">{{form.longitude(size=32)}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Country</td>
+          <td class="sample_value">{{form.country(size=32)}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Collector</td>
+          <td class="sample_value">{{form.collector(size=32)}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Present Sample Location</td>
+          <td class="sample_value">{{form.location_text(size=32)}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Region</td>
+          <td class="sample_value">{{ form.region(size=32) }}</td>
+          <td class="sample_value">
+            <select id="addreg" type = "button" onChange="addTextField()">
+              <option>Add Entry</option>
+              {% for r in regions %}
               <option name="region" value="{{r.name}}">{{r.name}}</option>
-            {% endfor %}
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <td class="sample_label">Metamorphic Region</td>
-        <td class="sample_value">{{ form.metamorphic_regions() }}</td>
-      </tr>
-      <tr>
-        <td class="sample_label">Metamorphic Grade</td>
-        <td class="sample_value">{{ form.metamorphic_grades() }}</td>
-      </tr>
-      <tr>
-        <td class="sample_label">Publication References</td>
-        <td class="sample_value">{{ references }}</td>
-      </tr>
-      <tr>
-        <td class="sample_label">Abstracts</td>
-        <td class="sample_value"></td>
-      </tr>
-      <tr>
-        <td class = "sample_label">Minerals</td>
-        <td class = "sample_value">{{ form.minerals() }}</td>
-
-        <script type="text/javascript">
-         function addMineralField()  {
-           var list = document.getElementById("minerals");
-           var newListElement = document.createElement("li");
-           var newInput = document.createElement("input");
-           var label = document.createElement("label");
-           var element = document.getElementById("addmin");
-           var i = 0;
-           while (document.getElementById('minerals-'+i.toString()) != null)
-            i++;
-           label.htmlFor = 'minerals-'+i.toString();
-           label.innerHTML = "  "+element.options[element.selectedIndex].value;
-           newInput.type = "checkbox";
-           newInput.id = "minerals-"+i.toString();
-           newInput.name = "minerals";
-           newInput.checked = true;
-           newInput.value = element.options[element.selectedIndex].value;
-           newListElement.appendChild(newInput);
-           newListElement.appendChild(label);
-           list.appendChild(newListElement);
-         }
-        </script>
-        <td class="sample_value">
-          <select id="addmin" type = "button" onChange="addMineralField()">
-            <option>Add Mineral</option>
-            {% for m in minerals %}
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td class="sample_label">Metamorphic Region</td>
+          <td class="sample_value">{{ form.metamorphic_regions() }}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Metamorphic Grade</td>
+          <td class="sample_value">{{ form.metamorphic_grades() }}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Publication References</td>
+          <td class="sample_value">{{ references }}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Abstracts</td>
+          <td class="sample_value"></td>
+        </tr>
+        <tr>
+          <td class="sample_label">Minerals</td>
+          <td class="sample_value">{{ form.minerals() }}</td>
+          <td class="sample_value">
+            <select id="addmin" type = "button" onChange="addMineralField()">
+              <option>Add Mineral</option>
+              {% for m in minerals %}
               <option name="mineral" value="{{m.name}}">{{m.name}}</option>
-            {% endfor %}
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <div class="flyout-parents">
-          <div class="flyout-item">
-            <div class="mpcheckbox">
-            </div>
-          </div>
-        </div>
-      </tr>
-      <tr>
-        <td></td>
-        <td><input type="submit" value="Save Changes"></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><input type="submit" value="Save Changes"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</form>
 
+<script src="/static/js/jquery-2.1.1.min.js"></script>
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+
+<script>
+function addTextField() {
+  var list = document.getElementById("region");
+  var newListElement = document.createElement("li");
+  var newInput = document.createElement("input");
+  var label = document.createElement("label");
+  var element = document.getElementById("addreg");
+  var i = 0;
+  while (document.getElementById('region-'+i.toString()) != null)
+    i++;
+  label.htmlFor = 'region-'+i.toString();
+  label.innerHTML = "Region  ";
+  newInput.type = "text";
+  newInput.id = "region-"+i.toString();
+  newInput.name = "region";
+  newInput.value = element.options[element.selectedIndex].value;
+  newListElement.appendChild(label);
+  newListElement.appendChild(newInput);
+  list.appendChild(newListElement);
+}
+function addMineralField() {
+  var list = document.getElementById("minerals");
+  var newListElement = document.createElement("li");
+  var newInput = document.createElement("input");
+  var label = document.createElement("label");
+  var element = document.getElementById("addmin");
+  var i = 0;
+  while (document.getElementById('minerals-'+i.toString()) != null)
+    i++;
+  label.htmlFor = 'minerals-'+i.toString();
+  label.innerHTML = "  "+element.options[element.selectedIndex].value;
+  newInput.type = "checkbox";
+  newInput.id = "minerals-"+i.toString();
+  newInput.name = "minerals";
+  newInput.checked = true;
+  newInput.value = element.options[element.selectedIndex].value;
+  newListElement.appendChild(newInput);
+  newListElement.appendChild(label);
+  list.appendChild(newListElement);
+}
+</script>
 {% endblock %}

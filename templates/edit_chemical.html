@@ -1,176 +1,155 @@
 {% extends "base.html" %}
 
-  <body>
-      {% block title %}
-        <h3> Chemical Analysis {{id}}</h3>
-      {% endblock %}
+{% block title %}
+  <h3> Chemical Analysis {{id}}</h3>
+{% endblock %}
 
-      {% block body %}
-<script src="/static/js/jquery-2.1.1.min.js"></script>
+{% block body %}
 <form action="" method="post" name="edit">
-{{form.hidden_tag()}}
+  {{form.hidden_tag()}}
+  <div class="table-responsive">
+    <table id="chemicalanalysisview_table" class="table">
+      <tbody>
+        <tr>
+          <td class="sample_label">Owner</td>
+          <td class="sample_value">{{form.owner(size=32)}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Point Number</td>
+          <td class="sample_value">{{form.point_number()}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Public</td>
+          <td class="sample_value">{{form.public(size=32)}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Image</td>
+          <td class="sample_value">No Image</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Analysis Method</td>
+          <td class="sample_value">{{form.analysis_method()}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Analyst</td>
+          <td class="sample_value">{{form.analyst(size=32)}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Analysis Location</td>
+          <td class="sample_value">{{form.analysis_location()}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Description</td>
+          <td class="sample_value">{{form.description()}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Analysis Material</td>
+          <td class="sample_value">{{form.analysis_material(size=32)}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Total</td>
+          <td class="sample_value">{{form.total(size=32)}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Stage X</td>
+          <td class="sample_value">{{form.StageX(size=32)}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Stage Y</td>
+          <td class="sample_value">{{form.StageY(size=32)}}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Sample</td>
+          {% if sample %}
+          <td class="sample_value"><a href="{{ url_for('sample', id=sample.sample_id) }}" target="_blank">{{ sample.number }}</a></td>
+          {% endif %}
+        </tr>
+        <tr>
+          <td class="sample_label">Subsample</td>
+          {% if subsample %}
+          <td class="sample_value"><a href="{{ url_for('subsample', id=subsample.subsample_id) }}" target="_blank">{{ subsample.name }}</a></td>
+          {% endif %}
+        </tr>
+        <tr>
+          <td class="sample_label">Mineral</td>
+          <td class="sample_value">{{ form.minerals() }}</td>
+        </tr>
+        <tr>
+          <td class="sample_label">Elements</td>
+          <td class="sample_value">{{ form.elements() }}</td>
+          <td class="sample_value">
+            <select id="addel" type="button" onChange="addElementField()">
+              <option>Add Element</option>
+              {% for e in elements %}
+              <option name="element" value="{{e.name}}">{{e.name}}</option>
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td class="sample_label">Oxides</td>
+          <td class="sample_value">{{ form.oxides() }}</td>
+          <td class="sample_value">
+            <select id="addox" type="button" onChange="addOxideField()">
+              <option>Add Oxide</option>
+              {% for o in oxides %}
+              <option name="region" value="{{o.species}}">{{o.species}}</option>
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><input type="submit" value="Save Changes"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</form>
+
+<script src="/static/js/jquery-2.1.1.min.js"></script>
 <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
-<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
-<link rel="stylesheet" href="/static/css/chosen.min.css">
-<script src="/static/js/chosen.jquery.min.js"></script>
-<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 
-
-<link rel="stylesheet" href="/static/css/style.min.css">
-<script src="/static/js/jstree.min.js"></script>
-<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
-
-<div class = "table-responsive">
-  <form action="" method="post" name = "edit">
-      <table id="chemicalanalysisview_table" class="table">
-        <tbody>
-          <tr>
-            <td class="sample_label">Owner</td>
-              <td class="sample_value">{{form.owner(size=32)}}</td>
-          </tr>
-          <tr>
-            <td class="sample_label">Point Number</td>
-              <td class="sample_value">{{form.point_number()}}</td>
-          </tr>
-          <tr>
-            <td class="sample_label">Public</td>
-              <td class="sample_value">{{form.public(size=32)}}</td>
-          </tr>
-          <tr>
-            <td class="sample_label">Image</td>
-              <td class="sample_value">No Image</td>
-          </tr>
-          <tr>
-            <td class="sample_label">Analysis Method</td>
-              <td class="sample_value">{{form.analysis_method()}}</td>
-          </tr>
-          <tr>
-            <td class="sample_label">Analyst</td>
-              <td class="sample_value">{{form.analyst(size=32)}}</td>
-          </tr>
-          <tr>
-            <td class="sample_label">Analysis Location</td>
-              <td class="sample_value">{{form.analysis_location()}}</td>
-          </tr>
-          <tr>
-            <td class="sample_label">Description</td>
-              <td class="sample_value">{{form.description()}}</td>
-          </tr>
-          <tr>
-            <td class="sample_label">Analysis Material</td>
-              <td class="sample_value">{{form.analysis_material(size=32)}}</td>
-          </tr>
-          <tr>
-            <td class="sample_label">Total</td>
-              <td class="sample_value">{{form.total(size=32)}}</td>
-          </tr>
-          <tr>
-            <td class="sample_label">Stage X</td>
-              <td class="sample_value">{{form.StageX(size=32)}}</td>
-          </tr>
-          <tr>
-            <td class="sample_label">Stage Y</td>
-              <td class="sample_value">{{form.StageY(size=32)}}</td>
-          </tr>
-          <tr>
-            <td class="sample_label">Sample</td>
-              {% if sample %}
-              <td class="sample_value"><a href="{{ url_for('sample', id=sample.sample_id) }}" target="_blank">{{ sample.number }}</a></td>
-              }
-              {% endif %}
-          </tr>
-          <tr>
-            {% if subsample %}
-            <td class="sample_label">Subsample</td>
-              <td class="sample_value"><a href="{{ url_for('subsample', id=subsample.subsample_id) }}" target="_blank">{{ subsample.name }}</a></td>
-            }
-            {% endif %}
-          </tr>
-          <tr>
-            <td class="sample_label">Mineral</td>
-            <td class="sample_value">{{ form.minerals() }}</td>
-          </tr>
-          <tr>
-            <td class="sample_label">Elements</td>
-            <td class="sample_value">{{ form.elements() }}</td>
-            <script type="text/javascript">
-             function addElementField()  {
-               var list = document.getElementById("elements");
-               var newListElement = document.createElement("li");
-               var newInput = document.createElement("input");
-               var label = document.createElement("label");
-               var element = document.getElementById("addel");
-               var i = 0;
-               while (document.getElementById('element-'+i.toString()) != null)
-                i++;
-               label.htmlFor = 'element-'+i.toString();
-               label.innerHTML = element.options[element.selectedIndex].value+"  ";
-               newInput.type = "text";
-               newInput.id = "element-"+i.toString();
-               newInput.name = "element";
-               newInput.value = element.options[element.selectedIndex].value;
-               newInput.innerHTML = '0.0';
-               newListElement.appendChild(label);
-               newListElement.appendChild(newInput);
-               list.appendChild(newListElement);
-             }
-            </script>
-            <td class="sample_value">
-              <select id="addel" type = "button" onChange="addElementField()">
-                <option>Add Element</option>
-                {% for e in elements %}
-                  <option name="element" value="{{e.name}}">{{e.name}}</option>
-                {% endfor %}
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td class="sample_label">Oxides</td>
-            <td class="sample_value">{{ form.oxides() }}</td>
-            <script type="text/javascript">
-             function addOxideField()  {
-               var list = document.getElementById("oxides");
-               var newListElement = document.createElement("li");
-               var newInput = document.createElement("input");
-               var label = document.createElement("label");
-               var element = document.getElementById("addox");
-               var i = 0;
-               while (document.getElementById('oxide-'+i.toString()) != null)
-                i++;
-               label.htmlFor = 'oxide-'+i.toString();
-               label.innerHTML = element.options[element.selectedIndex].value+"  ";
-               newInput.type = "text";
-               newInput.id = "oxide-"+i.toString();
-               newInput.name = "oxide";
-               newInput.value = element.options[element.selectedIndex].value;
-               newInput.innerHTML = '0.0';
-               newListElement.appendChild(label);
-               newListElement.appendChild(newInput);
-               list.appendChild(newListElement);
-             }
-            </script>
-            <td class="sample_value">
-              <select id="addox" type = "button" onChange="addOxideField()">
-                <option>Add Oxide</option>
-                {% for o in oxides %}
-                  <option name="region" value="{{o.species}}">{{o.species}}</option>
-                {% endfor %}
-              </select>
-            </td>
-          </tr>
-      <tr>
-        <div class="flyout-parents">
-          <div class="flyout-item">
-            <div class="mpcheckbox">
-            </div>
-          </div>
-        </div>
-      </tr>
-      <tr>
-        <td></td>
-        <td><input type="submit" value="Save Changes"></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+<script>
+function addElementField() {
+  var list = document.getElementById("elements");
+  var newListElement = document.createElement("li");
+  var newInput = document.createElement("input");
+  var label = document.createElement("label");
+  var element = document.getElementById("addel");
+  var i = 0;
+  while (document.getElementById('element-'+i.toString()) != null)
+    i++;
+  label.htmlFor = 'element-'+i.toString();
+  label.innerHTML = element.options[element.selectedIndex].value+"  ";
+  newInput.type = "text";
+  newInput.id = "element-"+i.toString();
+  newInput.name = "element";
+  newInput.value = element.options[element.selectedIndex].value;
+  newInput.innerHTML = '0.0';
+  newListElement.appendChild(label);
+  newListElement.appendChild(newInput);
+  list.appendChild(newListElement);
+}
+function addOxideField() {
+  var list = document.getElementById("oxides");
+  var newListElement = document.createElement("li");
+  var newInput = document.createElement("input");
+  var label = document.createElement("label");
+  var element = document.getElementById("addox");
+  var i = 0;
+  while (document.getElementById('oxide-'+i.toString()) != null)
+    i++;
+  label.htmlFor = 'oxide-'+i.toString();
+  label.innerHTML = element.options[element.selectedIndex].value+"  ";
+  newInput.type = "text";
+  newInput.id = "oxide-"+i.toString();
+  newInput.name = "oxide";
+  newInput.value = element.options[element.selectedIndex].value;
+  newInput.innerHTML = '0.0';
+  newListElement.appendChild(label);
+  newListElement.appendChild(newInput);
+  list.appendChild(newListElement);
+}
+</script>
 {% endblock %}
