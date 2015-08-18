@@ -8,7 +8,7 @@
   <div id="search-options" class="panel panel-default">
     <div id="search-panel" class="panel-heading" onclick="$('#collapseOne').collapse('toggle'); $('#collapseTwo').collapse('toggle');">
       <h4 class="panel-title">
-        <a href="#">Search Options</a>
+        <a class='accordion-toggle' data-toggle="collapse" data-parent="#accordion" href="#">Search Options</a>
       </h4>
     </div>
 
@@ -17,7 +17,8 @@
         <!-- Search Option Tabs -->
         <ul class="nav nav-tabs" id="myTab">
           <li class="active"><a href="#minerals">Minerals</a></li>
-          <li><a href="#chemistry">Elements and Oxides</a></li>
+          <li><a href="#elements">Elements</a></li>
+          <li><a href="#oxides">Oxides</a></li>
         </ul>
 
         <div class="tab-content">
@@ -34,32 +35,49 @@
             </div>
           </div>
 
-          <!-- CHEMISTRY -->
-          <div class="tab-pane" id="chemistry"><br>
-            <!-- ELEMENTS -->
-            <div style="float:left">
-              <label>Element: </label>
-              <div id="chemistry-select">
-                <select multiple id="selected-element" name="elements" onchange="updateChemistry()" class="chosen-select">
-                  <option></option>
-                  {% for e in elements %}
-                  <option value="{{ e.name }}">{{ e.symbol }} - {{ e.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
+          <!-- ELEMENTS -->
+          <div class="tab-pane" id="elements"><br>
+            <label>Element: </label>
+            <div id="element-select">
+              <select multiple id="selected-element" name="elements" onchange="updateElement()" class="chosen-select">
+                <option></option>
+                {% for e in elements %}
+                <option value="{{ e.name }}">{{ e.symbol }} - {{ e.name }}</option>
+                {% endfor %}
+              </select>
             </div>
+            <br>
 
-            <!-- OXIDES -->
-            <div style="margin-left:40px;float:left">
-              <label>Oxide: </label>
-              <div id="chemistry-select">
-                <select multiple id="selected-oxide" name="oxides" onchange="updateChemistry()" class="chosen-select">
-                  <option></option>
-                  {% for o in oxides %}
-                  <option value="{{ o.species }}">{{ o.species }}</option>
-                  {% endfor %}
-                </select>
-              </div>
+            <div id="element-and-or" class="text-center btn-group" data-toggle="buttons" style="margin:0 auto;">
+              <label class="btn btn-primary active">
+                <input type="radio" name="elements_and" value="True" checked> AND
+              </label>
+              <label class="btn btn-primary">
+                <input type="radio" name="elements_and" value=""> OR
+              </label>
+            </div>
+          </div>
+
+          <!-- OXIDES -->
+          <div class="tab-pane" id="oxides"><br>
+            <label>Oxide: </label>
+            <div id="oxide-select">
+              <select multiple id="selected-oxide" name="oxides" onchange="updateOxide()" class="chosen-select">
+                <option></option>
+                {% for o in oxides %}
+                <option value="{{ o.species }}">{{ o.species }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <br>
+
+            <div id="oxide-and-or" class="text-center btn-group" data-toggle="buttons" style="margin:0 auto;">
+              <label class="btn btn-primary active">
+                <input type="radio" name="oxides_and" value="True" checked> AND
+              </label>
+              <label class="btn btn-primary">
+                <input type="radio" name="oxides_and" value=""> OR
+              </label>
             </div>
           </div>
         </div>
@@ -82,7 +100,8 @@
       <div class="panel-body">
         <p id="instructions">Set your search criteria by selecting from the categories on the left.<br></p>
         <div id="search-options-minerals"></div>
-        <div id="search-options-chemistry"></div>
+        <div id="search-options-elements"></div>
+        <div id="search-options-oxides"></div>
         <div id="form-submit" class="text-center">
           <div class="btn-group" data-toggle="buttons">
             <label class="btn btn-primary">
@@ -93,9 +112,9 @@
             </label>
           </div>
           <div style="padding:10px 0px;">
-            <input type="checkbox" id="showall" name="all_results" value="yes">Display all results&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="checkbox" id="showmap" onchange="$('#collapseThree').collapse('toggle');" name="showmap" value="ofcourse">Show on map
+            <input type="checkbox" id="showmap" onchange="$('#collapseThree').collapse('toggle');" name="showmap" value="ofcourse">Show samples on map
           </div>
+          Display <input type="text" style="width:11%;text-align:right" name="page_size" value="20"> results &nbsp;&nbsp;&nbsp;&nbsp;
           <input type="submit" style="font-size:16px" value="Search">
         </div>
       </div>
@@ -134,12 +153,17 @@ $(function()
     width: "50%"
   });
 
+  $(".chosen-select2").chosen({
+    disable_search_threshold: 10,
+    width: "20%"
+  });
+
   // AJAX CALL TO UPDATE SAMPLE DATA
   $('#content').submit(function () {
     $('#collapseOne').collapse('toggle');
     $('#collapseTwo').collapse('toggle');
     $('#spinner').show();
-    var url = "resource=";
+    var url = "page_size="+document.getElementsByName("page_size")[0].value+"&resource=";
     if (document.getElementsByName("resource")[0].checked)
       url += "sample";
     else
@@ -152,10 +176,14 @@ $(function()
     for(var a = 0; a < oxides.length; a++)
       if(oxides[a].selected && oxides[a].value !== "")
         url += "&oxides="+oxides[a].value;
+    if (document.getElementsByName("oxides_and")[0].checked && oxides.length)
+      url += "&oxides_and=True";
     var elements = $("#selected-element option:selected");
     for(var a = 0; a < elements.length; a++)
       if(elements[a].selected && elements[a].value !== "")
         url += "&elements="+elements[a].value;
+    if (document.getElementsByName("elements_and")[0].checked && elements.length)
+      url += "&elements_and=True";
     $.ajax({
       type: $('#content').attr('method'),
       url: $('#content').attr('action'),
@@ -210,17 +238,15 @@ function clearMineral()
   $("#mineral-select .chosen-select").val('').trigger("chosen:updated");
 }
 
-// CHEMISTRY
-function updateChemistry()
+// ELEMENTS
+function updateElement()
 {
-  var searchOptions = document.getElementById("search-options-chemistry");
+  var searchOptions = document.getElementById("search-options-elements");
   searchOptions.innerHTML = "";
 
-  if ($("#selected-element option:selected").length || $("#selected-oxide option:selected").length)
-    searchOptions.innerHTML += "<div class = 'summary-title'><h4>Chemistry </h4><a onclick='clearChemistry()' class='clear-title' href='#'>Clear</a></div>";
- 
   if($("#selected-element option:selected").length)
   {
+    searchOptions.innerHTML += "<div class = 'summary-title'><h4>Elements </h4><a onclick='clearElement()' class='clear-title' href='#'>Clear</a></div>";
     for(var a = 0; a < $("#selected-element option:selected").length; a++)
     {
       if($("#selected-element option:selected")[a].selected)
@@ -232,9 +258,23 @@ function updateChemistry()
     searchOptions.innerHTML = s.slice(0, -2);
     searchOptions.innerHTML += "<br>";
   }
+}
+function clearElement()
+{
+  var searchOptions = document.getElementById("search-options-elements");
+  searchOptions.innerHTML = "";
+  $("#element-select .chosen-select").val('').trigger("chosen:updated");
+}
+
+// OXIDES
+function updateOxide()
+{
+  var searchOptions = document.getElementById("search-options-oxides");
+  searchOptions.innerHTML = "";
 
   if($("#selected-oxide option:selected").length)
   {
+    searchOptions.innerHTML += "<div class = 'summary-title'><h4>Oxides </h4><a onclick='clearOxide()' class='clear-title' href='#'>Clear</a></div>";
     for(var a = 0; a < $("#selected-oxide option:selected").length; a++)
     {
       if($("#selected-oxide option:selected")[a].selected)
@@ -247,17 +287,18 @@ function updateChemistry()
     searchOptions.innerHTML += "<br>";
   }
 }
-function clearChemistry()
+function clearOxide()
 {
-  var searchOptions = document.getElementById("search-options-chemistry");
+  var searchOptions = document.getElementById("search-options-oxides");
   searchOptions.innerHTML = "";
-  $("#chemistry-select .chosen-select").val('').trigger("chosen:updated");
+  $("#oxide-select .chosen-select").val('').trigger("chosen:updated");
 }
 
 function clearAll()
 {
   clearMineral();
-  clearChemistry();
+  clearElement();
+  clearOxide();
 }
 </script>
 {% endblock %}

@@ -153,7 +153,7 @@
               <select id="selected-number" onchange="updateProvenance()" name="numbers" class="chosen-select">
                 <option value="" disabled selected>Select sample number</option>
                 {% for n in numbers %}
-                <option value="{{ n }}">{{ n }}</option>
+                <option value="{{ n.number }}">{{ n.number }}</option>
                 {% endfor %}
               </select><br>
 
@@ -214,9 +214,9 @@
             </label>
           </div>
           <div style="padding:10px 0px;">
-            <input type="checkbox" id="showall" name="all_results" value="yes">Display all results&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="checkbox" id="showmap" onchange="$('#collapseThree').collapse('toggle');" name="showmap" value="ofcourse">Show on map
+            <input type="checkbox" id="showmap" onchange="$('#collapseThree').collapse('toggle');" name="showmap" value="ofcourse">Show samples on map
           </div>
+          Display <input type="text" style="width:11%;text-align:right" name="page_size" value="20"> results &nbsp;&nbsp;&nbsp;&nbsp;
           <input type="submit" style="font-size:16px" value="Search">
         </div>
       </div>
@@ -441,6 +441,11 @@ $(function()
     disable_search_threshold: 10,
     no_results_text: "Oops, nothing found!",
     width: "50%"
+  });
+
+  $(".chosen-select2").chosen({
+    disable_search_threshold: 10,
+    width: "20%"
   });
 
   // AJAX CALL TO UPDATE SAMPLE DATA

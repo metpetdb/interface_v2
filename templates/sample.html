@@ -28,7 +28,7 @@
         <td class="sample_value">{% if sample.rock_type.name %}{{ sample.rock_type.name }}{% endif %}</td>
       </tr>
       <tr>
-        <td class="sample_label">Public Data</td>
+        <td class="sample_label">Public</td>
         <td class="sample_value">{% if sample.public_data %}{{ sample.public_data }}{% endif %}</td>
       </tr>      
       <tr>
@@ -131,7 +131,7 @@
       <tr>
         <td id="img-popup"><a href="{{ url_for('subsample', id=subsample.id) }}" target="_blank">{{subsample.name}}</a></td>
         <td>{{subsample.public_data}}</td>
-        <td>{{subsample.type}}</td>
+        <td>{{subsample.subsample_type}}</td>
         <td>{{subsample.image_count}}</td>
         <td>{{subsample.chem_analyses_count}}</td>
         <td><a href="{{ url_for('user', id=sample.owner.id) }}" target="_blank">{{ sample.owner.name }}</a></td>

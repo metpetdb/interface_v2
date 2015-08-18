@@ -3,8 +3,7 @@ import json
 from ast import literal_eval
 from getenv import env
 from requests import get, post
-from urllib import urlencode
-from urllib2 import urlopen
+from urllib import urlencode, urlopen
 from flask import (
     Flask,
     request,
@@ -48,12 +47,10 @@ def search():
             filters[key] = (',').join(dict(request.args)[key])
 
     if request.args.get('resource') == 'sample':
-        #get samples with filters
         url = url_for('samples')+'?'+urlencode(filters)
         return redirect(url)
 
     if request.args.get('resource') == 'chemicalanalysis':
-        #get chemical analyses given sample filters
         if 'minerals_and' in filters:
             del filters['minerals_and']
         url = url_for('chemical_analyses')+'?'+urlencode(filters)+'&sample_filters=True'
@@ -67,24 +64,25 @@ def search():
     metamorphic_grades = json.loads(urlopen(env('API_DRF_HOST')+'/metamorphic_grades/?fields=name&page_size=30&format=json').read())['results']
     collectors = json.loads(urlopen(env('API_DRF_HOST')+'/collectors/?fields=name&page_size=140&format=json').read())['results']
 
+    fields = 'country,sesar_number,owner'
+    samples = json.loads(urlopen(env('API_DRF_HOST')+'/samples/?fields='+fields+'&public_data=True&page_size=1000&format=json').read())['results']
     countries = set()
     igsns = set()
-    numbers = set()
     owners = set()
-    fields = 'country,sesar_number,number,public_data,owner'
-    api_samples = json.loads(urlopen(env('API_DRF_HOST')+'/samples/?fields='+fields+'&page_size=2000&format=json').read())
-    #while api_samples['next']:
-    for sample in api_samples['results']:
+    for sample in samples:
         countries.add(sample['country'])
         igsns.add(sample['sesar_number'])
-        numbers.add(sample['number'])
-        if sample['public_data']:
-            owners.add(sample['owner']['name'])
-    #    api_samples = json.loads(urlopen(api_samples['next']).read())
+        owners.add(sample['owner']['name'])
 
-    #if email:
-    #    logged_in_user = api.user.get(params={'email': email, 'fields': 'user_id,name'}).data['results']
-    #    owners.add(logged_in_user[0]['name'])
+    api_samples = json.loads(urlopen(env('API_DRF_HOST')+'/samples/?fields=number&page_size=2000&format=json').read())
+    numbers = api_samples['results']
+    while api_samples['next']:
+        api_samples = json.loads(urlopen(api_samples['next']).read())
+        numbers += api_samples['results']
+
+    if email:
+       logged_in_user = json.loads(urlopen(env('API_DRF_HOST')+'/users/?email='+email+'&fields=name&page_size=40&format=json').read())['results']
+       owners.add(logged_in_user['name'])
 
     return render_template('search_form.html',
         countries=countries,
@@ -117,21 +115,7 @@ def search_chemistry():
         return redirect(url)
 
     if request.args.get('resource') == 'sample':
-        filters['fields'] = 'subsample'
-        chem_results = []
-        if 'all_results' in filters:
-            chemicals = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?'+urlencode(filters)+'&page_size=2000&format=json').read())
-            chem_results = chemicals['results']
-            while chemicals['next']:
-                chemicals = json.loads(urlopen(chemicals['next']).read())
-                chem_results += chemicals['results']
-        else:
-            chem_results = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?'+urlencode(filters)+'&format=json').read())['results']
-        
-        numbers = set()
-        for c in chem_results:
-            numbers.add(c['subsample']['sample'])#need number not id
-        url = url_for('samples')+'?'+urlencode({'numbers': numbers})
+        url = url_for('samples')+'?'+urlencode(filters)+'&chemical_analyses_filters=True'
         return redirect(url)
 
     minerals = json.loads(urlopen(env('API_DRF_HOST')+'/minerals/?fields=name&page_size=200&format=json').read())['results']
@@ -153,23 +137,16 @@ def samples():
     next = previous = last = total_count = None
     filters = literal_eval(json.dumps(request.args))
 
-    sample_results = []
-    if 'all_results' in filters:
-        samples = json.loads(urlopen(env('API_DRF_HOST')+'/samples/?'+urlencode(filters)+'&page_size=2000&format=json').read())
-        sample_results = samples['results']
-        while samples['next']:
-            samples = json.loads(urlopen(samples['next']).read())
-            sample_results += samples['results']
-        next, previous, last, total_count = None, None, url_for('samples')+'?'+urlencode(filters), samples['count']
-    else:
-        samples = json.loads(urlopen(env('API_DRF_HOST')+'/samples/?'+urlencode(filters)+'&format=json').read())
-        sample_results = samples['results']
-        next, previous, last, total_count = paginate_model('samples', samples, filters)
+    samples = json.loads(urlopen(env('API_DRF_HOST')+'/samples/?'+urlencode(filters)+'&format=json').read())
+    sample_results = samples['results']
+    next, previous, last, total_count = paginate_model('samples', samples, filters)
 
     for s in sample_results:
         pos = s['location_coords'].split(" ")
         s['location_coords'] = [round(float(pos[2].replace(")","")),5),round(float(pos[1].replace("(","")),5)]
         s['minerals'] = (', ').join([m['name'] for m in s['minerals']])
+        s['subsample_ids'] = len(s['subsample_ids'])
+        s['chemical_analyses_ids'] = len(s['chemical_analyses_ids'])
         if s['collection_date']:
             s['collection_date'] = s['collection_date'][:-10]
 
@@ -190,8 +167,8 @@ def sample(id):
     api = MetpetAPI(email, api_key).api
 
     sample = json.loads(urlopen(env('API_DRF_HOST')+'/samples/'+id+'?format=json').read())
-    if not sample:
-        return HttpResponse("Sample does not exist")
+    if "detail" in sample:
+        return render_template("warning.html", text="Sample "+id+" does not exist")
 
     pos = sample['location_coords'].split(" ")
     sample['location_coords'] = [round(float(pos[2].replace(")","")),5), round(float(pos[1].replace("(","")),5)]
@@ -204,7 +181,9 @@ def sample(id):
     if sample['collection_date']:
         sample['collection_date'] = sample['collection_date'][:-10]
 
-    subsamples = json.loads(urlopen(env('API_DRF_HOST')+'/subsamples/?'+urlencode({"samples": sample['id']})+'&format=json').read())['results']
+    subsamples = []
+    for s in sample['subsample_ids']:
+        subsamples.append(json.loads(urlopen(env('API_DRF_HOST')+'/subsamples/'+s+'?fields=subsample_type,name,id,public_data,owner&format=json').read()))
 
     return render_template('sample.html',
         sample=sample,
@@ -218,11 +197,12 @@ def subsample(id):
     api = MetpetAPI(email, api_key).api
 
     subsample = json.loads(urlopen(env('API_DRF_HOST')+'/subsamples/'+id+'?format=json').read())
-    if not subsample:
-        return HttpResponse("Subsample does not exist")
+    if "detail" in subsample:
+        return render_template("warning.html", text="Subsample "+id+" does not exist")
 
-    subsample['sample']['number'] = json.loads(urlopen(env('API_DRF_HOST')+'/samples/'+subsample['sample']['id']+'?fields=number&format=json').read())['number']
-    chemical_analyses = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?'+urlencode({"subsample_id": subsample['id']})+'&format=json').read())['results']
+    sample = subsample['sample']['id']
+    subsample['sample']['number'] = json.loads(urlopen(env('API_DRF_HOST')+'/samples/'+sample+'?fields=number&format=json').read())['number']
+    chemical_analyses = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?subsample_ids='+subsample['id']+'&format=json').read())['results']
 
     return render_template('subsample.html',
         subsample=subsample,
@@ -238,30 +218,23 @@ def edit_sample(id):
     api = MetpetAPI(email, api_key).api
 
     sample = json.loads(urlopen(env('API_DRF_HOST')+'/samples/'+id+'?format=json').read())
+    regions = [region['name'] for region in sample['regions']]
+    minerals = [mineral['name'] for mineral in sample['minerals']]
 
     rock_types = json.loads(urlopen(env('API_DRF_HOST')+'/rock_types/?fields=name&page_size=40&format=json').read())['results']
     api_regions = json.loads(urlopen(env('API_DRF_HOST')+'/regions/?fields=name&page_size=2000&format=json').read())['results']
     api_minerals = json.loads(urlopen(env('API_DRF_HOST')+'/minerals/?fields=name&page_size=200&format=json').read())['results']
-
-    metamorphic_regions = set()
-    metamorphic_grades = set()
-    api_samples = json.loads(urlopen(env('API_DRF_HOST')+'/samples/?fields=metamorphic_regions,metamorphic_grades&page_size=2000&format=json').read())
-    #while api_samples['next']:
-    for sample in api_samples['results']:
-        for mmr in sample['metamorphic_regions']:
-            metamorphic_regions.add(mmr['name'])
-        for mmg in sample['metamorphic_grades']:
-            metamorphic_grades.add(mmg['name'])
-    #    api_samples = json.loads(urlopen(api_samples['next']).read())
+    metamorphic_regions = json.loads(urlopen(env('API_DRF_HOST')+'/metamorphic_regions/?fields=name&page_size=240&format=json').read())['results']
+    metamorphic_grades = json.loads(urlopen(env('API_DRF_HOST')+'/metamorphic_grades/?fields=name&page_size=30&format=json').read())['results']
 
     location = sample['location_coords'].split(" ")
 
     form.owner.data = sample['owner']['name']
     form.public.data = sample['public_data']
-    form.location_text.data = sample['location_text']
-    form.collector.data = sample['collector']
-    form.rock_type.data = sample['rock_type']['rock_type']
-    form.rock_type.choices = [(r['rock_type'],r['rock_type']) for r in rock_types]
+    form.location_text.data = sample['location_name']
+    form.collector.data = sample['collector_name']
+    form.rock_type.data = sample['rock_type']['name']
+    form.rock_type.choices = [(r['name'],r['name']) for r in rock_types]
     form.country.data = sample['country']
     form.date_collected.data = sample['collection_date']
     form.longitude.data = location[1].replace("(","")
@@ -283,7 +256,7 @@ def edit_sample(id):
         rock = ''
         rock_select = form.rock_type.data
         for r in rock_types:
-            if r['rock_type'] == rock_select:
+            if r['name'] == rock_select:
                 rock = r
 
         met_grades = []
@@ -309,12 +282,12 @@ def edit_sample(id):
         new_sample.data['metamorphic_grades'] = met_grades
         new_sample.data['minerals'] = mins
         new_sample.data['regions'] = regs
-        new_sample.data['location'] = "POINT (" + str(form.longitude.data) + " " + str(form.latitude.data) + ")"
-        new_sample.data['user']['name'] = form.owner.data
+        new_sample.data['location_coords'] = "POINT (" + str(form.longitude.data) + " " + str(form.latitude.data) + ")"
+        new_sample.data['owner']['name'] = form.owner.data
         new_sample.data['public_data'] = form.public.data
-        new_sample.data['location_text'] = form.location_text.data
+        new_sample.data['location_name'] = form.location_text.data
         new_sample.data['collection_date'] = form.date_collected.data
-        new_sample.data['collector'] = form.collector.data
+        new_sample.data['collector_name'] = form.collector.data
         new_sample.data['country'] = form.country.data
         if form.date_collected.data != "":
             new_sample.data['collection_date'] = form.date_collected.data
@@ -328,7 +301,7 @@ def edit_sample(id):
         form = form,
         id = sample['number'],
         regions = api_regions,
-        minerals = sorted(api_minerals.values(), key=lambda k: k['name']),
+        minerals = api_minerals,
         api_key = api_key
     )
 
@@ -342,19 +315,10 @@ def new_sample():
     rock_types = json.loads(urlopen(env('API_DRF_HOST')+'/rock_types/?fields=name&page_size=40&format=json').read())['results']
     api_regions = json.loads(urlopen(env('API_DRF_HOST')+'/regions/?fields=name&page_size=2000&format=json').read())['results']
     api_minerals = json.loads(urlopen(env('API_DRF_HOST')+'/minerals/?fields=name&page_size=200&format=json').read())['results']
+    metamorphic_regions = json.loads(urlopen(env('API_DRF_HOST')+'/metamorphic_regions/?fields=name&page_size=240&format=json').read())['results']
+    metamorphic_grades = json.loads(urlopen(env('API_DRF_HOST')+'/metamorphic_grades/?fields=name&page_size=30&format=json').read())['results']
 
-    metamorphic_regions = set()
-    metamorphic_grades = set()
-    api_samples = json.loads(urlopen(env('API_DRF_HOST')+'/samples/?fields=metamorphic_regions,metamorphic_grades&page_size=2000&format=json').read())
-    #while api_samples['next']:
-    for sample in api_samples['results']:
-        for mmr in sample['metamorphic_regions']:
-            metamorphic_regions.add(mmr['name'])
-        for mmg in sample['metamorphic_grades']:
-            metamorphic_grades.add(mmg['name'])
-    #    api_samples = json.loads(urlopen(api_samples['next']).read())
-
-    form.rock_type.choices = [(r['rock_type'],r['rock_type']) for r in rock_types]
+    form.rock_type.choices = [(r['name'],r['name']) for r in rock_types]
     form.metamorphic_grades.choices = [(m['name'],m['name']) for m in metamorphic_grades]
     form.metamorphic_regions.choices = [(m['name'],m['name']) for m in metamorphic_regions]
     form.minerals.choices = []
@@ -363,7 +327,7 @@ def new_sample():
         rock = ''
         rock_select = form.rock_type.data
         for r in rock_types:
-            if r['rock_type'] == rock_select:
+            if r['name'] == rock_select:
                 rock = r
 
         met_grades = []
@@ -385,17 +349,17 @@ def new_sample():
                 regs.append(r)
 
         sample_data = {}
-        sample_data[u'rock_type'] = rock
-        sample_data[u'metamorphic_grades'] = met_grades
-        sample_data[u'minerals'] = mins
-        sample_data[u'regions'] = regs
-        sample_data[u'location'] = u"POINT (" + str(form.longitude.data) + " " + str(form.latitude.data) + ")"
-        sample_data[u'user']['name'] = form.owner.data
-        sample_data[u'public_data'] = form.public.data
-        sample_data[u'location_text'] = form.location_text.data
-        sample_data[u'collection_date'] = form.date_collected.data
-        sample_data[u'collector'] = form.collector.data
-        sample_data[u'country'] = form.country.data
+        sample_data['rock_type'] = rock
+        sample_data['metamorphic_grades'] = met_grades
+        sample_data['minerals'] = mins
+        sample_data['regions'] = regs
+        sample_data['location_coords'] = u"POINT (" + str(form.longitude.data) + " " + str(form.latitude.data) + ")"
+        sample_data['owner']['name'] = form.owner.data
+        sample_data['public_data'] = form.public.data
+        sample_data['location_name'] = form.location_text.data
+        sample_data['collection_date'] = form.date_collected.data
+        sample_data['collector_name'] = form.collector.data
+        sample_data['country'] = form.country.data
         
         sample_data = api.samples.post(sample_data)
         return redirect(url_for('search'))
@@ -404,7 +368,7 @@ def new_sample():
         form = form,
         id = '',
         regions = api_regions,
-        minerals = sorted(api_minerals.values(), key=lambda k: k['name']),
+        minerals = api_minerals,
         api_key = api_key
     )
 
@@ -417,20 +381,10 @@ def chemical_analyses():
 
     next = previous = last = total_count = None
     filters = literal_eval(json.dumps(request.args))
-    filters['fields'] = 'subsample,id,analysis_method,mineral,analyst,analysis_date,reference_x,reference_y,total'
 
-    chem_results = []
-    if 'all_results' in filters:
-        chemicals = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?'+urlencode(filters)+'&page_size=2000&format=json').read())
-        chem_results = chemicals['results']
-        while chemicals['next']:
-            chemicals = json.loads(urlopen(chemicals['next']).read())
-            chem_results += chemicals['results']
-        next, previous, last, total_count = None, None, url_for('chemical_analyses')+'?'+urlencode(filters), chemicals['count']
-    else:
-        chemicals = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?'+urlencode(filters)+'&format=json').read())
-        chem_results = chemicals['results']
-        next, previous, last, total_count = paginate_model('chemical_analyses', chemicals, filters)
+    chemicals = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?'+urlencode(filters)+'&format=json').read())
+    chem_results = chemicals['results']
+    next, previous, last, total_count = paginate_model('chemical_analyses', chemicals, filters)
 
     for c in chem_results:
         c['sample'] = json.loads(urlopen(env('API_DRF_HOST')+'/samples/'+c['subsample']['sample']+'?fields=number&format=json').read())
@@ -452,10 +406,10 @@ def chemical_analysis(id):
     email = session.get('email', None)
     api_key = session.get('api_key', None)
     api = MetpetAPI(email, api_key).api
-    
+
     analysis = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/'+id+'?format=json').read())
-    if not analysis:
-        return HttpResponse("Chemical analysis does not exist")
+    if "detail" in analysis:
+        return render_template("warning.html", text="Chemical analysis "+id+" does not exist")
     analysis['sample'] = json.loads(urlopen(env('API_DRF_HOST')+'/samples/'+analysis['subsample']['sample']+'?fields=number&format=json').read())
 
     return render_template('chemical_analysis.html',
@@ -474,26 +428,13 @@ def edit_chemical(id):
     chemical = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/'+id+'?format=json').read())
 
     api_minerals = json.loads(urlopen(env('API_DRF_HOST')+'/minerals/?fields=name&page_size=200&format=json').read())['results']
-    api_oxides = []#json.loads(urlopen(env('API_DRF_HOST')+'/oxides/?fields=species&page_size=50&format=json').read())['results']
-    api_elements = []#json.loads(urlopen(env('API_DRF_HOST')+'/elements/?fields=name,symbol&page_size=50&format=json').read())['results']
-    chemicals = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?fields=elements,oxides&page_size=1000&format=json').read())
-    #while chemicals['next']:
-    for c in chemicals['results']:
-        for o in c['oxides']:
-            if {'species': o['species']} not in api_oxides:
-                api_oxides.append({'species': o['species']})
-        for e in c['elements']:
-            if {'name': e['name'], 'symbol': e['symbol']} not in api_elements:
-                api_elements.append({'name': e['name'], 'symbol': e['symbol']})
-    #    chemicals = json.loads(urlopen(chemicals['next']).read())
+    api_oxides = json.loads(urlopen(env('API_DRF_HOST')+'/oxides/?fields=species&page_size=50&format=json').read())['results']
+    api_elements = json.loads(urlopen(env('API_DRF_HOST')+'/elements/?fields=name,symbol&page_size=50&format=json').read())['results']
 
-    elements = [e['name'] for e in api_elements if e['resource_uri'] in chemical['elements']]
-    oxides = [o['species'] for o in api_oxides if o['resource_uri'] in chemical['oxides']]
+    elements = [(e['name'],e['amount']) for e in chemical['elements']]
+    oxides = [(o['species'],o['amount']) for o in chemical['oxides']]
 
-    params = {'email': email, 'api_key': api_key}
-    pre = env('API_DRF_HOST')
-    suf = '?format=json'
-    user = get(pre+chemical['user']+suf, params=params).json()
+    user = json.loads(urlopen(env('API_DRF_HOST')+'/users/'+chemical['owner']['id']+'?format=json').read())
     subsample = json.loads(urlopen(env('API_DRF_HOST')+'/subsamples/'+chemical['subsample']['id']+'?format=json').read())
     sample = json.loads(urlopen(env('API_DRF_HOST')+'/samples/'+chemical['subsample']['sample']+'?format=json').read())
 
@@ -503,40 +444,35 @@ def edit_chemical(id):
     form.analysis_method.data = chemical['analysis_method']
     form.analyst.data = chemical['analyst']
     form.description.data = chemical['description']
-    form.minerals.data = chemical['minerals']['name']
-    form.minerals.choices = [(m,m) for m in api_minerals]
+    form.minerals.data = chemical['mineral']['name']
+    form.minerals.choices = [(m['name'],m['name']) for m in api_minerals]
     form.total.data = chemical['total']
-    form.StageX.data = chemical['stage_x']
-    form.StageY.data = chemical['stage_y']
+    form.StageX.data = chemical['reference_x']
+    form.StageY.data = chemical['reference_y']
     for i in range(len(oxides)):
-        form.oxides.append_entry(oxides[i])
-        form.oxides[i].label = oxides[i]
+        form.oxides.append_entry(oxides[i][1])
+        form.oxides[i].label = oxides[i][0]
     for i in range(len(elements)):
-        form.elements.append_entry(elements[i])
-        form.elements[i].label = elements[i]
+        form.elements.append_entry(elements[i][1])
+        form.elements[i].label = elements[i][0]
 
     if form.validate_on_submit():
         new_sample = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/'+id+'?format=json').read())
 
         elements = [e for e in api_elements if e['name'] in form.elements.data]
         oxides = [o for o in api_oxides if o['species'] in form.oxides.data]
+        mineral = [m for m in api_minerals if m['name'] in form.minerals.data][0]
 
-        mins = []
-        mineral_select = form.minerals.data
-        for m in api_minerals:
-            if m['name'] in mineral_select:
-                mins.append(m)
-
-        new_sample.data['user'] = form.owner.data
+        new_sample.data['owner'] = {'name': form.owner.data}
         new_sample.data['spot_id'] = form.point_number.data
         new_sample.data['public_data'] = form.public.data
         new_sample.data['analysis_method'] = form.analysis_method.data
         new_sample.data['analyst'] = form.analyst.data
         new_sample.data['description'] = form.description.data
-        new_sample.data['minerals'] = mins
+        new_sample.data['mineral'] = mineral
         new_sample.data['total'] = form.total.data
-        new_sample.data['stage_x'] = form.StageX.data
-        new_sample.data['stage_y'] = form.StageY.data
+        new_sample.data['reference_x'] = form.StageX.data
+        new_sample.data['reference_y'] = form.StageY.data
         if oxides:
             new_sample.data['oxides'] = oxides
         if elements:
@@ -547,7 +483,7 @@ def edit_chemical(id):
 
     return render_template('edit_chemical.html',
         form = form,
-        id = chemical['spot_id'],
+        id = chemical['id'],
         elements = api_elements,
         oxides = api_oxides,
         minerals = api_minerals,
@@ -566,30 +502,15 @@ def new_chemical():
     api.auth(user=email,api_key=api_key)
 
     api_minerals = json.loads(urlopen(env('API_DRF_HOST')+'/minerals/?fields=name&page_size=200&format=json').read())['results']
-    api_oxides = []#json.loads(urlopen(env('API_DRF_HOST')+'/oxides/?fields=species&page_size=50&format=json').read())['results']
-    api_elements = []#json.loads(urlopen(env('API_DRF_HOST')+'/elements/?fields=name,symbol&page_size=50&format=json').read())['results']
-    chemicals = json.loads(urlopen(env('API_DRF_HOST')+'/chemical_analyses/?fields=elements,oxides&page_size=1000&format=json').read())
-    #while chemicals['next']:
-    for c in chemicals['results']:
-        for o in c['oxides']:
-            if {'species': o['species']} not in api_oxides:
-                api_oxides.append({'species': o['species']})
-        for e in c['elements']:
-            if {'name': e['name'], 'symbol': e['symbol']} not in api_elements:
-                api_elements.append({'name': e['name'], 'symbol': e['symbol']})
-    #    chemicals = json.loads(urlopen(chemicals['next']).read())
+    api_oxides = json.loads(urlopen(env('API_DRF_HOST')+'/oxides/?fields=species&page_size=50&format=json').read())['results']
+    api_elements = json.loads(urlopen(env('API_DRF_HOST')+'/elements/?fields=name,symbol&page_size=50&format=json').read())['results']
 
     form.minerals.choices = [(m,m) for m in api_minerals]
 
     if form.validate_on_submit():
         elements = [e for e in api_elements if e['name'] in form.elements.data]
         oxides = [o for o in api_oxides if o['species'] in form.oxides.data]
-
-        mins = []
-        mineral_select = form.minerals.data
-        for m in api_minerals:
-            if m['name'] in mineral_select:
-                mins.append(m)
+        mineral = [m for m in api_minerals if m['name'] in form.minerals.data][0]
 
         chem_data = {}
         chem_data.data['user'] = form.owner.data
@@ -598,7 +519,7 @@ def new_chemical():
         chem_data.data['analysis_method'] = form.analysis_method.data
         chem_data.data['analyst'] = form.analyst.data
         chem_data.data['description'] = form.description.data
-        chem_data.data['minerals'] = mins
+        chem_data.data['minerals'] = mineral
         chem_data.data['total'] = form.total.data
         chem_data.data['stage_x'] = form.StageX.data
         chem_data.data['stage_y'] = form.StageY.data
@@ -694,8 +615,8 @@ def reset_password(token):
 @metpet_ui.route('/user/<string:id>')
 def user(id):
     user = json.loads(urlopen(env('API_DRF_HOST')+'/users/'+id+'?format=json').read())
-    if not user:
-        return HttpResponse("User does not exist")
+    if "detail" in user:
+        return render_template("warning.html", text="User "+id+" does not exist")
     return render_template('user.html', user=user)
 
 

@@ -1,11 +1,16 @@
-{% block body %}
 <div class="table-responsive">
   <table id="samplelist" class="table">
+    <caption>
+      <span style="float:left">Total: {{ total }}</span>
+      <span style="float:right"><a onclick="exportToCsv()">Export data to CSV file</a></span>
+    </caption>
     <thead>
       <tr>
         <th>Sample Number</th>
         <th>Analysis Method</th>
         <th>Analysis Material</th>
+        <th>Element Amounts</th>
+        <th>Oxide Amounts</th>
         <th>Analyst</th>
         <th>Analysis Date</th>
         <th>Reference X</th>
@@ -14,13 +19,31 @@
       </tr>
     </thead>
     <tbody>
-      <span>Total: {{ total }}</span>
-      <span style="float:right"><a onclick="exportToCsv()">Export data to CSV file</a></span>
       {% for analysis in chemical_analyses %}
       <tr>
-        <td td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}" target="_blank" >{% if analysis.sample %}{{ analysis.sample.number }}{% endif %}</a></td>
+        <td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}" target="_blank" >{% if analysis.sample %}{{ analysis.sample.number }}{% endif %}</a></td>
         <td class="sample_value">{% if analysis.analysis_method %}{{ analysis.analysis_method }}{% endif %}</td>
         <td class="sample_value">{% if analysis.mineral %}{{ analysis.mineral.name }}{% endif %}</td>
+        <td class="sample_mineral sample_value">
+          {% if analysis.elements %}
+          {{ analysis.elements.0.symbol }} {{ analysis.elements.0.amount }} ...
+          <div class="full_list">
+            {% for e in analysis.elements %}
+            {{ e.symbol }} {{ e.amount }}<br>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </td>
+        <td class="sample_mineral sample_value">
+          {% if analysis.oxides %}
+          {{ analysis.oxides.0.species }} {{ analysis.oxides.0.amount }} ...
+          <div class="full_list">
+            {% for o in analysis.oxides %}
+            {{ o.species }} {{ o.amount }}<br>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </td>
         <td class="sample_value">{% if analysis.analyst %}{{ analysis.analyst }}{% endif %}</td>
         <td class="sample_value">{% if analysis.analysis_date %}{{ analysis.analysis_date }}{% endif %}</td>
         <td class="sample_value">{% if analysis.reference_x != None %}{{ analysis.reference_x }}{% endif %}</td>
@@ -34,13 +57,13 @@
 
 &lt;&lt; <a class="samples-pagination" href="{{ first_page }}">First</a>
 {% if prev_url %}
-  &nbsp;&nbsp;&lt; <a class="samples-pagination" name="prev" value="sure" href="{{ prev_url }}">Prev</a>
+  &nbsp;&nbsp;&lt; <a class="samples-pagination" href="{{ prev_url }}">Prev</a>
 {% endif %}
 &nbsp;&nbsp;|
 {% if next_url %}
   &nbsp;&nbsp; <a class="samples-pagination" href="{{ next_url }}">Next</a> &gt;
 {% endif %}
-&nbsp;&nbsp; <a class="samples-pagination" name="prev" value="last" href="{{ last_page }}">Last</a> &gt;&gt;
+&nbsp;&nbsp; <a class="samples-pagination" href="{{ last_page }}">Last</a> &gt;&gt;
 
 <script>
 // AJAX PAGINATION CALLS
@@ -82,7 +105,7 @@ function exportToCsv() {
       var innerdata = cell.innerText.toString();
       var k = innerdata.indexOf("...");
       if (k >= 0)
-        innerdata = innerdata.substring(k+4);
+        innerdata = innerdata.replace(/\n/g,", ").substring(k+4,innerdata.length-2);
       if (innerdata.search(/("|,|\n)/g) >= 0)
         innerdata = '"' + innerdata + '"';
       if (j > 0)
@@ -110,4 +133,3 @@ function exportToCsv() {
   }
 }
 </script>
-{% endblock %}

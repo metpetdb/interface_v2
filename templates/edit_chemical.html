@@ -121,12 +121,11 @@ function addElementField() {
   while (document.getElementById('element-'+i.toString()) != null)
     i++;
   label.htmlFor = 'element-'+i.toString();
-  label.innerHTML = element.options[element.selectedIndex].value+"  ";
+  label.innerHTML = element.options[element.selectedIndex].value+"&nbsp;&nbsp;";
   newInput.type = "text";
   newInput.id = "element-"+i.toString();
   newInput.name = "element";
-  newInput.value = element.options[element.selectedIndex].value;
-  newInput.innerHTML = '0.0';
+  newInput.value = '0.0';
   newListElement.appendChild(label);
   newListElement.appendChild(newInput);
   list.appendChild(newListElement);
@@ -145,8 +144,7 @@ function addOxideField() {
   newInput.type = "text";
   newInput.id = "oxide-"+i.toString();
   newInput.name = "oxide";
-  newInput.value = element.options[element.selectedIndex].value;
-  newInput.innerHTML = '0.0';
+  newInput.value = '0.0';
   newListElement.appendChild(label);
   newListElement.appendChild(newInput);
   list.appendChild(newListElement);
