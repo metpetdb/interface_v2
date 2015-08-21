@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 
 {% block title %}
-  <h3>Subsample {{subsample.name}}</h3>
+  <h4>
+    <a href="{{ url_for('sample', id=subsample.sample.id) }}">Sample {{ subsample.sample.number }}</a> / 
+    Subsample {{ subsample.name }}
+  </h4>
 {% endblock %}
 
 {% block body %}
@@ -13,16 +16,8 @@
         <td class="subsample_value">{{subsample.sample.owner.name}}</td>
       </tr>
       <tr>
-        <td class="subsample_label">Name</td>
-        <td class="subsample_value">{{subsample.name}}</td>
-      </tr>
-      <tr>
         <td class="subsample_label">Public</td>
-        <td class="subsample_value">{{subsample.public_data}}</td>
-      </tr>
-      <tr>
-        <td class="subsample_label">Sample</td>
-        <td class="subsample_value"><a href="{{ url_for('sample', id=subsample.sample.id) }}" target="_blank">{{ subsample.sample.number }}</a></td>
+        <td class="subsample_value">{% if subsample.public_data %}Yes{% else %}No{% endif %}</td>
       </tr>
     </tbody>
   </table>
@@ -78,7 +73,7 @@
     <tbody>
       {%for analysis in chemical_analyses%}
       <tr>
-        <td><a href="{{ url_for('chemical_analysis', id=analysis.id) }}" target="_blank">{{analysis.spot_id}}</td>
+        <td><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{{analysis.spot_id}}</td>
         <td>{{analysis.public_data}}</td>
         <td>{{analysis.analysis_method}}</td>
         <td>{{analysis.mineral.name}}</td>

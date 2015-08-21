@@ -1,0 +1,244 @@
+MetPetDB DRF API:
+
+Contents
+i) General Info
+ii) Endpoints
+iii) Fields by Endpoint
+iv) Search Filters by Endpoint
+
+
+i) General Info
+To make a general API call for some endpoint, use
+	API_ROOT/ENDPOINT_NAME?fields=FIELDS&FILTERS&OTHER_PARAMETERS
+Endpoint names are found in ii)
+Field options are found in iii). If no fields are specified, it will return all fields
+Filter options are found in iv)
+Other parameters include:
+	page_size: number of results to return
+	page: to navigate through pages
+	format=json returns the data as a JSON string
+
+A call is returned as a dictionary, formatted thus
+	count: total number of results
+	next: url for next page, if any
+	previous: url for previous page, if any
+	results: list of results where each result is a dictionary containing the specified fields
+
+If you have an id and want its data, use
+	API_ROOT/ENDPOINT_NAME/id?fields=FIELDS&OTHER_PARAMETERS
+Again, fields are optional
+Other parameters include:
+	format=json
+
+This type of call is returned as one dictionary containing the specified fields
+
+
+ii) Endpoints
+
+a. users
+b. samples
+c. subsamples
+d. chemical_analyses
+e. metamorphic_regions
+f. metamorphic_grades
+g. minerals
+h. elements
+i. oxides
+j. rock_types
+k. regions
+l. references
+m. collectors
+
+
+iii) Fields by Endpoint
+
+a. users
+	id: unique user id
+	name: user's name
+	email: email address
+	address: physical address
+	city: city
+	province: province
+	country: country
+	postal_code: postal code
+	institution: user's research institution, if any
+	professional_url: url for professional website
+	research_interests: research interests
+
+b. samples
+	id: unique sample id
+	minerals: list of minerals found in sample, formatted thus
+		id: unique mineral id
+		name: mineral name (i.e. Quartz)
+		amount: amount of mineral found in sample
+		real_mineral_id: unique mineral id
+	owner: user who owns the sample, formatted as user from a.
+	subsample_ids: list of ids that correspond to subsamples of sample
+	chemical_analyses_ids: list of ids that coorespond to chemical analyses done on sample
+	version: 1
+	public_data: true or false, whether sample data is public
+	number: sample number
+	aliases: list of aliases
+	collection_date: date of sample collection, formatted as yyyy-mm-ddThh:mm:ssZ
+	description: description of sample given by owner
+	location_name: name of location found
+	location_coords: latitude and longitude of location found, formatted as SRID=####;POINT (longitude latitude)
+	location_error: error of location coords info
+	date precision: precision of collection date info
+	country: country found
+	regions: list of regions sample was found in
+	references: publication reference numbers
+	collector_name: name of sample collector
+	sesar_number: sample IGSN
+	rock_type: sample rock type, formatted as rock type from j.
+	collector_id: unique id of collector
+	metamorphic_regions: list of metamorphic regions sample was found in, formatted as metamorphic region from e.
+	metamorphic_grades: list of metamorphic grades sample was found in, formatted as metamorphic grade from f.
+
+c. subsamples
+	id: unique subsample id
+	sample: corresponding sample data, formatted as sample from b.
+	name: subsample name
+	version: 1
+	public_data: true or false, whether subsample data is public
+	owner: unique owner/user id
+	subsample_type: subsample type id
+
+d. chemical_analyses
+	id: unique chemical analysis id
+	mineral: mineral found in analysis, formatted as mineral from g.
+	owner: user who owns the analysis, formatted as user from a.
+	elements: list of elements found, formatted thus
+		id: unique element id
+		name: element name (i.e. Aluminium)
+		alternate_name: any alternate name for element
+		symbol: element symbol (i.e. Al)
+		atomic_number: atomic number
+		weight: atomic weight
+		order_id: order id
+		amount: amount of element found in analysis
+		precision: precision of measurements
+		precision_type: type of precision used
+		measurement_unit: unit of measurement (i.e. PPM)
+		min_amount: minimum amount
+		max_amount: maximum amount
+	oxides: list of oxides found, formatted thus
+		id: unique oxide id
+		element_id: unique element id
+		oxidation_state: oxidation state
+		species: name of oxide (i.e. Al2O3)
+		weight: atomic weight
+		cations_per_oxide: number of cations per oxide
+		conversion_factor: conversion factor
+		order_id: order id
+		amount: amount of oxide found
+		precision: precision of measurements
+		precision_type: type of precision
+		measurement_unit: unit of measurement (i.e. WT%)
+		min_amount: minimum amount
+		max_amount: maximum amount
+	version: 1
+	public_data: true or false, whether analysis data is public
+	reference_x: reference x
+	reference_y: reference y
+	stage_x: stage x
+	analysis_method: method of analysis (i.e. EMP)
+	where_done: where was analysis done
+	analyst: analyst
+	analysis_date: analysis date
+	date_precision: precision of date
+	description: user description of analysis
+	total: total
+	spot_id: id of spot on subsample it was done
+	reference: publication reference number
+	subsample: subsample analysis was done on, formatted thus
+		id: unique subsample id
+		name: subsample name
+		version: 1
+		public_data: true or false, if subsample data is public
+		sample: unique sample id
+		owner: subsample owner/user
+		subsample_type: subsample type id
+
+e. metamorphic_regions
+	id: unique region id
+	name: name of region (i.e. Arabian Shield)
+	shape: polygon shape of region (i.e. SRID=4326;POLYGON ((34.0484022838309031 27.8866910784390996, 34.4560488428044991 27.7520165428447996, 35.0158106954933999 27.8516038851304017, 38.2018302949166966 23.2699307269244002, 39.0207210064893033 20.8213618406717984, 41.4263074343348023 17.8929567219119008, 42.9308324032164990 13.6692550195186993, 43.6952854187557023 12.2679633886702000, 46.4883656499662976 13.3356946259380997, 47.8162190064966026 13.7360439211113992, 47.1914594523678019 15.1362360185172005, 45.6117277559638978 15.4710895235141006, 44.6384160400663035 18.6410954286027994, 44.7920243330208976 21.4961016684988984, 45.6376661662760981 23.2098741289774999, 44.8333406472004015 24.7632739882062012, 43.4195195247984032 26.7512257031151002, 42.5587478997422011 27.7243877213855008, 41.3655610154795994 27.7032691675475995, 39.6353318198052023 26.5673784159806985, 38.0192214787146980 26.8505813257254999, 37.7683589087429965 27.8422403673829990, 36.0409273308018001 28.0618683185420998, 35.3283144050313993 29.6572563771877000, 34.6678602800703999 29.6788204836438005, 33.2055223369228969 29.0676205123284994, 34.0484022838309031 27.8866910784390996)) )
+	description: generally list of countries contained in region
+	label_location: label of location
+
+f. metamorphic_grades
+	id: unique metamorphic grade id
+	name: grade name (i.e. Greenschist facies)
+
+g. minerals
+	id: unique mineral id
+	name: mineral name (i.e. Mica)
+	real_mineral: unique mineral id
+
+h. elements
+	id: unique element id
+	name: element name (i.e. Aluminium)
+	alternate_name: any alternate name for element
+	symbol: element symbol (i.e. Al)
+	atomic_number: atomic number
+	weight: atomic weight
+	order_id: order id
+
+i. oxides
+	id: unique oxide id
+	oxidation_state: oxidation state
+	species: name of oxide (i.e. Al2O3)
+	weight: atomic weight
+	cations_per_oxide: number of cations per oxide
+	conversion_factor: conversion factor
+	order_id: order id
+	element: unique element id
+
+j. rock_types
+	id: unique rock type id
+	name: rock name (i.e. Metapelite)
+
+k. regions
+	id: unique region id
+	name: region name (i.e. Damolandia)
+
+l. references
+	id: unique reference id
+	name: publication reference number (i.e. 1998-004725)
+
+m. collectors
+	id: unique collector id
+	name: collector name (i.e. Japanese Antarctic Research Expedition)
+
+
+iv) Search Filters by Endpoint
+Note: all endpoints can have fields specified, even if not listed here
+Also note: all lists should be comma separated with no spaces
+
+b. samples
+	minerals: list of mineral names
+	owner: list of user names
+	public_data: true or false, whether sample data is public
+	numbers: list of sample numbers
+	start_date, end_date: collection date range, formatted as yyyy-mm-dd 00:00:00
+	location_bbox: bounding box of location coordinates (order: sw corner lat, sw corner lon, ne corner lat, ne corner lon)
+	countries: list of countries
+	regions: list of region names
+	references: publication reference number
+	collectors: list of collector names
+	igsn: sample IGSN
+	rock_types: list of rock type names
+	metamorphic_regions: list of metamorphic region names
+	metamorphic_grades: list of metamorphic grade names
+	mineral_and: true or false, if set samples returned must contain ALL minerals specified
+	chemical_analyses_filters: true or false, if set it allows samples to be searched using filters from chemical analyses in d.
+
+d. chemical_analyses
+	minerals: list of mineral names
+	elements: list of element names
+	oxides: list of oxide species
+	subsample_ids: list of subsample ids that analyses correspond to
+	elements_and: true or false, if set analyses returned must contain ALL elements specified
+	oxides_and: true or false, if set analyses returned must contain ALL oxides specified
+	sample_filters: true or false, if set it allows analyses to be searched using filters from samples in b.

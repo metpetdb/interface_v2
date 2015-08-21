@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block title %}
-  <h3>Sample {{sample.number}}</h3>
+  <h4>
+    Sample {{sample.number}}
+  </h4>
 {% endblock %}
 
 {% block body %}
@@ -77,7 +79,7 @@
       </tr>
       {% if api_key %}
       <tr>
-        <p><a href="{{ url_for('edit_sample', id = sample.id) }}" target="_blank">Edit Sample</a></p>
+        <p><a href="{{ url_for('edit_sample', id = sample.id) }}">Edit Sample</a></p>
       </tr>
       {% endif %}
     </tbody>
@@ -129,7 +131,7 @@
     <tbody>
       {%for subsample in subsamples%}
       <tr>
-        <td id="img-popup"><a href="{{ url_for('subsample', id=subsample.id) }}" target="_blank">{{subsample.name}}</a></td>
+        <td id="img-popup"><a href="{{ url_for('subsample', id=subsample.id) }}">{{subsample.name}}</a></td>
         <td>{{subsample.public_data}}</td>
         <td>{{subsample.subsample_type}}</td>
         <td>{{subsample.image_count}}</td>

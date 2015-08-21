@@ -135,7 +135,7 @@
                 {% endfor %}
               </select><br>
 
-              <label class="provenance-label" for="collector">Collector: </label>
+              <label class="provenance-label" for="collectors">Collector: </label>
               <select id="selected-collectors" onchange="updateProvenance()" multiple name="collectors" class="chosen-select">
                 {% for c in collectors %}
                 <option value="{{ c.name }}">{{ c.name }}</option>
@@ -149,7 +149,7 @@
                 {% endfor %}
               </select><br>
 
-              <label class="provenance-label" for="number">Number: </label>
+              <label class="provenance-label" for="numbers">Number: </label>
               <select id="selected-number" onchange="updateProvenance()" name="numbers" class="chosen-select">
                 <option value="" disabled selected>Select sample number</option>
                 {% for n in numbers %}
@@ -157,7 +157,7 @@
                 {% endfor %}
               </select><br>
 
-              <label class="provenance-label" for="sesar_number">IGSN: </label>
+              <label class="provenance-label" for="igsn">IGSN: </label>
               <select id="selected-igsn" onchange="updateProvenance()" name="igsn" class="chosen-select">
                 <option value="" disabled selected>Select IGSN</option>
                 {% for i in igsns %}

@@ -1,29 +1,21 @@
 {% extends "base.html" %}
 
 {% block title %}
-  <h3>Chemical Analysis {{analysis.id}}</h3>
+  <h4>
+    <a href="{{ url_for('sample', id=analysis.subsample.sample) }}">Sample {{ analysis.sample.number }}</a> / 
+    <a href="{{ url_for('subsample', id=analysis.subsample.id) }}">Subsample {{ analysis.subsample.name }}</a> / 
+    Chemical Analysis Point {{analysis.spot_id}}
+  </h4>
 {% endblock %}
 
 {% block body %}
 <div class="table-responsive">
   <table id="chemicalanalysisview_table" class="table">
-    <tbody>
-      <tr>
-        <td class="sample_label">Sample</td>
-        <td class="sample_value"><a href="{{ url_for('sample', id=analysis.subsample.sample) }}" target="_blank">{% if analysis.sample %}{{ analysis.sample.number }}{% endif %}</a></td>
-      </tr>          
-      <tr>
-        <td class="sample_label">Subsample</td>
-        <td class="sample_value"><a href="{{ url_for('subsample', id=analysis.subsample.id) }}" target="_blank">{% if analysis.subsample.name %}{{ analysis.subsample.name }}{% endif %}</a></td>
-      </tr>          
+    <tbody>    
       <tr>
         <td class="sample_label">Owner</td>
         <td class="sample_value">{% if analysis.owner.name %}{{analysis.owner.name}}{% endif %}</td>
-      </tr>          
-      <tr>
-        <td class="sample_label">Point Number</td>
-        <td class="sample_value">{% if analysis.spot_id %}{{analysis.spot_id}}{% endif %}</td>
-      </tr>          
+      </tr>      
       <tr>
         <td class="sample_label">Public</td>
         <td class="sample_value">{% if analysis.public_data %}{{analysis.public_data}}{% endif %}</td>
@@ -66,7 +58,7 @@
       </tr>
       {% if api_key %}
       <tr>
-        <p><a href="{{ url_for('edit_chemical', id = analysis.chemical_analysis_id) }}" target="_blank">Edit Chemical Analysis</a></p>
+        <p><a href="{{ url_for('edit_chemical', id=analysis.chemical_analysis_id) }}">Edit Chemical Analysis</a></p>
       </tr>
       {% endif %}
     </tbody>
