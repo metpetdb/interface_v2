@@ -28,8 +28,8 @@
       {% for sample in samples %}
       <tr>
         <td id="url" class="sample_label"><a href="{{ url_for('sample', id=sample.id) }}" target="_blank">{% if sample.number %}{{ sample.number }}{% endif %}</td>
-        <td class="sample_value">{% if sample.subsample_ids != None %}{{ sample.subsample_ids }}{% endif %}</td>
-        <td class="sample_value">{% if sample.chemical_analyses_ids != None %}{{ sample.chemical_analyses_ids }}{% endif %}</td>
+        <td class="sample_value">{% if sample.subsample_ids != None %}{{ sample.subsample_ids|length }}{% endif %}</td>
+        <td class="sample_value">{% if sample.chemical_analyses_ids != None %}{{ sample.chemical_analyses_ids|length }}{% endif %}</td>
         <td class="sample_value">{% if sample.image_count != None %}{{ sample.image_count }}{% endif %}</td>
         <td class="sample_value">{% if sample.rock_type %}{{ sample.rock_type.name }}{% endif %}</td>
         <td class="sample_mineral sample_value">{{ sample.minerals|truncate(30)}}
