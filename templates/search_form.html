@@ -128,13 +128,6 @@
           <div class="tab-pane" id="provenance">
             <ul id="provenance">
               <h3>Provenance</h3>
-              <label class="provenance-label" for="owner">Owner: </label>
-              <select id="selected-owners" onchange="updateProvenance()" multiple name="owner" class="chosen-select">
-                {% for o in owners %}
-                <option value="{{ o }}">{{ o }}</option>
-                {% endfor %}
-              </select><br>
-
               <label class="provenance-label" for="collectors">Collector: </label>
               <select id="selected-collectors" onchange="updateProvenance()" multiple name="collectors" class="chosen-select">
                 {% for c in collectors %}
@@ -157,13 +150,13 @@
                 {% endfor %}
               </select><br>
 
-              <label class="provenance-label" for="igsn">IGSN: </label>
+<!--               <label class="provenance-label" for="igsn">IGSN: </label>
               <select id="selected-igsn" onchange="updateProvenance()" name="igsn" class="chosen-select">
                 <option value="" disabled selected>Select IGSN</option>
                 {% for i in igsns %}
                 <option value="{{ i }}">{{ i }}</option>
                 {% endfor %}
-              </select><br>
+              </select><br> -->
 
               <input type="hidden" id="startdatevalue" name="start_date" value="">
               <input type="hidden" id="enddatevalue" name="end_date" value="">
@@ -689,27 +682,12 @@ function updateProvenance()
   var searchOptions = document.getElementById("search-options-provenance");
   searchOptions.innerHTML = "";
 
-  if($("#selected-owners option:selected").length ||
-      $("#selected-collectors option:selected").length ||
+  if($("#selected-collectors option:selected").length ||
       $("#selected-reference option:selected").length ||
       $("#selected-number option:selected").length ||
       $("#selected-igsn option:selected").length ||
       $('#startdatevalue').val() || $('#enddatevalue').val())
     searchOptions.innerHTML += "<div class='summary-title'><h4>Provenance</h4><a onclick='clearProvenance()' class='clear-title' href='#'>Clear</a></div>";
-
-  var selectedOwners = document.getElementById("selected-owners");
-  if($("#selected-owners option:selected").length)
-  {
-    searchOptions.innerHTML += "<b>Owners:<b> ";
-    for(var a = 0; a < selectedOwners.options.length; a++)
-    {
-      if(selectedOwners.options[a].selected)
-        searchOptions.innerHTML += selectedOwners.options[a].innerHTML + ", ";
-    }
-    var s = searchOptions.innerHTML;
-    searchOptions.innerHTML = s.slice(0, -2);
-    searchOptions.innerHTML += "<br>";
-  }
 
   var selectedCollectors = document.getElementById("selected-collectors");
   if($("#selected-collectors option:selected").length)

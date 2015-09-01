@@ -17,6 +17,8 @@ Other parameters include:
 	page_size: number of results to return
 	page: to navigate through pages
 	format=json returns the data as a JSON string
+In Python, you can create a dictionary of fields, filters, and other parameters
+then format them using url_encode(dictionary_name)
 
 A call is returned as a dictionary, formatted thus
 	count: total number of results
@@ -222,7 +224,7 @@ b. samples
 	public_data: true or false, whether sample data is public
 	numbers: list of sample numbers
 	start_date, end_date: collection date range, formatted as yyyy-mm-dd 00:00:00
-	location_bbox: bounding box of location coordinates (order: sw corner lat, sw corner lon, ne corner lat, ne corner lon)
+	location_bbox: bounding box of location coordinates (order: sw corner long, sw corner lat, ne corner long, ne corner lat)
 	countries: list of countries
 	regions: list of region names
 	references: publication reference number

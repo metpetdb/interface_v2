@@ -12,7 +12,8 @@
     <tbody>
       <tr>
         <td class="sample_label">Owner</td>
-        <td class="sample_value">{% if sample.owner.name %}{{ sample.owner.name }}{% endif %}</td>      
+        <td class="sample_value">{% if sample.owner.name %}{{ sample.owner.name }}{% endif %}</td>
+      </tr>
       <tr>
         <td class="sample_label">IGSN</td>
         <td class="sample_value">{% if sample.sesar_number %}{{ sample.sesar_number }}{% endif %}</td>
@@ -20,11 +21,11 @@
       <tr>
         <td class="sample_label">Aliases</td>
         <td class="sample_value">{% if sample.aliases %}{{ sample.aliases }}{% endif %}</td>
-      </tr>      
+      </tr>
       <tr>
         <td class="sample_label">Date Collected</td>
         <td class="sample_value">{% if sample.collection_date %}{{ sample.collection_date }}{% endif %}</td>
-      </tr>      
+      </tr>
       <tr>
         <td class="sample_label">Rock Type</td>
         <td class="sample_value">{% if sample.rock_type.name %}{{ sample.rock_type.name }}{% endif %}</td>
@@ -32,42 +33,46 @@
       <tr>
         <td class="sample_label">Public</td>
         <td class="sample_value">{% if sample.public_data %}{{ sample.public_data }}{% endif %}</td>
-      </tr>      
+      </tr>
       <tr>
         <td class="sample_label">Latitude</td>
         <td class="sample_value">{% if sample.location_coords %}{{ sample.location_coords.0 }}{% endif %}</td>
-      </tr>      
+      </tr>
       <tr>
         <td class="sample_label">Longitude</td>
         <td class="sample_value">{% if sample.location_coords %}{{ sample.location_coords.1 }}{% endif %}</td>
-      </tr>      
+      </tr>
       <tr>
         <td class="sample_label">Country</td>
         <td class="sample_value">{% if sample.country %}{{ sample.country }}{% endif %}</td>
-      </tr>      
+      </tr>
       <tr>
         <td class="sample_label">Collector</td>
         <td class="sample_value">{% if sample.collector_name %}{{ sample.collector_name }}{% endif %}</td>
-      </tr>      
+      </tr>
       <tr>
         <td class="sample_label">Present Location</td>
         <td class="sample_value">{% if sample.location_name %}{{ sample.location_name }}{% endif %}</td>
-      </tr>      
+      </tr>
       <tr>
         <td class="sample_label">Region</td>
         <td class="sample_value">{% if sample.regions %}{{ sample.regions }}{% endif %}</td>
-      </tr>      
+      </tr>
       <tr>
         <td class="sample_label">Metamorphic Region</td>
         <td class="sample_value">{% if sample.metamorphic_regions %}{{ sample.metamorphic_regions }}{% endif %}</td>
-      </tr>      
+      </tr>
       <tr>
         <td class="sample_label">Metamorphic Grade</td>
         <td class="sample_value">{% if sample.metamorphic_grades %}{{ sample.metamorphic_grades }}{% endif %}</td>
-      </tr>      
+      </tr>
       <tr>
         <td class="sample_label">Publication References</td>
         <td class="sample_value">{% if sample.references %}{{ sample.references }}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Description</td>
+        <td class="sample_value">{% if sample.description %}{{ sample.description }}{% endif %}</td>
       </tr>
       <tr>
         <td class="sample_label">Abstracts</td>
@@ -79,7 +84,7 @@
       </tr>
       {% if api_key %}
       <tr>
-        <p><a href="{{ url_for('edit_sample', id = sample.id) }}">Edit Sample</a></p>
+        <p><a href="{{ url_for('edit-sample', id = sample.id) }}">Edit Sample</a></p>
       </tr>
       {% endif %}
     </tbody>
@@ -133,9 +138,9 @@
       <tr>
         <td id="img-popup"><a href="{{ url_for('subsample', id=subsample.id) }}">{{subsample.name}}</a></td>
         <td>{{subsample.public_data}}</td>
-        <td>{{subsample.subsample_type}}</td>
+        <td>{{subsample.subsample_type.name}}</td>
         <td>{{subsample.image_count}}</td>
-        <td>{{subsample.chem_analyses_count}}</td>
+        <td>{{subsample.chemical_analyses|length}}</td>
         <td><a href="{{ url_for('user', id=sample.owner.id) }}" target="_blank">{{ sample.owner.name }}</a></td>
         <td> -- </td>
       </tr>

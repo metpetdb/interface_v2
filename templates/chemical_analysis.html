@@ -58,7 +58,7 @@
       </tr>
       {% if api_key %}
       <tr>
-        <p><a href="{{ url_for('edit_chemical', id=analysis.chemical_analysis_id) }}">Edit Chemical Analysis</a></p>
+        <p><a href="{{ url_for('edit-chemical', id=analysis.id) }}">Edit Chemical Analysis</a></p>
       </tr>
       {% endif %}
     </tbody>

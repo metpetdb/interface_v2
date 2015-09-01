@@ -4,7 +4,7 @@
   <h4>
     <a href="{{ url_for('sample', id=analysis.subsample.sample) }}">Sample {{ analysis.sample.number }}</a> / 
     <a href="{{ url_for('subsample', id=analysis.subsample.id) }}">Subsample {{ analysis.subsample.name }}</a> / 
-    Chemical Analysis Point {{analysis.spot_id}}
+    Chemical Analysis Point {% if analysis.spot_id %}{{analysis.spot_id}}{% endif %}
   </h4>
 {% endblock %}
 

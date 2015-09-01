@@ -129,6 +129,8 @@
                 {% endif %}
               {% endfor %}
             </select>
+            <br>
+            <input type="text" id="add_regions" style="width:85%">
             <button type="button" onclick="addOption('regions')" style="float:right">Add</button>
           </td>
         </tr>
@@ -167,10 +169,16 @@
           <td class="sample_value">
             <select multiple name="references" class="chosen-select" style="width:85%">
               <option></option>
-              {% for r in sample.references %}
+              {% for r in references %}
+                {% if r in sample.references %}
                 <option value="{{ r }}" selected="selected">{{ r }}</option>
+                {% else %}
+                <option value="{{ r }}">{{ r }}</option>
+                {% endif %}
               {% endfor %}
             </select>
+            <br>
+            <input type="text" id="add_references" style="width:85%">
             <button type="button" onclick="addOption('references')" style="float:right">Add</button>
           </td>
         </tr>
@@ -249,11 +257,12 @@ $(function()
 function addOption(name) {
   var list = document.getElementById(name);
   var new_option = document.createElement("option");
-  new_option.text = $('#references .chosen-search input[type="text"]').text;
-  new_option.value = $('#references .chosen-search input[type="text"]').text;
+  new_option.text = document.getElementById('add_'+name).value;
+  new_option.value = document.getElementById('add_'+name).value;
   new_option.selected = "selected";
   list.add(new_option);
   $('.chosen-select').trigger("chosen:updated");
+  document.getElementById('add_'+name).value = '';
 }
 
 function update() {

@@ -20,7 +20,6 @@ from forms import (
     RequestPasswordResetForm,
     PasswordResetForm
 )
-from lib.api import MetpetAPI
 from utilities import paginate_model
 
 mail = Mail()
@@ -36,8 +35,7 @@ def index():
 
 @metpet_ui.route('/search/')
 def search():
-    email = session.get('email', None)
-    api = drest.api.API(baseurl=env('API_DRF_HOST'))
+    api = drest.API(baseurl=env('API_DRF_HOST'))
 
     filters = {}
     for key in dict(request.args):
@@ -51,7 +49,7 @@ def search():
         if 'minerals_and' in filters:
             del filters['minerals_and']
         filters['sample_filters'] = True
-        return redirect(url_for('chemical_analyses')+'?'+urlencode(filters))
+        return redirect(url_for('chemical-analyses')+'?'+urlencode(filters))
 
     regions = api.make_request('GET','/regions/', params={'fields': 'name', 'page_size': 2000, 'format': 'json'}).data['results']
     minerals = api.make_request('GET','/minerals/', params={'fields': 'name', 'page_size': 200, 'format': 'json'}).data['results']
@@ -62,14 +60,10 @@ def search():
     metamorphic_regions = api.make_request('GET','/metamorphic_regions/', params={'fields': 'name', 'page_size': 240, 'format': 'json'}).data['results']
 
     samples = api.make_request('GET','/samples/',
-        params={'fields': 'country,sesar_number,owner', 'public_data': True, 'page_size': 1000, 'format': 'json'}).data['results']
+        params={'fields': 'country', 'public_data': True, 'page_size': 1000, 'format': 'json'}).data['results']
     countries = set()
-    igsns = set()
-    owners = set()
     for sample in samples:
         countries.add(sample['country'])
-        igsns.add(sample['sesar_number'])
-        owners.add(sample['owner']['name'])
 
     api_samples = api.make_request('GET','/samples/', params={'fields': 'number', 'page_size': 2000, 'format': 'json'}).data
     numbers = api_samples['results']
@@ -77,18 +71,12 @@ def search():
         api_samples = json.loads(urlopen(api_samples['next']).read())
         numbers += api_samples['results']
 
-    if email:
-       logged_in_user = api.make_request('GET','/users/', params={'fields': 'name', 'email': email, 'page_size': 40, 'format': 'json'}).data['results']
-       owners.add(logged_in_user['name'])
-
     return render_template('search_form.html',
         countries=countries,
-        igsns=igsns,
         metamorphic_grades=metamorphic_grades,
         metamorphic_regions=metamorphic_regions,
         minerals=minerals,
         numbers=numbers,
-        owners=owners,
         collectors=collectors,
         references=references,
         regions=regions,
@@ -98,7 +86,7 @@ def search():
 
 @metpet_ui.route('/search-chemistry/')
 def search_chemistry():
-    api = drest.api.API(baseurl=env('API_DRF_HOST'))
+    api = drest.API(baseurl=env('API_DRF_HOST'))
 
     filters = {}
     for key in dict(request.args):
@@ -106,7 +94,7 @@ def search_chemistry():
             filters[key] = (',').join(dict(request.args)[key])
 
     if request.args.get('resource') == 'chemicalanalysis':
-        return redirect(url_for('chemical_analyses')+'?'+urlencode(filters))
+        return redirect(url_for('chemical-analyses')+'?'+urlencode(filters))
 
     if request.args.get('resource') == 'sample':
         filters['chemical_analyses_filters'] = True
@@ -124,7 +112,7 @@ def search_chemistry():
 
 @metpet_ui.route('/samples/')
 def samples():
-    api = drest.api.API(baseurl=env('API_DRF_HOST'))
+    api = drest.API(baseurl=env('API_DRF_HOST'))
 
     next = previous = last = total_count = None
     filters = literal_eval(json.dumps(request.args))
@@ -153,12 +141,14 @@ def samples():
 
 @metpet_ui.route('/sample/<string:id>')
 def sample(id):
-    api_key = session.get('api_key', None)
-    api = drest.api.API(baseurl=env('API_DRF_HOST'))
+    headers = None
+    if session.get('auth_token', None):
+        headers = {'email': session.get('email'), 'auth_token': session.get('auth_token')}
+    api = drest.API(baseurl=env('API_DRF_HOST'))
 
-    sample = api.make_request('GET','/samples/'+id, params={'format': 'json'}).data
+    sample = api.make_request('GET','/samples/'+id, params={'format': 'json'}, headers=headers).data
     if "detail" in sample:
-        return render_template("warning.html", text="Sample "+id+" does not exist")
+        return render_template("warning.html", text=sample['detail'])
 
     pos = sample['location_coords'].split(" ")
     sample['location_coords'] = [round(float(pos[2].replace(")","")),5), round(float(pos[1].replace("(","")),5)]
@@ -173,58 +163,42 @@ def sample(id):
 
     subsamples = []
     for s in sample['subsample_ids']:
-        subsamples.append(api.make_request('GET','/subsamples/'+s, params={'fields': 'subsample_type,name,id,public_data,owner', 'format': 'json'}).data)
+        subsamples.append(api.make_request('GET','/subsamples/'+s,
+            params={'fields': 'subsample_type,name,id,public_data,owner', 'format': 'json'}, headers=headers).data)
+    for s in subsamples:
+        s['chemical_analyses'] = api.make_request('GET','/chemical_analyses/',
+            params={'subsample_ids': s['id'], 'fields': 'id', 'format': 'json'}, headers=headers).data['results']
 
     return render_template('sample.html',
         sample=sample,
         subsamples=subsamples
     )
 
-@metpet_ui.route('/subsample/<string:id>')
-def subsample(id):
-    api_key = session.get('api_key', None)
-    api = drest.api.API(baseurl=env('API_DRF_HOST'))
 
-    subsample = api.make_request('GET','/subsamples/'+id, params={'format': 'json'}).data
-    if "detail" in subsample:
-        return render_template("warning.html", text="Subsample "+id+" does not exist")
-
-    subsample['sample']['number'] = api.make_request('GET','/samples/'+subsample['sample']['id'], params={'fields': 'number', 'format': 'json'}).data['number']
-    chemical_analyses = api.make_request('GET','/chemical_analyses/', params={'subsample_ids': subsample['id'], 'format': 'json'}).data['results']
-
-    return render_template('subsample.html',
-        subsample=subsample,
-        chemical_analyses=chemical_analyses
-    )
-
-
-@metpet_ui.route('/edit_sample/<string:id>', methods = ['GET','POST'])
+@metpet_ui.route('/edit-sample/<string:id>', methods=['GET','POST'])
 def edit_sample(id):
-    email = session.get('email', None)
-    api_key = session.get('api_key', None)
     headers = None
-    if email and api_key:
-        headers = {'email': email, 'api_key': api_key}
-    api = drest.api.API(baseurl=env('API_DRF_HOST'))
+    if session.get('auth_token', None):
+        headers = {'email': session.get('email'), 'auth_token': session.get('auth_token')}
+    else:
+        return redirect(url_for('sample', id=id))
+    api = drest.API(baseurl=env('API_DRF_HOST'))
 
     if len(dict(request.form)):
-        new_sample = dict(request.form)
+        new_sample = literal_eval(json.dumps(request.form))
         new_sample['minerals'] = []
         for key in new_sample.keys():
-            if len(new_sample[key]) == 1 and key[-1] != "s":
-                new_sample[key] = new_sample[key][0]
-                if key[:9] == "minerals_":
-                    new_sample["minerals"].append({'id': key[9:], 'amount': new_sample[key]})
-                    del new_sample[key]
+            if key[:9] == "minerals_":
+                new_sample["minerals"].append({'id': key[9:], 'amount': new_sample[key]})
+                del new_sample[key]
         new_sample['id'] = id
 
-        new_sample['aliases'] = new_sample['aliases'][0].split(',')
+        new_sample['aliases'] = new_sample['aliases'].split(',')
         new_sample['location_coords'] = "SRID=4326;POINT ("+str(new_sample['location_coords1'])+" "+str(new_sample['location_coords0'])+")"
         del new_sample['location_coords0']
         del new_sample['location_coords1']
 
-        print new_sample
-        #new_sample = api.make_request('PUT','/samples/'+id, params=new_sample).data
+        api.make_request('POST','/samples/'+id, params=new_sample, headers=headers).data
         return redirect(url_for('sample', id=id))
 
     sample = api.make_request('GET','/samples/'+id, params={'format': 'json'}).data
@@ -234,6 +208,7 @@ def edit_sample(id):
     regions = api.make_request('GET','/regions/', params={'page_size': 2000, 'format': 'json'}).data['results']
     minerals = api.make_request('GET','/minerals/', params={'page_size': 200, 'format': 'json'}).data['results']
     rock_types = api.make_request('GET','/rock_types/', params={'page_size': 40, 'format': 'json'}).data['results']
+    references = api.make_request('GET','/references/', params={'page_size': 1100, 'format': 'json'}).data['results']
     metamorphic_grades = api.make_request('GET','/metamorphic_grades/', params={'page_size': 30, 'format': 'json'}).data['results']
     metamorphic_regions = api.make_request('GET','/metamorphic_regions/', params={'page_size': 240, 'format': 'json'}).data['results']
 
@@ -242,36 +217,37 @@ def edit_sample(id):
         regions=regions,
         minerals=minerals,
         rock_types=rock_types,
+        references=references,
         metamorphic_grades=metamorphic_grades,
         metamorphic_regions=metamorphic_regions
     )
 
-@metpet_ui.route('/new_sample/', methods = ['GET', 'POST'])
+
+@metpet_ui.route('/new-sample/', methods=['GET', 'POST'])
 def new_sample():
-    email = session.get('email', None)
-    api_key = session.get('api_key', None)
+    session['email'] = 'sibel@cs.rpi.edu'
+    session['auth_token'] = 'e8a233e6cb9c32c0f8e0bf6979838e801303fc51'
     headers = None
-    if email and api_key:
-        headers = {'email': email, 'api_key': api_key}
-    api = drest.api.API(baseurl=env('API_DRF_HOST'))
+    if session.get('auth_token', None):
+        headers = {'email': session.get('email'), 'auth_token': session.get('auth_token')}
+    else:
+        return redirect(url_for('search'))
+    api = drest.API(baseurl=env('API_DRF_HOST'))
 
     if len(dict(request.form)):
-        new_sample = dict(request.form)
+        new_sample = literal_eval(json.dumps(request.form))
         for key in new_sample.keys():
-            if len(new_sample[key]) == 1 and key[-1] != "s":
-                new_sample[key] = new_sample[key][0]
-                if key[:9] == "minerals_":
-                    new_sample["minerals"].append({'id': key[9:], 'amount': new_sample[key]})
-                    del new_sample[key]
+            if key[:9] == "minerals_":
+                new_sample["minerals"].append({'id': key[9:], 'amount': new_sample[key]})
+                del new_sample[key]
 
-        new_sample['aliases'] = new_sample['aliases'][0].split(',')
+        new_sample['aliases'] = new_sample['aliases'].split(',')
         new_sample['location_coords'] = "SRID=4326;POINT ("+str(new_sample['location_coords1'])+" "+str(new_sample['location_coords0'])+")"
         del new_sample['location_coords0']
         del new_sample['location_coords1']
 
-        print new_sample
-        #new_sample = api.make_request('POST','/samples/', params=new_sample).data
-        return redirect(url_for('search'))
+        new_sample = api.make_request('POST','/samples/', params=new_sample, headers=headers).data
+        return redirect(url_for('sample',id=new_sample['id']))
 
     regions = api.make_request('GET','/regions/', params={'page_size': 2000, 'format': 'json'}).data['results']
     minerals = api.make_request('GET','/minerals/', params={'page_size': 200, 'format': 'json'}).data['results']
@@ -279,7 +255,7 @@ def new_sample():
     metamorphic_grades = api.make_request('GET','/metamorphic_grades/', params={'page_size': 30, 'format': 'json'}).data['results']
     metamorphic_regions = api.make_request('GET','/metamorphic_regions/', params={'page_size': 240, 'format': 'json'}).data['results']
 
-    owner = api.make_request('GET','/users/', params={'email': email}).data['results']
+    owner = api.make_request('GET','/users/', params={'email': session.get('email')}).data['results']
     if len(owner) > 1:
         owner = None
     else:
@@ -295,9 +271,79 @@ def new_sample():
     )
 
 
-@metpet_ui.route('/chemical_analyses/')
+@metpet_ui.route('/subsample/<string:id>')
+def subsample(id):
+    headers = None
+    if session.get('auth_token', None):
+        headers = {'email': session.get('email'), 'auth_token': session.get('auth_token')}
+    api = drest.API(baseurl=env('API_DRF_HOST'))
+
+    subsample = api.make_request('GET','/subsamples/'+id, params={'format': 'json'}, headers=headers).data
+    print subsample
+    if "detail" in subsample:
+        return render_template("warning.html", text="Subsample "+id+" does not exist")
+
+    subsample['sample']['number'] = api.make_request('GET','/samples/'+subsample['sample']['id'], params={'fields': 'number', 'format': 'json'}).data['number']
+    chemical_analyses = api.make_request('GET','/chemical_analyses/', params={'subsample_ids': subsample['id'], 'format': 'json'}).data['results']
+
+    return render_template('subsample.html',
+        subsample=subsample,
+        chemical_analyses=chemical_analyses
+    )
+
+
+@metpet_ui.route('/edit-subsample/<string:id>', methods=['GET', 'POST'])
+def edit_subsample(id):
+    headers = None
+    if session.get('auth_token', None):
+        headers = {'email': session.get('email'), 'auth_token': session.get('auth_token')}
+    else:
+        return redirect(url_for('subsample', id=id))
+    api = drest.API(baseurl=env('API_DRF_HOST'))
+
+    if len(dict(request.form)):
+        new_subsample = literal_eval(json.dumps(request.form))
+        new_subsample['id'] = id
+
+        new_subsample = api.make_request('POST','/subsamples/'+id, params=new_subsample, headers=headers).data
+        return redirect(url_for('subsample', id=id))
+
+    subsample = api.make_request('GET','/subsamples/'+id, params={'format': 'json'}).data
+    subsample['owner'] = api.make_request('GET','/users/'+subsample['owner'], params={'format': 'json'}).data
+
+    return render_template('edit_subsample.html',
+        subsample=subsample
+    )
+
+
+@metpet_ui.route('/new-subsample/', methods=['GET', 'POST'])
+def new_subsample():
+    headers = None
+    if session.get('auth_token', None):
+        headers = {'email': session.get('email'), 'auth_token': session.get('auth_token')}
+    else:
+        return redirect(url_for('search'))
+    api = drest.API(baseurl=env('API_DRF_HOST'))
+
+    if len(dict(request.form)):
+        new_subsample = literal_eval(json.dumps(request.form))
+        new_subsample = api.make_request('POST','/subsamples/', params=new_subsample, headers=headers).data
+        return redirect(url_for('subsample', id=new_subsample['id']))
+
+    owner = api.make_request('GET','/users/', params={'email': email}).data['results']
+    if len(owner) > 1:
+        owner = None
+    else:
+        owner = owner[0]
+
+    return render_template('edit_subsample.html',
+        subsample={'owner': owner, 'sample': ''}
+    )
+
+
+@metpet_ui.route('/chemical-analyses/')
 def chemical_analyses():
-    api = drest.api.API(baseurl=env('API_DRF_HOST'))
+    api = drest.API(baseurl=env('API_DRF_HOST'))
 
     next = previous = last = total_count = None
     filters = literal_eval(json.dumps(request.args))
@@ -305,7 +351,7 @@ def chemical_analyses():
 
     chemicals = api.make_request('GET','/chemical_analyses/', params=filters).data
     chem_results = chemicals['results']
-    next, previous, last, total_count = paginate_model('chemical_analyses', chemicals, filters)
+    next, previous, last, total_count = paginate_model('chemical-analyses', chemicals, filters)
 
     for c in chem_results:
         c['sample'] = api.make_request('GET','/samples/'+c['subsample']['sample'], params={'fields': 'number', 'format': 'json'}).data
@@ -317,17 +363,19 @@ def chemical_analyses():
         next_url=next,
         prev_url=previous,
         total=total_count,
-        first_page=url_for('chemical_analyses')+'?'+urlencode(filters),
+        first_page=url_for('chemical-analyses')+'?'+urlencode(filters),
         last_page=last
     )
 
 
-@metpet_ui.route('/chemical_analysis/<string:id>')
+@metpet_ui.route('/chemical-analysis/<string:id>')
 def chemical_analysis(id):
-    api_key = session.get('api_key', None)
-    api = drest.api.API(baseurl=env('API_DRF_HOST'))
+    headers = None
+    if session.get('auth_token', None):
+        headers = {'email': session.get('email'), 'auth_token': session.get('auth_token')}
+    api = drest.API(baseurl=env('API_DRF_HOST'))
 
-    analysis = api.make_request('GET','/chemical_analyses/'+id, params={'format': 'json'}).data
+    analysis = api.make_request('GET','/chemical_analyses/'+id, params={'format': 'json'}, headers=headers).data
     if "detail" in analysis:
         return render_template("warning.html", text="Chemical analysis "+id+" does not exist")
     analysis['sample'] = api.make_request('GET','/samples/'+analysis['subsample']['sample'], params={'fields': 'number', 'format': 'json'}).data
@@ -337,20 +385,17 @@ def chemical_analysis(id):
     )
 
 
-@metpet_ui.route('/edit_chemical_analysis/<string:id>', methods = ['GET','POST'])
+@metpet_ui.route('/edit-chemical-analysis/<string:id>', methods=['GET','POST'])
 def edit_chemical_analysis(id):
-    email = session.get('email', None)
-    api_key = session.get('api_key', None)
     headers = None
-    if email and api_key:
-        headers = {'email': email, 'api_key': api_key}
-    api = drest.api.API(baseurl=env('API_DRF_HOST'))
+    if session.get('auth_token', None):
+        headers = {'email': session.get('email'), 'auth_token': session.get('auth_token')}
+    else:
+        return redirect(url_for('chemical-analysis', id=id))
+    api = drest.API(baseurl=env('API_DRF_HOST'))
 
     if len(dict(request.form)):
-        new_analysis = dict(request.form)
-        for key in new_analysis:
-            if len(new_analysis[key]) == 1 and key[-1] != "s":
-                new_analysis[key] = new_analysis[key][0]
+        new_analysis = literal_eval(json.dumps(request.form))
         new_analysis['id'] = id
 
         new_analysis['elements'] = []
@@ -365,9 +410,8 @@ def edit_chemical_analysis(id):
                 new_analysis["oxides"].append({'id': key[7:], 'amount': o[0], 'precision': o[1], 'precision_type': o[2], 'measurement_unit': o[3], 'min': o[4], 'max': o[5]})
                 del new_analysis[key]
 
-        print new_analysis
-        #new_analysis = api.make_request('PUT','/chemical_analyses/'+id, params=new_analysis).data
-        return redirect(url_for('chemical_analysis', id=id))
+        new_analysis = api.make_request('POST','/chemical_analyses/'+id, params=new_analysis, headers=headers).data
+        return redirect(url_for('chemical-analysis', id=id))
 
     analysis = api.make_request('GET','/chemical_analyses/'+id, params={'format': 'json'}).data
     analysis['sample'] = api.make_request('GET','/samples/'+analysis['subsample']['sample'], params={'fields': 'number', 'format': 'json'}).data
@@ -384,20 +428,17 @@ def edit_chemical_analysis(id):
     )
 
 
-@metpet_ui.route('/new_chemical_analysis/', methods = ['GET', 'POST'])
+@metpet_ui.route('/new-chemical-analysis/', methods=['GET', 'POST'])
 def new_chemical_analysis():
-    email = session.get('email', None)
-    api_key = session.get('api_key', None)
     headers = None
-    if email and api_key:
-        headers = {'email': email, 'api_key': api_key}
-    api = drest.api.API(baseurl=env('API_DRF_HOST'))
+    if session.get('auth_token', None):
+        headers = {'email': session.get('email'), 'auth_token': session.get('auth_token')}
+    else:
+        return redirect(url_for('search-chemistry'))
+    api = drest.API(baseurl=env('API_DRF_HOST'))
 
     if len(dict(request.form)):
-        new_analysis = dict(request.form)
-        for key in new_analysis:
-            if len(new_analysis[key]) == 1 and key[-1] != "s":
-                new_analysis[key] = new_analysis[key][0]
+        new_analysis = literal_eval(json.dumps(request.form))
 
         new_analysis['elements'] = []
         new_analysis['oxides'] = []
@@ -411,8 +452,7 @@ def new_chemical_analysis():
                 new_analysis["oxides"].append({'id': key[7:], 'amount': o[0], 'precision': o[1], 'precision_type': o[2], 'measurement_unit': o[3], 'min': o[4], 'max': o[5]})
                 del new_analysis[key]
 
-        print new_analysis
-        #new_analysis = api.make_request('PUT','/chemical_analyses/'+id, params=new_analysis).data
+        new_analysis = api.make_request('POST','/chemical_analyses/'+id, params=new_analysis, headers=headers).data
         return redirect(url_for('search-chemistry'))
 
     minerals = api.make_request('GET','/minerals/', params={'page_size': 200, 'format': 'json'}).data['results']
@@ -435,16 +475,18 @@ def new_chemical_analysis():
 
 @metpet_ui.route('/login', methods=['GET', 'POST'])
 def login():
-    if session.get('api_key'):
+    auth_token = session.get('auth_token', None)
+    if auth_token:
         return redirect(url_for('search'))
+    api = drest.TastyPieAPI(env('API_DRF_HOST'),auth_mech="basic")
+
     form = LoginForm()
     if form.validate_on_submit():
-        payload = {'email': form.email.data, 'password': form.password.data}
-        response =  post(env('API_DRF_HOST') + '/authenticate/', data=payload)
-        if response.status_code == 200:
-            data = json.loads(response.text)
-            session['email'] = data['email']
-            session['api_key'] = data['api_key']
+        auth_token = api.make_request('POST','/auth/login/', params={'email': form.email.data, 'password': form.password.data})
+        print auth_token
+        if 'auth_token' in auth_token:
+            session['email'] = form.email.data
+            session['auth_token'] = auth_token['auth_token']
             flash('Login successful!')
             return redirect(url_for('search'))
         else:
@@ -455,7 +497,7 @@ def login():
 @metpet_ui.route('/logout')
 def logout():
     session.pop('email', None)
-    session.pop('api_key', None)
+    session.pop('auth_token', None)
     flash('Logout successful.')
     return redirect(url_for('search'))
 
@@ -488,7 +530,7 @@ def reset_password(token):
         if response.status_code == 200:
             data = json.loads(response.text)
             session['email'] = data['email']
-            session['api_key'] = data['api_key']
+            session['auth_token'] = data['auth_token']
             flash('Password reset successful!')
             return redirect(url_for('index'))
         else:
@@ -506,7 +548,12 @@ def reset_password(token):
 
 @metpet_ui.route('/user/<string:id>')
 def user(id):
-    user = api.make_request('GET','/users/'+id, params={'format': 'json'}).data
+    headers = None
+    if session.get('auth_token', None):
+        headers = {'email': session.get('email'), 'auth_token': session.get('auth_token')}
+    api = drest.API(baseurl=env('API_DRF_HOST'))
+
+    user = api.make_request('GET','/users/'+id, params={'format': 'json'}, headers=headers).data
     if "detail" in user:
         return render_template("warning.html", text="User "+id+" does not exist")
     return render_template('user.html', user=user)
