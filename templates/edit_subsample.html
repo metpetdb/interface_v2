@@ -2,8 +2,12 @@
 
 {% block title %}
   <h4>
+    {% if subsample.id %}
     <a href="{{ url_for('sample', id=subsample.sample.id) }}">Sample {{ subsample.sample.number }}</a> / 
-    Subsample {% if subsample.name %}{{subsample.name}}{% endif %}
+    <a href="{{ url_for('subsample', id=subsample.id) }}">Subsample {% if subsample.name %}{{subsample.name}}{% endif %}</a>
+    {% else %}
+    New Subsample
+    {% endif %}
   </h4>
 {% endblock %}
 
@@ -39,7 +43,16 @@
         <tr>
           <td class="sample_label">Subsample Type</td>
           <td class="sample_value">
-            <input type="text" name="type" value="{% if subsample.subsample_type %}{{subsample.subsample_type}}{% endif %}" style="width:85%">
+            <select name="subsample_type" class="chosen-select" style="width:85%">
+              <option></option>
+              {% for t in types %}
+                {% if subsample.subsample_type and t.name == subsample.subsample_type.name %}
+                <option value="{{ t.id }}" selected="selected">{{ t.name }}</option>
+                {% else %}
+                <option value="{{ t.id }}">{{ t.name }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
           </td>
         </tr>
         <tr>

@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="/static/css/base.css">
     <meta name="viewport" content="width=device-width"/>
   </head>
+
   <body class="container">
     <header>
       <h3 class="brand" id="page_title">MetPetDB: Database for Metamorphic Petrology</h3>
@@ -15,22 +16,34 @@
             <div class="navbar-header">
               <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                 <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
               </button>
               <a class="navbar-brand" href="{{ url_for('index') }}"><img src="/static/images/MPDBlogo_sml.png"/></a>
             </div>
             <div class="navbar-collapse collapse">
               <ul class="nav navbar-nav navbar-right">
-                <li><a id="samples" href="{{ url_for('search') }}">Search Samples</a></li>
-                <li><a id="chemistry-search" href="{{ url_for('search_chemistry') }}">Search Chemistry</a></li>
-                <li><a id="about" href="#">About</a></li>
-                <li><a id="help" href="#">Help</a></li>
-                {% if session['api_key'] %}
+                <li>
+                  <a href="#" onmouseover="openSearchMenu()">Search</a>
+                  <ul style="position:absolute;background-color:#fafafa;width:120px;margin-left:-10px" onmouseleave="closeSearchMenu()">
+                    <li name="searchobject" style="display:none;margin-left:-30px"><a href="{{ url_for('search') }}">Search Samples</a></li>
+                    <li name="searchobject" style="display:none;margin-left:-30px"><a href="{{ url_for('search_chemistry') }}">Search Chemistry</a></li>
+                  </ul>
+                </li>
+                {% if auth_token %}
+                <li>
+                  <a href="#" onmouseover="openEditMenu()">Upload Data</a>
+                  <ul style="position:absolute;background-color:#fafafa;width:120px;margin-left:-10px" onmouseleave="closeEditMenu()">
+                    <li name="editobject" style="display:none;margin-left:-30px"><a href="{{ url_for('new_sample') }}">Sample</a></li>
+                    <li name="editobject" style="display:none;margin-left:-30px"><a href="{{ url_for('new_subsample') }}">Subsample</a></li>
+                    <li name="editobject" style="display:none;margin-left:-30px"><a href="{{ url_for('new_chemical_analysis')}}">Chemical Analysis</a></li>
+                    <li name="editobject" style="display:none;margin-left:-30px"><a href="{{ url_for('index') }}">Bulk Upload</a></li>
+                  </ul>
+                </li>
+                {% endif %}
+                <li><a href="{{ url_for('index') }}">Help</a></li>
+                {% if auth_token %}
                 <li><a href="{{ url_for('logout') }}"><b>Logout</b></a></li>
                 {% else %}
-                <li><a href="{{ url_for('login') }}"><b>Login</b></a></li>
+                <li><a href="{{ url_for('login') }}"><b>Login/Register</b></a></li>
                 {% endif %}
               </ul>
             </div>
@@ -47,7 +60,7 @@
       {% if messages %}
       <ul>
         {% for message in messages %}
-        <p style="color: red;">{{ message }} </li>
+        <p style="color: red;">{{ message }}</p>
         {% endfor %}
       </ul>
       {% endif %}
@@ -67,3 +80,33 @@
     <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
   </body>
 </html>
+
+<script>
+function openSearchMenu()
+{
+  var options = document.getElementsByName("searchobject");
+  for (var i = 0; i < options.length; i++)
+    options[i].style.display = "block";
+}
+
+function closeSearchMenu()
+{
+  var options = document.getElementsByName("searchobject");
+  for (var i = 0; i < options.length; i++)
+    options[i].style.display = "none";
+}
+
+function openEditMenu()
+{
+  var options = document.getElementsByName("editobject");
+  for (var i = 0; i < options.length; i++)
+    options[i].style.display = "block";
+}
+
+function closeEditMenu()
+{
+  var options = document.getElementsByName("editobject");
+  for (var i = 0; i < options.length; i++)
+    options[i].style.display = "none";
+}
+</script>

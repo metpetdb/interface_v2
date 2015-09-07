@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
 {% block title %}
-  <h4>
-    Sample {{sample.number}}
-  </h4>
+<h4>
+  Sample {{sample.number}}
+</h4>
 {% endblock %}
 
 {% block body %}
@@ -82,9 +82,10 @@
         <td class="sample_label">Minerals</td>
         <td class="sample_value">{{ sample.minerals }}</td>
       </tr>
-      {% if api_key %}
+      {% if auth_token %}
       <tr>
-        <p><a href="{{ url_for('edit-sample', id = sample.id) }}">Edit Sample</a></p>
+        <td> </td>
+        <td><a href="{{ url_for('edit_sample', id=sample.id) }}">Edit Sample</a></td>
       </tr>
       {% endif %}
     </tbody>

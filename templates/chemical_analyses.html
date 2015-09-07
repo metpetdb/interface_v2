@@ -21,7 +21,7 @@
     <tbody>
       {% for analysis in chemical_analyses %}
       <tr>
-        <td class="sample_value"><a href="{{ url_for('chemical-analysis', id=analysis.id) }}" target="_blank" >{% if analysis.sample %}{{ analysis.sample.number }}{% endif %}</a></td>
+        <td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}" target="_blank" >{% if analysis.sample %}{{ analysis.sample.number }}{% endif %}</a></td>
         <td class="sample_value">{% if analysis.analysis_method %}{{ analysis.analysis_method }}{% endif %}</td>
         <td class="sample_value">{% if analysis.mineral %}{{ analysis.mineral.name }}{% endif %}</td>
         <td class="sample_mineral sample_value">

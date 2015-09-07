@@ -2,7 +2,11 @@
 
 {% block title %}
   <h4>
-    Sample {% if sample.number %}{{sample.number}}{% endif %}
+    {% if sample.id %}
+    <a href="{{ url_for('sample', id=sample.id) }}">Sample {% if sample.number %}{{sample.number}}{% endif %}</a>
+    {% else %}
+    New Sample
+    {% endif %}
   </h4>
 {% endblock %}
 
@@ -119,7 +123,7 @@
         <tr>
           <td class="sample_label">Region</td>
           <td class="sample_value">
-            <select multiple name="regions" class="chosen-select" style="width:85%">
+            <select multiple name="regions" id="regions" class="chosen-select" style="width:85%">
               <option></option>
               {% for r in regions %}
                 {% if r.name in sample.regions %}
@@ -131,7 +135,7 @@
             </select>
             <br>
             <input type="text" id="add_regions" style="width:85%">
-            <button type="button" onclick="addOption('regions')" style="float:right">Add</button>
+            <button type="button" onclick="addRegion()" style="float:right">Add</button>
           </td>
         </tr>
         <tr>
@@ -167,19 +171,19 @@
         <tr>
           <td class="sample_label">Publication References</td>
           <td class="sample_value">
-            <select multiple name="references" class="chosen-select" style="width:85%">
+            <select multiple name="references" id="references" class="chosen-select" style="width:85%">
               <option></option>
               {% for r in references %}
                 {% if r in sample.references %}
-                <option value="{{ r }}" selected="selected">{{ r }}</option>
+                <option value="{{ r.id }}" selected="selected">{{ r.name }}</option>
                 {% else %}
-                <option value="{{ r }}">{{ r }}</option>
+                <option value="{{ r.id }}">{{ r.name }}</option>
                 {% endif %}
               {% endfor %}
             </select>
             <br>
-            <input type="text" id="add_references" style="width:85%">
-            <button type="button" onclick="addOption('references')" style="float:right">Add</button>
+            <input type="text" id="add_references" value="" style="width:85%">
+            <button type="button" onclick="addReference()" style="float:right">Add</button>
           </td>
         </tr>
         <tr>
@@ -213,7 +217,7 @@
               {% endfor %}
               </tbody>
             </table>
-            <select class="chosen-select" id="mineral_names" onchange="update()">
+            <select class="chosen-select" id="mineral_names" onchange="updateMinerals()">
               <option></option>
               {% for m in minerals %}
                 <option value="{{ m.id }}">{{ m.name }}</option>
@@ -254,18 +258,33 @@ $(function()
   });
 });
 
-function addOption(name) {
-  var list = document.getElementById(name);
+function addRegion() {
+  var input = document.getElementById('add_regions');
   var new_option = document.createElement("option");
-  new_option.text = document.getElementById('add_'+name).value;
-  new_option.value = document.getElementById('add_'+name).value;
+  new_option.innerHTML = input.value;
+  new_option.value = input.value;
   new_option.selected = "selected";
-  list.add(new_option);
+  input.value = 'a';
+  document.getElementById('regions').add(new_option);
+  input.value = '';
   $('.chosen-select').trigger("chosen:updated");
-  document.getElementById('add_'+name).value = '';
+  
 }
 
-function update() {
+function addReference() {
+  var input = document.getElementById('add_references');
+  var new_option = document.createElement("option");
+  new_option.innerHTML = input.value;
+  new_option.value = 0;
+  new_option.selected = "selected";
+  input.value = 'a';
+  document.getElementById('references').add(new_option);
+  input.value = '';
+  $('.chosen-select').trigger("chosen:updated");
+  
+}
+
+function updateMinerals() {
   var minerals = document.getElementById("minerals");
   var mineral = document.getElementById("mineral_names");
   var id = mineral.options[mineral.selectedIndex].value;

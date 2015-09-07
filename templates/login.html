@@ -1,19 +1,121 @@
 {% extends "base.html" %}
 
+{% block title %}
+<div class="table-responsive" style="float:left;width:46%">
+  <h4>Log In</h4>
+</div>
+<div class="table-responsive" style="float:left;width:45%">
+  <h4>Register</h4>
+</div>
+{% endblock %}
+
 {% block body %}
-<h1>Login</h1>
-<form action="" method="post" name="login">
-    {{form.hidden_tag()}}
-    <p>
-      Email: {{form.email(size=80)}}
-      {% for error in form.errors.email %}
-      <span style="color: red;">{{error}}</span>
-      {% endfor %}<br>
-    </p>
-    <p>Password: {{form.password(size=80)}} </p>
-    <p>
-      <span><input type="submit" value="Sign In"></span>&nbsp;&nbsp;&nbsp;
-      <span><a href="{{ url_for('request_password_reset') }}">Reset Password</a></span>
-    </p>
+<form action="" method="post" onsubmit="return checkForm(this);">
+  <div class="table-responsive" style="float:left;width:45%">
+    <table class="table">
+      <tr>
+        <td>Email*</td>
+        <td><input type="text" name="email" style="width:95%"></td>
+      </tr>
+      <tr>
+        <td>Password*</td>
+        <td><input type="password" name="password" style="width:95%"></td>
+      </tr>
+      <tr>
+        <td> </td>
+        <td><input type="submit" name="login" value="Log In">&nbsp;&nbsp;&nbsp;<a href="{{ url_for('request_password_reset') }}">Reset Password</a></td>
+      </tr>
+    </table>
+  </div>
 </form>
+<form action="" method="post" onsubmit="return checkForm(this);">
+  <div class="table-responsive" style="float:left;width:45%;border-left:solid #aaaabb;padding-left:15px">
+    <table class="table">
+      <tr>
+        <td>Name*</td>
+        <td><input type="text" name="name" style="width:95%"></td>
+      </tr>
+      <tr>
+        <td>Email*</td>
+        <td><input type="text" name="email" style="width:95%"></td>
+      </tr>
+      <tr>
+        <td>Address</td>
+        <td><input type="text" name="address" style="width:95%"></td>
+      </tr>
+      <tr>
+        <td>City</td>
+        <td><input type="text" name="city" style="width:95%"></td>
+      </tr>
+      <tr>
+        <td>Province</td>
+        <td><input type="text" name="province" style="width:95%"></td>
+      </tr>
+      <tr>
+        <td>Country</td>
+        <td><input type="text" name="country" style="width:95%"></td>
+      </tr>
+      <tr>
+        <td>Postal Code</td>
+        <td><input type="text" name="postal_code" style="width:95%"></td>
+      </tr>
+      <tr>
+        <td>Research Institution</td>
+        <td><input type="text" name="institution" style="width:95%"></td>
+      </tr>
+      <tr>
+        <td>Professional URL</td>
+        <td><input type="text" name="professional_url" style="width:95%"></td>
+      </tr>
+      <tr>
+        <td>Research Interests</td>
+        <td><input type="text" name="research_interests" style="width:95%"></td>
+      </tr>
+      <tr>
+        <td>Choose a Password*</td>
+        <td><input type="password" name="password" style="width:95%"></td>
+      </tr>
+      <tr>
+        <td>Verify Password*</td>
+        <td><input type="password" name="password_confirm" style="width:95%"></td>
+      </tr>
+      <tr>
+        <td> </td>
+        <td><input type="submit" name="login" value="Register"></td>
+      </td>
+    </table>
+  </div>
+</form>
+
+<script>
+function checkForm(form)
+{
+  if (form.name.value == "")
+  {
+    alert("Error: Name cannot be blank!");
+    form.name.focus();
+    return false;
+  }
+  if (form.email.value == "")
+  {
+    alert("Error: Email cannot be blank!");
+    form.email.focus();
+    return false;
+  }
+  if (form.password.value == "")
+  {
+    alert("Error: Password cannot be blank!");
+    form.password.focus();
+    return false;
+  }
+  if (form.password.value != form.password_confirm.value)
+  {
+    alert("Error: Passwords do not match!");
+    form.password_confirm.focus();
+    return false;
+  }
+  form.password_confirm.value = "";
+  return true;
+}
+</script>
 {% endblock %}

@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
 {% block title %}
-  <h4>
-    <a href="{{ url_for('sample', id=subsample.sample.id) }}">Sample {{ subsample.sample.number }}</a> / 
-    Subsample {{ subsample.name }}
-  </h4>
+<h4>
+  <a href="{{ url_for('sample', id=subsample.sample.id) }}">Sample {{ subsample.sample.number }}</a> / 
+  Subsample {{ subsample.name }}
+</h4>
 {% endblock %}
 
 {% block body %}
@@ -23,6 +23,12 @@
         <td class="subsample_label">Public</td>
         <td class="subsample_value">{% if subsample.public_data %}Yes{% else %}No{% endif %}</td>
       </tr>
+      {% if auth_token %}
+      <tr>
+        <td> </td>
+        <td><a href="{{ url_for('edit_subsample', id=subsample.id) }}">Edit Subsample</a></td>
+      </tr>
+      {% endif %}
     </tbody>
   </table>
 </div>
@@ -77,7 +83,7 @@
     <tbody>
       {%for analysis in chemical_analyses%}
       <tr>
-        <td><a href="{{ url_for('chemical-analysis', id=analysis.id) }}">{{analysis.spot_id}}</td>
+        <td><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{{analysis.spot_id}}</td>
         <td>{{analysis.public_data}}</td>
         <td>{{analysis.analysis_method}}</td>
         <td>{{analysis.mineral.name}}</td>

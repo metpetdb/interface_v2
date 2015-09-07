@@ -2,9 +2,13 @@
 
 {% block title %}
   <h4>
+    {% if analysis.id %}
     <a href="{{ url_for('sample', id=analysis.subsample.sample) }}">Sample {{ analysis.sample.number }}</a> / 
     <a href="{{ url_for('subsample', id=analysis.subsample.id) }}">Subsample {{ analysis.subsample.name }}</a> / 
-    Chemical Analysis Point {% if analysis.spot_id %}{{analysis.spot_id}}{% endif %}
+    <a href="{{ url_for('chemical_analysis', id=analysis.id) }}">Chemical Analysis Point {% if analysis.spot_id %}{{analysis.spot_id}}{% endif %}</a>
+    {% else %}
+    New Chemical Analysis
+    {% endif %}
   </h4>
 {% endblock %}
 
@@ -225,6 +229,7 @@ function update(type) {
     var input = document.createElement("input");
     input.type = "text";
     input.name = type+"s_"+id;
+    input.value = 0.0;
     input.style.textAlign = "right";
     input.style.width = "65px";
     cell.appendChild(input);
