@@ -36,7 +36,12 @@
         <tr>
           <td class="sample_label">Aliases</td>
           <td class="sample_value">
-            <input type="text" name="aliases" value="{% if sample.aliases %}{{sample.aliases}}{% endif %}" style="width:85%">
+            <div id="aliases">
+              {% for a in sample.aliases %}
+                <input type="text" name="aliases" value="{{a}}" style="width:85%">
+              {% endfor %}
+              <button type="button" onclick="document.getElementById('aliases').innerHTML += '<input type=\'text\' name=\'aliases\' style=\'width:85%\'>'" style="float:right">Add</button>
+            </div>
           </td>
         </tr>
         <tr>

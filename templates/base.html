@@ -21,23 +21,24 @@
             </div>
             <div class="navbar-collapse collapse">
               <ul class="nav navbar-nav navbar-right">
-                <li>
-                  <a href="#" onmouseover="openSearchMenu()">Search</a>
-                  <ul style="position:absolute;background-color:#fafafa;width:120px;margin-left:-10px" onmouseleave="closeSearchMenu()">
-                    <li name="searchobject" style="display:none;margin-left:-30px"><a href="{{ url_for('search') }}">Search Samples</a></li>
-                    <li name="searchobject" style="display:none;margin-left:-30px"><a href="{{ url_for('search_chemistry') }}">Search Chemistry</a></li>
+                <li onmouseleave="closeSearchMenu()">
+                  <a onmouseover="openSearchMenu()">Search</a>
+                  <ul class="navbar-dropdown searchmenu">
+                    <li name="searchobject"><a href="{{ url_for('search') }}">Samples</a></li>
+                    <li name="searchobject"><a href="{{ url_for('search_chemistry') }}">Chemistry</a></li>
                   </ul>
                 </li>
                 {% if auth_token %}
-                <li>
-                  <a href="#" onmouseover="openEditMenu()">Upload Data</a>
-                  <ul style="position:absolute;background-color:#fafafa;width:120px;margin-left:-10px" onmouseleave="closeEditMenu()">
-                    <li name="editobject" style="display:none;margin-left:-30px"><a href="{{ url_for('new_sample') }}">Sample</a></li>
-                    <li name="editobject" style="display:none;margin-left:-30px"><a href="{{ url_for('new_subsample') }}">Subsample</a></li>
-                    <li name="editobject" style="display:none;margin-left:-30px"><a href="{{ url_for('new_chemical_analysis')}}">Chemical Analysis</a></li>
-                    <li name="editobject" style="display:none;margin-left:-30px"><a href="{{ url_for('index') }}">Bulk Upload</a></li>
+                <li onmouseleave="closeEditMenu()">
+                  <a onmouseover="openEditMenu()">Upload Data</a>
+                  <ul class="navbar-dropdown editmenu">
+                    <li name="editobject"><a href="{{ url_for('new_sample') }}">Sample</a></li>
+                    <li name="editobject"><a href="{{ url_for('new_subsample') }}">Subsample</a></li>
+                    <li name="editobject"><a href="{{ url_for('new_chemical_analysis')}}">Chemical Analysis</a></li>
+                    <li name="editobject"><a href="{{ url_for('index') }}">Bulk Upload</a></li>
                   </ul>
                 </li>
+                <li><a href="{{ url_for('user', id=0) }}">Profile</a></li><!-- hold user id in session -->
                 {% endif %}
                 <li><a href="{{ url_for('index') }}">Help</a></li>
                 {% if auth_token %}
@@ -75,8 +76,8 @@
     <script src="/static/js/lightbox.js"></script>
     
     <link href="/static/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
     <link href="/static/css/lightbox.css" rel="stylesheet" />
-    <link href="/static/css/style.css" rel="stylesheet" type="text/css">
     <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
   </body>
 </html>

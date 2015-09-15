@@ -9,7 +9,7 @@
   <table id="samplelist" class="table">
     <caption>
       <span style="float:left">Total: {{ total }}</span>
-      <span style="float:right"><a onclick="exportToCsv()">Export data to CSV file</a></span>
+      <span style="float:right"><a href="#collapseOne" onclick="exportToCsv()">Export data to CSV file</a></span>
     </caption>
     <thead>
       <tr>
@@ -27,7 +27,7 @@
     <tbody>
       {% for sample in samples %}
       <tr>
-        <td id="url" class="sample_label"><a href="{{ url_for('sample', id=sample.id) }}" target="_blank">{% if sample.number %}{{ sample.number }}{% endif %}</td>
+        <td id="url" class="sample_label"><a href="{{ url_for('sample', id=sample.id) }}">{% if sample.number %}{{ sample.number }}{% endif %}</td>
         <td class="sample_value">{% if sample.subsample_ids != None %}{{ sample.subsample_ids|length }}{% endif %}</td>
         <td class="sample_value">{% if sample.chemical_analyses_ids != None %}{{ sample.chemical_analyses_ids|length }}{% endif %}</td>
         <td class="sample_value">{% if sample.image_count != None %}{{ sample.image_count }}{% endif %}</td>
@@ -82,12 +82,12 @@ function initialize() {
       position: {lat: lat, lng: lon},
       map: map,
       title: samples[i]['number']+
-        '\nSubsamples: '+samples[i]['subsample_ids']+
-        '\nChemical Analyses: '+samples[i]['chemical_analyses_ids'],
+        '\nSubsamples: '+samples[i]['subsample_ids'].length+
+        '\nChemical Analyses: '+samples[i]['chemical_analyses_ids'].length,
       url: url
     });
     marker.addListener('click', function() {
-      window.open(this.url,'_blank');
+      window.open(this.url);
     });
     markers.push(marker);
   }

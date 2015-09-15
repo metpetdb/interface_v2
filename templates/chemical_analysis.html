@@ -5,6 +5,7 @@
   <a href="{{ url_for('sample', id=analysis.subsample.sample) }}">Sample {{ analysis.sample.number }}</a> / 
   <a href="{{ url_for('subsample', id=analysis.subsample.id) }}">Subsample {{ analysis.subsample.name }}</a> / 
   Chemical Analysis Point {{analysis.spot_id}}
+  {% if auth_token %}<span style="float:right"><a href="{{ url_for('edit_chemical_analysis', id=analysis.id) }}">Edit Chemical Analysis</a></span>{% endif %}
 </h4>
 {% endblock %}
 
@@ -56,12 +57,6 @@
         <td class="sample_label">Stage Y</td>
         <td class="sample_value">{% if analysis.reference_y != None %}{{analysis.reference_y}}{% endif %}</td>
       </tr>
-      {% if auth_token %}
-      <tr>
-        <td> </td>
-        <td><a href="{{ url_for('edit_chemical_analysis', id=analysis.id) }}">Edit Chemical Analysis</a></td>
-      </tr>
-      {% endif %}
     </tbody>
   </table>
 </div>

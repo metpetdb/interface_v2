@@ -2,15 +2,15 @@
   <table id="samplelist" class="table">
     <caption>
       <span style="float:left">Total: {{ total }}</span>
-      <span style="float:right"><a onclick="exportToCsv()">Export data to CSV file</a></span>
+      <span style="float:right"><a href="#collapseOne" onclick="exportToCsv()">Export data to CSV file</a></span>
     </caption>
     <thead>
       <tr>
         <th>Sample Number</th>
         <th>Analysis Method</th>
         <th>Analysis Material</th>
-        <th>Element Amounts</th>
-        <th>Oxide Amounts</th>
+        <th>Elements</th>
+        <th>Oxides</th>
         <th>Analyst</th>
         <th>Analysis Date</th>
         <th>Reference X</th>
@@ -21,7 +21,7 @@
     <tbody>
       {% for analysis in chemical_analyses %}
       <tr>
-        <td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}" target="_blank" >{% if analysis.sample %}{{ analysis.sample.number }}{% endif %}</a></td>
+        <td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{% if analysis.sample %}{{ analysis.sample.number }}{% endif %}</a></td>
         <td class="sample_value">{% if analysis.analysis_method %}{{ analysis.analysis_method }}{% endif %}</td>
         <td class="sample_value">{% if analysis.mineral %}{{ analysis.mineral.name }}{% endif %}</td>
         <td class="sample_mineral sample_value">

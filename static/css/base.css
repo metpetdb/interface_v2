@@ -261,6 +261,43 @@ border-radius: 4px;
 box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
 }
 
+.navbar-dropdown
+{
+    position:absolute;
+    margin-left:-10px;
+}
+
+.navbar-dropdown li
+{
+    display:none;
+    padding:8px 10px;
+    min-height:40px;
+    text-align:center;
+    background-color: #fafafa;
+    background-image: -moz-linear-gradient(top, #ffffff, #f2f2f2);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#f2f2f2));
+    background-image: -webkit-linear-gradient(top, #ffffff, #f2f2f2);
+    background-image: -o-linear-gradient(top, #ffffff, #f2f2f2);
+    background-image: linear-gradient(to bottom, #ffffff, #f2f2f2);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#fff2f2f2', GradientType=0);
+    -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+    -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+}
+
+.editmenu
+{
+    margin-left:-55px;
+    width:175px;
+}
+
+.searchmenu
+{
+    margin-left:-46px;
+    width:125px;
+}
+
 .container-fluid
 {
  padding: 0 !important;
@@ -268,8 +305,8 @@ box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
 
 body
 {
-	font-family: 'Source Sans Pro', sans-serif;
-	background-color: #e4e6e5;
+    font-family: 'Source Sans Pro', sans-serif;
+    background-color: #e4e6e5;
         padding-bottom: 40px;
 }
 
@@ -284,8 +321,39 @@ body
 
 h3
 {
-	font-size: 22px;
-	font-weight: 400;
+    font-size: 22px;
+    font-weight: 400;
+}
+
+/* Style for dummy table which has the data to export to csv*/
+#dummy
+{
+    visibility: hidden;
+    height: 10px;
+    overflow: hidden;
+}
+
+#exportBtn
+{
+    float: right;
+    margin-top: 10px;
+    display: inline-block;
+    padding: 5px 14px;
+    font-weight: normal;
+    background-color: white;
+    color: #409f89;
+    border: 1px solid #DDD;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+}
+
+#exportBtn: hover
+{
+    text-decoration: none;
+    cursor: pointer;
+    background-color: #409F89;
+    color: #F8F8F8;
 }
 
 hr
@@ -296,6 +364,16 @@ hr
     border-top: 1px solid #B6B8B7;
     border-bottom: 1px solid white;
 }
+
+/*.navbar-nav>li>a
+{
+    font-size: 16px !important;
+}*/
+
+/*.navbar .brand
+{
+    padding: 7px 30px 5px !important;
+}*/
 
 #heading
 {
@@ -328,48 +406,57 @@ hr
 
 #image_canvas thead tr
 {
-	background-color: #318B76;
-	color:	white;
+    background-color: #318B76;
+    color:  white;
 }
 
 #map_canvas
 {
-	float: right;
-	height: 400px;
-	width: 450px;
-	border: 3px solid #C7C6C6;
-	border-radius: 5px
+    float: right;
+    height: 400px;
+    width: 450px;
+    border: 3px solid #C7C6C6;
+    border-radius: 5px
 
+}
+
+.reference_table
+{
+    font-size: 13px;
+    position:absolute;
+    opacity:0;
+    max-width:40%;
+    margin-left:100px;
 }
 
 #sampleview_table
 {
-	background-color: rgb(235, 235, 235);
-	width: 650px;
+    background-color: rgb(235, 235, 235);
+    width: 650px;
     margin-bottom: 50px;
-	float: left;
+    float: left;
 }
 
 .sample_value
 {
-	font-size: 16px;
+    font-size: 16px;
     color: rgb(14, 15, 15);
 }
 
 #subsampletable_header
 {
-	padding-top: 10px;
+    padding-top: 10px;
 }
 
 #sampleview_images
 {
-	width: 100%;
-	clear: both;
+    width: 100%;
+    clear: both;
 }
 
 #sampleview_images h4
 {
-	margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 #subsampletable_canvas_wrapper, #subsampleviewimg_canvas_wrapper, #chemtable_canvas_wrapper
@@ -397,8 +484,8 @@ hr
 
 #subsampletable_canvas, #subsampleviewimg_canvas, #chemtable_canvas
 {
-	clear: both;
-	width: 100%;
+    clear: both;
+    width: 100%;
 }
 
 #subsampletable_canvas thead tr, #subsampleviewimg_canvas thead tr, #chemtable_canvas thead tr
@@ -489,7 +576,7 @@ hr
 
 #jquery-overlay
 {
-	width: 100% !important;
+    width: 100% !important;
 
 }
 
@@ -517,7 +604,7 @@ hr
 /*------------------ CSS for chemicalanalysisView ------------------*/
 
 #chemicalanalysisview_table{
-    background-color: rgb(235, 235, 235);
+background-color: rgb(235, 235, 235);
     width: 550px;
     margin-bottom: 50px;
     float: left;
@@ -525,10 +612,9 @@ hr
 
 #chem_elements
 {
-    background-color: rgb(235, 235, 235);
-    width: 35%;
-    margin-bottom: 50px;
-    float: left;
+    width: 400px;
+    float: right;
+
 }
 
 #chem_elements h5
@@ -586,7 +672,8 @@ hr
 
  #chem_elements
  {
-  text-align: center;
+  float: none;
+  margin: 0 auto;
  }
 
  #map_canvas

@@ -10,7 +10,7 @@ def paginate_model(model_name, data, filters):
     	del filters['page']
     size = 20
     if 'page_size' in filters:
-        size = int(filters['page_size'])
+        size = int(filters['page_size'][0])
     previous = None
     if data['previous']:
 	    previous = url_for(model_name)+'?page='+str(page-1)+'&'+urlencode(filters)

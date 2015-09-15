@@ -3,6 +3,7 @@
 {% block title %}
 <h4>
   Sample {{sample.number}}
+  {% if auth_token %}<span style="float:right"><a href="{{ url_for('edit_sample', id=sample.id) }}">Edit Sample</a></span>{% endif %}
 </h4>
 {% endblock %}
 
@@ -20,7 +21,7 @@
       </tr>
       <tr>
         <td class="sample_label">Aliases</td>
-        <td class="sample_value">{% if sample.aliases %}{{ sample.aliases }}{% endif %}</td>
+        <td class="sample_value">{% for a in sample.aliases %}{% if loop.index0 > 0 %}, {% endif %}{{ a.name }}{% endfor %}</td>
       </tr>
       <tr>
         <td class="sample_label">Date Collected</td>
@@ -55,39 +56,45 @@
         <td class="sample_value">{% if sample.location_name %}{{ sample.location_name }}{% endif %}</td>
       </tr>
       <tr>
-        <td class="sample_label">Region</td>
-        <td class="sample_value">{% if sample.regions %}{{ sample.regions }}{% endif %}</td>
+        <td class="sample_label">Regions</td>
+        <td class="sample_value">{% for r in sample.regions %}{% if loop.index0 > 0 %}, {% endif %}{{ r }}{% endfor %}</td>
       </tr>
       <tr>
-        <td class="sample_label">Metamorphic Region</td>
-        <td class="sample_value">{% if sample.metamorphic_regions %}{{ sample.metamorphic_regions }}{% endif %}</td>
+        <td class="sample_label">Metamorphic Regions</td>
+        <td class="sample_value">{% for r in sample.metamorphic_regions %}{% if loop.index0 > 0 %}, {% endif %}{{ r.name }}{% endfor %}</td>
       </tr>
       <tr>
-        <td class="sample_label">Metamorphic Grade</td>
-        <td class="sample_value">{% if sample.metamorphic_grades %}{{ sample.metamorphic_grades }}{% endif %}</td>
+        <td class="sample_label">Metamorphic Grades</td>
+        <td class="sample_value">{% for g in sample.metamorphic_grades %}{% if loop.index0 > 0 %}, {% endif %}{{ g.name }}{% endfor %}</td>
       </tr>
       <tr>
         <td class="sample_label">Publication References</td>
-        <td class="sample_value">{% if sample.references %}{{ sample.references }}{% endif %}</td>
+        <td class="sample_value">
+        {% for r in sample.references %}
+          {{ r.name }}&nbsp;&nbsp;<img src="/static/images/icon-info-small.png" onclick="document.getElementById({{ loop.index0 }}).style.opacity=1">
+          <table id="{{ loop.index0 }}" class="table reference_table">
+            <tr>
+              <td>Title:</td>
+              <td>
+                <img src="/static/images/close.png" style="float:right;width:9px" onclick="document.getElementById({{ loop.index0 }}).style.opacity=0">
+                {% if r.title %}{{ r.title }}{% endif %}
+              </td>
+            </tr>
+            <tr><td>Authors:</td><td>{% if r.first_author %}{{ r.first_author }}{% endif %}{% if r.second_authors %}, {{ r.second_authors }}{% endif %}</td></tr>
+            <tr><td>Journal:</td><td>{% if r.journal_name %}{{ r.journal_name }}{% endif %}</td></tr>
+            <tr><td>Text:</td><td>{% if r.full_text %}{{ r.full_text }}{% endif %}</td></tr>
+          </table><br>
+        {% endfor %}
+        </td>
       </tr>
       <tr>
         <td class="sample_label">Description</td>
         <td class="sample_value">{% if sample.description %}{{ sample.description }}{% endif %}</td>
       </tr>
       <tr>
-        <td class="sample_label">Abstracts</td>
-        <td class="sample_value"></td>
-      </tr>
-      <tr>
         <td class="sample_label">Minerals</td>
-        <td class="sample_value">{{ sample.minerals }}</td>
+        <td class="sample_value">{% for m in sample.minerals %}{% if loop.index0 > 0 %}, {% endif %}{{ m.name }}{% endfor %}</td>
       </tr>
-      {% if auth_token %}
-      <tr>
-        <td> </td>
-        <td><a href="{{ url_for('edit_sample', id=sample.id) }}">Edit Sample</a></td>
-      </tr>
-      {% endif %}
     </tbody>
   </table>
 </div>
