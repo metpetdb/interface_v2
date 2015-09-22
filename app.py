@@ -1,6 +1,5 @@
 import dotenv
 import json
-from ast import literal_eval
 from getenv import env
 from requests import get, put, post
 from urllib import urlencode, urlopen
@@ -191,6 +190,7 @@ def edit_sample(id):
     #this time redirect to sample page if not logged in
     headers = None
     if session.get("auth_token", None):
+        print session.get("auth_token")
         headers = {"Authorization": "Token "+session.get("auth_token")}
     else:
         return redirect(url_for("sample", id=id))
@@ -202,10 +202,12 @@ def edit_sample(id):
         new_sample["minerals"] = []
         for key in new_sample.keys():
             if key[:9] == "minerals_":
-                new_sample["minerals"].append({"id": key[9:], "amount": new_sample[key]})
+                new_sample["minerals"].append({"id": key[9:], "amount": new_sample[key][0]})
                 del new_sample[key]
             elif (not new_sample[key] or not new_sample[key][0]) and key != "minerals":
                 del new_sample[key]
+            elif key != "minerals":
+                new_sample[key] = new_sample[key][0]
 
         #the form keeps these in lists but the API wants them as a comma separated string
         if "metamorphic_grade_ids" in new_sample and type(new_sample["metamorphic_grade_ids"]) is list:
@@ -221,7 +223,10 @@ def edit_sample(id):
         del new_sample["location_coords1"]
 
         #send data to API with PUT call and return error message if any
-        new_sample = put(env("API_DRF_HOST")+"/samples/"+id, data=new_sample, headers=headers).json()
+        new_sample = {"number": "G85", "rock_type_id": "7fa3b51a-672f-48dd-9c3e-bee31dc41952", "collector_name": "J.T. Cheney", "minerals": [{"amount": "x", "id": "c56f1c32-1cfa-43f1-a358-d9a9f3981199"}, {"amount": "1.5", "id": "64a8c311-5907-4dda-83ff-10646cb4fc49"}, {"amount": "x", "id": "40faca8f-5b1d-4040-b35d-b6897fd540f6"}, {"amount": "x", "id": "967ad0cc-8792-4287-aa55-4342a2232326"}, {"amount": "x", "id": "81ae6820-0388-4e8c-a488-fe66985dd764"}, {"amount": "x", "id": "25a230e5-f00c-4c25-a128-b8026973125a"}, {"amount": "x", "id": "b1a7bd27-0251-4f91-84f1-7882127cb1a2"}], "country": "USA", "metamorphic_grade_ids": "5c3217f1-2a4b-498d-aab5-181b869ddc50", "public_data": "false", "metamorphic_region_ids": "6ded6250-2da0-43ba-a83b-b474013d6936", "location_coords": "SRID=4326;POINT (-70.9905776978 44.6203613281)"}
+        print json.dumps(new_sample)
+        new_sample = put(env("API_DRF_HOST")+"/samples/"+id, data=json.dumps(new_sample), headers=headers)
+        print new_sample
         if 'detail' in new_sample:
             flash(new_sample['detail'])
         return redirect(url_for("sample", id=id))
@@ -258,17 +263,21 @@ def new_sample():
     if session.get("auth_token", None):
         headers = {"Authorization": "Token "+session.get("auth_token")}
     else:
-        return redirect(url_for("sample", id=id))
+        return redirect(url_for("search"))
 
     new_sample = dict(request.form)
     if new_sample:
         new_sample["minerals"] = []
         for key in new_sample.keys():
             if key[:9] == "minerals_":
-                new_sample["minerals"].append({"id": key[9:], "amount": new_sample[key]})
+                new_sample["minerals"].append({"id": key[9:], "amount": new_sample[key][0]})
                 del new_sample[key]
             elif (not new_sample[key] or not new_sample[key][0]) and key != "minerals":
                 del new_sample[key]
+            elif key != "minerals":
+                new_sample[key] = new_sample[key][0]
+        if not new_sample['minerals']:
+            del new_sample['minerals']
 
         if "metamorphic_grade_ids" in new_sample and type(new_sample["metamorphic_grade_ids"]) is list:
             new_sample["metamorphic_grade_ids"] = (",").join(new_sample["metamorphic_grade_ids"])
@@ -281,10 +290,13 @@ def new_sample():
         del new_sample["location_coords0"]
         del new_sample["location_coords1"]
 
-        new_sample = post(env("API_DRF_HOST")+"/samples/", data=new_sample, headers=headers).json()
+        new_sample['owner'] = '3144472b-42af-4fbb-94e2-19d2443d07dc'
+        print json.dumps(new_sample)
+        new_sample = post(env("API_DRF_HOST")+"/samples/", data=json.dumps(new_sample), headers=headers).json()
+        print new_sample
         if 'detail' in new_sample:
             flash(new_sample['detail'])
-        return redirect(url_for("sample", id=id))
+        return redirect(url_for("search"))
 
     regions = get(env("API_DRF_HOST")+"/regions/", params={"page_size": 2000, "format": "json"}).json()["results"]
     minerals = get(env("API_DRF_HOST")+"/minerals/", params={"page_size": 200, "format": "json"}).json()["results"]
@@ -406,7 +418,7 @@ def chemical_analyses():
     #hopefully analyses will have sample numbers instead of just ids to skip this step
     for c in chem_results:
         c["sample"] = get(env("API_DRF_HOST")+"/samples/"+c["subsample"]["sample"],
-            params={"fields": "number", "format": "json"}, headers={"Authorization": "Token "+session.get("auth_token", None)}).json()
+            params={"fields": "number", "format": "json"}, headers={"Authorization": "Token "+session.get("auth_token", '')}).json()
         if c["analysis_date"]:
             c["analysis_date"] = c["analysis_date"][:-10]
 
@@ -560,8 +572,8 @@ def login():
         else:
             auth_token = post(env("API_DRF_HOST")+"/auth/login/", data=login).json()
 
-        if not auth_token or "detail" in auth_token:
-            flash(auth_token['detail'])
+        if not auth_token or "auth_token" not in auth_token:
+            flash(auth_token.values()[0][0])
         else:
             flash("Login successful!")
             session["auth_token"] = auth_token["auth_token"]
