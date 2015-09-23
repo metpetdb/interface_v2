@@ -51,12 +51,6 @@
           </td>
         </tr>
         <tr>
-          <td class="sample_label">Date Precision</td>
-          <td class="sample_value">
-            <input type="text" name="date_precision" value="{% if sample.date_precision %}{{sample.date_precision}}{% endif %}" style="width:85%">
-          </td>
-        </tr>
-        <tr>
           <td class="sample_label">Rock Type*</td>
           <td class="sample_value">
             <select name="rock_type_id" class="chosen-select" style="width:85%">
@@ -93,12 +87,6 @@
           <td class="sample_label">Longitude*</td>
           <td class="sample_value">
             <input type="text" name="location_coords1" value="{% if sample.location_coords %}{{sample.location_coords.1}}{% endif %}" style="width:85%">
-          </td>
-        </tr>
-        <tr>
-          <td class="sample_label">Location Error</td>
-          <td class="sample_value">
-            <input type="text" name="location_error" value="{% if sample.location_error %}{{sample.location_error}}{% endif %}" style="width:85%">
           </td>
         </tr>
         <tr>
@@ -180,9 +168,9 @@
               <option></option>
               {% for r in references %}
                 {% if r in sample.references %}
-                <option value="{{ r.id }}" selected="selected">{{ r.name }}</option>
+                <option value="{{ r.name }}" selected="selected">{{ r.name }}</option>
                 {% else %}
-                <option value="{{ r.id }}">{{ r.name }}</option>
+                <option value="{{ r.name }}">{{ r.name }}</option>
                 {% endif %}
               {% endfor %}
             </select>
@@ -269,7 +257,6 @@ function addRegion() {
   new_option.innerHTML = input.value;
   new_option.value = input.value;
   new_option.selected = "selected";
-  input.value = 'a';
   document.getElementById('regions').add(new_option);
   input.value = '';
   $('.chosen-select').trigger("chosen:updated");
@@ -282,7 +269,6 @@ function addReference() {
   new_option.innerHTML = input.value;
   new_option.value = 0;
   new_option.selected = "selected";
-  input.value = 'a';
   document.getElementById('references').add(new_option);
   input.value = '';
   $('.chosen-select').trigger("chosen:updated");

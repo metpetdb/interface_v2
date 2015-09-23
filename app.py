@@ -1,7 +1,7 @@
 import dotenv
 import json
 from getenv import env
-from requests import get, put, post
+from requests import get, put, post, codes
 from urllib import urlencode, urlopen
 from flask import (
     Flask,
@@ -206,16 +206,8 @@ def edit_sample(id):
                 del new_sample[key]
             elif (not new_sample[key] or not new_sample[key][0]) and key != "minerals":
                 del new_sample[key]
-            elif key != "minerals":
+            elif key[-1] != "s":
                 new_sample[key] = new_sample[key][0]
-
-        #the form keeps these in lists but the API wants them as a comma separated string
-        if "metamorphic_grade_ids" in new_sample and type(new_sample["metamorphic_grade_ids"]) is list:
-            new_sample["metamorphic_grade_ids"] = (",").join(new_sample["metamorphic_grade_ids"])
-        if "metamorphic_region_ids" in new_sample and type(new_sample["metamorphic_region_ids"]) is list:
-            new_sample["metamorphic_region_ids"] = (",").join(new_sample["metamorphic_region_ids"])
-        if "regions" in new_sample and type(new_sample["regions"]) is not list:
-            new_sample["regions"] = [new_sample["regions"]]
 
         #make lat/long back into point
         new_sample["location_coords"] = "SRID=4326;POINT ("+str(new_sample["location_coords1"])+" "+str(new_sample["location_coords0"])+")"
@@ -223,12 +215,12 @@ def edit_sample(id):
         del new_sample["location_coords1"]
 
         #send data to API with PUT call and return error message if any
-        new_sample = {"number": "G85", "rock_type_id": "7fa3b51a-672f-48dd-9c3e-bee31dc41952", "collector_name": "J.T. Cheney", "minerals": [{"amount": "x", "id": "c56f1c32-1cfa-43f1-a358-d9a9f3981199"}, {"amount": "1.5", "id": "64a8c311-5907-4dda-83ff-10646cb4fc49"}, {"amount": "x", "id": "40faca8f-5b1d-4040-b35d-b6897fd540f6"}, {"amount": "x", "id": "967ad0cc-8792-4287-aa55-4342a2232326"}, {"amount": "x", "id": "81ae6820-0388-4e8c-a488-fe66985dd764"}, {"amount": "x", "id": "25a230e5-f00c-4c25-a128-b8026973125a"}, {"amount": "x", "id": "b1a7bd27-0251-4f91-84f1-7882127cb1a2"}], "country": "USA", "metamorphic_grade_ids": "5c3217f1-2a4b-498d-aab5-181b869ddc50", "public_data": "false", "metamorphic_region_ids": "6ded6250-2da0-43ba-a83b-b474013d6936", "location_coords": "SRID=4326;POINT (-70.9905776978 44.6203613281)"}
+        new_sample['owner'] = '3144472b-42af-4fbb-94e2-19d2443d07dc'
         print json.dumps(new_sample)
         new_sample = put(env("API_DRF_HOST")+"/samples/"+id, data=json.dumps(new_sample), headers=headers)
-        print new_sample
-        if 'detail' in new_sample:
-            flash(new_sample['detail'])
+        print new_sample.json()
+        if new_sample.status_code != codes.ok:
+            flash(new_sample.json().values()[0][0])
         return redirect(url_for("sample", id=id))
 
     #get sample data and make lat/long separate
@@ -274,28 +266,67 @@ def new_sample():
                 del new_sample[key]
             elif (not new_sample[key] or not new_sample[key][0]) and key != "minerals":
                 del new_sample[key]
-            elif key != "minerals":
+            elif key[-1] != "s":
                 new_sample[key] = new_sample[key][0]
         if not new_sample['minerals']:
             del new_sample['minerals']
-
-        if "metamorphic_grade_ids" in new_sample and type(new_sample["metamorphic_grade_ids"]) is list:
-            new_sample["metamorphic_grade_ids"] = (",").join(new_sample["metamorphic_grade_ids"])
-        if "metamorphic_region_ids" in new_sample and type(new_sample["metamorphic_region_ids"]) is list:
-            new_sample["metamorphic_region_ids"] = (",").join(new_sample["metamorphic_region_ids"])
-        if "regions" in new_sample and type(new_sample["regions"]) is not list:
-            new_sample["regions"] = [new_sample["regions"]]
 
         new_sample["location_coords"] = "SRID=4326;POINT ("+str(new_sample["location_coords1"])+" "+str(new_sample["location_coords0"])+")"
         del new_sample["location_coords0"]
         del new_sample["location_coords1"]
 
         new_sample['owner'] = '3144472b-42af-4fbb-94e2-19d2443d07dc'
-        print json.dumps(new_sample)
-        new_sample = post(env("API_DRF_HOST")+"/samples/", data=json.dumps(new_sample), headers=headers).json()
+        new_sample = {
+            "minerals": [
+                {
+                    "id": "0010184b-28aa-4816-89c0-5137773883d8",
+                    "amount": "x"
+                },
+                {
+                    "id": "feb8da1f-c2d1-4af8-b675-9b2fd62ba9c2",
+                    "amount": "y"
+                }
+            ],
+            "owner": "930dfb18-433f-4a9c-be02-0475d42b4d3f",
+            "public_data": True,
+            "number": "GF-63:2007-110722",
+            "aliases": [
+                "Mysample1",
+                "Mysample2"
+            ],
+            "collection_date": None,
+            "description": "Creating a sample",
+            "location_name": "Montreal",
+            "location_coords": "SRID=4326;POINT (-118.4008865356450002 49.1695137023925994)",
+            "location_error": None,
+            "date_precision": None,
+            "country": "Canada",
+            "regions": [
+                "British Columbia",
+                "Shuswap",
+                "Footwall of Granby Fault",
+                "The Grand Forks Complex"
+            ],
+            "references": [
+                "2007-110722"
+            ],
+            "collector_name": None,
+            "sesar_number": None,
+            "rock_type_id": "0d4504cf-f965-4eb7-8a2a-31272825bb54",
+            "collector_id": None,
+            "metamorphic_region_ids": [
+                "e43059ba-d33f-41d6-a226-b58c5ef93ada",
+                "002cdc09-5e33-421b-be7d-89f400da438a"
+            ],
+            "metamorphic_grade_ids": [
+                "0e4e0c52-169d-49a9-8e5c-657b9f6c84c8"
+            ]
+        }
         print new_sample
-        if 'detail' in new_sample:
-            flash(new_sample['detail'])
+        new_sample = post(env("API_DRF_HOST")+"/samples/", data=new_sample, headers=headers)
+        print new_sample.json()
+        if new_sample.status_code != codes.ok:
+            flash(new_sample.json().values()[0][0])
         return redirect(url_for("search"))
 
     regions = get(env("API_DRF_HOST")+"/regions/", params={"page_size": 2000, "format": "json"}).json()["results"]
@@ -473,11 +504,21 @@ def edit_chemical_analysis(id):
         for key in new_analysis.keys():
             if key[:9] == "elements_":
                 e = new_analysis[key]
-                new_analysis["elements"].append({"id": key[9:], "amount": e[0], "precision": e[1], "precision_type": e[2], "measurement_unit": e[3], "min": e[4], "max": e[5]})
+                new_analysis["elements"].append({"id": key[9:],
+                                                "amount": e[0],
+                                                "precision": e[1],
+                                                "precision_type": e[2],
+                                                "measurement_unit": e[3],
+                                                "min": e[4], "max": e[5]})
                 del new_analysis[key]
             if key[:7] == "oxides_":
                 o = new_analysis[key]
-                new_analysis["oxides"].append({"id": key[7:], "amount": o[0], "precision": o[1], "precision_type": o[2], "measurement_unit": o[3], "min": o[4], "max": o[5]})
+                new_analysis["oxides"].append({"id": key[7:],
+                                                "amount": o[0],
+                                                "precision": o[1],
+                                                "precision_type": o[2],
+                                                "measurement_unit": o[3],
+                                                "min": o[4], "max": o[5]})
                 del new_analysis[key]
 
         new_analysis = put(env("API_DRF_HOST")+"/chemical_analyses/"+id, data=new_analysis, headers=headers).json()
@@ -518,11 +559,21 @@ def new_chemical_analysis():
         for key in new_analysis.keys():
             if key[:9] == "elements_":
                 e = new_analysis[key]
-                new_analysis["elements"].append({"id": key[9:], "amount": e[0], "precision": e[1], "precision_type": e[2], "measurement_unit": e[3], "min": e[4], "max": e[5]})
+                new_analysis["elements"].append({"id": key[9:],
+                                                "amount": e[0],
+                                                "precision": e[1],
+                                                "precision_type": e[2],
+                                                "measurement_unit": e[3],
+                                                "min": e[4], "max": e[5]})
                 del new_analysis[key]
             if key[:7] == "oxides_":
                 o = new_analysis[key]
-                new_analysis["oxides"].append({"id": key[7:], "amount": o[0], "precision": o[1], "precision_type": o[2], "measurement_unit": o[3], "min": o[4], "max": o[5]})
+                new_analysis["oxides"].append({"id": key[7:],
+                                                "amount": o[0],
+                                                "precision": o[1],
+                                                "precision_type": o[2],
+                                                "measurement_unit": o[3],
+                                                "min": o[4], "max": o[5]})
                 del new_analysis[key]
 
         new_analysis = post(env("API_DRF_HOST")+"/chemical_analyses/"+id, data=new_analysis, headers=headers).json()
