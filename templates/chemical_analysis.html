@@ -71,12 +71,12 @@
       </tr>
     </thead>
     <tbody>
-      {%for element in analysis.elements%}
+      {% if analysis.elements %}{%for element in analysis.elements%}
       <tr>
         <td>{{element.symbol}}</td>
         <td>{{element.amount}}</td>
       </tr>
-      {%endfor%}
+      {%endfor%}{% endif %}
     </tbody>
   </table>
 </div>
@@ -91,12 +91,12 @@
       </tr>
     </thead>
     <tbody>
-      {%for oxide in analysis.oxides%}
+      {% if analysis.oxides %}{%for oxide in analysis.oxides%}
       <tr>
         <td>{{oxide.species}}</td>
         <td>{{oxide.amount}}</td>
       </tr>
-      {%endfor%}
+      {%endfor%}{% endif %}
     </tbody>
   </table>
 </div>

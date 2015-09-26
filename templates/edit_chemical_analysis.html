@@ -115,7 +115,7 @@
                 </tr>
               </thead>
               <tbody>
-              {% for e in analysis.elements %}
+              {% if analysis.elements %}{% for e in analysis.elements %}
                 <tr id="{{ e.name }}">
                   <td><a href="#elements" onclick="document.getElementById('elements').deleteRow(document.getElementById('{{ e.name }}').rowIndex)">x</a></td>
                   <td>&nbsp&nbsp{{ e.name }}&nbsp&nbsp</td>
@@ -126,7 +126,7 @@
                   <td><input type="text" name="elements_{{ e.id }}" value="{{ e.min_amount }}" style="text-align:right;width:65px"></td>
                   <td><input type="text" name="elements_{{ e.id }}" value="{{ e.max_amount }}" style="text-align:right;width:65px"></td>
                 </tr>
-              {% endfor %}
+              {% endfor %}{% endif %}
               </tbody>
             </table>
             <select class="chosen-select" id="element_names" onchange="update('element')">
@@ -154,7 +154,7 @@
                 </tr>
               </thead>
               <tbody>
-              {% for o in analysis.oxides %}
+              {% if analysis.oxides %}{% for o in analysis.oxides %}
                 <tr id="{{ o.species }}">
                   <td><a href="#oxides" onclick="document.getElementById('oxides').deleteRow(document.getElementById('{{ o.species }}').rowIndex)">x</a></td>
                   <td>&nbsp&nbsp{{ o.species }}&nbsp&nbsp</td>
@@ -165,7 +165,7 @@
                   <td><input type="text" name="oxides_{{ o.id }}" value="{{ o.min_amount }}" style="text-align:right;width:65px"></td>
                   <td><input type="text" name="oxides_{{ o.id }}" value="{{ o.max_amount }}" style="text-align:right;width:65px"></td>
                 </tr>
-              {% endfor %}
+              {% endfor %}{% endif %}
               </tbody>
             </table>
             <select class="chosen-select" id="oxide_names" onchange="update('oxide')">

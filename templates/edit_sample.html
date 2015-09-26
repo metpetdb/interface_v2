@@ -37,9 +37,9 @@
           <td class="sample_label">Aliases</td>
           <td class="sample_value">
             <div id="aliases">
-              {% for a in sample.aliases %}
+              {% if sample.aliases %}{% for a in sample.aliases %}
                 <input type="text" name="aliases" value="{{a}}" style="width:85%">
-              {% endfor %}
+              {% endfor %}{% endif %}
               <button type="button" onclick="document.getElementById('aliases').innerHTML += '<input type=\'text\' name=\'aliases\' style=\'width:85%\'>'" style="float:right">Add</button>
             </div>
           </td>
@@ -201,13 +201,13 @@
                 </tr>
               </thead>
               <tbody>
-              {% for m in sample.minerals %}
+              {% if sample.minerals %}{% for m in sample.minerals %}
                 <tr id="{{ m.name }}">
                   <td><a href="#minerals" onclick="document.getElementById('minerals').deleteRow(document.getElementById('{{ m.name }}').rowIndex)">x</a></td>
                   <td>&nbsp&nbsp{{ m.name }}&nbsp&nbsp</td>
                   <td><input type="text" name="minerals_{{ m.id }}" value="{{ m.amount }}" style="text-align:right;width:65px"></td>
                 </tr>
-              {% endfor %}
+              {% endfor %}{% endif %}
               </tbody>
             </table>
             <select class="chosen-select" id="mineral_names" onchange="updateMinerals()">

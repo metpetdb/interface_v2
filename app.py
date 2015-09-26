@@ -208,19 +208,23 @@ def edit_sample(id):
                 del new_sample[key]
             elif key[-1] != "s":
                 new_sample[key] = new_sample[key][0]
+        if not new_sample['minerals']:
+            del new_sample['minerals']
 
-        #make lat/long back into point
+        #make lat/long back into a point
         new_sample["location_coords"] = "SRID=4326;POINT ("+str(new_sample["location_coords1"])+" "+str(new_sample["location_coords0"])+")"
         del new_sample["location_coords0"]
         del new_sample["location_coords1"]
 
-        #send data to API with PUT call and return error message if any
-        new_sample['owner'] = '3144472b-42af-4fbb-94e2-19d2443d07dc'
-        print json.dumps(new_sample)
-        new_sample = put(env("API_DRF_HOST")+"/samples/"+id, data=json.dumps(new_sample), headers=headers)
-        print new_sample.json()
-        if new_sample.status_code != codes.ok:
-            flash(new_sample.json().values()[0][0])
+        #send data to API with PUT call and display error message if any
+        new_sample = put(env("API_DRF_HOST")+"/samples/"+id, json=new_sample, headers=headers)
+        print new_sample.content #500 error (on API side I believe) "This QueryDict instance is immutable"
+                                 #I also get this error when sending data=new_sample
+                                 #when I try to send either json=json.dumps(new_sample) or data=json.dumps(new_sample),
+                                 #I get the response: {"detail":"Unsupported media type \"\" in request."}
+
+        #if new_sample.status_code != codes.ok:
+        #   flash(new_sample.json().values()[0][0])
         return redirect(url_for("sample", id=id))
 
     #get sample data and make lat/long separate
@@ -275,59 +279,10 @@ def new_sample():
         del new_sample["location_coords0"]
         del new_sample["location_coords1"]
 
-        new_sample['owner'] = '3144472b-42af-4fbb-94e2-19d2443d07dc'
-        new_sample = {
-            "minerals": [
-                {
-                    "id": "0010184b-28aa-4816-89c0-5137773883d8",
-                    "amount": "x"
-                },
-                {
-                    "id": "feb8da1f-c2d1-4af8-b675-9b2fd62ba9c2",
-                    "amount": "y"
-                }
-            ],
-            "owner": "930dfb18-433f-4a9c-be02-0475d42b4d3f",
-            "public_data": True,
-            "number": "GF-63:2007-110722",
-            "aliases": [
-                "Mysample1",
-                "Mysample2"
-            ],
-            "collection_date": None,
-            "description": "Creating a sample",
-            "location_name": "Montreal",
-            "location_coords": "SRID=4326;POINT (-118.4008865356450002 49.1695137023925994)",
-            "location_error": None,
-            "date_precision": None,
-            "country": "Canada",
-            "regions": [
-                "British Columbia",
-                "Shuswap",
-                "Footwall of Granby Fault",
-                "The Grand Forks Complex"
-            ],
-            "references": [
-                "2007-110722"
-            ],
-            "collector_name": None,
-            "sesar_number": None,
-            "rock_type_id": "0d4504cf-f965-4eb7-8a2a-31272825bb54",
-            "collector_id": None,
-            "metamorphic_region_ids": [
-                "e43059ba-d33f-41d6-a226-b58c5ef93ada",
-                "002cdc09-5e33-421b-be7d-89f400da438a"
-            ],
-            "metamorphic_grade_ids": [
-                "0e4e0c52-169d-49a9-8e5c-657b9f6c84c8"
-            ]
-        }
-        print new_sample
-        new_sample = post(env("API_DRF_HOST")+"/samples/", data=new_sample, headers=headers)
-        print new_sample.json()
-        if new_sample.status_code != codes.ok:
-            flash(new_sample.json().values()[0][0])
-        return redirect(url_for("search"))
+        new_sample = post(env("API_DRF_HOST")+"/samples/", json=new_sample, headers=headers)
+        # if new_sample.status_code != codes.ok:
+        #     flash((", ").join((", ").join(new_sample.json().values()[i]) for i in range(len(new_sample.json().values()))))
+        return redirect(url_for("sample", id=new_sample.json()["id"]))
 
     regions = get(env("API_DRF_HOST")+"/regions/", params={"page_size": 2000, "format": "json"}).json()["results"]
     minerals = get(env("API_DRF_HOST")+"/minerals/", params={"page_size": 200, "format": "json"}).json()["results"]
