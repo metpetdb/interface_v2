@@ -19,7 +19,7 @@
       </tr>      
       <tr>
         <td class="sample_label">Public</td>
-        <td class="sample_value">{% if analysis.public_data %}{{analysis.public_data}}{% endif %}</td>
+        <td class="sample_value">{% if analysis.public_data %}Yes{% else %}No{% endif %}</td>
       </tr>          
       <tr>
         <td class="sample_label">Image</td>
@@ -48,14 +48,22 @@
       <tr>
         <td class="sample_label">Total</td>
         <td class="sample_value">{% if analysis.total != None %}{{analysis.total}}{% endif %}</td>
-      </tr>          
+      </tr>
       <tr>
-        <td class="sample_label">Stage X</td>
+        <td class="sample_label">Reference X</td>
         <td class="sample_value">{% if analysis.reference_x != None %}{{analysis.reference_x}}{% endif %}</td>
       </tr>
       <tr>
-        <td class="sample_label">Stage Y</td>
+        <td class="sample_label">Reference Y</td>
         <td class="sample_value">{% if analysis.reference_y != None %}{{analysis.reference_y}}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Stage X</td>
+        <td class="sample_value">{% if analysis.stage_x != None %}{{analysis.stage_x}}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Stage Y</td>
+        <td class="sample_value">{% if analysis.stage_y != None %}{{analysis.stage_y}}{% endif %}</td>
       </tr>
     </tbody>
   </table>

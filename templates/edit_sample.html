@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block body %}
-<form action="" method="POST" name="edit">
+<form action="" method="POST" onsubmit="return checkForm(this);">
   <div class="table-responsive">
     <table id="sampleview_table" class="table">
       <tbody>
@@ -102,12 +102,6 @@
           </td>
         </tr>
         <tr>
-          <td class="sample_label">Collector ID</td>
-          <td class="sample_value">
-            <input type="text" name="collector_id" value="{% if sample.collector_id %}{{sample.collector_id}}{% endif %}" style="width:85%">
-          </td>
-        </tr>
-        <tr>
           <td class="sample_label">Present Sample Location</td>
           <td class="sample_value">
             <input type="text" name="location_name" value="{% if sample.location_name %}{{sample.location_name}}{% endif %}" style="width:85%">
@@ -117,7 +111,7 @@
           <td class="sample_label">Region</td>
           <td class="sample_value">
             <select multiple name="regions" id="regions" class="chosen-select" style="width:85%">
-              <option></option>
+              <option hidden selected="selected"></option>
               {% for r in regions %}
                 {% if r.name in sample.regions %}
                 <option value="{{ r.name }}" selected="selected">{{ r.name }}</option>
@@ -135,7 +129,7 @@
           <td class="sample_label">Metamorphic Regions</td>
           <td class="sample_value">
             <select multiple name="metamorphic_region_ids" class="chosen-select" style="width:85%">
-              <option></option>
+              <option hidden selected="selected"></option>
               {% for m in metamorphic_regions %}
                 {% if m in sample.metamorphic_regions %}
                 <option value="{{ m.id }}" selected="selected">{{ m.name }}</option>
@@ -150,7 +144,7 @@
           <td class="sample_label">Metamorphic Grades</td>
           <td class="sample_value">
             <select multiple name="metamorphic_grade_ids" class="chosen-select" style="width:85%">
-              <option></option>
+              <option hidden selected="selected"></option>
               {% for m in metamorphic_grades %}
                 {% if m in sample.metamorphic_grades %}
                 <option value="{{ m.id }}" selected="selected">{{ m.name }}</option>
@@ -250,6 +244,35 @@ $(function()
     no_results_text: "Oops, nothing found!"
   });
 });
+
+function checkForm(form)
+{
+  if (form.number.value == "")
+  {
+    alert("Error: Number cannot be blank!");
+    form.number.focus();
+    return false;
+  }
+  if (form.rock_type.value == "")
+  {
+    alert("Error: Rock type cannot be blank!");
+    form.rock_type.focus();
+    return false;
+  }
+  if (form.location_coords0.value == "")
+  {
+    alert("Error: Latitude cannot be blank!");
+    form.location_coords0.focus();
+    return false;
+  }
+  if (form.location_coords1.value == "")
+  {
+    alert("Error: Longitude cannot be blank!");
+    form.location_coords1.focus();
+    return false;
+  }
+  return true;
+}
 
 function addRegion() {
   var input = document.getElementById('add_regions');

@@ -21,7 +21,7 @@
       </tr>
       <tr>
         <td class="sample_label">Aliases</td>
-        <td class="sample_value">{% if sample.aliases %}{% for a in sample.aliases %}{% if loop.index0 > 0 %}, {% endif %}{{ a.name }}{% endfor %}{% endif %}</td>
+        <td class="sample_value">{% if sample.aliases %}{% for a in sample.aliases %}{% if loop.index0 > 0 %}, {% endif %}{{ a }}{% endfor %}{% endif %}</td>
       </tr>
       <tr>
         <td class="sample_label">Date Collected</td>
@@ -33,7 +33,7 @@
       </tr>
       <tr>
         <td class="sample_label">Public</td>
-        <td class="sample_value">{% if sample.public_data %}{{ sample.public_data }}{% endif %}</td>
+        <td class="sample_value">{% if sample.public_data %}Yes{% else %}No{% endif %}</td>
       </tr>
       <tr>
         <td class="sample_label">Latitude</td>
@@ -129,7 +129,7 @@
 </div>
 
 <hr>
-<h4>Subsamples</h4>
+<h4>Subsamples{% if auth_token %}<span style="float:right"><a href="{{ url_for('new_subsample', sample_id=sample.id)}}">Add Subsample</a></span>{% endif %}</h4>
 <div class="table-responsive">
   <table id="subsampletable_canvas">
     <thead>

@@ -290,12 +290,14 @@ box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
 {
     margin-left:-55px;
     width:175px;
+    z-index:15;
 }
 
 .searchmenu
 {
     margin-left:-46px;
     width:125px;
+    z-index:15;
 }
 
 .container-fluid

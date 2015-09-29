@@ -58,7 +58,7 @@
 </div>
 
 <hr>
-<h4>Chemical Analyses</h4>
+<h4>Chemical Analyses{% if auth_token %}<span style="float:right"><a href="{{ url_for('new_chemical_analysis', subsample_id=subsample.id)}}">Add Chemical Analysis</a></span>{% endif %}</h4>
 <div class="table-responsive">
   <table id="chemtable_canvas">
     <thead>

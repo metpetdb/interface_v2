@@ -2,8 +2,8 @@
 
 {% block title %}
   <h4>
-    {% if subsample.id %}
     <a href="{{ url_for('sample', id=subsample.sample.id) }}">Sample {{ subsample.sample.number }}</a> / 
+    {% if subsample.id %}
     <a href="{{ url_for('subsample', id=subsample.id) }}">Subsample {% if subsample.name %}{{subsample.name}}{% endif %}</a>
     {% else %}
     New Subsample
@@ -12,14 +12,14 @@
 {% endblock %}
 
 {% block body %}
-<form action="" method="POST" name="edit">
+<form action="" method="POST" onsubmit="return checkForm(this);">
   <div class="table-responsive">
     <table id="sampleview_table" class="table">
       <tbody>
         <tr>
           <td class="sample_label">Name*</td>
           <td class="sample_value">
-            <input type="text" name="number" value="{% if subsample.name %}{{subsample.name}}{% endif %}" style="width:85%">
+            <input type="text" name="name" value="{% if subsample.name %}{{subsample.name}}{% endif %}" style="width:85%">
           </td>
         </tr>
         <tr>
@@ -87,5 +87,16 @@ $(function()
     no_results_text: "Oops, nothing found!"
   });
 });
+
+function checkForm(form)
+{
+  if (form.name.value == "")
+  {
+    alert("Error: Name cannot be blank!");
+    form.name.focus();
+    return false;
+  }
+  return true;
+}
 </script>
 {% endblock %}

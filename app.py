@@ -158,7 +158,7 @@ def sample(id):
         headers = {"Authorization": "Token "+session.get("auth_token")}
 
     #get the sample the usual way and return error message if something went wrong
-    sample = get(env("API_DRF_HOST")+"/samples/"+id, params={"format": "json"}, headers=headers).json()
+    sample = get(env("API_DRF_HOST")+"/samples/"+id+"/", params={"format": "json"}, headers=headers).json()
     if "detail" in sample:
         flash(sample["detail"])
         return redirect(url_for("search"))
@@ -196,39 +196,36 @@ def edit_sample(id):
         return redirect(url_for("sample", id=id))
 
     #edit_sample.html is a form with mostly the right input names
-    new_sample = dict(request.form)
-    if new_sample:
+    sample = dict(request.form)
+    if sample:
         #minerals are named by id, make it into a nested list of dictionaries
-        new_sample["minerals"] = []
-        for key in new_sample.keys():
+        sample["minerals"] = []
+        for key in sample.keys():
             if key[:9] == "minerals_":
-                new_sample["minerals"].append({"id": key[9:], "amount": new_sample[key][0]})
-                del new_sample[key]
-            elif (not new_sample[key] or not new_sample[key][0]) and key != "minerals":
-                del new_sample[key]
-            elif key[-1] != "s":
-                new_sample[key] = new_sample[key][0]
-        if not new_sample['minerals']:
-            del new_sample['minerals']
+                sample["minerals"].append({"id": key[9:], "amount": sample[key][0]})
+                del sample[key]
+            elif key[-1] != "s" and sample[key]:
+                sample[key] = sample[key][0]
+
+        if not sample["collection_date"]:
+            del sample["collection_date"]
+        sample["regions"] = sample["regions"][1:]
+        sample["metamorphic_region_ids"] = sample["metamorphic_region_ids"][1:]
+        sample["metamorphic_grade_ids"] = sample["metamorphic_grade_ids"][1:]
 
         #make lat/long back into a point
-        new_sample["location_coords"] = "SRID=4326;POINT ("+str(new_sample["location_coords1"])+" "+str(new_sample["location_coords0"])+")"
-        del new_sample["location_coords0"]
-        del new_sample["location_coords1"]
+        sample["location_coords"] = "SRID=4326;POINT ("+str(sample["location_coords1"])+" "+str(sample["location_coords0"])+")"
+        del sample["location_coords0"]
+        del sample["location_coords1"]
 
         #send data to API with PUT call and display error message if any
-        new_sample = put(env("API_DRF_HOST")+"/samples/"+id, json=new_sample, headers=headers)
-        print new_sample.content #500 error (on API side I believe) "This QueryDict instance is immutable"
-                                 #I also get this error when sending data=new_sample
-                                 #when I try to send either json=json.dumps(new_sample) or data=json.dumps(new_sample),
-                                 #I get the response: {"detail":"Unsupported media type \"\" in request."}
-
-        #if new_sample.status_code != codes.ok:
-        #   flash(new_sample.json().values()[0][0])
+        sample = put(env("API_DRF_HOST")+"/samples/"+id+"/", json=sample, headers=headers)
+        if sample.status_code > 299:
+            flash(sample.json())
         return redirect(url_for("sample", id=id))
 
     #get sample data and make lat/long separate
-    sample = get(env("API_DRF_HOST")+"/samples/"+id, params={"format": "json"}, headers=headers).json()
+    sample = get(env("API_DRF_HOST")+"/samples/"+id+"/", params={"format": "json"}, headers=headers).json()
     pos = sample["location_coords"].split(" ")
     sample["location_coords"] = [float(pos[2].replace(")","")), float(pos[1].replace("(",""))]
 
@@ -261,28 +258,34 @@ def new_sample():
     else:
         return redirect(url_for("search"))
 
-    new_sample = dict(request.form)
-    if new_sample:
-        new_sample["minerals"] = []
-        for key in new_sample.keys():
+    sample = dict(request.form)
+    if sample:
+        sample["minerals"] = []
+        for key in sample.keys():
             if key[:9] == "minerals_":
-                new_sample["minerals"].append({"id": key[9:], "amount": new_sample[key][0]})
-                del new_sample[key]
-            elif (not new_sample[key] or not new_sample[key][0]) and key != "minerals":
-                del new_sample[key]
-            elif key[-1] != "s":
-                new_sample[key] = new_sample[key][0]
-        if not new_sample['minerals']:
-            del new_sample['minerals']
+                sample["minerals"].append({"id": key[9:], "amount": sample[key][0]})
+                del sample[key]
+            elif key[-1] != "s" and sample[key]:
+                sample[key] = sample[key][0]
 
-        new_sample["location_coords"] = "SRID=4326;POINT ("+str(new_sample["location_coords1"])+" "+str(new_sample["location_coords0"])+")"
-        del new_sample["location_coords0"]
-        del new_sample["location_coords1"]
+        if not sample["collection_date"]:
+            del sample["collection_date"]
+        sample["regions"] = sample["regions"][1:]
+        sample["metamorphic_region_ids"] = sample["metamorphic_region_ids"][1:]
+        sample["metamorphic_grade_ids"] = sample["metamorphic_grade_ids"][1:]
 
-        new_sample = post(env("API_DRF_HOST")+"/samples/", json=new_sample, headers=headers)
-        # if new_sample.status_code != codes.ok:
-        #     flash((", ").join((", ").join(new_sample.json().values()[i]) for i in range(len(new_sample.json().values()))))
-        return redirect(url_for("sample", id=new_sample.json()["id"]))
+        if not sample['minerals']:
+            del sample['minerals']
+
+        sample["location_coords"] = "SRID=4326;POINT ("+str(sample["location_coords1"])+" "+str(sample["location_coords0"])+")"
+        del sample["location_coords0"]
+        del sample["location_coords1"]
+
+        sample = post(env("API_DRF_HOST")+"/samples/", json=sample, headers=headers)
+        if sample.status_code > 299:
+            flash(sample.json())
+            return redirect(url_for("new_sample"))
+        return redirect(url_for("sample", id=sample.json()["id"]))
 
     regions = get(env("API_DRF_HOST")+"/regions/", params={"page_size": 2000, "format": "json"}).json()["results"]
     minerals = get(env("API_DRF_HOST")+"/minerals/", params={"page_size": 200, "format": "json"}).json()["results"]
@@ -317,7 +320,7 @@ def subsample(id):
         headers = {"Authorization": "Token "+session.get("auth_token")}
 
     #get subsample info
-    subsample = get(env("API_DRF_HOST")+"/subsamples/"+id, params={"format": "json"}, headers=headers).json()
+    subsample = get(env("API_DRF_HOST")+"/subsamples/"+id+"/", params={"format": "json"}, headers=headers).json()
     if "detail" in subsample:
         flash(subsample['detail'])
         return redirect(url_for("search"))
@@ -343,13 +346,18 @@ def edit_subsample(id):
     else:
         return redirect(url_for("subsample", id=id))
 
-    if dict(request.form):
-        new_subsample = put(env("API_DRF_HOST")+"/subsamples/"+id, data=dict(request.form), headers=headers).json()
-        if 'detail' in new_subsample:
-            flash(new_subsample['detail'])
+    subsample = dict(request.form)
+    if subsample:
+        for key in subsample.keys():
+            if subsample[key] and subsample[key][0]:
+                subsample[key] = subsample[key][0]
+
+        subsample = put(env("API_DRF_HOST")+"/subsamples/"+id+"/", json=subsample, headers=headers)
+        if subsample.status_code > 299:
+            flash(subsample.json())
         return redirect(url_for("subsample", id=id))
 
-    subsample = get(env("API_DRF_HOST")+"/subsamples/"+id, params={"format": "json"}, headers=headers).json()
+    subsample = get(env("API_DRF_HOST")+"/subsamples/"+id+"/", params={"format": "json"}, headers=headers).json()
     subsample["owner"] = get(env("API_DRF_HOST")+"/users/"+subsample["owner"]["id"], params={"format": "json"}, headers=headers).json()
     types = [subsample["subsample_type"]]#api type request
 
@@ -360,8 +368,8 @@ def edit_subsample(id):
     )
 
 
-@metpet_ui.route("/new-subsample/", methods=["GET", "POST"])
-def new_subsample():
+@metpet_ui.route("/new-subsample/<string:sample_id>", methods=["GET", "POST"])
+def new_subsample(sample_id):
     #basically the same as edit subsample
     headers = None
     if session.get("auth_token", None):
@@ -369,23 +377,26 @@ def new_subsample():
     else:
         return redirect(url_for("search"))
 
-    if dict(request.form):
-        new_subsample = post(env("API_DRF_HOST")+"/subsamples/", data=dict(request.form), headers=headers).json()
-        if 'detail' in new_subsample:
-            flash(new_subsample['detail'])
-        return redirect(url_for("subsample", id=new_subsample["id"]))
+    sample = get(env("API_DRF_HOST")+"/samples/"+sample_id+"/", params={"fields": "id,number,owner"}).json()
+    subsample = dict(request.form)
+    if subsample:
+        for key in subsample.keys():
+            if subsample[key]:
+                subsample[key] = subsample[key][0]
+
+        #ubsample["sample_id"] = sample_id
+        #subsample["owner_id"] = sample["owner"]["id"]
+
+        subsample = post(env("API_DRF_HOST")+"/subsamples/", json=subsample, headers=headers)
+        if subsample.status_code > 299:
+            flash(subsample.json())
+        return redirect(url_for("subsample", id=subsample.json()["id"]))
 
     #theoretically there'll be an endpoint for subsample types
     types = []
 
-    owner = get(env("API_DRF_HOST")+"/users/", params={"fields": "name"}, headers=headers).json()["results"]
-    if len(owner) > 1:
-        owner = None
-    else:
-        owner = owner[0]
-
     return render_template("edit_subsample.html",
-        subsample={"owner": owner, "sample": {}},
+        subsample={"owner": sample["owner"], "sample": sample},
         types=types,
         auth_token=session.get("auth_token",None)
     )
@@ -426,7 +437,7 @@ def chemical_analysis(id):
     if session.get("auth_token", None):
         headers = {"Authorization": "Token "+session.get("auth_token")}
 
-    analysis = get(env("API_DRF_HOST")+"/chemical_analyses/"+id, params={"format": "json"}, headers=headers).json()
+    analysis = get(env("API_DRF_HOST")+"/chemical_analyses/"+id+"/", params={"format": "json"}, headers=headers).json()
     if "detail" in analysis:
         flash(analysis['detail'])
         return redirect(url_for("search_chemistry"))
@@ -451,36 +462,51 @@ def edit_chemical_analysis(id):
         return redirect(url_for("chemical_analysis", id=id))
 
     if dict(request.form):
-        new_analysis = dict(request.form)
+        analysis = dict(request.form)
 
         #this part is just like minerals from edit sample
-        new_analysis["elements"] = []
-        new_analysis["oxides"] = []
-        for key in new_analysis.keys():
+        analysis["elements"] = []
+        analysis["oxides"] = []
+        for key in analysis.keys():
             if key[:9] == "elements_":
-                e = new_analysis[key]
-                new_analysis["elements"].append({"id": key[9:],
+                e = analysis[key]
+                analysis["elements"].append({"id": key[9:],
                                                 "amount": e[0],
                                                 "precision": e[1],
                                                 "precision_type": e[2],
                                                 "measurement_unit": e[3],
-                                                "min": e[4], "max": e[5]})
-                del new_analysis[key]
-            if key[:7] == "oxides_":
-                o = new_analysis[key]
-                new_analysis["oxides"].append({"id": key[7:],
+                                                "min_amount": e[4], "max_amount": e[5]})
+                del analysis[key]
+            elif key[:7] == "oxides_":
+                o = analysis[key]
+                analysis["oxides"].append({"id": key[7:],
                                                 "amount": o[0],
                                                 "precision": o[1],
                                                 "precision_type": o[2],
                                                 "measurement_unit": o[3],
-                                                "min": o[4], "max": o[5]})
-                del new_analysis[key]
+                                                "min_amount": o[4], "max_amount": o[5]})
+                del analysis[key]
+            elif key[-1] != "s" and analysis[key]:
+                analysis[key] = analysis[key][0]
 
-        new_analysis = put(env("API_DRF_HOST")+"/chemical_analyses/"+id, data=new_analysis, headers=headers).json()
+        if analysis["total"] == '':
+            del analysis["total"]
+        if analysis["stage_x"] == '':
+            del analysis["stage_x"]
+        if analysis["stage_y"] == '':
+            del analysis["stage_y"]
+        if analysis["reference_x"] == '':
+            del analysis["reference_x"]
+        if analysis["reference_y"] == '':
+            del analysis["reference_y"]
+
+        analysis = put(env("API_DRF_HOST")+"/chemical_analyses/"+id+"/", json=analysis, headers=headers)
+        if analysis.status_code > 299:
+            flash(analysis.json())
         return redirect(url_for("chemical_analysis", id=id))
 
     #again, still have to get sample number
-    analysis = get(env("API_DRF_HOST")+"/chemical_analyses/"+id, params={"format": "json"}, headers=headers).json()
+    analysis = get(env("API_DRF_HOST")+"/chemical_analyses/"+id+"/", params={"format": "json"}, headers=headers).json()
     analysis["sample"] = get(env("API_DRF_HOST")+"/samples/"+analysis["subsample"]["sample"],
         params={"fields": "number", "format": "json"}, headers=headers).json()
 
@@ -497,8 +523,8 @@ def edit_chemical_analysis(id):
     )
 
 
-@metpet_ui.route("/new-chemical-analysis/", methods=["GET", "POST"])
-def new_chemical_analysis():
+@metpet_ui.route("/new-chemical-analysis/<string:subsample_id>", methods=["GET", "POST"])
+def new_chemical_analysis(subsample_id):
     #basically the same as edit analysis
     headers = None
     if session.get("auth_token", None):
@@ -507,45 +533,60 @@ def new_chemical_analysis():
         return redirect(url_for("search_chemistry"))
 
     if dict(request.form):
-        new_analysis = dict(request.form)
+        analysis = dict(request.form)
 
-        new_analysis["elements"] = []
-        new_analysis["oxides"] = []
-        for key in new_analysis.keys():
+        analysis["elements"] = []
+        analysis["oxides"] = []
+        for key in analysis.keys():
             if key[:9] == "elements_":
-                e = new_analysis[key]
-                new_analysis["elements"].append({"id": key[9:],
+                e = analysis[key]
+                analysis["elements"].append({"id": key[9:],
                                                 "amount": e[0],
                                                 "precision": e[1],
                                                 "precision_type": e[2],
                                                 "measurement_unit": e[3],
-                                                "min": e[4], "max": e[5]})
-                del new_analysis[key]
-            if key[:7] == "oxides_":
-                o = new_analysis[key]
-                new_analysis["oxides"].append({"id": key[7:],
+                                                "min_amount": e[4], "max_amount": e[5]})
+                del analysis[key]
+            elif key[:7] == "oxides_":
+                o = analysis[key]
+                analysis["oxides"].append({"id": key[7:],
                                                 "amount": o[0],
                                                 "precision": o[1],
                                                 "precision_type": o[2],
                                                 "measurement_unit": o[3],
-                                                "min": o[4], "max": o[5]})
-                del new_analysis[key]
+                                                "min_amount": o[4], "max_amount": o[5]})
+                del analysis[key]
+            elif key[-1] != "s" and analysis[key]:
+                analysis[key] = analysis[key][0]
 
-        new_analysis = post(env("API_DRF_HOST")+"/chemical_analyses/"+id, data=new_analysis, headers=headers).json()
-        return redirect(url_for("search_chemistry"))
+        if analysis["total"] == '':
+            del analysis["total"]
+        if analysis["stage_x"] == '':
+            del analysis["stage_x"]
+        if analysis["stage_y"] == '':
+            del analysis["stage_y"]
+        if analysis["reference_x"] == '':
+            del analysis["reference_x"]
+        if analysis["reference_y"] == '':
+            del analysis["reference_y"]
+
+        analysis["subsample_id"] = subsample_id
+        analysis = post(env("API_DRF_HOST")+"/chemical_analyses/", json=analysis, headers=headers)
+
+        if analysis.status_code > 299:
+            flash(analysis.json())
+        return redirect(url_for("chemical_analysis", id=analysis.json()["id"]))
+
+    subsample = get(env("API_DRF_HOST")+"/subsamples/"+subsample_id+"/", params={"fields": "id,name,owner,sample"}).json()
+    sample = subsample["sample"]
+    subsample["sample"] = subsample["sample"]["id"]
 
     minerals = get(env("API_DRF_HOST")+"/minerals/", params={"page_size": 200, "format": "json"}).json()["results"]
     elements = get(env("API_DRF_HOST")+"/elements/", params={"page_size": 50, "format": "json"}).json()["results"]
     oxides = get(env("API_DRF_HOST")+"/oxides/", params={"page_size": 50, "format": "json"}).json()["results"]
 
-    owner = get(env("API_DRF_HOST")+"/users/", params={"auth_token": session.get("auth_token", None)}, headers=headers).json()["results"]
-    if len(owner) > 1:
-        owner = None
-    else:
-        owner = owner[0]
-
     return render_template("edit_chemical_analysis.html",
-        analysis={"owner": owner, "sample": "", "subsample": ""},
+        analysis={"owner": subsample["owner"], "sample": sample, "subsample": subsample},
         minerals=minerals,
         elements=elements,
         oxides=oxides,
@@ -648,7 +689,7 @@ def user(id):
         headers = {"Authorization": "Token "+session.get("auth_token")}
 
     #get user data, potentially add samples/analyses owned by user
-    user = get(env("API_DRF_HOST")+"/users/"+id, params={"format": "json"}, headers=headers).json()
+    user = get(env("API_DRF_HOST")+"/users/"+id+"/", params={"format": "json"}, headers=headers).json()
     if "detail" in user:
         flash(user['detail'])
         return redirect(url_for("index"))
