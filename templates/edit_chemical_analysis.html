@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block body %}
-<form action="" method="POST" onsubmit="return checkForm(this);">
+<form action="" method="POST">
   <div class="table-responsive">
     <table id="chemicalanalysisview_table" class="table">
       <tbody>
@@ -21,6 +21,8 @@
           <td class="sample_label">Point Number*</td>
           <td class="sample_value">
             <input type="text" name="spot_id" value="{% if analysis.spot_id != None %}{{analysis.spot_id}}{% endif %}" style="width:85%">
+            {% if errors.spot_id %}<br>{% for e in errors.spot_id %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("spot_id")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
@@ -39,30 +41,40 @@
             <input type="radio" name="public_data" value="True">Yes<br>
             <input type="radio" name="public_data" value="False" checked>No
             {% endif %}
+            {% if errors.public_data %}<br>{% for e in errors.public_data %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("public_data")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
           <td class="sample_label">Analysis Method</td>
           <td class="sample_value">
             <input type="text" name="analysis_method" value="{% if analysis.analysis_method %}{{analysis.analysis_method}}{% endif %}" style="width:85%">
+            {% if errors.analysis_method %}<br>{% for e in errors.analysis_method %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("analysis_method")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
           <td class="sample_label">Analysis Location</td>
           <td class="sample_value">
             <input type="text" name="where_done" value="{% if analysis.where_done %}{{analysis.where_done}}{% endif %}" style="width:85%">
+            {% if errors.where_done %}<br>{% for e in errors.where_done %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("where_done")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
           <td class="sample_label">Analyst</td>
           <td class="sample_value">
             <input type="text" name="analyst" value="{% if analysis.analyst %}{{analysis.analyst}}{% endif %}" style="width:85%">
+            {% if errors.analyst %}<br>{% for e in errors.analyst %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("analyst")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
           <td class="sample_label">Description</td>
           <td class="sample_value">
             <input type="text" name="description" value="{% if analysis.description %}{{analysis.description}}{% endif %}" style="width:85%">
+            {% if errors.description %}<br>{% for e in errors.description %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("description")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
@@ -78,36 +90,48 @@
                 {% endif %}
               {% endfor %}
             </select>
+            {% if errors.mineral_id %}<br>{% for e in errors.mineral_id %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("mineral_id")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
           <td class="sample_label">Total</td>
           <td class="sample_value">
             <input type="text" name="total" value="{% if analysis.total != None %}{{analysis.total}}{% endif %}" style="width:85%">
+            {% if errors.total %}<br>{% for e in errors.total %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("total")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
                 <tr>
           <td class="sample_label">Reference X</td>
           <td class="sample_value">
             <input type="text" name="reference_x" value="{% if analysis.reference_x != None %}{{analysis.reference_x}}{% endif %}" style="width:85%">
+            {% if errors.reference_x %}<br>{% for e in errors.reference_x %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("reference_x")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
           <td class="sample_label">Reference Y</td>
           <td class="sample_value">
             <input type="text" name="reference_y" value="{% if analysis.reference_y != None %}{{analysis.reference_y}}{% endif %}" style="width:85%">
+            {% if errors.reference_y %}<br>{% for e in errors.reference_y %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("reference_y")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
           <td class="sample_label">Stage X</td>
           <td class="sample_value">
-            <input type="text" name="stage_x" value="{% if analysis.reference_x != None %}{{analysis.reference_x}}{% endif %}" style="width:85%">
+            <input type="text" name="stage_x" value="{% if analysis.stage_x != None %}{{analysis.stage_x}}{% endif %}" style="width:85%">
+            {% if errors.stage_x %}<br>{% for e in errors.stage_x %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("stage_x")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
           <td class="sample_label">Stage Y</td>
           <td class="sample_value">
-            <input type="text" name="stage_y" value="{% if analysis.reference_y != None %}{{analysis.reference_y}}{% endif %}" style="width:85%">
+            <input type="text" name="stage_y" value="{% if analysis.stage_y != None %}{{analysis.stage_y}}{% endif %}" style="width:85%">
+            {% if errors.stage_y %}<br>{% for e in errors.stage_y %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("stage_y")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
@@ -129,7 +153,7 @@
               <tbody>
               {% if analysis.elements %}{% for e in analysis.elements %}
                 <tr id="{{ e.name }}">
-                  <td><a href="#elements" onclick="document.getElementById('elements').deleteRow(document.getElementById('{{ e.name }}').rowIndex)">x</a></td>
+                  <td><a href="#elements" onclick="document.getElementsByName('elements').deleteRow(document.getEl[0]ementsByName('{{ e.name }}').rowIndex)">x</a></td>
                   <td>&nbsp&nbsp{{ e.name }}&nbsp&nbsp</td>
                   <td><input type="text" name="elements_{{ e.id }}" value="{{ e.amount }}" style="text-align:right;width:65px"></td>
                   <td><input type="text" name="elements_{{ e.id }}" value="{{ e.precision }}" style="text-align:right;width:65px"></td>
@@ -147,6 +171,8 @@
                 <option value="{{ e.id }}">{{ e.name }}</option>
               {% endfor %}
             </select>
+            {% if errors.elements %}<br>{% for e in errors.elements %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("elements")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
@@ -168,7 +194,7 @@
               <tbody>
               {% if analysis.oxides %}{% for o in analysis.oxides %}
                 <tr id="{{ o.species }}">
-                  <td><a href="#oxides" onclick="document.getElementById('oxides').deleteRow(document.getElementById('{{ o.species }}').rowIndex)">x</a></td>
+                  <td><a href="#oxides" onclick="document.getElementsByName('oxides').deleteRow(document.getElement[0]sByName('{{ o.species }}').rowIndex)">x</a></td>
                   <td>&nbsp&nbsp{{ o.species }}&nbsp&nbsp</td>
                   <td><input type="text" name="oxides_{{ o.id }}" value="{{ o.amount }}" style="text-align:right;width:65px"></td>
                   <td><input type="text" name="oxides_{{ o.id }}" value="{{ o.precision }}" style="text-align:right;width:65px"></td>
@@ -186,13 +212,15 @@
                 <option value="{{ o.id }}">{{ o.species }}</option>
               {% endfor %}
             </select>
+            {% if errors.oxides %}<br>{% for e in errors.oxides %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("oxides")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
           <td> </td>
           <td>
             <a href="#"><input type="submit" value="Save Changes"></a>
-            <a href=""><button type="button">Reset</button></a>
+            <a href="{% if analysis.id %}{{ url_for('chemical_analysis', id=analysis.id) }}{% else %}{{ url_for('search_chemistry') }}{% endif %}"><button type="button">Cancel</button></a>
           </td>
         </tr>
       </tbody>
@@ -221,29 +249,21 @@ $(function()
   });
 });
 
-function checkForm(form)
-{
-  if (form.spot_id.value == "")
-  {
-    alert("Error: Point number cannot be blank!");
-    form.spot_id.focus();
-    return false;
-  }
-  return true;
-}
-
 function update(type) {
   var objects = document.getElementById(type+"s");
   var object = document.getElementById(type+"_names");
   var id = object.options[object.selectedIndex].value;
   var n = object.options[object.selectedIndex].text;
 
+  for (var i = 0, row; row = objects.rows[i]; i++)
+    if (row.id == n) { row.cells[2].focus(); return; }
+
   var row = objects.insertRow(-1);
   row.id = n;
 
   var remove = row.insertCell(-1);
   var name = row.insertCell(-1);
-  remove.innerHTML = '<a href="#'+type+'s" onclick="document.getElementById(\''+type+'s\').deleteRow(document.getElementById(\''+n+'\').rowIndex)">x</a>'
+  remove.innerHTML = '<a href="#'+type+'s" onclick="document.getElementsByName(\''+type+'s\').deleteRow(document[0].getElementsByName(\''+n+'\').rowIndex)">x</a>'
   name.innerHTML = '&nbsp&nbsp'+n+'&nbsp&nbsp';
 
   for (var i = 0; i < 6; i++ )

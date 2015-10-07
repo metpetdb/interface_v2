@@ -36,7 +36,7 @@
                     <li name="editobject"><a href="{{ url_for('index') }}">Bulk Upload</a></li>
                   </ul>
                 </li>
-                <li><a href="{{ url_for('user', id=0) }}">Profile</a></li><!-- hold user id in session -->
+                <li><a href="{{ url_for('user', id=0) }}">Account</a></li><!-- hold user id in session -->
                 {% endif %}
                 <li><a href="{{ url_for('index') }}">Help</a></li>
                 {% if auth_token %}

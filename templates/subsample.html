@@ -14,11 +14,11 @@
     <tbody>
       <tr>
         <td class="subsample_label">Owner</td>
-        <td class="subsample_value">{{subsample.owner.name}}</td>
+        <td class="subsample_value">{% if subsample.owner %}{{ subsample.owner.name }}{% endif %}</td>
       </tr>
       <tr>
         <td class="subsample_label">Type</td>
-        <td class="subsample_value">{% if subsample.subsample_type.name %}{{ subsample.subsample_type.name }}{% endif %}</td>
+        <td class="subsample_value">{% if subsample.subsample_type %}{{ subsample.subsample_type.name }}{% endif %}</td>
       </tr>
       <tr>
         <td class="subsample_label">Public</td>
@@ -41,18 +41,18 @@
       </tr>
     </thead>
     <tbody>
-      {%for image in images%}
+      {% for image in images %}
       <tr id="thumb_row">
         <td>
           <a href="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_half}}" rel="lightbox" title="Image type: {{ image.image_type }} <br> File name: {{ image.filename }} <br> <a href='http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum}}' target='_blank'>View Original</a>">
             <img src="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_64x64}}">
           </a>
         </td>
-        <td>{{image.filename}}</td>
-        <td>{{image.image_type}}</td>
-        <td>{{image.collector}}</td>
+        <td>{{ image.filename }}</td>
+        <td>{{ image.image_type }}</td>
+        <td>{{ image.collector }}</td>
       </tr>
-      {%endfor%}
+      {% endfor %}
     </tbody>
   </table>
 </div>
@@ -76,20 +76,20 @@
       </tr>
     </thead>
     <tbody>
-      {%for analysis in chemical_analyses%}
+      {% for analysis in chemical_analyses %}
       <tr>
-        <td><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{{analysis.spot_id}}</td>
-        <td>{{analysis.public_data}}</td>
-        <td>{{analysis.analysis_method}}</td>
-        <td>{{analysis.mineral.name}}</td>
-        <td>{{analysis.where_done}}</td>
-        <td>{{analysis.analyst}}</td>
-        <td>{{analysis.analysis_date}}</td>
-        <td>{{analysis.reference_x}}</td>
-        <td>{{analysis.reference_y}}</td>
-        <td>{{analysis.total}}</td>
+        <td><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{{ analysis.spot_id }}</td>
+        <td>{{ analysis.public_data }}</td>
+        <td>{{ analysis.analysis_method }}</td>
+        <td>{{ analysis.mineral.name }}</td>
+        <td>{{ analysis.where_done }}</td>
+        <td>{{ analysis.analyst }}</td>
+        <td>{{ analysis.analysis_date }}</td>
+        <td>{{ analysis.reference_x }}</td>
+        <td>{{ analysis.reference_y }}</td>
+        <td>{{ analysis.total }}</td>
       </tr>
-      {%endfor%}
+      {% endfor %}
     </tbody>
   </table>
 </div>
@@ -98,11 +98,10 @@
 <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
 
 <script>
-$(document).ready(function() {
+$(document).ready(function()
+{
   $('#chemtable_canvas').dataTable();
   $('#thumb_row td a').lightbox();
 });
 </script>
-
 {% endblock %}
-

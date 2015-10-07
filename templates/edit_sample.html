@@ -19,6 +19,8 @@
           <td class="sample_label">Number*</td>
           <td class="sample_value">
             <input type="text" name="number" value="{% if sample.number %}{{sample.number}}{% endif %}" style="width:85%">
+            {% if errors.number %}<br>{% for e in errors.number %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("number")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
@@ -31,6 +33,8 @@
           <td class="sample_label">IGSN</td>
           <td class="sample_value">
             <input type="text" name="sesar_number" value="{% if sample.sesar_number %}{{sample.sesar_number}}{% endif %}" style="width:85%">
+            {% if errors.sesar_number %}<br>{% for e in errors.sesar_number %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("sesar_number")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
@@ -40,14 +44,18 @@
               {% if sample.aliases %}{% for a in sample.aliases %}
                 <input type="text" name="aliases" value="{{a}}" style="width:85%">
               {% endfor %}{% endif %}
-              <button type="button" onclick="document.getElementById('aliases').innerHTML += '<input type=\'text\' name=\'aliases\' style=\'width:85%\'>'" style="float:right">Add</button>
             </div>
+            <button type="button" onclick="addAlias()" style="float:right">Add</button>
+            {% if errors.aliases %}<br>{% for e in errors.aliases %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("aliases")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
-          <td class="sample_label">Date Collected</td>
+          <td class="sample_label">Date Collected<br>YYYY-MM-DD</td>
           <td class="sample_value">
             <input type="text" name="collection_date" value="{% if sample.collection_date %}{{sample.collection_date}}{% endif %}" style="width:85%">
+            {% if errors.collection_date %}<br>{% for e in errors.collection_date %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("collection_date")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
@@ -63,54 +71,68 @@
                 {% endif %}
               {% endfor %}
             </select>
+            {% if errors.rock_type_id %}<br>{% for e in errors.rock_type_id %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("rock_type_id")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
           <td class="sample_label">Public</td>
           <td class="sample_value">
             {% if sample.public_data %}
-            <input type="radio" name="public_data" value="true" checked>Yes<br>
-            <input type="radio" name="public_data" value="false">No
+            <input type="radio" name="public_data" value="True" checked>Yes<br>
+            <input type="radio" name="public_data" value="False">No
             {% else %}
-            <input type="radio" name="public_data" value="true">Yes<br>
-            <input type="radio" name="public_data" value="false" checked>No
+            <input type="radio" name="public_data" value="True">Yes<br>
+            <input type="radio" name="public_data" value="False" checked>No
             {% endif %}
+            {% if errors.public_data %}<br>{% for e in errors.public_data %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("public_data")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
           <td class="sample_label">Latitude*</td>
-          <td class="sample_value">
+          <td class="sample_value" id="location_coords0">
             <input type="text" name="location_coords0" value="{% if sample.location_coords %}{{sample.location_coords.0}}{% endif %}" style="width:85%">
           </td>
+          {% if errors.location_coords %}<br>{% for e in errors.location_coords %}{{ e }}{% endfor %}
+          <script>document.getElementsByName("location_coords0")[0].style.borderColor = "red";</script>{% endif %}
         </tr>
         <tr>
           <td class="sample_label">Longitude*</td>
-          <td class="sample_value">
+          <td class="sample_value" id="location_coords1">
             <input type="text" name="location_coords1" value="{% if sample.location_coords %}{{sample.location_coords.1}}{% endif %}" style="width:85%">
           </td>
+          {% if errors.location_coords %}<br>{% for e in errors.location_coords %}{{ e }}{% endfor %}
+          <script>document.getElementsByName("location_coords1")[0].style.borderColor = "red";</script>{% endif %}
         </tr>
         <tr>
           <td class="sample_label">Country</td>
           <td class="sample_value">
             <input type="text" name="country" value="{% if sample.country %}{{sample.country}}{% endif %}" style="width:85%">
           </td>
+          {% if errors.country %}<br>{% for e in errors.country %}{{ e }}{% endfor %}
+          <script>document.getElementsByName("country")[0].style.borderColor = "red";</script>{% endif %}
         </tr>
         <tr>
           <td class="sample_label">Collector</td>
           <td class="sample_value">
             <input type="text" name="collector_name" value="{% if sample.collector_name %}{{sample.collector_name}}{% endif %}" style="width:85%">
           </td>
+          {% if errors.collector_name %}<br>{% for e in errors.collector_name %}{{ e }}{% endfor %}
+          <script>document.getElementsByName("collector_name")[0].style.borderColor = "red";</script>{% endif %}
         </tr>
         <tr>
           <td class="sample_label">Present Sample Location</td>
           <td class="sample_value">
             <input type="text" name="location_name" value="{% if sample.location_name %}{{sample.location_name}}{% endif %}" style="width:85%">
           </td>
+          {% if errors.location_name %}<br>{% for e in errors.location_name %}{{ e }}{% endfor %}
+          <script>document.getElementsByName("location_name")[0].style.borderColor = "red";</script>{% endif %}
         </tr>
         <tr>
           <td class="sample_label">Region</td>
           <td class="sample_value">
-            <select multiple name="regions" id="regions" class="chosen-select" style="width:85%">
+            <select multiple id="regions" name="regions" class="chosen-select" style="width:85%">
               <option hidden selected="selected"></option>
               {% for r in regions %}
                 {% if r.name in sample.regions %}
@@ -122,7 +144,9 @@
             </select>
             <br>
             <input type="text" id="add_regions" style="width:85%">
-            <button type="button" onclick="addRegion()" style="float:right">Add</button>
+            <button type="button" onclick="addtoList('regions')" style="float:right">Add</button>
+            {% if errors.regions %}<br>{% for e in errors.regions %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("regions")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
@@ -138,6 +162,8 @@
                 {% endif %}
               {% endfor %}
             </select>
+            {% if errors.metamorphic_region_ids %}<br>{% for e in errors.metamorphic_region_ids %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("metamorphic_region_ids")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
@@ -153,15 +179,17 @@
                 {% endif %}
               {% endfor %}
             </select>
+            {% if errors.metamorphic_grade_ids %}<br>{% for e in errors.metamorphic_grade_ids %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("metamorphic_grade_ids")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
           <td class="sample_label">Publication References</td>
           <td class="sample_value">
-            <select multiple name="references" id="references" class="chosen-select" style="width:85%">
+            <select multiple id="references" name="references" class="chosen-select" style="width:85%">
               <option></option>
               {% for r in references %}
-                {% if r in sample.references %}
+                {% if r.name in sample.references %}
                 <option value="{{ r.name }}" selected="selected">{{ r.name }}</option>
                 {% else %}
                 <option value="{{ r.name }}">{{ r.name }}</option>
@@ -170,7 +198,9 @@
             </select>
             <br>
             <input type="text" id="add_references" value="" style="width:85%">
-            <button type="button" onclick="addReference()" style="float:right">Add</button>
+            <button type="button" onclick="addtoList('references')" style="float:right">Add</button>
+            {% if errors.references %}<br>{% for e in errors.references %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("references")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
@@ -178,6 +208,8 @@
           <td class="sample_value">
             <input type="text" name="description" value="{% if sample.description %}{{sample.description}}{% endif %}" style="width:85%">
           </td>
+          {% if errors.description %}<br>{% for e in errors.description %}{{ e }}{% endfor %}
+          <script>document.getElementsByName("description")[0].style.borderColor = "red";</script>{% endif %}
         </tr>
         <tr>
           <td class="sample_label">Abstracts</td>
@@ -210,13 +242,15 @@
                 <option value="{{ m.id }}">{{ m.name }}</option>
               {% endfor %}
             </select>
+            {% if errors.minerals %}<br>{% for e in errors.minerals %}{{ e }}{% endfor %}
+            <script>document.getElementsByName("minerals")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
           <td> </td>
           <td>
             <a href="#"><input type="submit" value="Save Changes"></a>
-            <a href=""><button type="button">Reset</button></a>
+            <a href="{{ url_for('sample', id=sample.id) }}"><button type="button">Cancel</button></a>
           </td>
         </tr>
       </tbody>
@@ -245,57 +279,44 @@ $(function()
   });
 });
 
-function checkForm(form)
-{
-  if (form.number.value == "")
-  {
-    alert("Error: Number cannot be blank!");
-    form.number.focus();
-    return false;
-  }
-  if (form.rock_type.value == "")
-  {
-    alert("Error: Rock type cannot be blank!");
-    form.rock_type.focus();
-    return false;
-  }
-  if (form.location_coords0.value == "")
-  {
-    alert("Error: Latitude cannot be blank!");
+function checkForm(form) {
+  var error = document.createElement("span");
+  var val = form.location_coords0.value;
+  if (val == "" || parseFloat(val) < -90 || parseFloat(val) > 90) {
+    error.innerHTML = "<br>Please enter a latitude between -90 and 90!";
+    document.getElementById("location_coords0").appendChild(error);
+    form.location_coords0.style.borderColor = "red";
     form.location_coords0.focus();
     return false;
   }
-  if (form.location_coords1.value == "")
-  {
-    alert("Error: Longitude cannot be blank!");
+  val = form.location_coords1.value;
+  if (val == "" || parseFloat(val) < -180 || parseFloat(val) > 180) {
+    error.innerHTML = "<br>Please enter a longitude between -180 and 180!";
+    document.getElementById("location_coords1").appendChild(error);
+    form.location_coords1.style.borderColor = "red";
     form.location_coords1.focus();
     return false;
   }
   return true;
 }
 
-function addRegion() {
-  var input = document.getElementById('add_regions');
+function addAlias() {
+  var input = document.createElement('input');
+  input.type = "text";
+  input.name = "aliases";
+  input.style.width = "85%";
+  document.getElementById('aliases').appendChild(input);
+}
+
+function addtoList(type) {
+  var input = document.getElementById('add_'+type.toString());
   var new_option = document.createElement("option");
   new_option.innerHTML = input.value;
   new_option.value = input.value;
   new_option.selected = "selected";
-  document.getElementById('regions').add(new_option);
+  document.getElementById(type.toString()).add(new_option);
   input.value = '';
   $('.chosen-select').trigger("chosen:updated");
-  
-}
-
-function addReference() {
-  var input = document.getElementById('add_references');
-  var new_option = document.createElement("option");
-  new_option.innerHTML = input.value;
-  new_option.value = 0;
-  new_option.selected = "selected";
-  document.getElementById('references').add(new_option);
-  input.value = '';
-  $('.chosen-select').trigger("chosen:updated");
-  
 }
 
 function updateMinerals() {
@@ -303,6 +324,9 @@ function updateMinerals() {
   var mineral = document.getElementById("mineral_names");
   var id = mineral.options[mineral.selectedIndex].value;
   var n = mineral.options[mineral.selectedIndex].text;
+
+  for (var i = 0, row; row = minerals.rows[i]; i++)
+    if (row.id == n) { row.cells[2].focus(); return; }
 
   var row = minerals.insertRow(-1);
   row.id = n;

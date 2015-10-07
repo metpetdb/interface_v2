@@ -61,18 +61,8 @@ def search():
     metamorphic_regions = get(env("API_DRF_HOST")+"/metamorphic_regions/", params={"fields": "name", "page_size": 240, "format": "json"}).json()["results"]
 
     #get countries and sample numbers
-    #endpoints for these should be deployed soon so it's not so slow
-    samples = get(env("API_DRF_HOST")+"/samples/",
-        params={"fields": "country", "public_data": True, "page_size": 1000, "format": "json"}).json()["results"]
-    countries = set()
-    for sample in samples:
-        countries.add(sample["country"])
-
-    api_samples = get(env("API_DRF_HOST")+"/samples/", params={"fields": "number", "page_size": 2000, "format": "json"}).json()
-    numbers = api_samples["results"]
-    while api_samples["next"]:
-        api_samples = json.loads(urlopen(api_samples["next"]).read())
-        numbers += api_samples["results"]
+    countries = get(env("API_DRF_HOST")+"/country_names/").json()["country_names"]
+    numbers = get(env("API_DRF_HOST")+"/sample_numbers/").json()["sample_numbers"]
 
     return render_template("search_form.html",
         countries=countries,
@@ -190,7 +180,6 @@ def edit_sample(id):
     #this time redirect to sample page if not logged in
     headers = None
     if session.get("auth_token", None):
-        print session.get("auth_token")
         headers = {"Authorization": "Token "+session.get("auth_token")}
     else:
         return redirect(url_for("sample", id=id))
@@ -206,12 +195,11 @@ def edit_sample(id):
                 del sample[key]
             elif key[-1] != "s" and sample[key]:
                 sample[key] = sample[key][0]
+            elif key[-1] == "s":
+                sample[key] = filter(lambda k: k != "", sample[key])
 
         if not sample["collection_date"]:
             del sample["collection_date"]
-        sample["regions"] = sample["regions"][1:]
-        sample["metamorphic_region_ids"] = sample["metamorphic_region_ids"][1:]
-        sample["metamorphic_grade_ids"] = sample["metamorphic_grade_ids"][1:]
 
         #make lat/long back into a point
         sample["location_coords"] = "SRID=4326;POINT ("+str(sample["location_coords1"])+" "+str(sample["location_coords0"])+")"
@@ -219,15 +207,18 @@ def edit_sample(id):
         del sample["location_coords1"]
 
         #send data to API with PUT call and display error message if any
-        sample = put(env("API_DRF_HOST")+"/samples/"+id+"/", json=sample, headers=headers)
-        if sample.status_code > 299:
-            flash(sample.json())
-        return redirect(url_for("sample", id=id))
+        response = put(env("API_DRF_HOST")+"/samples/"+id+"/", json=sample, headers=headers)
+        if response.status_code < 300:
+            return redirect(url_for("sample", id=id))
+        errors = response.json()
+    else:
+        errors = []
 
-    #get sample data and make lat/long separate
+    #get sample data and split point into lat/long
     sample = get(env("API_DRF_HOST")+"/samples/"+id+"/", params={"format": "json"}, headers=headers).json()
     pos = sample["location_coords"].split(" ")
     sample["location_coords"] = [float(pos[2].replace(")","")), float(pos[1].replace("(",""))]
+    sample["references"] = [r["name"] for r in sample["references"]]
 
     #get all the other data
     regions = get(env("API_DRF_HOST")+"/regions/", params={"page_size": 2000, "format": "json"}).json()["results"]
@@ -245,6 +236,7 @@ def edit_sample(id):
         references=references,
         metamorphic_grades=metamorphic_grades,
         metamorphic_regions=metamorphic_regions,
+        errors=errors,
         auth_token=session.get("auth_token",None)
     )
 
@@ -267,12 +259,11 @@ def new_sample():
                 del sample[key]
             elif key[-1] != "s" and sample[key]:
                 sample[key] = sample[key][0]
+            elif key[-1] == "s":
+                sample[key] = filter(lambda k: k != "", sample[key])
 
         if not sample["collection_date"]:
             del sample["collection_date"]
-        sample["regions"] = sample["regions"][1:]
-        sample["metamorphic_region_ids"] = sample["metamorphic_region_ids"][1:]
-        sample["metamorphic_grade_ids"] = sample["metamorphic_grade_ids"][1:]
 
         if not sample['minerals']:
             del sample['minerals']
@@ -281,11 +272,12 @@ def new_sample():
         del sample["location_coords0"]
         del sample["location_coords1"]
 
-        sample = post(env("API_DRF_HOST")+"/samples/", json=sample, headers=headers)
-        if sample.status_code > 299:
-            flash(sample.json())
-            return redirect(url_for("new_sample"))
-        return redirect(url_for("sample", id=sample.json()["id"]))
+        response = post(env("API_DRF_HOST")+"/samples/", json=sample, headers=headers)
+        if response.status_code < 300:
+            return redirect(url_for("sample", id=response.json()["id"]))
+        errors = response.json()
+    else:
+        errors = []
 
     regions = get(env("API_DRF_HOST")+"/regions/", params={"page_size": 2000, "format": "json"}).json()["results"]
     minerals = get(env("API_DRF_HOST")+"/minerals/", params={"page_size": 200, "format": "json"}).json()["results"]
@@ -352,18 +344,23 @@ def edit_subsample(id):
             if subsample[key] and subsample[key][0]:
                 subsample[key] = subsample[key][0]
 
-        subsample = put(env("API_DRF_HOST")+"/subsamples/"+id+"/", json=subsample, headers=headers)
-        if subsample.status_code > 299:
-            flash(subsample.json())
-        return redirect(url_for("subsample", id=id))
+        print subsample
+
+        response = put(env("API_DRF_HOST")+"/subsamples/"+id+"/", json=subsample, headers=headers)
+        if response.status_code < 300:
+            return redirect(url_for("subsample", id=id))
+        errors = response.json()
+    else:
+        errors = []
 
     subsample = get(env("API_DRF_HOST")+"/subsamples/"+id+"/", params={"format": "json"}, headers=headers).json()
     subsample["owner"] = get(env("API_DRF_HOST")+"/users/"+subsample["owner"]["id"], params={"format": "json"}, headers=headers).json()
-    types = [subsample["subsample_type"]]#api type request
+    types = get(env("API_DRF_HOST")+"/subsample_types/", headers=headers).json()["results"]
 
     return render_template("edit_subsample.html",
         subsample=subsample,
         types=types,
+        errors=errors,
         auth_token=session.get("auth_token",None)
     )
 
@@ -377,7 +374,7 @@ def new_subsample(sample_id):
     else:
         return redirect(url_for("search"))
 
-    sample = get(env("API_DRF_HOST")+"/samples/"+sample_id+"/", params={"fields": "id,number,owner"}).json()
+    sample = get(env("API_DRF_HOST")+"/samples/"+sample_id+"/", params={"fields": "id,number,owner"}, headers=headers).json()
     subsample = dict(request.form)
     if subsample:
         for key in subsample.keys():
@@ -387,17 +384,19 @@ def new_subsample(sample_id):
         #ubsample["sample_id"] = sample_id
         #subsample["owner_id"] = sample["owner"]["id"]
 
-        subsample = post(env("API_DRF_HOST")+"/subsamples/", json=subsample, headers=headers)
-        if subsample.status_code > 299:
-            flash(subsample.json())
-        return redirect(url_for("subsample", id=subsample.json()["id"]))
-
-    #theoretically there'll be an endpoint for subsample types
-    types = []
+        response = post(env("API_DRF_HOST")+"/subsamples/", json=subsample, headers=headers)
+        print response.content
+        if response.status_code < 300:
+            return redirect(url_for("subsample", id=response.json()["id"]))
+        errors = response.json()
+    else:
+        errors = []
+    types = get(env("API_DRF_HOST")+"/subsample_types/", headers=headers).json()["results"]
 
     return render_template("edit_subsample.html",
         subsample={"owner": sample["owner"], "sample": sample},
         types=types,
+        errors=errors,
         auth_token=session.get("auth_token",None)
     )
 
@@ -500,10 +499,14 @@ def edit_chemical_analysis(id):
         if analysis["reference_y"] == '':
             del analysis["reference_y"]
 
-        analysis = put(env("API_DRF_HOST")+"/chemical_analyses/"+id+"/", json=analysis, headers=headers)
-        if analysis.status_code > 299:
-            flash(analysis.json())
-        return redirect(url_for("chemical_analysis", id=id))
+        print analysis
+
+        response = put(env("API_DRF_HOST")+"/chemical_analyses/"+id+"/", json=analysis, headers=headers)
+        if response.status_code < 300:
+            return redirect(url_for("chemical_analysis", id=id))
+        errors = response.json()
+    else:
+        errors = []
 
     #again, still have to get sample number
     analysis = get(env("API_DRF_HOST")+"/chemical_analyses/"+id+"/", params={"format": "json"}, headers=headers).json()
@@ -519,6 +522,7 @@ def edit_chemical_analysis(id):
         minerals=minerals,
         elements=elements,
         oxides=oxides,
+        errors=errors,
         auth_token=session.get("auth_token",None)
     )
 
@@ -571,11 +575,12 @@ def new_chemical_analysis(subsample_id):
             del analysis["reference_y"]
 
         analysis["subsample_id"] = subsample_id
-        analysis = post(env("API_DRF_HOST")+"/chemical_analyses/", json=analysis, headers=headers)
-
-        if analysis.status_code > 299:
-            flash(analysis.json())
-        return redirect(url_for("chemical_analysis", id=analysis.json()["id"]))
+        response = post(env("API_DRF_HOST")+"/chemical_analyses/", json=analysis, headers=headers)
+        if response.status_code < 300:
+            return redirect(url_for("chemical_analysis", id=response.json()["id"]))
+        errors = response.json()
+    else:
+        errors = []
 
     subsample = get(env("API_DRF_HOST")+"/subsamples/"+subsample_id+"/", params={"fields": "id,name,owner,sample"}).json()
     sample = subsample["sample"]
@@ -590,6 +595,7 @@ def new_chemical_analysis(subsample_id):
         minerals=minerals,
         elements=elements,
         oxides=oxides,
+        errors=errors,
         auth_token=session.get("auth_token",None)
     )
 

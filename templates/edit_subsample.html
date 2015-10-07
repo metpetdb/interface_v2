@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block body %}
-<form action="" method="POST" onsubmit="return checkForm(this);">
+<form action="" method="POST">
   <div class="table-responsive">
     <table id="sampleview_table" class="table">
       <tbody>
@@ -20,6 +20,8 @@
           <td class="sample_label">Name*</td>
           <td class="sample_value">
             <input type="text" name="name" value="{% if subsample.name %}{{subsample.name}}{% endif %}" style="width:85%">
+            {% if errors.name %}<br>{% for e in errors.name %}{{ e }}{% endfor %}
+            <script>document.getElementById("name").style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
@@ -38,6 +40,8 @@
             <input type="radio" name="public_data" value="True">Yes<br>
             <input type="radio" name="public_data" value="False" checked>No
             {% endif %}
+            {% if errors.public_data %}<br>{% for e in errors.public_data %}{{ e }}{% endfor %}
+            <script>document.getElementById("public_data").style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
@@ -53,13 +57,15 @@
                 {% endif %}
               {% endfor %}
             </select>
+            {% if errors.subsample_type %}<br>{% for e in errors.subsample_type %}{{ e }}{% endfor %}
+            <script>document.getElementById("subsample_type").style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
         <tr>
           <td> </td>
           <td>
             <a href="#"><input type="submit" value="Save Changes"></a>
-            <a href=""><button type="button">Reset</button></a>
+            <a href="{% if subsample.id %}{{ url_for('subsample', id=subsample.id) }}{% else %}{{ url_for('search') }}{% endif %}"><button type="button">Cancel</button></a>
           </td>
         </tr>
       </tbody>
@@ -87,16 +93,5 @@ $(function()
     no_results_text: "Oops, nothing found!"
   });
 });
-
-function checkForm(form)
-{
-  if (form.name.value == "")
-  {
-    alert("Error: Name cannot be blank!");
-    form.name.focus();
-    return false;
-  }
-  return true;
-}
 </script>
 {% endblock %}

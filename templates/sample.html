@@ -2,7 +2,7 @@
 
 {% block title %}
 <h4>
-  Sample {{sample.number}}
+  Sample {{ sample.number }}
   {% if auth_token %}<span style="float:right"><a href="{{ url_for('edit_sample', id=sample.id) }}">Edit Sample</a></span>{% endif %}
 </h4>
 {% endblock %}
@@ -13,7 +13,7 @@
     <tbody>
       <tr>
         <td class="sample_label">Owner</td>
-        <td class="sample_value">{% if sample.owner.name %}{{ sample.owner.name }}{% endif %}</td>
+        <td class="sample_value">{% if sample.owner %}{{ sample.owner.name }}{% endif %}</td>
       </tr>
       <tr>
         <td class="sample_label">IGSN</td>
@@ -29,7 +29,7 @@
       </tr>
       <tr>
         <td class="sample_label">Rock Type</td>
-        <td class="sample_value">{% if sample.rock_type.name %}{{ sample.rock_type.name }}{% endif %}</td>
+        <td class="sample_value">{% if sample.rock_type %}{{ sample.rock_type.name }}{% endif %}</td>
       </tr>
       <tr>
         <td class="sample_label">Public</td>
@@ -114,16 +114,16 @@
       </tr>
     </thead>
     <tbody>
-      {% if sample.images %}{% for image in sample.images%}
+      {% if sample.images %}{% for image in sample.images %}
       <tr id="thumb_row">
         <td>
           <a href="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_half}}" rel="lightbox" title="Image type: {{ image.image_type }} <br> File name: {{ image.filename }} <br> <a href='http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum}}' target='_blank'>View Original</a>">
             <img src="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_64x64}}"/>
           </a>
         </td>
-        <td>{{image.image_type}}</td>
+        <td>{{ image.image_type }}</td>
       </tr>
-      {%endfor%}{% endif %}
+      {% endfor %}{% endif %}
     </tbody>
   </table>
 </div>
@@ -144,17 +144,17 @@
       </tr>
     </thead>
     <tbody>
-      {%for subsample in subsamples%}
+      {% for subsample in subsamples %}
       <tr>
-        <td id="img-popup"><a href="{{ url_for('subsample', id=subsample.id) }}">{{subsample.name}}</a></td>
-        <td>{{subsample.public_data}}</td>
-        <td>{{subsample.subsample_type.name}}</td>
-        <td>{{subsample.image_count}}</td>
-        <td>{{subsample.chemical_analyses|length}}</td>
+        <td id="img-popup"><a href="{{ url_for('subsample', id=subsample.id) }}">{{ subsample.name }}</a></td>
+        <td>{{ subsample.public_data }}</td>
+        <td>{{ subsample.subsample_type.name }}</td>
+        <td>{{ subsample.image_count }}</td>
+        <td>{{ subsample.chemical_analyses|length }}</td>
         <td><a href="{{ url_for('user', id=sample.owner.id) }}" target="_blank">{{ sample.owner.name }}</a></td>
         <td> -- </td>
       </tr>
-      {%endfor%}
+      {% endfor %}
     </tbody>
   </table>
 </div>
@@ -164,7 +164,8 @@
 <script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
 
 <script>
-$(document).ready(function() {
+$(document).ready(function()
+{
   $('#subsampletable_canvas').dataTable();
   $('#thumb_row td a').lightbox();
 });
