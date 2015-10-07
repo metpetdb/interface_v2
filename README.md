@@ -10,7 +10,7 @@
 Front-end application for the Meptetb system built using Flask.
 (metpetdb.rpi.edu)
 
-The API is built in Django and can be found here: https://github.com/metpetdb/metpetdb-py
+The API is built in Django and can be found here: https://github.com/metpetdb/api_v2
 
 We will now set up the system and virtual environment for a new/clean meachine, which means `/usr/lib/python2.7/site-packages` is not modified globally for any application. Let's start from installing global applications to virtual environment.
 
@@ -142,12 +142,16 @@ Under metpetdb directory, where we place our secret "app_variables.env" file tha
 	
 Then we clone the interface code from github, just do:
 	
-	$ sudo apt-get install git -y && git clone https://github.com/metpetdb/metpetdb_interface.git
+	$ sudo apt-get install git -y && git clone https://github.com/metpetdb/interface_v2.git
 	
 Alright, we are so close to finishing setting up MetpetDB locally. Next, install required dependentcies for the interface.
 		
 	$ cd metpetdb_interface
 	$ pip install -r requirements_new_ubuntu_14.04.txt
+
+If you get an error when accessing edit/add sample/subsample/chemical analysis, install the latest version of requests:
+
+	$ pip install requests
 	
 Finally, run app.py to test if we have set up the interface properly:
 
