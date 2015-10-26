@@ -227,6 +227,7 @@ def edit_sample(id):
     references = get(env("API_DRF_HOST")+"/references/", params={"page_size": 1100, "format": "json"}).json()["results"]
     metamorphic_grades = get(env("API_DRF_HOST")+"/metamorphic_grades/", params={"page_size": 30, "format": "json"}).json()["results"]
     metamorphic_regions = get(env("API_DRF_HOST")+"/metamorphic_regions/", params={"page_size": 240, "format": "json"}).json()["results"]
+    countries = get(env("API_DRF_HOST")+"/country_names/").json()["country_names"]
 
     return render_template("edit_sample.html",
         sample=sample,
@@ -236,6 +237,7 @@ def edit_sample(id):
         references=references,
         metamorphic_grades=metamorphic_grades,
         metamorphic_regions=metamorphic_regions,
+        countries=countries,
         errors=errors,
         auth_token=session.get("auth_token",None)
     )
@@ -630,6 +632,7 @@ def login():
         else:
             flash("Login successful!")
             session["auth_token"] = auth_token["auth_token"]
+            session["email"] = login["email"]
             return redirect(url_for("index"))
 
     return render_template("login.html",

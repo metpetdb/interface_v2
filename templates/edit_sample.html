@@ -108,7 +108,16 @@
         <tr>
           <td class="sample_label">Country</td>
           <td class="sample_value">
-            <input type="text" name="country" value="{% if sample.country %}{{sample.country}}{% endif %}" style="width:85%">
+            <select name="country" class="chosen-select" style="width:85%">
+              <option></option>
+              {% for c in countries %}
+                {% if sample.country == c %}
+                <option value="{{ c }}" selected="selected">{{ c }}</option>
+                {% else %}
+                <option value="{{ c }}">{{ c }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
           </td>
           {% if errors.country %}<br>{% for e in errors.country %}{{ e }}{% endfor %}
           <script>document.getElementsByName("country")[0].style.borderColor = "red";</script>{% endif %}

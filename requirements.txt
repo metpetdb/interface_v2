@@ -1,3 +1,12 @@
+dotenv
+json
+getent
+requests
+urllib
+flask
+flask_mail
+
+
 Flask==0.10.1
 Flask-Mail==0.9.0
 Flask-WTF==0.9.5
