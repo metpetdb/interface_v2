@@ -105,10 +105,10 @@
         <div id="form-submit" class="text-center">
           <div class="btn-group" data-toggle="buttons">
             <label class="btn btn-primary">
-              <input type="radio" name="resource" value="sample"> Samples
+              <input type="radio" name="resource" value="samples"> Samples
             </label>
             <label class="btn btn-primary active">
-              <input type="radio" name="resource" value="chemicalanalysis" checked="checked"> Chemical Analyses
+              <input type="radio" name="resource" value="chemical_analyses" checked="checked"> Chemical Analyses
             </label>
           </div>
           <div style="padding:10px 0px;">
@@ -122,6 +122,7 @@
   </div>
 </form>
 
+<hr>
 <div id="results"></div>
 
 <script src="/static/js/jquery-2.1.1.min.js"></script>
@@ -187,6 +188,7 @@ $(function()
         $("#results").html("");
         $("#results").html(data);
         $('#spinner').hide();
+        clearAll();
         if(document.getElementsByTagName("header")[1])
           document.getElementsByTagName("header")[1].innerHTML = "";
       },

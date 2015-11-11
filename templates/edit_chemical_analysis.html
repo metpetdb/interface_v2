@@ -21,7 +21,7 @@
           <td class="sample_label">Point Number*</td>
           <td class="sample_value">
             <input type="text" name="spot_id" value="{% if analysis.spot_id != None %}{{analysis.spot_id}}{% endif %}" style="width:85%">
-            {% if errors.spot_id %}<br>{% for e in errors.spot_id %}{{ e }}{% endfor %}
+            {% if errors and errors.spot_id %}<br>{% for e in errors.spot_id %}{{ e }}{% endfor %}
             <script>document.getElementsByName("spot_id")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
@@ -41,7 +41,7 @@
             <input type="radio" name="public_data" value="True">Yes<br>
             <input type="radio" name="public_data" value="False" checked>No
             {% endif %}
-            {% if errors.public_data %}<br>{% for e in errors.public_data %}{{ e }}{% endfor %}
+            {% if errors and errors.public_data %}<br>{% for e in errors.public_data %}{{ e }}{% endfor %}
             <script>document.getElementsByName("public_data")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
@@ -49,7 +49,7 @@
           <td class="sample_label">Analysis Method</td>
           <td class="sample_value">
             <input type="text" name="analysis_method" value="{% if analysis.analysis_method %}{{analysis.analysis_method}}{% endif %}" style="width:85%">
-            {% if errors.analysis_method %}<br>{% for e in errors.analysis_method %}{{ e }}{% endfor %}
+            {% if errors and errors.analysis_method %}<br>{% for e in errors.analysis_method %}{{ e }}{% endfor %}
             <script>document.getElementsByName("analysis_method")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
@@ -57,7 +57,7 @@
           <td class="sample_label">Analysis Location</td>
           <td class="sample_value">
             <input type="text" name="where_done" value="{% if analysis.where_done %}{{analysis.where_done}}{% endif %}" style="width:85%">
-            {% if errors.where_done %}<br>{% for e in errors.where_done %}{{ e }}{% endfor %}
+            {% if errors and errors.where_done %}<br>{% for e in errors.where_done %}{{ e }}{% endfor %}
             <script>document.getElementsByName("where_done")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
@@ -65,7 +65,7 @@
           <td class="sample_label">Analyst</td>
           <td class="sample_value">
             <input type="text" name="analyst" value="{% if analysis.analyst %}{{analysis.analyst}}{% endif %}" style="width:85%">
-            {% if errors.analyst %}<br>{% for e in errors.analyst %}{{ e }}{% endfor %}
+            {% if errors and errors.analyst %}<br>{% for e in errors.analyst %}{{ e }}{% endfor %}
             <script>document.getElementsByName("analyst")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
@@ -73,7 +73,7 @@
           <td class="sample_label">Description</td>
           <td class="sample_value">
             <input type="text" name="description" value="{% if analysis.description %}{{analysis.description}}{% endif %}" style="width:85%">
-            {% if errors.description %}<br>{% for e in errors.description %}{{ e }}{% endfor %}
+            {% if errors and errors.description %}<br>{% for e in errors.description %}{{ e }}{% endfor %}
             <script>document.getElementsByName("description")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
@@ -90,7 +90,7 @@
                 {% endif %}
               {% endfor %}
             </select>
-            {% if errors.mineral_id %}<br>{% for e in errors.mineral_id %}{{ e }}{% endfor %}
+            {% if errors and errors.mineral_id %}<br>{% for e in errors.mineral_id %}{{ e }}{% endfor %}
             <script>document.getElementsByName("mineral_id")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
@@ -98,7 +98,7 @@
           <td class="sample_label">Total</td>
           <td class="sample_value">
             <input type="text" name="total" value="{% if analysis.total != None %}{{analysis.total}}{% endif %}" style="width:85%">
-            {% if errors.total %}<br>{% for e in errors.total %}{{ e }}{% endfor %}
+            {% if errors and errors.total %}<br>{% for e in errors.total %}{{ e }}{% endfor %}
             <script>document.getElementsByName("total")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
@@ -106,7 +106,7 @@
           <td class="sample_label">Reference X</td>
           <td class="sample_value">
             <input type="text" name="reference_x" value="{% if analysis.reference_x != None %}{{analysis.reference_x}}{% endif %}" style="width:85%">
-            {% if errors.reference_x %}<br>{% for e in errors.reference_x %}{{ e }}{% endfor %}
+            {% if errors and errors.reference_x %}<br>{% for e in errors.reference_x %}{{ e }}{% endfor %}
             <script>document.getElementsByName("reference_x")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
@@ -114,7 +114,7 @@
           <td class="sample_label">Reference Y</td>
           <td class="sample_value">
             <input type="text" name="reference_y" value="{% if analysis.reference_y != None %}{{analysis.reference_y}}{% endif %}" style="width:85%">
-            {% if errors.reference_y %}<br>{% for e in errors.reference_y %}{{ e }}{% endfor %}
+            {% if errors and errors.reference_y %}<br>{% for e in errors.reference_y %}{{ e }}{% endfor %}
             <script>document.getElementsByName("reference_y")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
@@ -122,7 +122,7 @@
           <td class="sample_label">Stage X</td>
           <td class="sample_value">
             <input type="text" name="stage_x" value="{% if analysis.stage_x != None %}{{analysis.stage_x}}{% endif %}" style="width:85%">
-            {% if errors.stage_x %}<br>{% for e in errors.stage_x %}{{ e }}{% endfor %}
+            {% if errors and errors.stage_x %}<br>{% for e in errors.stage_x %}{{ e }}{% endfor %}
             <script>document.getElementsByName("stage_x")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
@@ -130,7 +130,7 @@
           <td class="sample_label">Stage Y</td>
           <td class="sample_value">
             <input type="text" name="stage_y" value="{% if analysis.stage_y != None %}{{analysis.stage_y}}{% endif %}" style="width:85%">
-            {% if errors.stage_y %}<br>{% for e in errors.stage_y %}{{ e }}{% endfor %}
+            {% if errors and errors.stage_y %}<br>{% for e in errors.stage_y %}{{ e }}{% endfor %}
             <script>document.getElementsByName("stage_y")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
@@ -171,7 +171,7 @@
                 <option value="{{ e.id }}">{{ e.name }}</option>
               {% endfor %}
             </select>
-            {% if errors.elements %}<br>{% for e in errors.elements %}{{ e }}{% endfor %}
+            {% if errors and errors.elements %}<br>{% for e in errors.elements %}{{ e }}{% endfor %}
             <script>document.getElementsByName("elements")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
@@ -212,7 +212,7 @@
                 <option value="{{ o.id }}">{{ o.species }}</option>
               {% endfor %}
             </select>
-            {% if errors.oxides %}<br>{% for e in errors.oxides %}{{ e }}{% endfor %}
+            {% if errors and errors.oxides %}<br>{% for e in errors.oxides %}{{ e }}{% endfor %}
             <script>document.getElementsByName("oxides")[0].style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>

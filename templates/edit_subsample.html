@@ -20,7 +20,7 @@
           <td class="sample_label">Name*</td>
           <td class="sample_value">
             <input type="text" name="name" value="{% if subsample.name %}{{subsample.name}}{% endif %}" style="width:85%">
-            {% if errors.name %}<br>{% for e in errors.name %}{{ e }}{% endfor %}
+            {% if errors and errors.name %}<br>{% for e in errors.name %}{{ e }}{% endfor %}
             <script>document.getElementById("name").style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
@@ -40,7 +40,7 @@
             <input type="radio" name="public_data" value="True">Yes<br>
             <input type="radio" name="public_data" value="False" checked>No
             {% endif %}
-            {% if errors.public_data %}<br>{% for e in errors.public_data %}{{ e }}{% endfor %}
+            {% if errors and errors.public_data %}<br>{% for e in errors.public_data %}{{ e }}{% endfor %}
             <script>document.getElementById("public_data").style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>
@@ -57,7 +57,7 @@
                 {% endif %}
               {% endfor %}
             </select>
-            {% if errors.subsample_type %}<br>{% for e in errors.subsample_type %}{{ e }}{% endfor %}
+            {% if errors and errors.subsample_type %}<br>{% for e in errors.subsample_type %}{{ e }}{% endfor %}
             <script>document.getElementById("subsample_type").style.borderColor = "red";</script>{% endif %}
           </td>
         </tr>

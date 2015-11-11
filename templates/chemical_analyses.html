@@ -6,22 +6,22 @@
     </caption>
     <thead>
       <tr>
-        <th>Sample Number</th>
+        <th>Sample</th>
+        <th>Point</th>
         <th>Analysis Method</th>
         <th>Analysis Material</th>
         <th>Elements</th>
         <th>Oxides</th>
         <th>Analyst</th>
         <th>Analysis Date</th>
-        <th>Reference X</th>
-        <th>Reference Y</th>
         <th>Total</th>
       </tr>
     </thead>
     <tbody>
       {% for analysis in chemical_analyses %}
       <tr>
-        <td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{% if analysis.sample %}{{ analysis.sample.number }}{% endif %}</a></td>
+        <td class="sample_value"><a href="{{ url_for('sample', id=analysis.sample.id) }}">{% if analysis.sample %}{{ analysis.sample.number }}{% endif %}</a></td>
+        <td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{% if analysis.spot_id %}{{ analysis.spot_id }}{% endif %}</a></td>
         <td class="sample_value">{% if analysis.analysis_method %}{{ analysis.analysis_method }}{% endif %}</td>
         <td class="sample_value">{% if analysis.mineral %}{{ analysis.mineral.name }}{% endif %}</td>
         <td class="sample_mineral sample_value">
@@ -46,8 +46,6 @@
         </td>
         <td class="sample_value">{% if analysis.analyst %}{{ analysis.analyst }}{% endif %}</td>
         <td class="sample_value">{% if analysis.analysis_date %}{{ analysis.analysis_date }}{% endif %}</td>
-        <td class="sample_value">{% if analysis.reference_x != None %}{{ analysis.reference_x }}{% endif %}</td>
-        <td class="sample_value">{% if analysis.reference_y != None %}{{ analysis.reference_y }}{% endif %}</td>
         <td class="sample_value">{% if analysis.total != None %}{{ analysis.total }}{% endif %}</td>
       </tr>
       {%endfor%}
