@@ -1,5 +1,4 @@
 import dotenv
-import json
 from getenv import env
 from requests import get, put, post, codes
 from urllib import urlencode, urlopen
@@ -25,12 +24,14 @@ mail.init_app(metpet_ui)
 def index():
     return render_template("index.html",
         auth_token = session.get("auth_token",None),
-        email = session.get("email",None)
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 
 @metpet_ui.route("/search/")
 def search():
+    #get all filter options from API, use format = json and minimum page sizes to speed it up
     if request.args.get("resource") == "samples":
         #resource value set in search_form.html, appends samples.html to bottom of page
         return redirect(url_for("samples")+"?"+urlencode(request.args))
@@ -42,17 +43,17 @@ def search():
         return redirect(url_for("chemical_analyses")+"?"+urlencode(request.args)+"&sample_filters=True")
 
     #get all filter options from API, use format = json and minimum page sizes to speed it up
-    regions = get(env("API_HOST")+"/regions/", params = {"fields": "name", "page_size": 2000, "format": "json"}).json()["results"]
-    minerals = get(env("API_HOST")+"/minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
-    rock_types = get(env("API_HOST")+"/rock_types/", params = {"fields": "name", "page_size": 40, "format": "json"}).json()["results"]
-    collectors = get(env("API_HOST")+"/collectors/", params = {"fields": "name", "page_size": 140, "format": "json"}).json()["results"]
-    references = get(env("API_HOST")+"/references/", params = {"fields": "name", "page_size": 1100, "format": "json"}).json()["results"]
-    metamorphic_grades = get(env("API_HOST")+"/metamorphic_grades/", params = {"fields": "name", "page_size": 30, "format": "json"}).json()["results"]
-    metamorphic_regions = get(env("API_HOST")+"/metamorphic_regions/", params = {"fields": "name", "page_size": 240, "format": "json"}).json()["results"]
+    regions = get(env("API_HOST")+"regions/", params = {"fields": "name", "page_size": 2000, "format": "json"}).json()["results"]
+    minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
+    rock_types = get(env("API_HOST")+"rock_types/", params = {"fields": "name", "page_size": 40, "format": "json"}).json()["results"]
+    collectors = get(env("API_HOST")+"collectors/", params = {"fields": "name", "page_size": 140, "format": "json"}).json()["results"]
+    references = get(env("API_HOST")+"references/", params = {"fields": "name", "page_size": 1100, "format": "json"}).json()["results"]
+    metamorphic_grades = get(env("API_HOST")+"metamorphic_grades/", params = {"fields": "name", "page_size": 30, "format": "json"}).json()["results"]
+    metamorphic_regions = get(env("API_HOST")+"metamorphic_regions/", params = {"fields": "name", "page_size": 240, "format": "json"}).json()["results"]
 
-    countries = get(env("API_HOST")+"/country_names/", params = {"format": "json"}).json()["country_names"]
-    numbers = get(env("API_HOST")+"/sample_numbers/", params = {"format": "json"}).json()["sample_numbers"]
-    owners = [session.get("email")]#get(env("API_HOST")+"/public_owners/", params = {"format": "json"}).json()["public_owners"]
+    countries = get(env("API_HOST")+"country_names/", params = {"format": "json"}).json()["country_names"]
+    numbers = get(env("API_HOST")+"sample_numbers/", params = {"format": "json"}).json()["sample_numbers"]
+    owners = get(env("API_HOST")+"sample_owner_names/", params = {"format": "json"}).json()["sample_owner_names"]
  
     return render_template("search_form.html",
         regions = regions,
@@ -66,7 +67,8 @@ def search():
         numbers = numbers,
         owners = owners,
         auth_token = session.get("auth_token",None),
-        email = session.get("email",None)
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 
@@ -79,16 +81,17 @@ def search_chemistry():
     if request.args.get("resource") == "sample":
         return redirect(url_for("samples")+"?"+urlencode(request.args)+"&chemical_analyses_filters=True")
 
-    oxides = get(env("API_HOST")+"/oxides/", params = {"fields": "species", "page_size": 100, "format": "json"}).json()["results"]
-    elements = get(env("API_HOST")+"/elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"}).json()["results"]
-    minerals = get(env("API_HOST")+"/minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
+    oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"}).json()["results"]
+    elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"}).json()["results"]
+    minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
 
     return render_template("chemical_search_form.html",
         oxides = oxides,
         elements = elements,
         minerals = minerals,
         auth_token = session.get("auth_token",None),
-        email = session.get("email",None)
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 
@@ -109,7 +112,7 @@ def samples():
     filters["format"] = "json"
 
     #get sample data and use meta data to get pagination urls
-    samples = get(env("API_HOST")+"/samples/", params = filters).json()
+    samples = get(env("API_HOST")+"samples/", params = filters).json()
     sample_results = samples["results"]
     next_url, prev_url, last_page, total = paginate_model("samples", samples, filters)
 
@@ -125,13 +128,15 @@ def samples():
     return render_template("samples.html",
         samples = sample_results,
         showmap = "showmap" in filters,
+        extends = "render" in filters,
         total = total,
         next_url = next_url,
         prev_url = prev_url,
         first_page = url_for("samples")+"?"+urlencode(filters),
         last_page = last_page,
         auth_token = session.get("auth_token",None),
-        email = session.get("email",None)
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 
@@ -143,7 +148,7 @@ def sample(id):
         headers = {"Authorization": "Token "+session.get("auth_token")}
 
     #get the sample the usual way and return error message if something went wrong
-    sample = get(env("API_HOST")+"/samples/"+id+"/", params = {"format": "json"}, headers = headers).json()
+    sample = get(env("API_HOST")+"samples/"+id+"/", params = {"format": "json"}, headers = headers).json()
     if "detail" in sample:
         flash(sample["detail"])
         return redirect(url_for("search"))
@@ -157,17 +162,18 @@ def sample(id):
     #get subsample and analysis data for tables
     subsamples = []
     for s in sample["subsample_ids"]:
-        subsamples.append(get(env("API_HOST")+"/subsamples/"+s,
+        subsamples.append(get(env("API_HOST")+"subsamples/"+s,
             params = {"fields": "subsample_type,name,id,public_data,owner", "format": "json"}, headers = headers).json())
     for s in subsamples:
-        s["chemical_analyses"] = get(env("API_HOST")+"/chemical_analyses/",
+        s["chemical_analyses"] = get(env("API_HOST")+"chemical_analyses/",
             params = {"subsample_ids": s["id"], "fields": "id", "format": "json"}, headers = headers).json()["results"]
 
     return render_template("sample.html",
         sample = sample,
         subsamples = subsamples,
         auth_token = session.get("auth_token",None),
-        email = session.get("email",None)
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 
@@ -196,9 +202,6 @@ def edit_sample(id):
             elif key[-1] == "s":
                 sample[key] = filter(lambda k: k != "", sample[key])
 
-        sample["metamorphic_region_ids"] = (',').join(sample["metamorphic_region_ids"])#[[e] for e in sample["metamorphic_region_ids"]]
-        sample["metamorphic_grade_ids"] = (',').join(sample["metamorphic_grade_ids"])#[[e] for e in sample["metamorphic_grade_ids"]]
-
         if not sample["collection_date"]:
             del sample["collection_date"]
 
@@ -207,43 +210,42 @@ def edit_sample(id):
         del sample["location_coords0"]
         del sample["location_coords1"]
 
-        #check for samples with the same name under the same user
-        # samples = get(env("API_HOST")+"/samples/", params = {"fields": "name", "emails": session.get("email")})
-        # for s in samples:
-        #    if s.name == sample.name:
-        #       errors = {"name": "Error: cannot have multiple samples with the same name"}
+        samples = get(env("API_HOST")+"samples/", params = {"fields": "number", "emails": session.get("email")}).json()["results"]
+        for s in samples:
+            if s["number"] == sample["number"]:
+                errors = {"name": "Error: cannot have multiple samples with the same number"}
 
         #send data to API with PUT call and display error message if any
         if not errors:
             if new:
-                sample["owner"] = get(env("API_HOST")+"/users/", params = {"email": session.get("email")}, headers = headers).json()
-                response = post(env("API_HOST")+"/samples/", data = sample, headers = headers)
+                sample["owner"] = get(env("API_HOST")+"users/", params = {"email": session.get("email")}, headers = headers).json()
+                response = post(env("API_HOST")+"samples/", json = sample, headers = headers)
             else:
-                print sample
-                response = put(env("API_HOST")+"/samples/"+id+"/", data = sample, headers = headers)
-                print response.content
+                response = put(env("API_HOST")+"samples/"+id+"/", json = sample, headers = headers)
+            print response.status_code
+            print response.json()
             if response.status_code < 300:
                 return redirect(url_for("sample", id = response.json()["id"]))
             errors = response.json()
 
     #get sample data and split point into lat/long
     if new:
-        sample["owner"] = get(env("API_HOST")+"/users/", params = {"email": session.get("email")}, headers = headers).json()
+        sample["owner"] = get(env("API_HOST")+"users/"+session.get("id")+"/", headers = headers).json()
     else:
-        sample = get(env("API_HOST")+"/samples/"+id+"/", params = {"format": "json"}, headers = headers).json()
+        sample = get(env("API_HOST")+"samples/"+id+"/", params = {"format": "json"}, headers = headers).json()
         pos = sample["location_coords"].split(" ")
         sample["location_coords"] = [float(pos[2].replace(")","")), float(pos[1].replace("(",""))]
         sample["references"] = [r["name"] for r in sample["references"]]
 
     #get all the other data
-    regions = get(env("API_HOST")+"/regions/", params = {"page_size": 2000, "format": "json"}).json()["results"]
-    minerals = get(env("API_HOST")+"/minerals/", params = {"page_size": 200, "format": "json"}).json()["results"]
-    rock_types = get(env("API_HOST")+"/rock_types/", params = {"page_size": 40, "format": "json"}).json()["results"]
-    references = get(env("API_HOST")+"/references/", params = {"page_size": 1100, "format": "json"}).json()["results"]
-    metamorphic_grades = get(env("API_HOST")+"/metamorphic_grades/", params = {"page_size": 30, "format": "json"}).json()["results"]
-    metamorphic_regions = get(env("API_HOST")+"/metamorphic_regions/", params = {"page_size": 240, "format": "json"}).json()["results"]
+    regions = get(env("API_HOST")+"regions/", params = {"page_size": 2000, "format": "json"}).json()["results"]
+    minerals = get(env("API_HOST")+"minerals/", params = {"page_size": 200, "format": "json"}).json()["results"]
+    rock_types = get(env("API_HOST")+"rock_types/", params = {"page_size": 40, "format": "json"}).json()["results"]
+    references = get(env("API_HOST")+"references/", params = {"page_size": 1100, "format": "json"}).json()["results"]
+    metamorphic_grades = get(env("API_HOST")+"metamorphic_grades/", params = {"page_size": 30, "format": "json"}).json()["results"]
+    metamorphic_regions = get(env("API_HOST")+"metamorphic_regions/", params = {"page_size": 240, "format": "json"}).json()["results"]
 
-    countries = get(env("API_HOST")+"/country_names/").json()["country_names"]
+    countries = get(env("API_HOST")+"country_names/").json()["country_names"]
 
     return render_template("edit_sample.html",
         sample = sample,
@@ -256,7 +258,8 @@ def edit_sample(id):
         countries = countries,
         errors = errors,
         auth_token = session.get("auth_token",None),
-        email = session.get("email",None)
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 
@@ -267,21 +270,22 @@ def subsample(id):
         headers = {"Authorization": "Token "+session.get("auth_token")}
 
     #get subsample info
-    subsample = get(env("API_HOST")+"/subsamples/"+id+"/", params = {"format": "json"}, headers = headers).json()
+    subsample = get(env("API_HOST")+"subsamples/"+id+"/", params = {"format": "json"}, headers = headers).json()
     if "detail" in subsample:
         flash(subsample['detail'])
         return redirect(url_for("search"))
 
     #get sample and analysis info
-    subsample["sample"]["number"] = get(env("API_HOST")+"/samples/"+subsample["sample"]["id"],
+    subsample["sample"]["number"] = get(env("API_HOST")+"samples/"+subsample["sample"]["id"],
         params = {"fields": "number", "format": "json"}, headers = headers).json()["number"]
-    chemical_analyses = get(env("API_HOST")+"/chemical_analyses/", params = {"subsample_ids": subsample["id"], "format": "json"}).json()["results"]
+    chemical_analyses = get(env("API_HOST")+"chemical_analyses/", params = {"subsample_ids": subsample["id"], "format": "json"}).json()["results"]
 
     return render_template("subsample.html",
         subsample = subsample,
         chemical_analyses = chemical_analyses,
         auth_token = session.get("auth_token",None),
-        email = session.get("email",None)
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 
@@ -296,7 +300,7 @@ def edit_subsample(id):
     new = (id == "new")
 
     if new:
-        sample = get(env("API_HOST")+"/samples/"+request.args.get("sample_id")+"/", params = {"fields": "id,number,owner"}, headers = headers).json()
+        sample = get(env("API_HOST")+"samples/"+request.args.get("sample_id")+"/", params = {"fields": "id,number,owner"}, headers = headers).json()
     subsample = dict(request.form)
     if subsample:
         for key in subsample.keys():
@@ -307,9 +311,9 @@ def edit_subsample(id):
         #subsample["owner_id"] = sample["owner"]["id"]
 
         if new:
-            response = post(env("API_HOST")+"/subsamples/", data = subsample, headers = headers)
+            response = post(env("API_HOST")+"subsamples/", data = subsample, headers = headers)
         else:
-            response = put(env("API_HOST")+"/subsamples/"+id+"/", data = subsample, headers = headers)
+            response = put(env("API_HOST")+"subsamples/"+id+"/", data = subsample, headers = headers)
         if response.status_code < 300:
             return redirect(url_for("subsample", id = response.json()["id"]))
         errors = response.json()
@@ -319,16 +323,17 @@ def edit_subsample(id):
     if new:
         subsample = {"owner": sample["owner"], "sample": sample}
     else:
-        subsample = get(env("API_HOST")+"/subsamples/"+id+"/", params = {"format": "json"}, headers = headers).json()
-        subsample["owner"] = get(env("API_HOST")+"/users/"+subsample["owner"]["id"], params = {"format": "json"}, headers = headers).json()
-    types = get(env("API_HOST")+"/subsample_types/", headers = headers).json()["results"]
+        subsample = get(env("API_HOST")+"subsamples/"+id+"/", params = {"format": "json"}, headers = headers).json()
+        subsample["owner"] = get(env("API_HOST")+"users/"+subsample["owner"]["id"], params = {"format": "json"}, headers = headers).json()
+    types = get(env("API_HOST")+"subsample_types/", headers = headers).json()["results"]
 
     return render_template("edit_subsample.html",
         subsample = subsample,
         types = types,
         errors = errors,
         auth_token = session.get("auth_token",None),
-        email = session.get("email",None)
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 
@@ -355,7 +360,7 @@ def chemical_analyses():
     else:
         filters["public_data"] = True
 
-    chemicals = get(env("API_HOST")+"/chemical_analyses/", params = filters).json()
+    chemicals = get(env("API_HOST")+"chemical_analyses/", params = filters).json()
     chem_results = chemicals["results"]
     next_url, prev_url, last_page, total = paginate_model("chemical_analyses", chemicals, filters)
 
@@ -363,7 +368,7 @@ def chemical_analyses():
     samples = set()
     for c in chem_results:
         samples.add(c["subsample"]["sample"])
-    samples = get(env("API_HOST")+"/samples/", params = {"fields": "number,id",
+    samples = get(env("API_HOST")+"samples/", params = {"fields": "number,id",
         "ids": (",").join(list(samples)), "format": "json"}, headers = headers).json()["results"]
     numbers = {}
     for s in samples:
@@ -382,7 +387,8 @@ def chemical_analyses():
         first_page = url_for("chemical_analyses")+"?"+urlencode(filters),
         last_page = last_page,
         auth_token = session.get("auth_token",None),
-        email = session.get("email",None)
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 
@@ -393,19 +399,20 @@ def chemical_analysis(id):
     if session.get("auth_token", None):
         headers = {"Authorization": "Token "+session.get("auth_token")}
 
-    analysis = get(env("API_HOST")+"/chemical_analyses/"+id+"/", params = {"format": "json"}, headers = headers).json()
+    analysis = get(env("API_HOST")+"chemical_analyses/"+id+"/", params = {"format": "json"}, headers = headers).json()
     if "detail" in analysis:
         flash(analysis['detail'])
         return redirect(url_for("search_chemistry"))
 
     #have to get sample number still
-    analysis["sample"] = get(env("API_HOST")+"/samples/"+analysis["subsample"]["sample"],
+    analysis["sample"] = get(env("API_HOST")+"samples/"+analysis["subsample"]["sample"],
         params = {"fields": "number", "format": "json"}, headers = headers).json()
 
     return render_template("chemical_analysis.html",
         analysis = analysis,
         auth_token = session.get("auth_token",None),
-        email = session.get("email",None)
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 
@@ -460,26 +467,26 @@ def edit_chemical_analysis(id):
 
         if new:
             analysis["subsample_id"] = request.args.get("subsample_id")
-            response = post(env("API_HOST")+"/chemical_analyses/", data = analysis, headers = headers)
+            response = post(env("API_HOST")+"chemical_analyses/", data = analysis, headers = headers)
         else:
-            response = put(env("API_HOST")+"/chemical_analyses/"+id+"/", data = analysis, headers = headers)
+            response = put(env("API_HOST")+"chemical_analyses/"+id+"/", data = analysis, headers = headers)
         if response.status_code < 300:
             return redirect(url_for("chemical_analysis", id = response.json()["id"]))
         errors = response.json()
 
     if new:
-        subsample = get(env("API_HOST")+"/subsamples/"+subsample_id+"/", params = {"fields": "id,name,owner,sample"}).json()
+        subsample = get(env("API_HOST")+"subsamples/"+subsample_id+"/", params = {"fields": "id,name,owner,sample"}).json()
         subsample["sample"] = subsample["sample"]["id"]
         analysis = {"owner": subsample["owner"], "sample": subsample["sample"], "subsample": subsample}
     else:
         #again, still have to get sample number
-        analysis = get(env("API_HOST")+"/chemical_analyses/"+id+"/", params = {"format": "json"}, headers = headers).json()
-        analysis["sample"] = get(env("API_HOST")+"/samples/"+analysis["subsample"]["sample"],
+        analysis = get(env("API_HOST")+"chemical_analyses/"+id+"/", params = {"format": "json"}, headers = headers).json()
+        analysis["sample"] = get(env("API_HOST")+"samples/"+analysis["subsample"]["sample"],
             params = {"fields": "number", "format": "json"}, headers = headers).json()
 
-    minerals = get(env("API_HOST")+"/minerals/", params = {"page_size": 200, "format": "json"}).json()["results"]
-    elements = get(env("API_HOST")+"/elements/", params = {"page_size": 50, "format": "json"}).json()["results"]
-    oxides = get(env("API_HOST")+"/oxides/", params = {"page_size": 50, "format": "json"}).json()["results"]
+    minerals = get(env("API_HOST")+"minerals/", params = {"page_size": 200, "format": "json"}).json()["results"]
+    elements = get(env("API_HOST")+"elements/", params = {"page_size": 50, "format": "json"}).json()["results"]
+    oxides = get(env("API_HOST")+"oxides/", params = {"page_size": 50, "format": "json"}).json()["results"]
 
     return render_template("edit_chemical_analysis.html",
         analysis = analysis,
@@ -488,7 +495,8 @@ def edit_chemical_analysis(id):
         oxides = oxides,
         errors = errors,
         auth_token = session.get("auth_token",None),
-        email = session.get("email",None)
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 
@@ -502,32 +510,38 @@ def login():
     if login:
         #get email/password/(other info if registering)
         for l in login.keys():
-            if not login[l]:
+            if login[l]:
+                login[l] = login[l][0]
+            else:
                 del login[l]
-        register = False
-        if login["login"] == "Register":
-            register = True
+        register = (login["login"] == "Register")
         del login["login"]
 
         #try to login/register
         auth_token = {}
         if register:
-            #auth_token = post(env("API_HOST")+"/auth/register/", params = login).json()
-            auth_token = {"detail": "hi"}
+            auth_token = post(env("API_HOST")+"auth/register/", data = login).json()
         else:
-            auth_token = post(env("API_HOST")+"/auth/login/", data = login).json()
+            auth_token = post(env("API_HOST")+"auth/login/", data = login).json()
+
+        #http://45.55.207.138/api/users/9fc3b7ab-cec5-450a-9b33-b3200a5eaca5/
 
         if not auth_token or "auth_token" not in auth_token:
-            flash(auth_token.values()[0][0])
+            flash((',').join(auth_token.values()[0]))
         else:
             flash("Login successful!")
             session["auth_token"] = auth_token["auth_token"]
-            session["email"] = login["email"][0]
+            session["email"] = login["email"]
+            session["id"] = auth_token["user_id"]
+            session["name"] = get(env("API_HOST")+"users/"+session["id"],
+                params = {"fields": "name"}, headers = {"Authorization": "Token "+session["auth_token"]}).json()["name"]
+
             return redirect(url_for("index"))
 
     return render_template("login.html",
         auth_token = session.get("auth_token",None),
-        email = session.get("email",None)
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 
@@ -536,6 +550,8 @@ def logout():
     #just pop the data from the session
     del session['auth_token']
     del session["email"]
+    del session["name"]
+    del session["id"]
     flash("Logout successful.")
     return redirect(url_for("index"))
 
@@ -546,7 +562,7 @@ def request_password_reset():
     form = dict(request.form)
     if form:
         #get email data
-        email_data = post(env("API_HOST")+"/auth/password/reset/", data = form).json()
+        email_data = post(env("API_HOST")+"auth/password/reset/", data = form).json()
         if not email_data or "detail" in email_data:
             flash("Invalid email. Please try again.")
         else:
@@ -560,7 +576,8 @@ def request_password_reset():
 
     return render_template("request_password_reset.html",
         auth_token = session.get("auth_token",None),
-        email = session.get("email",None)
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 
@@ -570,7 +587,7 @@ def reset_password(token):
     password = request.form.get("password",None)
     if password:
         #send new password to API
-        reset_data = post(env("API_HOST")+"/auth/password/reset/confirm/", data = {"token": token, "password": password}).json()
+        reset_data = post(env("API_HOST")+"auth/password/reset/confirm/", data = {"token": token, "password": password}).json()
         if not reset_data or "detail" in reset_data:
             flash("Password reset failed. Please try again.")
             return redirect(url_for("request_password_reset"))
@@ -581,27 +598,28 @@ def reset_password(token):
 
     return render_template("reset_password.html",
         auth_token = session.get("auth_token",None),
-        email = session.get("email",None)
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 
-@metpet_ui.route("/user/<string:email>")
-def user(email):
+@metpet_ui.route("/user")
+def user():
     headers = None
     if session.get("auth_token", None):
         headers = {"Authorization": "Token "+session.get("auth_token")}
+    else:
+        return redirect(url_for("index"))
 
-    #get user data, potentially add samples/analyses owned by user
-    print email
-    user = get(env("API_HOST")+"/users/", params = {"email": email, "format": "json"}, headers = headers).json()
-    print user
+    user = get(env("API_HOST")+"users/"+session.get("id"), params = {"format": "json"}, headers = headers).json()
     if "detail" in user:
         flash(user['detail'])
         return redirect(url_for("index"))
     return render_template("user.html",
         user = user,
         auth_token = session.get("auth_token",None),
-        email = session.get("email",None)
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 

@@ -161,9 +161,9 @@ $(function()
     $('#spinner').show();
     var url = "page_size="+document.getElementsByName("page_size")[0].value+"&resource=";
     if (document.getElementsByName("resource")[0].checked)
-      url += "sample";
+      url += "samples";
     else
-      url += "chemicalanalysis";
+      url += "chemical_analyses";
     var minerals = $("#selected-mineral option:selected");
     for(var a = 0; a < minerals.length; a++)
       if(minerals[a].selected && minerals[a].value !== "")

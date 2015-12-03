@@ -122,8 +122,8 @@
           <div class="tab-pane" id="provenance">
             <ul id="provenance">
               <h3>Provenance</h3>
-              <label class="provenance-label" for="emails">Owner: </label>
-              <select id="selected-owner" onchange="updateProvenance()" name="emails" class="chosen-select">
+              <label class="provenance-label" for="owners">Owner: </label>
+              <select id="selected-owner" onchange="updateProvenance()" name="owners" class="chosen-select">
                 <option value="" selected>Select owner</option>
                 {% for o in owners %}
                 <option value="{{ o }}">{{ o }}</option>

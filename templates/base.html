@@ -8,7 +8,7 @@
 
   <body class="container">
     <header>
-      {% if auth_token %}<span style="float:right">Logged in as {{ email }}</span>{% endif %}
+      {% if auth_token %}<span style="float:right">Logged in as {{ name }}</span>{% endif %}
       <h3 class="brand" id="page_title">MetPetDB: Database for Metamorphic Petrology</h3>
       <hr>
       <div class="container-fluid">
@@ -37,7 +37,7 @@
                     <li name="editobject"><a href="{{ url_for('index') }}">Bulk Upload</a></li>
                   </ul>
                 </li>
-                <li><a href="{{ url_for('search') }}?emails={{ email }}&resource=samples">My Samples</a></li>
+                <li><a href="{{ url_for('search') }}?emails={{ email }}&resource=samples&render=True">My Samples</a></li>
                 {% endif %}
                 <li><a href="{{ url_for('index') }}">Help</a></li>
                 {% if auth_token %}
