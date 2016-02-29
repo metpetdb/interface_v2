@@ -1,13 +1,12 @@
-<html>
-  <head>
+{% extends "base.html" %}
+{% block head %}
     <title>MetPetDB Bulk Upload</title>
-    <script type="text/javascript" src="/static/js/file_select.js"></script>
-    <script type="text/javascript" src="/static/js/jquery-1.12.0.min.js"></script>
-  </head>
-  <body>    
+{% endblock %}
+{% block body %}
     <form>
-      <fieldset>
-        <legend>Bulk Upload</legend>
+        <!--<fieldset>-->
+        <!--<legend>Bulk Upload</legend>-->
+        <h4 id="heading">Bulk Upload</h4>
         <input type="button" value="Choose File" id="a" onclick="GetFileURL()">
           <div style="display:inline" id="CheckOrX"></div><br>
         Selected URL: <div style="display:inline" id="URLEntered"></div><br>
@@ -15,7 +14,6 @@
         <input type="radio" name="filetype" id="ChemicalAnalyses">Chemical Analyses<br>
         <input type="radio" name="filetype" id="Images">Images<br>
         <input type="submit" value="Parse file for upload" onclick="ParseFileForUpload()">
-      </fieldset>
+        <!--</fieldset>-->
     </form>
-  </body>    
-</html>
+{% endblock %}
