@@ -1,4 +1,4 @@
-import dotenv
+import dotenv, commands, json
 from getenv import env
 from requests import get, put, post, codes
 from urllib import urlencode, urlopen
@@ -8,6 +8,8 @@ from flask import (
     render_template,
     url_for,
     redirect,
+    request,
+    jsonify,
     flash,
     session
 )
@@ -621,6 +623,26 @@ def user():
         email = session.get("email",None),
         name = session.get("name",None)
     )
+
+#Handle the bulk upload URL
+@metpet_ui.route("/bulk-upload")
+def bulk_upload():
+    return render_template('bulk_upload.html')
+
+@metpet_ui.route("/test", methods=['POST'])
+def test():
+    #Capture bulk upload details inputted by user (url, filetype) formatted as
+    #JSON that was sent from JavaScript
+    UserInput = request.json
+    print "Type received: ", type(UserInput)
+    if (UserInput != None):
+        print "Checked Value: ", UserInput['checked']
+        #Call the parse program and get the response
+        status, response = commands.getstatusoutput("python \
+                ./ParseTest/bulk-upload.py " + str(UserInput['url']) \
+                + " " + str(UserInput['checked']))
+        print "Response: ", response
+    return response
 
 
 if __name__ == "__main__":
