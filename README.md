@@ -96,7 +96,7 @@ To create a new virtual environment:
 	New python executable in metpetdb/bin/python
 	Installing setuptools, pip...done.
 	
-As you mihgt notic, the command prompt contains the name before you username
+As you might notice, the command prompt contains the name before you username
 	
 	**(metpetdb)**user@xxxx:~$ python --version
 	Python 2.7.6
@@ -136,7 +136,7 @@ Under metpetdb directory, where we place our secret "app_variables.env" file tha
 	
 	# copy and paste the following keys into "app_variables.env"
 	--------------------------------------------------------
-	API_HOST=http://54.164.222.32
+	API_HOST=<api-host-location> (e.g http://54.164.222.32)
 	SECRET_KEY=qqqqqqqqqqjjhuk8jl9l99l9l;;0o0o;0'0'
 	--------------------------------------------------------
 	
@@ -205,19 +205,23 @@ Modify and add the following lines of conde to the metpetdb.wsgi according to yo
 	import logging
 	logging.basicConfig(stream=sys.stderr)
 	sys.path.insert(0,"/home/ubuntu/metpetdb/")
-	sys.path.insert(0,"/home/ubuntu/metpetdb/metpetdb_interface")
-	sys.path.insert(0,"/home/ubuntu/.virtualenvs/metpetdb/lib/python2.7/site-packag$
+	sys.path.insert(0,"/home/ubuntu/metpetdb/interface_v2")
+	sys.path.insert(0,"/home/ubuntu/.virtualenvs/metpetdb/lib/python2.7/site-packages")
 
-	from metpetdb_interface import app as application
+	from metpetdb_interface import metpet_ui as application
+
+Next rename app.py to __init__.py
+    
+    $ cd interface_v2/
+    $ mv app.py __init__.py
 
 Now your directory structure should look like this:
 
 	|--------metpetdb
-	|----------------metpetdb_interface
+	|----------------interface_v2
 	|-----------------------static
 	|-----------------------templates
 	|-----------------------api.py
-	|-----------------------app.py
 	|-----------------------...*.py
 	|-----------------------__init__.py
 	|----------------app_variables.env  
