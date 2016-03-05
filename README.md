@@ -210,7 +210,7 @@ Modify and add the following lines of conde to the metpetdb.wsgi according to yo
 
 	from metpetdb_interface import metpet_ui as application
 
-Next rename app.py to __init__.py
+Next rename app.py
     
     $ cd interface_v2/
     $ mv app.py __init__.py
@@ -221,9 +221,9 @@ Now your directory structure should look like this:
 	|----------------interface_v2
 	|-----------------------static
 	|-----------------------templates
-	|-----------------------api.py
-	|-----------------------...*.py
 	|-----------------------__init__.py
+	|-----------------------forms.py
+	|-----------------------*.py
 	|----------------app_variables.env  
 	|----------------metpetdb.wsgi
 
