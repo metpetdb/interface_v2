@@ -74,7 +74,8 @@ def main():
          
     p = Parser(template_instance) 
     JSON = p.parse(input_file_name)
-    write_JSON(JSON)
+    print JSON
+    #write_JSON(JSON)
 
 if __name__ == '__main__':
     main()

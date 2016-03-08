@@ -44,7 +44,7 @@ class Template:
             exit(1)
 
         for i in range(1,len(data)):
-            print data
+            #print data
             if (len(data[i]) != len(data[i-1])):             
                 print "prev: " + str(len(data[i-1]))
                 print "curr: " + str(len(data[i]))
