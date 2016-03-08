@@ -240,11 +240,36 @@ Restart Apache with the following command to apply the changes:
 	$ sudo service apache2 restart 
 	
 	
+## Redeployment 
+This process should be followed to replace an outdated front-end
+
+Stop the apache server
+    $ sudo service apache2 stop
+
+Remove the old front-end
+    $ sudo rm -r interface_v2/  	
 	
-	
-	
-	
-	
+Clone the latest version
+    git clone https://github.com/metpetdb/interface_v2.git
+
+Next rename app.py
+    $ cd interface_v2/
+    $ mv app.py __init__.py
+
+Your directory structure should look like this:
+
+	|--------metpetdb
+	|----------------interface_v2
+	|-----------------------static
+	|-----------------------templates
+	|-----------------------__init__.py
+	|-----------------------forms.py
+	|-----------------------*.py
+	|----------------app_variables.env  
+	|----------------metpetdb.wsgi
+
+Restart the apache server
+   $ sudo service apache2 start
 	
 	
 	
