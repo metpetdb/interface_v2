@@ -138,7 +138,8 @@ function exportToCsv() {
   var table = document.getElementById("samplelist");
   for (var i = 0, row; row = table.rows[i]; i++) {
     for (var j = 0, cell; cell = row.cells[j]; j++) {
-      var innerdata = cell.innerText.toString();
+      //var innerdata = cell.innerText.toString();
+      var innerdata = cell.textContent.toString();
       var k = innerdata.indexOf("...");
       if (k >= 0)
         innerdata = innerdata.substring(k+4);
