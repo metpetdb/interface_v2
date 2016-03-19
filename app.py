@@ -627,7 +627,11 @@ def user():
 #Handle the bulk upload URL
 @metpet_ui.route("/bulk-upload")
 def bulk_upload():
-    return render_template('bulk_upload.html')
+    return render_template('bulk_upload.html',
+        auth_token = session.get("auth_token",None),
+        email = session.get("email",None),
+        name = session.get("name",None)
+    )
 
 @metpet_ui.route("/test", methods=['POST'])
 def test():
