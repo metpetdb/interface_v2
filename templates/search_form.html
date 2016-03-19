@@ -610,7 +610,9 @@ function clearBounds()
 {
   document.getElementById("search-options-location").innerHTML="";
   document.getElementById("polygon_coord_list").innerHTML="";
-  document.getElementById("polygon_coords").value="";
+  if (document.getElementById("polygon_coords")) {
+      document.getElementById("polygon_coords").value="";
+  }
   if(poly)
     poly.setMap(null);
   poly=null;
