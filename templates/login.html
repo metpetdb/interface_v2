@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block body %}
-<form action="" method="post" onsubmit="return checkForm(this);">
+<form action="" method="post" onsubmit="return checkForm(this, 'login');">
   <div class="table-responsive" style="float:left;width:45%">
     <table class="table">
       <tr>
@@ -28,7 +28,7 @@
     </table>
   </div>
 </form>
-<form action="" method="post" onsubmit="return checkForm(this);">
+<form action="" method="post" onsubmit="return checkForm(this, 'register');">
   <div class="table-responsive" style="float:left;width:45%;border-left:solid #aaaabb;padding-left:15px">
     <table class="table">
       <tr>
@@ -88,7 +88,7 @@
 </form>
 
 <script>
-function checkForm(form)
+function checkForm(form, type)
 {
   if (form.name.value == "")
   {
@@ -108,13 +108,13 @@ function checkForm(form)
     form.password.focus();
     return false;
   }
-  if (form.password.value != form.password_confirm.value)
+  if (type == "register" && form.password.value != form.password_confirm.value)
   {
     alert("Error: Passwords do not match!");
     form.password_confirm.focus();
+    form.password_confirm.value = "";
     return false;
   }
-  form.password_confirm.value = "";
   return true;
 }
 </script>
