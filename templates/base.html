@@ -4,6 +4,35 @@
     <title></title>
     <link rel="stylesheet" type="text/css" href="/static/css/base.css">
     <meta name="viewport" content="width=device-width"/>
+    <script>
+      function openSearchMenu() {
+        var options = document.getElementsByName("searchobject");
+        for (var i = 0; i < options.length; i++) {
+          options[i].style.display = "block";
+        }
+      }
+
+      function closeSearchMenu() {
+        var options = document.getElementsByName("searchobject");
+        for (var i = 0; i < options.length; i++) {
+          options[i].style.display = "none";
+        }
+      }
+
+      function openEditMenu() {
+        var options = document.getElementsByName("editobject");
+        for (var i = 0; i < options.length; i++) {
+          options[i].style.display = "block";
+        }
+      }
+
+      function closeEditMenu() {
+        var options = document.getElementsByName("editobject");
+        for (var i = 0; i < options.length; i++) {
+          options[i].style.display = "none";
+        }
+      }
+    </script>
   </head>
 
   <body class="container">
@@ -88,32 +117,3 @@
   </body>
 </html>
 
-<script>
-function openSearchMenu()
-{
-  var options = document.getElementsByName("searchobject");
-  for (var i = 0; i < options.length; i++)
-    options[i].style.display = "block";
-}
-
-function closeSearchMenu()
-{
-  var options = document.getElementsByName("searchobject");
-  for (var i = 0; i < options.length; i++)
-    options[i].style.display = "none";
-}
-
-function openEditMenu()
-{
-  var options = document.getElementsByName("editobject");
-  for (var i = 0; i < options.length; i++)
-    options[i].style.display = "block";
-}
-
-function closeEditMenu()
-{
-  var options = document.getElementsByName("editobject");
-  for (var i = 0; i < options.length; i++)
-    options[i].style.display = "none";
-}
-</script>
