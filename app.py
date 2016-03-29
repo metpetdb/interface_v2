@@ -652,7 +652,7 @@ def test():
         response = post(env("API_HOST")+"bulk_upload/", json = UserInput, headers = headers)
         print response.status_code
         print response.json()
-    return response.json()
+    return str(response.json())
 
 
 if __name__ == "__main__":
