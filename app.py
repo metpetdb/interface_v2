@@ -653,7 +653,10 @@ def test():
         print response.status_code
         print response.json()
     return render_template('bulk_upload_results.html',
-        output = str(response.json())
+        output = str(response.json()),
+        auth_token = session.get("auth_token",None),
+        email = session.get("email",None),
+        name = session.get("name",None)
     )
 
 
