@@ -637,16 +637,22 @@ def bulk_upload():
 def test():
     #Capture bulk upload details inputted by user (url, filetype) formatted as
     #JSON that was sent from JavaScript
+    #auth_token = session.get("auth_token",None),
     UserInput = request.json
+    response = None
     print "Type received: ", type(UserInput)
     if (UserInput != None):
-        print "Checked Value: ", UserInput['checked']
-        #Call the parse program and get the response
-        status, response = commands.getstatusoutput("python \
-                ./ParseTest/bulk-upload.py " + str(UserInput['url']) \
-                + " " + str(UserInput['checked']))
-        print "Response: ", response
-    return response
+        headers = None
+        if session.get("auth_token", None):
+            print session.get("auth_token")
+            print "UserInput:",UserInput
+            headers = {"Authorization": "Token "+session.get("auth_token")}
+        else:
+            return render_template('index.html')
+        response = post(env("API_HOST")+"bulk_upload/", json = UserInput, headers = headers)
+        print response.status_code
+        print response.json()
+    return response.json()
 
 
 if __name__ == "__main__":
