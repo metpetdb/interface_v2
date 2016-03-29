@@ -55,8 +55,8 @@ function ParseFileForUpload() {
     }
     //Send Checked and URL as JSON using POST
     var data = {};
-    data["checked"] = Checked;
     data["url"] = fileSelectURL;
+    data["template"] = Checked;
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "/test", false);
     xhr.setRequestHeader("Content-type", "application/json");
