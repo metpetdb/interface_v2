@@ -640,20 +640,20 @@ def test():
     #auth_token = session.get("auth_token",None),
     UserInput = request.json
     response = None
-    print "Type received: ", type(UserInput)
+    print "Type received from user input: ", type(UserInput)
     if (UserInput != None):
         headers = None
         if session.get("auth_token", None):
-            print session.get("auth_token")
+            print "User auth_token:",session.get("auth_token")
             print "UserInput:",UserInput
             headers = {"Authorization": "Token "+session.get("auth_token")}
         else:
             return render_template('index.html')
         response = post(env("API_HOST")+"bulk_upload/", json = UserInput, headers = headers)
-        print response.status_code
-        print response.json()
+        print "Response status code:",response.status_code
+        print "Response content (json):",response.json()
     return render_template('bulk_upload_results.html',
-        output = str(response.json()),
+        bulk_upload_output = str(response.json()),
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),
         name = session.get("name",None)
