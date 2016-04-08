@@ -61,4 +61,5 @@ function ParseFileForUpload() {
     xhr.open("POST", "/test", false);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.send(JSON.stringify(data));
+    //document.write(xhr.responseText);
 }

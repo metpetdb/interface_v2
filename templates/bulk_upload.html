@@ -6,12 +6,12 @@
 <script src="/static/js/file_select.js" type="text/javascript"></script>
     <form>
         <h4 id="heading">Bulk Upload</h4>
-        <input type="button" value="Choose File" id="a" onclick="GetFileURL()">
+        <input type="button" value="Choose File" id="a" onclick="GetFileURL();">
         <div style="display:inline" id="CheckOrX"></div><br>
         Selected URL: <div style="display:inline" id="URLEntered"></div><br>
         <input type="radio" name="filetype" id="Samples" checked>Samples<br>
         <input type="radio" name="filetype" id="ChemicalAnalyses">Chemical Analyses<br>
         <input type="radio" name="filetype" id="Images">Images<br>
-        <input type="button" value="Parse file for upload" onclick="ParseFileForUpload()">
+        <input type="button" value="Parse file for upload" onclick="ParseFileForUpload();">
     </form>
 {% endblock %}
