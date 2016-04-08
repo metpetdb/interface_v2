@@ -657,7 +657,6 @@ def test():
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),
         name = session.get("name",None)
-    
     )
 
 
