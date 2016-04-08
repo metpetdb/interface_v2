@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block head %}
-  <!--
-  <script>
-    var output = {{ output|tojson }};
-  </script>
-  -->
+<!--
+<script>
+    var output = {{ bulk_upload_output|tojson }};
+</script>
+-->
 {% endblock %}
 {% block body %}
-  <p>{{ output }}</p>
+  <p>{{ bulk_upload_output }}</p>
 {% endblock %}
