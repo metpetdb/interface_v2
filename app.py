@@ -221,9 +221,13 @@ def edit_sample(id):
         if not errors:
             if new:
                 sample["owner"] = get(env("API_HOST")+"users/", params = {"email": session.get("email")}, headers = headers).json()
+                print "!!!!!!!!!!Header!!!!!!!!!:", headers
+                print "!!!!!!!!!!SAMPLE!!!!!!!!!:", sample
                 response = post(env("API_HOST")+"samples/", json = sample, headers = headers)
             else:
                 response = put(env("API_HOST")+"samples/"+id+"/", json = sample, headers = headers)
+                print "!!!!!!!!!!Header!!!!!!!!!:", headers
+                print "!!!!!!!!!!SAMPLE!!!!!!!!!:", sample
             print response.status_code
             print response.json()
             if response.status_code < 300:
@@ -652,14 +656,15 @@ def test():
         response = post(env("API_HOST")+"bulk_upload/", json = UserInput, headers = headers)
         print "Response status code:",response.status_code
         print "Response content (json):",response.json()
+    '''
     return render_template('bulk_upload_results.html',
-        bulk_upload_output = str(response.json()),
+        bulk_upload_output = response.json(),
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),
         name = session.get("name",None)
     )
-
-
+    '''
+    return str(response.json())
 
 if __name__ == "__main__":
     dotenv.read_dotenv("../app_variables.env")

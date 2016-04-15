@@ -61,5 +61,23 @@ function ParseFileForUpload() {
     xhr.open("POST", "/test", false);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.send(JSON.stringify(data));
-    //document.write(xhr.responseText);
+    document.getElementById('content').innerHTML = xhr.responseText;
+    //alert(xhr.responseText);
+    //var array_from_json = JSON.parse(JSON.stringify(xhr.responseText));
+    //alert(array_from_json[0].elements);
+    //drawTable(array_from_json);
+}
+
+function drawTable(data) {
+    for (var i = 0; i < data.length; i++) {
+        drawRow(data[i]);
+    }
+}
+
+function drawRow(rowData) {
+    var row = $("<tr />")
+    $("#personDataTable").append(row); //this will append tr element to table... keep its reference for a while since we will add cels into it
+    row.append($("<td>" + rowData.elements + "</td>"));
+    //row.append($("<td>" + rowData.region + "</td>"));
+    //row.append($("<td>" + rowData.mineral + "</td>"));
 }
