@@ -90,17 +90,17 @@ function ParseFileForUpload() {
 function makeTable(data) {
     document.getElementById('gridHeading').innerHTML = "Editable Grid";
     var metadata = [];
-    metadata.push({ name: " reference_y", label: "Reference Y", datatype: "string", editable: true});
+    metadata.push({ name: " reference_y", label: "Ref. Y", datatype: "string", editable: true});
     metadata.push({ name: "analysis_date", label: "Analysis Data", datatype: "string", editable: true});
-    metadata.push({ name: "analysis_method", label: "Analysis Method", datatype: "string", editable: true});
+    metadata.push({ name: "analysis_method", label: "Analysis Meth.", datatype: "string", editable: true});
     metadata.push({ name: "analyst", label: "Analyst", datatype: "string", editable: true});
     metadata.push({ name: "comment", label: "Comment", datatype: "string", editable: true});
     metadata.push({ name: "elements", label: "Elements", datatype: "string", editable: true});
     metadata.push({ name: "errors", label: "Errors", datatype: "string", editable: true});
-    metadata.push({ name: "mineral_id", label: "Mineral ID", datatype: "string", editable: true});
+    metadata.push({ name: "mineral_id", label: "Min. ID", datatype: "string", editable: true});
     metadata.push({ name: "oxides", label: "Oxides", datatype: "string", editable: true});
-    metadata.push({ name: "reference_image", label: "Reference Image", datatype: "string", editable: true});
-    metadata.push({ name: "reference_x", label: "Reference X", datatype: "string", editable: true});
+    metadata.push({ name: "reference_image", label: "Ref. Img.", datatype: "string", editable: true});
+    metadata.push({ name: "reference_x", label: "Ref. X", datatype: "string", editable: true});
     metadata.push({ name: "spot_id", label: "Spot ID", datatype: "string", editable: true});
     metadata.push({ name: "stage_x", label: "Stage X", datatype: "string", editable: true});
     metadata.push({ name: "stage_y", label: "Stage Y", datatype: "string", editable: true});
