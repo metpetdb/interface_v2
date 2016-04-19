@@ -4,6 +4,12 @@
 {% endblock %}
 {% block body %}
 <div id="content">
+<script src="/static/js/editablegrid.js" type="text/javascript"></script>
+<script src="/static/js/editablegrid_renderers.js" type="text/javascript"></script>
+<script src="/static/js/editablegrid_editors.js" type="text/javascript"></script>
+<script src="/static/js/editablegrid_validators.js" type="text/javascript"></script>
+<script src="/static/js/editablegrid_utils.js" type="text/javascript"></script>
+<script src="/static/js/editablegrid_charts.js" type="text/javascript"></script>
 <script src="/static/js/file_select.js" type="text/javascript"></script>
     <form>
         <h4 id="heading">Bulk Upload</h4>
@@ -16,10 +22,6 @@
         <input type="button" value="Parse file for upload" onclick="ParseFileForUpload();">
     </form>
 </div>
-<!--
-<table id="personDataTable">
-    <tr>
-        <th>Number</th>
-    </tr>
-</table>-->
+<h1 id="gridHeading"></h1>
+<div id="tablecontent"></div>
 {% endblock %}

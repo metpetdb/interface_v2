@@ -221,15 +221,15 @@ def edit_sample(id):
         if not errors:
             if new:
                 sample["owner"] = get(env("API_HOST")+"users/", params = {"email": session.get("email")}, headers = headers).json()
-                print "!!!!!!!!!!Header!!!!!!!!!:", headers
-                print "!!!!!!!!!!SAMPLE!!!!!!!!!:", sample
+                print "new edit-sample headers", headers
+                print "new edit-sample sample", sample
                 response = post(env("API_HOST")+"samples/", json = sample, headers = headers)
             else:
                 response = put(env("API_HOST")+"samples/"+id+"/", json = sample, headers = headers)
-                print "!!!!!!!!!!Header!!!!!!!!!:", headers
-                print "!!!!!!!!!!SAMPLE!!!!!!!!!:", sample
-            print response.status_code
-            print response.json()
+                print "old edit-sample headers", headers
+                print "old edit-sample sample", sample
+            print "edit-sample status code:",response.status_code
+            print "edit-sample response:",response.json()
             if response.status_code < 300:
                 return redirect(url_for("sample", id = response.json()["id"]))
             errors = response.json()
@@ -664,7 +664,7 @@ def test():
         name = session.get("name",None)
     )
     '''
-    return str(response.json())
+    return jsonify(results=response.json())
 
 if __name__ == "__main__":
     dotenv.read_dotenv("../app_variables.env")
