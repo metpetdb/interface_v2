@@ -99,6 +99,7 @@ function ParseFileForUpload() {
         editurl: 'clientArray'
     });
     createGridSubmitButton();
+    //$("jqGrid").setCell(1, 'analyst', '', {color:'green'});
 }
 
 function createGridSubmitButton() {
