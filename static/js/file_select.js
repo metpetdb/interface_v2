@@ -38,25 +38,6 @@ function ValidateURL(fileSelectURL) {
     return Regex.test(fileSelectURL);
 }
 
-/*
-$.makeTable = function (mydata) {
-    var table = $('<table border=1>');
-    var tblHeader = "<tr>";
-    for (var k in mydata[0]) tblHeader += "<th>" + k + "</th>";
-    tblHeader += "</tr>";
-    $(tblHeader).appendTo(table);
-    $.each(mydata, function (index, value) {
-        var TableRow = "<tr>";
-        $.each(value, function (key, val) {
-            TableRow += "<td>" + val + "</td>";
-        });
-        TableRow += "</tr>";
-        $(table).append(TableRow);
-    });
-    return ($(table));
-};
-*/
-
 //Submit the URL
 function ParseFileForUpload() {
     var Checked = null;
@@ -83,36 +64,49 @@ function ParseFileForUpload() {
     var a = JSON.parse(xhr.responseText);
     //document.getElementById('content').innerHTML = JSON.stringify(a);
     document.getElementById('content').innerHTML = "";
-    //drawTable(a["results"]);
-    makeTable(a["results"]); 
+    var tableData = a["results"];
+    jQuery.noConflict(); 
+    $("#jqGrid").jqGrid({
+        datatype: "local",
+        data: tableData,
+        //rownumbers: true,
+        //Speed boost but no treeGrid, subGrid, or afterInsertRow
+        gridview: true,
+        autowidth: true,
+        cmTemplate: {sortable: true},
+        colModel: [
+            {name: " reference_y", editable: true},
+            {name: "analysis_date", editable: true},
+            {name: "analysis_method", editable: true},
+            {name: "analyst", editable: true},
+            {name: "comment", editable: true},
+            {name: "elements", editable: true},
+            {name: "mineral_id", editable: true},
+            {name: "oxides", editable: true},
+            {name: "reference_image", editable: true},
+            {name: "reference_x", editable: true},
+            {name: "spot_id", editable: true},
+            {name: "stage_x", editable: true},
+            {name: "stage_y", editable: true},
+            {name: "subsample_id", editable: true},
+            {name: "total", editable: true},
+            {name: "where_done", editable: true},
+        ],
+        pager:'#pager',
+        viewrecords: true,
+        'cellEdit': true,
+        'cellsubmit': 'clientArray',
+        editurl: 'clientArray',
+        /*afterSaveCell: function() {
+            var a = $("#jqGrid").getChangedCells('all');
+            alert(JSON.stringify(a));
+        }*/
+    });
 }
-
-function makeTable(data) {
-    document.getElementById('gridHeading').innerHTML = "Editable Grid";
-    var metadata = [];
-    metadata.push({ name: " reference_y", label: "Ref. Y", datatype: "string", editable: true});
-    metadata.push({ name: "analysis_date", label: "Analysis Data", datatype: "string", editable: true});
-    metadata.push({ name: "analysis_method", label: "Analysis Meth.", datatype: "string", editable: true});
-    metadata.push({ name: "analyst", label: "Analyst", datatype: "string", editable: true});
-    metadata.push({ name: "comment", label: "Comment", datatype: "string", editable: true});
-    metadata.push({ name: "elements", label: "Elements", datatype: "string", editable: true});
-    metadata.push({ name: "errors", label: "Errors", datatype: "string", editable: true});
-    metadata.push({ name: "mineral_id", label: "Min. ID", datatype: "string", editable: true});
-    metadata.push({ name: "oxides", label: "Oxides", datatype: "string", editable: true});
-    metadata.push({ name: "reference_image", label: "Ref. Img.", datatype: "string", editable: true});
-    metadata.push({ name: "reference_x", label: "Ref. X", datatype: "string", editable: true});
-    metadata.push({ name: "spot_id", label: "Spot ID", datatype: "string", editable: true});
-    metadata.push({ name: "stage_x", label: "Stage X", datatype: "string", editable: true});
-    metadata.push({ name: "stage_y", label: "Stage Y", datatype: "string", editable: true});
-    metadata.push({ name: "subsample_id", label: "Subsample ID", datatype: "string", editable: true});
-    metadata.push({ name: "total", label: "Total", datatype: "string", editable: true});
-    metadata.push({ name: "where_done", label: "Where Done", datatype: "string", editable: true});
-    var data = formatJsonForTable(data);
-    //alert(JSON.stringify(data));
-    editableGrid = new EditableGrid("SamplesGrid");
-    editableGrid.load({"metadata": metadata, "data": data});
-    editableGrid.renderGrid("tablecontent", "testgrid");
-}
+//Resize the table when the window size changes
+$(window).bind('resize', function() {
+    $("#jqGrid").setGridWidth($("body").width())
+}).trigger('resize');
 
 //Format the data to work with the editableGrid
 function formatJsonForTable(data) {
@@ -122,33 +116,3 @@ function formatJsonForTable(data) {
     }
     return newData;
 }
-
-/*
-function drawTable(data) {
-    for (var i = 0; i < data.length; i++) {
-        drawRow(data[i]);
-    }
-}
-
-function drawRow(rowData) {
-    var row = $("<tr />")
-    $("#personDataTable").append(row); //this will append tr element to table... keep its reference for a while since we will add cels into it
-    row.append($("<td>" + rowData[" reference_y"] + "</td>"));
-    row.append($("<td>" + rowData["analysis_date"] + "</td>"));
-    row.append($("<td>" + rowData["analysis_method"] + "</td>"));
-    row.append($("<td>" + rowData["analyst"] + "</td>"));
-    row.append($("<td>" + rowData["comment"] + "</td>"));
-    row.append($("<td>" + rowData["elements"] + "</td>"));
-    row.append($("<td>" + rowData["errors"] + "</td>"));
-    row.append($("<td>" + rowData["mineral_id"] + "</td>"));
-    row.append($("<td>" + rowData["oxides"] + "</td>"));
-    row.append($("<td>" + rowData["reference_image"] + "</td>"));
-    row.append($("<td>" + rowData["reference_x"] + "</td>"));
-    row.append($("<td>" + rowData["spot_id"] + "</td>"));
-    row.append($("<td>" + rowData["stage_x"] + "</td>"));
-    row.append($("<td>" + rowData["stage_y"] + "</td>"));
-    row.append($("<td>" + rowData["subsample_id"] + "</td>"));
-    row.append($("<td>" + rowData["total"] + "</td>"));
-    row.append($("<td>" + rowData["where_done"] + "</td>"));
-}
-*/
