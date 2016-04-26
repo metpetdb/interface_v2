@@ -96,12 +96,24 @@ function ParseFileForUpload() {
         viewrecords: true,
         'cellEdit': true,
         'cellsubmit': 'clientArray',
-        editurl: 'clientArray',
-        /*afterSaveCell: function() {
-            var a = $("#jqGrid").getChangedCells('all');
-            alert(JSON.stringify(a));
-        }*/
+        editurl: 'clientArray'
     });
+    createGridSubmitButton();
+}
+
+function createGridSubmitButton() {
+    var element = document.createElement("input");
+    element.setAttribute("type", "button");
+    element.setAttribute("value", "Submit");
+    element.setAttribute("onclick", "submitGrid();");
+    var foo = document.getElementById("gridSubmit");
+    foo.appendChild(element);
+}
+
+function submitGrid() {
+    var a = $("#jqGrid").getChangedCells('all');
+    var allRowsInGrid = $('#jqGrid').jqGrid('getGridParam','data');
+    alert(JSON.stringify(allRowsInGrid));
 }
 //Resize the table when the window size changes
 $(window).bind('resize', function() {
