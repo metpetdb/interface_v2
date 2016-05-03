@@ -65,6 +65,13 @@ function ParseFileForUpload() {
     //document.getElementById('content').innerHTML = JSON.stringify(a);
     document.getElementById('content').innerHTML = "";
     var tableData = a["results"];
+    //Create the strings required to highlight the individual cells that contain
+    //errors
+    var strings = [];
+    var toolTips = [];
+    makeStrings(tableData, strings, toolTips);
+    //Dynamically create the column headings
+    var colArray = makeColModelArray(tableData);
     jQuery.noConflict(); 
     $("#jqGrid").jqGrid({
         datatype: "local",
@@ -73,33 +80,23 @@ function ParseFileForUpload() {
         //Speed boost but no treeGrid, subGrid, or afterInsertRow
         gridview: true,
         autowidth: true,
-        cmTemplate: {sortable: true},
-        colModel: [
-            {name: " reference_y", editable: true},
-            {name: "analysis_date", editable: true},
-            {name: "analysis_method", editable: true},
-            {name: "analyst", editable: true},
-            {name: "comment", editable: true},
-            {name: "elements", editable: true},
-            {name: "mineral_id", editable: true},
-            {name: "oxides", editable: true},
-            {name: "reference_image", editable: true},
-            {name: "reference_x", editable: true},
-            {name: "spot_id", editable: true},
-            {name: "stage_x", editable: true},
-            {name: "stage_y", editable: true},
-            {name: "subsample_id", editable: true},
-            {name: "total", editable: true},
-            {name: "where_done", editable: true},
-        ],
+        cmTemplate: {sortable: true, resizable: true, editable: true,
+                     title: false},
+        colModel: colArray,
         pager:'#pager',
         viewrecords: true,
         'cellEdit': true,
         'cellsubmit': 'clientArray',
-        editurl: 'clientArray'
+        editurl: 'clientArray',
+        gridComplete: function() {
+            //Highlight the errors in the table
+            for (var i = 0; i < strings.length; ++i) {
+                $(strings[i]).css({"background-color": "red"});
+                $(strings[i]).attr('title', toolTips[i]);
+            }
+        }
     });
     createGridSubmitButton();
-    //$("jqGrid").setCell(1, 'analyst', '', {color:'green'});
 }
 
 function createGridSubmitButton() {
@@ -116,6 +113,7 @@ function submitGrid() {
     var allRowsInGrid = $('#jqGrid').jqGrid('getGridParam','data');
     alert(JSON.stringify(allRowsInGrid));
 }
+
 //Resize the table when the window size changes
 $(window).bind('resize', function() {
     $("#jqGrid").setGridWidth($("body").width())
@@ -128,4 +126,34 @@ function formatJsonForTable(data) {
         newData.push({id: i+1, values: data[i]});
     }
     return newData;
+}
+
+//Create the strings used by JQuery to highlight individual cells containing
+//errors. The returned array of strings are used in the "gridComplete" callback
+//function in jqGrid
+function makeStrings(data, strings, toolTips) {
+    for (var i = 0; i < data.length; i++) {
+        for (var key in data[i]["errors"]) {
+            var num = i + 1;
+            strings.push('tr[id=' + num + '] td[aria-describedby=jqGrid_' + key + ']');
+            toolTips.push(data[i]["errors"][key]);
+        }
+    }
+}
+
+//Dynamically create an array of the column objects used by jqGrid's "colModel"
+function makeColModelArray(data) {
+    var temp = {};
+    for (var i = 0; i < data.length; ++i) {
+        for (key in data[i]) {
+            if (key != "errors") {
+                temp[key] = "";
+            }
+        }
+    }
+    var colArray = [];
+    for (var key in temp) {
+        colArray.push({"name": key});
+    }
+    return colArray;
 }
