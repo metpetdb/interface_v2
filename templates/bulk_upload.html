@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block head %}
+    <title>MetPetDB Bulk Upload</title>
+{% endblock %}
+{% block body %}
+<!--<script src="/static/js/editablegrid.js" type="text/javascript"></script>
+<script src="/static/js/editablegrid_renderers.js" type="text/javascript"></script>
+<script src="/static/js/editablegrid_editors.js" type="text/javascript"></script>
+<script src="/static/js/editablegrid_validators.js" type="text/javascript"></script>
+<script src="/static/js/editablegrid_utils.js" type="text/javascript"></script>
+<script src="/static/js/editablegrid_charts.js" type="text/javascript"></script>
+<link type="text/css" rel="stylesheet" href="/static/css/jsgrid.min.css" />
+<link type="text/css" rel="stylesheet" href="/static/css/jsgrid-theme.min.css" />
+<script type="text/javascript" src="/static/js/jsgrid.min.js"></script>-->
+
+<!-- The jQuery library is a prerequisite for all jqSuite products -->
+<script src="/static/js/jquery-2.1.1.min.js" type="text/javascript"></script>
+<!-- We support more than 40 localizations -->
+<script type="text/javascript" src="/static/js/jqGrid/grid.locale-en.js"></script>
+<!-- This is the Javascript file of jqGrid -->   
+<script type="text/javascript" src="/static/js/jqGrid/jquery.jqGrid.min.js"></script>
+<!-- This is the localization file of the grid controlling messages, labels, etc.-->
+<!-- The link to the CSS that the grid needs -->
+<link rel="stylesheet" type="text/css" media="screen" href="/static/css/jqGrid/ui.jqgrid.css" />
+
+
+
+<script src="/static/js/file_select.js" type="text/javascript"></script>
+<div id="content">
+    <form>
+        <h4 id="heading">Bulk Upload</h4>
+        <input type="button" value="Choose File" id="a" onclick="GetFileURL();">
+        <div style="display:inline" id="CheckOrX"></div><br>
+        Selected URL: <div style="display:inline" id="URLEntered"></div><br>
+        <input type="radio" name="filetype" id="Samples" checked>Samples<br>
+        <input type="radio" name="filetype" id="ChemicalAnalyses">Chemical Analyses<br>
+        <input type="radio" name="filetype" id="Images">Images<br>
+        <input type="button" value="Parse file for upload" onclick="ParseFileForUpload();">
+    </form>
+</div>
+<!--<h1 id="gridHeading"></h1>
+<div id="tablecontent"></div>
+<div id="jsGrid"></div>-->
+<table id="jqGrid"></table>
+<div id="pager"></div>
+<div id="gridSubmit"></div>
+{% endblock %}

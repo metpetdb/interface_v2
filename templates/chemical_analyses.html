@@ -100,7 +100,9 @@ function exportToCsv() {
   var table = document.getElementById("samplelist");
   for (var i = 0, row; row = table.rows[i]; i++) {
     for (var j = 0, cell; cell = row.cells[j]; j++) {
-      var innerdata = cell.innerText.toString();
+      //innerText is only for IE
+      //var innerdata = cell.innerText.toString();
+      var innerdata = cell.textContent.toString();
       var k = innerdata.indexOf("...");
       if (k >= 0)
         innerdata = innerdata.replace(/\n/g,", ").substring(k+4,innerdata.length-2);

@@ -1,4 +1,4 @@
-import dotenv
+import dotenv, commands, json
 from getenv import env
 from requests import get, put, post, codes
 from urllib import urlencode, urlopen
@@ -8,6 +8,8 @@ from flask import (
     render_template,
     url_for,
     redirect,
+    request,
+    jsonify,
     flash,
     session
 )
@@ -219,11 +221,15 @@ def edit_sample(id):
         if not errors:
             if new:
                 sample["owner"] = get(env("API_HOST")+"users/", params = {"email": session.get("email")}, headers = headers).json()
+                print "new edit-sample headers", headers
+                print "new edit-sample sample", sample
                 response = post(env("API_HOST")+"samples/", json = sample, headers = headers)
             else:
                 response = put(env("API_HOST")+"samples/"+id+"/", json = sample, headers = headers)
-            print response.status_code
-            print response.json()
+                print "old edit-sample headers", headers
+                print "old edit-sample sample", sample
+            print "edit-sample status code:",response.status_code
+            print "edit-sample response:",response.json()
             if response.status_code < 300:
                 return redirect(url_for("sample", id = response.json()["id"]))
             errors = response.json()
@@ -622,6 +628,43 @@ def user():
         name = session.get("name",None)
     )
 
+#Handle the bulk upload URL
+@metpet_ui.route("/bulk-upload")
+def bulk_upload():
+    return render_template('bulk_upload.html',
+        auth_token = session.get("auth_token",None),
+        email = session.get("email",None),
+        name = session.get("name",None)
+    )
+
+@metpet_ui.route("/test", methods=['POST'])
+def test():
+    #Capture bulk upload details inputted by user (url, filetype) formatted as
+    #JSON that was sent from JavaScript
+    #auth_token = session.get("auth_token",None),
+    UserInput = request.json
+    response = None
+    print "Type received from user input: ", type(UserInput)
+    if (UserInput != None):
+        headers = None
+        if session.get("auth_token", None):
+            print "User auth_token:",session.get("auth_token")
+            print "UserInput:",UserInput
+            headers = {"Authorization": "Token "+session.get("auth_token")}
+        else:
+            return render_template('index.html')
+        response = post(env("API_HOST")+"bulk_upload/", json = UserInput, headers = headers)
+        print "Response status code:",response.status_code
+        print "Response content (json):",response.json()
+    '''
+    return render_template('bulk_upload_results.html',
+        bulk_upload_output = response.json(),
+        auth_token = session.get("auth_token",None),
+        email = session.get("email",None),
+        name = session.get("name",None)
+    )
+    '''
+    return jsonify(results=response.json())
 
 if __name__ == "__main__":
     dotenv.read_dotenv("../app_variables.env")

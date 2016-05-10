@@ -264,7 +264,7 @@ $(function()
         $("#results").html("");
         $("#results").html(data);
         $('#spinner').hide();
-        clearAll();
+        //clearAll();
         if(document.getElementsByTagName("header")[1])
           document.getElementsByTagName("header")[1].innerHTML="";
       },
@@ -610,7 +610,9 @@ function clearBounds()
 {
   document.getElementById("search-options-location").innerHTML="";
   document.getElementById("polygon_coord_list").innerHTML="";
-  document.getElementById("polygon_coords").value="";
+  if (document.getElementById("polygon_coords")) {
+      document.getElementById("polygon_coords").value="";
+  }
   if(poly)
     poly.setMap(null);
   poly=null;

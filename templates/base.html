@@ -4,6 +4,35 @@
     <title></title>
     <link rel="stylesheet" type="text/css" href="/static/css/base.css">
     <meta name="viewport" content="width=device-width"/>
+    <script>
+      function openSearchMenu() {
+        var options = document.getElementsByName("searchobject");
+        for (var i = 0; i < options.length; i++) {
+          options[i].style.display = "block";
+        }
+      }
+
+      function closeSearchMenu() {
+        var options = document.getElementsByName("searchobject");
+        for (var i = 0; i < options.length; i++) {
+          options[i].style.display = "none";
+        }
+      }
+
+      function openEditMenu() {
+        var options = document.getElementsByName("editobject");
+        for (var i = 0; i < options.length; i++) {
+          options[i].style.display = "block";
+        }
+      }
+
+      function closeEditMenu() {
+        var options = document.getElementsByName("editobject");
+        for (var i = 0; i < options.length; i++) {
+          options[i].style.display = "none";
+        }
+      }
+    </script>
   </head>
 
   <body class="container">
@@ -34,7 +63,8 @@
                   <a onmouseover="openEditMenu()">Upload Data</a>
                   <ul class="navbar-dropdown editmenu">
                     <li name="editobject"><a href="{{ url_for('edit_sample', id='new') }}">Sample</a></li>
-                    <li name="editobject"><a href="{{ url_for('index') }}">Bulk Upload</a></li>
+                    <!--<li name="editobject"><a href="{{ url_for('bulk_upload')
+                    }}">Bulk Upload</a></li>-->
                   </ul>
                 </li>
                 <li><a href="{{ url_for('search') }}?emails={{ email }}&resource=samples&render=True">My Samples</a></li>
@@ -69,6 +99,13 @@
     {% block body %}
     {% endblock %}
 
+    <!--Gives errors in the browser console if jquery not included, but formats
+        search page checkboxes not in columns if included-->
+    <script type="text/javascript" src="/static/js/jquery-2.1.1.min.js"></script>
+    <!--<script type="text/javascript" src="/static/js/jquery-1.12.0.min.js"></script>-->
+    <script type="text/javascript" src="/static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/static/js/chosen.jquery.min.js"></script>
+    <!--<script src="/static/js/file_select.js" type="text/javascript"></script>-->
     <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
     <script src="/static/js/html2csv.js" type="text/javascript"></script>
     <script src="/static/js/table2csv.js" type="text/javascript"></script>
@@ -81,32 +118,3 @@
   </body>
 </html>
 
-<script>
-function openSearchMenu()
-{
-  var options = document.getElementsByName("searchobject");
-  for (var i = 0; i < options.length; i++)
-    options[i].style.display = "block";
-}
-
-function closeSearchMenu()
-{
-  var options = document.getElementsByName("searchobject");
-  for (var i = 0; i < options.length; i++)
-    options[i].style.display = "none";
-}
-
-function openEditMenu()
-{
-  var options = document.getElementsByName("editobject");
-  for (var i = 0; i < options.length; i++)
-    options[i].style.display = "block";
-}
-
-function closeEditMenu()
-{
-  var options = document.getElementsByName("editobject");
-  for (var i = 0; i < options.length; i++)
-    options[i].style.display = "none";
-}
-</script>
