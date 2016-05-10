@@ -21,6 +21,7 @@ metpet_ui = Flask(__name__)
 metpet_ui.config.from_object("config")
 mail.init_app(metpet_ui)
 
+dotenv.read_dotenv(os.path.dirname(__file__) + '/../app_variables.env')
 
 @metpet_ui.route("/")
 def index():
