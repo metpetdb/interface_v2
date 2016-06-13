@@ -59,7 +59,7 @@
 &nbsp;&nbsp; <a class="samples-pagination" href="{{ last_page }}">Last</a> &gt;&gt;
 
 {% if showmap %}
-<script src="https://maps.googleapis.com/maps/api/js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA6JUQr7NP8akFd_yqVXj9BhCCP-vFSvDg"></script>
 <script>
 // SHOW SAMPLES ON MAP
 function initialize() {
@@ -100,6 +100,7 @@ function initialize() {
 google.maps.event.addDomListenerOnce(window, 'mouseover', initialize);
 </script>
 {% endif %}
+<script type="text/javascript" src="/static/js/jquery-2.1.1.min.js"></script>
 
 <script>
 // AJAX PAGINATION CALLS
@@ -130,6 +131,7 @@ $('.samples-pagination').click(function (event)
 
 // EXPORT DATA TO CSV
 function exportToCsv() {
+  console.log("function called");
   var filename = prompt("Please enter a filename:","search_results.csv");
   if (filename.substring(filename.length-4) != ".csv")
     filename += ".csv";
@@ -152,16 +154,25 @@ function exportToCsv() {
     csvFile += '\n';
   }
 
-  var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
   if (navigator.msSaveBlob) { // IE 10+
+    var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+
     navigator.msSaveBlob(blob, filename);
   }
   else {
     var link = document.createElement("a");
-    if (link.download !== undefined) {
+
+    if (navigator.userAgent.includes('Safari')) {
+
+       window.open('data:attachment/csv;charset=utf-8,' + encodeURI(csvFile));
+
+    } else {
+      console.log(navigator.userAgent);
       var url = URL.createObjectURL(blob);
+      console.log(url);
       link.setAttribute("href", url);
       link.setAttribute("download", filename);
+      link.setAttribute('target', '_blank');
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -170,5 +181,6 @@ function exportToCsv() {
   }
 }
 </script>
+
 
 {% endblock %}

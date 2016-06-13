@@ -15,7 +15,7 @@
     <div id="collapseOne" class="panel-collapse collapse in">
       <div class="panel-body">
         <!-- Search Option Tabs -->
-        <ul class="nav nav-tabs" id="myTab">
+        <ul class="nav nav-tabs" id="chemTab">
           <li class="active"><a href="#minerals">Minerals</a></li>
           <li><a href="#elements">Elements</a></li>
           <li><a href="#oxides">Oxides</a></li>
@@ -127,19 +127,18 @@
 
 <script src="/static/js/jquery-2.1.1.min.js"></script>
 <script src="/static/js/chosen.jquery.min.js"></script>
-<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+<script src="/static/js/jquery-ui.min.js"></script>
 <script src="/static/js/jstree.min.js"></script>
 <script src="/static/css/bootstrap-switch.min.js"></script>
 
-<link href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css" rel="stylesheet">
+<link href="/static/css/jquery-ui.css" rel="stylesheet">
 <link href="/static/css/chosen.min.css" rel="stylesheet">
 <link href="/static/css/style.min.css" rel="stylesheet">
-<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
 <link href="/static/css/bootstrap-switch.min.css" rel="stylesheet">
 
 <script>
 // TO SWITCH TABS
-$('#myTab a').click(function (e) {
+$('#chemTab a').click(function (e) {
   e.preventDefault();
   $(this).tab('show');
 });
@@ -188,7 +187,7 @@ $(function()
         $("#results").html("");
         $("#results").html(data);
         $('#spinner').hide();
-        clearAll();
+        // clearAll();
         if(document.getElementsByTagName("header")[1])
           document.getElementsByTagName("header")[1].innerHTML = "";
       },
