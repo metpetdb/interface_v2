@@ -3,7 +3,7 @@
 {% block body %}
 {% if showmap %}
 <div id="collapseThree" class="panel-collapse collapse in">
-  <div id="res-map-canvas" style='width:600px;height:500px;margin:20px'></div>
+  <div id="res-map-canvas" style='width:600px;height:500px;margin:15px'></div>
 </div>
 {% endif %}
 
@@ -59,7 +59,8 @@
 &nbsp;&nbsp; <a class="samples-pagination" href="{{ last_page }}">Last</a> &gt;&gt;
 
 {% if showmap %}
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA6JUQr7NP8akFd_yqVXj9BhCCP-vFSvDg"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCGEQBqKb2zbQdXuO8c9QNkvvkoL20eNw4"></script>
+
 <script>
 // SHOW SAMPLES ON MAP
 function initialize() {
@@ -100,7 +101,6 @@ function initialize() {
 google.maps.event.addDomListenerOnce(window, 'mouseover', initialize);
 </script>
 {% endif %}
-<script type="text/javascript" src="/static/js/jquery-2.1.1.min.js"></script>
 
 <script>
 // AJAX PAGINATION CALLS
