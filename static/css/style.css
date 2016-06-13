@@ -240,4 +240,12 @@ div.widget-divider div.ui-accordion-content.ui-helper-reset.ui-widget-content.ui
     padding: 1em;
 }
 
+.rocktypecheckboxgroup input
+{
+    margin-right: 0.5em;
+}
+.metgradecheckboxgroup input
+{
+    margin-right: 0.5em;
+}
 

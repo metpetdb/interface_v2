@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}
+<h4>
+  Sample {{ sample.number }}
+  {% if auth_token %}<span style="float:right"><a href="{{ url_for('edit_sample', id=sample.id) }}">Edit Sample</a></span>{% endif %}
+</h4>
+{% endblock %}
+
+{% block body %}
+<div class="table-responsive">
+  <table id="sampleview_table" class="table">
+    <tbody>
+      <tr>
+        <td class="sample_label">Owner</td>
+        <td class="sample_value">{% if sample.owner %}{{ sample.owner.name }}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">IGSN</td>
+        <td class="sample_value">{% if sample.sesar_number %}{{ sample.sesar_number }}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Aliases</td>
+        <td class="sample_value">{% if sample.aliases %}{% for a in sample.aliases %}{% if loop.index0 > 0 %}, {% endif %}{{ a }}{% endfor %}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Date Collected</td>
+        <td class="sample_value">{% if sample.collection_date %}{{ sample.collection_date }}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Rock Type</td>
+        <td class="sample_value">{% if sample.rock_type %}{{ sample.rock_type.name }}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Public</td>
+        <td class="sample_value">{% if sample.public_data %}Yes{% else %}No{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Latitude</td>
+        <td class="sample_value">{% if sample.location_coords %}{{ sample.location_coords.0 }}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Longitude</td>
+        <td class="sample_value">{% if sample.location_coords %}{{ sample.location_coords.1 }}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Country</td>
+        <td class="sample_value">{% if sample.country %}{{ sample.country }}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Collector</td>
+        <td class="sample_value">{% if sample.collector_name %}{{ sample.collector_name }}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Present Location</td>
+        <td class="sample_value">{% if sample.location_name %}{{ sample.location_name }}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Regions</td>
+        <td class="sample_value">{% if sample.regions %}{% for r in sample.regions %}{% if loop.index0 > 0 %}, {% endif %}{{ r }}{% endfor %}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Metamorphic Regions</td>
+        <td class="sample_value">{% if sample.metamorphic_regions %}{% for r in sample.metamorphic_regions %}{% if loop.index0 > 0 %}, {% endif %}{{ r.name }}{% endfor %}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Metamorphic Grades</td>
+        <td class="sample_value">{% if sample.metamorphic_grades %}{% for g in sample.metamorphic_grades %}{% if loop.index0 > 0 %}, {% endif %}{{ g.name }}{% endfor %}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Publication References</td>
+        <td class="sample_value">
+        {% if sample.references %}{% for r in sample.references %}
+          {{ r.name }}
+          {% if r.title %}&nbsp;&nbsp;<img src="/static/images/icon-info-small.png" onclick="document.getElementById({{ loop.index0 }}).style.opacity=1">
+          <table id="{{ loop.index0 }}" class="table reference_table">
+            <tr>
+              <td>Title:</td>
+              <td>
+                <img src="/static/images/close.png" style="float:right;width:9px" onclick="document.getElementById({{ loop.index0 }}).style.opacity=0">
+                {% if r.title %}{{ r.title }}{% endif %}
+              </td>
+            </tr>
+            <tr><td>Authors:</td><td>{% if r.first_author %}{{ r.first_author }}{% endif %}{% if r.second_authors %}, {{ r.second_authors }}{% endif %}</td></tr>
+            <tr><td>Journal:</td><td>{% if r.journal_name %}{{ r.journal_name }}{% endif %}</td></tr>
+            <tr><td>Text:</td><td>{% if r.full_text %}{{ r.full_text }}{% endif %}</td></tr>
+          </table><br>
+          {% endif %}
+        {% endfor %}{% endif %}
+        </td>
+      </tr>
+      <tr>
+        <td class="sample_label">Description</td>
+        <td class="sample_value">{% if sample.description %}{{ sample.description }}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Minerals</td>
+        <td class="sample_value">{% if sample.minerals %}{% for m in sample.minerals %}{% if loop.index0 > 0 %}, {% endif %}{{ m.name }}{% endfor %}{% endif %}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div id="map_canvas"></div>
+
+<hr>
+<div class="table-responsive">
+  <h4>Sample Images</h4>
+  <table id="image_canvas" class="table">
+    <thead>
+      <tr>
+        <th>Thumbnail</td>
+        <th>Type</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% if sample.images %}{% for image in sample.images %}
+      <tr id="thumb_row">
+        <td>
+          <a href="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_half}}" rel="lightbox" title="Image type: {{ image.image_type }} <br> File name: {{ image.filename }} <br> <a href='http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum}}' target='_blank'>View Original</a>">
+            <img src="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_64x64}}"/>
+          </a>
+        </td>
+        <td>{{ image.image_type }}</td>
+      </tr>
+      {% endfor %}{% endif %}
+    </tbody>
+  </table>
+</div>
+
+<hr>
+<h4>Subsamples{% if auth_token %}<span style="float:right"><a href="{{ url_for('edit_subsample', id='new')}}?sample_id={{ sample.id }}">Add Subsample</a></span>{% endif %}</h4>
+<div class="table-responsive">
+  <table id="subsampletable_canvas">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Public</th>
+        <th>Type</th>
+        <th>Image Count</th>
+        <th>Chemical Analysis Count</th>
+        <th>Owner</th>
+        <th>Image Map</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for subsample in subsamples %}
+      <tr>
+        <td id="img-popup"><a href="{{ url_for('subsample', id=subsample.id) }}">{{ subsample.name }}</a></td>
+        <td>{{ subsample.public_data }}</td>
+        <td>{{ subsample.subsample_type.name }}</td>
+        <td>{{ subsample.image_count }}</td>
+        <td>{{ subsample.chemical_analyses|length }}</td>
+        <td><a href="{{ url_for('user', email=email) }}" target="_blank">{{ sample.owner.name }}</a></td>
+        <td> -- </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- <script src="/static/js/jquery-2.1.1.min.js"></script> -->
+<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
+<script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+
+<script>
+$(document).ready(function()
+{
+  $('#subsampletable_canvas').dataTable();
+  $('#thumb_row td a').lightbox();
+});
+
+map_lat = {{sample.location_coords.0}};
+map_long = {{sample.location_coords.1}};
+
+var myCenter=new google.maps.LatLng(map_lat, map_long);
+function initialize()
+{
+  var mapProp = {
+    center:myCenter,
+    zoom:8,
+    mapTypeId:google.maps.MapTypeId.HYBRID
+  };
+
+  var map=new google.maps.Map(document.getElementById("map_canvas"), mapProp);
+  var infowindow = new google.maps.InfoWindow();
+
+  var marker=new google.maps.Marker({
+    position:myCenter,
+  });
+
+  var content="latitude:"+map_lat+","+"longitude:"+map_long;
+
+  makeInfoWindowEvent(map, infowindow, content, marker);
+  marker.setMap(map);
+
+  function makeInfoWindowEvent(map, infowindow, contentString, marker) {
+    google.maps.event.addListener(marker, 'click', function() {
+      infowindow.setContent(contentString);
+      infowindow.open(map, marker);
+    })
+  };
+}
+google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+{% endblock %}
