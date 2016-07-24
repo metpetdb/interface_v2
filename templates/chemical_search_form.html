@@ -108,7 +108,7 @@
               <input type="radio" name="resource" value="samples"> Samples
             </label>
             <label class="btn btn-primary active">
-              <input type="radio" name="resource" value="chemical_analyses" checked="checked"> Chemical Analyses
+              <input type="radio" name="resource" value="chemical_analyses" checked="checked"> Chemistry
             </label>
           </div>
           <div style="padding:10px 0px;">
@@ -177,6 +177,9 @@ $(function()
     for(var a = 0; a < elements.length; a++)
       if(elements[a].selected && elements[a].value !== "")
         url += "&elements="+elements[a].value;
+
+    console.log(url);
+
     if (document.getElementsByName("elements_and")[0].checked && elements.length)
       url += "&elements_and=True";
     $.ajax({
@@ -249,6 +252,7 @@ function updateElement()
         var nextElement = $("#selected-element option:selected")[a].innerHTML + ", ";
       if(nextElement !== ", ")
         searchOptions.innerHTML += nextElement;
+      console.log(searchOptions);
     }
     var s = searchOptions.innerHTML;
     searchOptions.innerHTML = s.slice(0, -2);

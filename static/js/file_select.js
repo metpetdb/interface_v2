@@ -57,10 +57,13 @@ function ParseFileForUpload() {
     var data = {};
     data["url"] = fileSelectURL;
     data["template"] = Checked;
+    // data["owner"] = ;
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "/test", false);
     xhr.setRequestHeader("Content-type", "application/json");
+    console.log(JSON.stringify(data));
     xhr.send(JSON.stringify(data));
+    console.log(xhr.responseText);
     var a = JSON.parse(xhr.responseText);
     //document.getElementById('content').innerHTML = JSON.stringify(a);
     document.getElementById('content').innerHTML = "";
@@ -86,6 +89,7 @@ function ParseFileForUpload() {
         pager:'#pager',
         viewrecords: true,
         'cellEdit': true,
+        'overflow': 'auto',
         'cellsubmit': 'clientArray',
         editurl: 'clientArray',
         gridComplete: function() {

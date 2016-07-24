@@ -21,11 +21,7 @@ metpet_ui = Flask(__name__)
 metpet_ui.config.from_object("config")
 mail.init_app(metpet_ui)
 
-# For OS X
-# dotenv.read_dotenv(os.path.dirname(__file__) + '../app_variables.env')
-
-# For Ubuntu
-dotenv.read_dotenv(os.path.dirname(__file__) + '/../app_variables.env')
+dotenv.read_dotenv(os.path.dirname(__file__) + '../app_variables.env')
 
 @metpet_ui.route("/")
 def index():
@@ -639,7 +635,8 @@ def bulk_upload():
     return render_template('bulk_upload.html',
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),
-        name = session.get("name",None)
+        name = session.get("name",None),
+        owner = session.get("owner",None)
     )
 
 @metpet_ui.route("/test", methods=['POST'])
@@ -651,15 +648,25 @@ def test():
     response = None
     print "Type received from user input: ", type(UserInput)
     if (UserInput != None):
+        UserInput = dict([(str(k), str(v)) for k, v in UserInput.items()])
         headers = None
-        if session.get("auth_token", None):
-            print "User auth_token:",session.get("auth_token")
-            print "UserInput:",UserInput
-            headers = {"Authorization": "Token "+session.get("auth_token")}
-        else:
-            return render_template('index.html')
+        # if session.get("auth_token", None):
+        print "User auth_token:",session.get("auth_token")
+        print "User id:",session.get("user_id")
+        print "UserInput:",UserInput
+        headers = {"Authorization": "Token "+session.get("auth_token")}
+        UserInput["owner"]=session.get("id")
+        # for result in results["results"].items():
+
+
+        # print "Owner:",UserInput["owner"]
+
+        # else:
+            # pass
+            # return render_template('index.html')
         response = post(env("API_HOST")+"bulk_upload/", json = UserInput, headers = headers)
         print "Response status code:",response.status_code
+        print "Response:", response
         print "Response content (json):",response.json()
     '''
     return render_template('bulk_upload_results.html',

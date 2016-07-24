@@ -165,6 +165,7 @@ function exportToCsv() {
     if (navigator.userAgent.includes('Safari')) {
 
        window.open('data:attachment/csv;charset=utf-8,' + encodeURI(csvFile));
+       console.log(navigator.userAgent)
 
     } else {
       console.log(navigator.userAgent);

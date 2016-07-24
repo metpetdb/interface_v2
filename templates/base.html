@@ -63,8 +63,8 @@
                   <a onmouseover="openEditMenu()">Upload Data</a>
                   <ul class="navbar-dropdown editmenu">
                     <li name="editobject"><a href="{{ url_for('edit_sample', id='new') }}">Sample</a></li>
-                    <!--<li name="editobject"><a href="{{ url_for('bulk_upload')
-                    }}">Bulk Upload</a></li>-->
+                    <li name="editobject"><a href="{{ url_for('bulk_upload')
+                    }}">Bulk Upload</a></li>
                   </ul>
                 </li>
                 <li><a href="{{ url_for('search') }}?emails={{ email }}&resource=samples&render=True">My Samples</a></li>
