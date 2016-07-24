@@ -118,8 +118,11 @@ function exportToCsv() {
   var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
   if (navigator.msSaveBlob) { // IE 10+
     navigator.msSaveBlob(blob, filename);
-  }
-  else {
+  } if (navigator.userAgent.includes('Safari')) {
+
+       window.open('data:attachment/csv;charset=utf-8,' + encodeURI(csvFile));
+
+    } else {
     var link = document.createElement("a");
     if (link.download !== undefined) {
       var url = URL.createObjectURL(blob);

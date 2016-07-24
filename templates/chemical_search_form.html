@@ -15,7 +15,7 @@
     <div id="collapseOne" class="panel-collapse collapse in">
       <div class="panel-body">
         <!-- Search Option Tabs -->
-        <ul class="nav nav-tabs" id="myTab">
+        <ul class="nav nav-tabs" id="chemTab">
           <li class="active"><a href="#minerals">Minerals</a></li>
           <li><a href="#elements">Elements</a></li>
           <li><a href="#oxides">Oxides</a></li>
@@ -108,7 +108,7 @@
               <input type="radio" name="resource" value="samples"> Samples
             </label>
             <label class="btn btn-primary active">
-              <input type="radio" name="resource" value="chemical_analyses" checked="checked"> Chemical Analyses
+              <input type="radio" name="resource" value="chemical_analyses" checked="checked"> Chemistry
             </label>
           </div>
           <div style="padding:10px 0px;">
@@ -127,19 +127,18 @@
 
 <script src="/static/js/jquery-2.1.1.min.js"></script>
 <script src="/static/js/chosen.jquery.min.js"></script>
-<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+<script src="/static/js/jquery-ui.min.js"></script>
 <script src="/static/js/jstree.min.js"></script>
 <script src="/static/css/bootstrap-switch.min.js"></script>
 
-<link href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css" rel="stylesheet">
+<link href="/static/css/jquery-ui.css" rel="stylesheet">
 <link href="/static/css/chosen.min.css" rel="stylesheet">
 <link href="/static/css/style.min.css" rel="stylesheet">
-<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
 <link href="/static/css/bootstrap-switch.min.css" rel="stylesheet">
 
 <script>
 // TO SWITCH TABS
-$('#myTab a').click(function (e) {
+$('#chemTab a').click(function (e) {
   e.preventDefault();
   $(this).tab('show');
 });
@@ -178,6 +177,9 @@ $(function()
     for(var a = 0; a < elements.length; a++)
       if(elements[a].selected && elements[a].value !== "")
         url += "&elements="+elements[a].value;
+
+    console.log(url);
+
     if (document.getElementsByName("elements_and")[0].checked && elements.length)
       url += "&elements_and=True";
     $.ajax({
@@ -188,7 +190,7 @@ $(function()
         $("#results").html("");
         $("#results").html(data);
         $('#spinner').hide();
-        clearAll();
+        // clearAll();
         if(document.getElementsByTagName("header")[1])
           document.getElementsByTagName("header")[1].innerHTML = "";
       },
@@ -250,6 +252,7 @@ function updateElement()
         var nextElement = $("#selected-element option:selected")[a].innerHTML + ", ";
       if(nextElement !== ", ")
         searchOptions.innerHTML += nextElement;
+      console.log(searchOptions);
     }
     var s = searchOptions.innerHTML;
     searchOptions.innerHTML = s.slice(0, -2);

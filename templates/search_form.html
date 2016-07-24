@@ -14,7 +14,7 @@
 
     <div id="collapseOne" class="panel-collapse collapse in">
       <div class="panel-body">
-        <ul class="nav nav-tabs" id="myTab">
+        <ul class="nav nav-tabs" id="searchTab">
           <li class="active"><a href="#rocktypes">Rock Types</a></li>
           <li><a href="#metgrade">Metamorphic Grade</a></li>
           <li><a id="location-tab" href="#location">Location</a></li>
@@ -51,7 +51,7 @@
           <div class="tab-pane" id="location">
             <ul>
               <h3>Location</h3>
-              <ul id="myTab" class="nav nav-tabs">
+              <ul id="searchTab" class="nav nav-tabs">
                 <li class="active"><a href="#mapselect" data-toggle="tab">Map</a></li>
                 <li><a  href="#location-regions" data-toggle="tab">Region</a></li>
               </ul>
@@ -113,7 +113,7 @@
                 <input type="radio" name="minerals_and" value="True" onchange="updateMineral()" id="minand"> AND
               </label>
               <label class="btn btn-primary active">
-                <input type="radio" name="minerals_and" value="" onchange="updateMineral()" checked> OR
+                <input type="radio" name="minerals_and" value="False" onchange="updateMineral()" checked> OR
               </label>
             </div>
           </div>
@@ -205,7 +205,7 @@
               <input type="radio" name="resource" value="samples" checked="checked"> Samples
             </label>
             <label class="btn btn-primary">
-              <input type="radio" name="resource" value="chemical_analyses"> Chemical Analyses
+              <input type="radio" name="resource" value="chemical_analyses"> Chemistry
             </label>
           </div>
           <div style="padding:10px 0px;">
@@ -222,7 +222,7 @@
 <hr>
 <div id="results"></div>
 
-<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCGEQBqKb2zbQdXuO8c9QNkvvkoL20eNw4&libraries=drawing"></script>
 <script src="/static/js/jquery-2.1.1.min.js"></script>
 <script src="/static/js/chosen.jquery.min.js"></script>
 <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
@@ -232,12 +232,12 @@
 <link href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css" rel="stylesheet">
 <link href="/static/css/chosen.min.css" rel="stylesheet">
 <link href="/static/css/style.min.css" rel="stylesheet">
-<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+<!-- <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet"> -->
 <link href="/static/css/bootstrap-switch.min.css" rel="stylesheet">
 
 <script>
 // TO SWITCH TABS
-$('#myTab a').click(function (e) {
+$('#searchTab a').click(function (e) {
   e.preventDefault();
   $(this).tab('show');
 });
