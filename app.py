@@ -23,6 +23,7 @@ mail.init_app(metpet_ui)
 
 dotenv.read_dotenv(os.path.dirname(__file__) + '../app_variables.env')
 
+
 @metpet_ui.route("/")
 def index():
     return render_template("index.html",
