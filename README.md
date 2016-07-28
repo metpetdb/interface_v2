@@ -7,7 +7,6 @@
 
 ##MetPetDB-interface
 
-
 Front-end application for the Meptetb system built using Flask.
 (metpetdb.rpi.edu)
 
