@@ -7,6 +7,7 @@
 
 ##MetPetDB-interface
 
+
 Front-end application for the Meptetb system built using Flask.
 (metpetdb.rpi.edu)
 
@@ -276,6 +277,14 @@ Restart the apache server
    
    $ sudo service apache2 start
 	
+
+
+
+## Changelog
+
+- 0.1 Core Functionality
+
+- 0.2 [7/24/2016] Bulk Upload Added
 	
 	
 	
