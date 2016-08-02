@@ -1,3 +1,15 @@
+#test-page-banner
+{
+    display: block;
+    padding: 15px 20px;
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
+    background-color: #CD2626;
+    margin-left: -100px;
+    margin-right: -100px;
+}
+
 #mineral-and-or
 {
  float:left;
