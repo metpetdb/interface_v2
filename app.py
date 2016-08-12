@@ -104,20 +104,60 @@ def samples():
     #filters sent as parameters to API calls
     #only return public data samples if not logged in
     filters = dict(request.args)
+    tmp_var = 0
+    new_dict = {}
+
+    print "size:", len(filters)
     for key in filters.keys():
         if key == "polygon_coords" and filters[key][0]:
-            coords = filters[key][0][1:-1].split("],[")
+            print filters[key]
+            coords = filters[key][0][1:-1].strip().split("],[")
             coords.append(coords[0])
             filters[key] = ["[["+("],[").join(coords)+"]]"]
-            filters["polygon_coord"] = []
         filters[key] = (',').join([e for e in filters[key] if e and e[0]])
+        # print filters['poly']
+        # filters["polygon_coords"] = "["+str(filters["polygon_coords"])+"]"
+
         if not filters[key]:
+            print "not: ", key, filters[key]
+            filters.pop(key, None)
+            try:
+                print key, filters[key]
+            except:
+                print "yay deleted", key
+        elif filters[key] == "":
             del filters[key]
+        else:
+            print tmp_var, filters[key], "\n"
+            tmp_var += 1
+
+    try:
+        filters.pop("polygon_coord", None)
+        new_dict.pop("polygon_coord", None)
+    except:
+        pass
+    print "size:", len(filters)
+        
+
+    fields = [x for x in filters.keys()]
+    print "fields: ",fields
     filters["format"] = "json"
+    print filters
+
+    new_dict = filters
 
     #get sample data and use meta data to get pagination urls
-    samples = get(env("API_HOST")+"samples/", params = filters).json()
-    sample_results = samples["results"]
+    samples = get(env("API_HOST")+"samples/", params = new_dict).json()
+    # print samples
+    try:
+        sample_results = samples["results"]
+    except: 
+        try:
+            error = samples["error"]
+            print error
+            sample_results = {}
+        except: 
+            pass
     next_url, prev_url, last_page, total = paginate_model("samples", samples, filters)
 
     #split location into (rounded!) latitude and longitude
