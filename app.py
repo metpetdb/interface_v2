@@ -255,11 +255,11 @@ def edit_sample(id):
         del sample["location_coords1"]
 
         samples = get(env("API_HOST")+"samples/", params = {"fields": "number", "emails": session.get("email")}).json()["results"]
-        for s in samples:
-            if s["number"] == sample["number"]:
-                errors = {"name": "Error: cannot have multiple samples with the same number"}
+
 
         #send data to API with PUT call and display error message if any
+        if errors:
+            print errors
         if not errors:
             if new:
                 sample["owner"] = get(env("API_HOST")+"users/", params = {"email": session.get("email")}, headers = headers).json()
@@ -697,8 +697,9 @@ def test():
         print "UserInput:",UserInput
         headers = {"Authorization": "Token "+session.get("auth_token")}
         UserInput["owner"]=session.get("id")
-        # for result in results["results"].items():
 
+        
+        # print response.json()
 
         # print "Owner:",UserInput["owner"]
 
