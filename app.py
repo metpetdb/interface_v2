@@ -105,7 +105,6 @@ def samples():
     #only return public data samples if not logged in
     filters = dict(request.args)
     tmp_var = 0
-    new_dict = {}
 
     print "size:", len(filters)
     for key in filters.keys():
@@ -115,16 +114,9 @@ def samples():
             coords.append(coords[0])
             filters[key] = ["[["+("],[").join(coords)+"]]"]
         filters[key] = (',').join([e for e in filters[key] if e and e[0]])
-        # print filters['poly']
-        # filters["polygon_coords"] = "["+str(filters["polygon_coords"])+"]"
 
         if not filters[key]:
-            print "not: ", key, filters[key]
             filters.pop(key, None)
-            try:
-                print key, filters[key]
-            except:
-                print "yay deleted", key
         elif filters[key] == "":
             del filters[key]
         else:
@@ -133,21 +125,15 @@ def samples():
 
     try:
         filters.pop("polygon_coord", None)
-        new_dict.pop("polygon_coord", None)
     except:
         pass
     print "size:", len(filters)
         
-
-    fields = [x for x in filters.keys()]
-    print "fields: ",fields
     filters["format"] = "json"
-    print filters
 
-    new_dict = filters
 
     #get sample data and use meta data to get pagination urls
-    samples = get(env("API_HOST")+"samples/", params = new_dict).json()
+    samples = get(env("API_HOST")+"samples/", params = filters).json()
     # print samples
     try:
         sample_results = samples["results"]
