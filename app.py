@@ -104,6 +104,7 @@ def samples():
     #filters sent as parameters to API calls
     #only return public data samples if not logged in
     filters = dict(request.args)
+    tmp_var = 0
     
     for key in filters.keys():
         if key == "polygon_coords" and filters[key][0]:
@@ -138,9 +139,10 @@ def samples():
         try:
             error = samples["error"]
             print error
-            sample_results = {}
+            samples = {}
         except: 
-            pass
+            samples = {}
+
     next_url, prev_url, last_page, total = paginate_model("samples", samples, filters)
 
     #split location into (rounded!) latitude and longitude
@@ -333,6 +335,7 @@ def edit_subsample(id):
     if new:
         sample = get(env("API_HOST")+"samples/"+request.args.get("sample_id")+"/", params = {"fields": "id,number,owner"}, headers = headers).json()
     subsample = dict(request.form)
+
     if subsample:
         for key in subsample.keys():
             if subsample[key] and subsample[key][0]:
@@ -342,12 +345,19 @@ def edit_subsample(id):
         #subsample["owner_id"] = sample["owner"]["id"]
 
         if new:
+            print subsample
             response = post(env("API_HOST")+"subsamples/", data = subsample, headers = headers)
+            print response
         else:
             response = put(env("API_HOST")+"subsamples/"+id+"/", data = subsample, headers = headers)
         if response.status_code < 300:
             return redirect(url_for("subsample", id = response.json()["id"]))
-        errors = response.json()
+        
+        try:
+            errors = response.json()
+        except:
+            print response
+            errors = []
     else:
         errors = []
 
@@ -664,6 +674,7 @@ def bulk_upload():
     )
 
 @metpet_ui.route("/test", methods=['POST'])
+
 def test():
     #Capture bulk upload details inputted by user (url, filetype) formatted as
     #JSON that was sent from JavaScript
@@ -690,8 +701,19 @@ def test():
             # pass
             # return render_template('index.html')
         response = post(env("API_HOST")+"bulk_upload/", json = UserInput, headers = headers)
+        # response_dict = dict(response.json()[0])
+        # new_response = dict()
+        # for key in response_dict:
+        #     # new_key = key.replace('_', " ")
+        #     new_key = key
+        #     new_response[new_key] = response_dict[key] 
+        #     print key, new_key, len(new_response)
+        # # print "new response:", new_response
+        # json_response = jsonify(new_response)
+        print response
+        # print "Keys:", new_response.keys()
         print "Response status code:",response.status_code
-        print "Response:", response
+        print "Response:",response
         print "Response content (json):",response.json()
     '''
     return render_template('bulk_upload_results.html',
