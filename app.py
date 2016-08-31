@@ -105,7 +105,7 @@ def samples():
     #only return public data samples if not logged in
     filters = dict(request.args)
     tmp_var = 0
-    
+
     for key in filters.keys():
         if key == "polygon_coords" and filters[key][0]:
             coords = filters[key][0][1:-1].strip().split("],[")
