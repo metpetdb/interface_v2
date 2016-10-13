@@ -215,10 +215,10 @@ def edit_sample(id):
         del sample["location_coords1"]
 
         samples = get(env("API_HOST")+"samples/", params = {"fields": "number", "emails": session.get("email")}).json()["results"]
-        for s in samples:
-            if s["number"] == sample["number"]:
-                errors = {"name": "Error: cannot have multiple samples with the same number"}
-
+        #for s in samples:
+        #    if s["number"] == sample["number"] and not new:
+        #        errors = {"name": "Error: cannot have multiple samples with the same number"}
+        errors = {}
         #send data to API with PUT call and display error message if any
         if not errors:
             if new:
@@ -297,7 +297,7 @@ def subsample(id):
     )
 
 
-@metpet_ui.route("/edit-subsample/<string:id>", methods = ["GET", "POST"])
+@metpet_ui.route("/edit-subsample/<string:id>", methods = ["GET", "PUT", "POST"])
 def edit_subsample(id):
     #similar to but much simpler than edit sample
     headers = None
@@ -310,6 +310,7 @@ def edit_subsample(id):
     if new:
         sample = get(env("API_HOST")+"samples/"+request.args.get("sample_id")+"/", params = {"fields": "id,number,owner"}, headers = headers).json()
     subsample = dict(request.form)
+    print subsample
     if subsample:
         for key in subsample.keys():
             if subsample[key] and subsample[key][0]:
@@ -321,9 +322,10 @@ def edit_subsample(id):
         if new:
             response = post(env("API_HOST")+"subsamples/", data = subsample, headers = headers)
         else:
-            response = put(env("API_HOST")+"subsamples/"+id+"/", data = subsample, headers = headers)
+            response = put(env("API_HOST")+"subsamples/"+id+"/", json = subsample, headers = headers)
         if response.status_code < 300:
             return redirect(url_for("subsample", id = response.json()["id"]))
+        print response
         errors = response.json()
     else:
         errors = []
@@ -477,7 +479,9 @@ def edit_chemical_analysis(id):
             analysis["subsample_id"] = request.args.get("subsample_id")
             response = post(env("API_HOST")+"chemical_analyses/", data = analysis, headers = headers)
         else:
+            print "here????"
             response = put(env("API_HOST")+"chemical_analyses/"+id+"/", data = analysis, headers = headers)
+            print response
         if response.status_code < 300:
             return redirect(url_for("chemical_analysis", id = response.json()["id"]))
         errors = response.json()
