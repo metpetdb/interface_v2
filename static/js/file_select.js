@@ -38,6 +38,17 @@ function ValidateURL(fileSelectURL) {
     return Regex.test(fileSelectURL);
 }
 
+//Format object for table display
+function formatForTable(entry) {
+    console.log("entry", entry.type,entry);
+    for( key in entry) {
+        console.log(key);
+        // key = key.replace("_", " ");
+        entry[key] = JSON.stringify(entry[key]);
+    }
+    return entry
+}
+
 //Submit the URL
 function ParseFileForUpload() {
     var Checked = null;
@@ -67,6 +78,10 @@ function ParseFileForUpload() {
     var a = JSON.parse(xhr.responseText);
     //document.getElementById('content').innerHTML = JSON.stringify(a);
     document.getElementById('content').innerHTML = "";
+    console.log(a["results"]);
+    for (var i = a["results"].length - 1; i >= 0; i--) {
+        a["results"][i] = formatForTable(a["results"][i]);
+    }
     var tableData = a["results"];
     //Create the strings required to highlight the individual cells that contain
     //errors
@@ -82,7 +97,7 @@ function ParseFileForUpload() {
         //rownumbers: true,
         //Speed boost but no treeGrid, subGrid, or afterInsertRow
         gridview: true,
-        autowidth: true,
+        // autowidth: true,
         cmTemplate: {sortable: true, resizable: true, editable: true,
                      title: false},
         colModel: colArray,
@@ -115,7 +130,7 @@ function createGridSubmitButton() {
 function submitGrid() {
     var a = $("#jqGrid").getChangedCells('all');
     var allRowsInGrid = $('#jqGrid').jqGrid('getGridParam','data');
-    alert(JSON.stringify(allRowsInGrid));
+    // alert(JSON.stringify(allRowsInGrid));
 }
 
 //Resize the table when the window size changes

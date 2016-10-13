@@ -131,7 +131,6 @@ $('.samples-pagination').click(function (event)
 
 // EXPORT DATA TO CSV
 function exportToCsv() {
-  console.log("function called");
   var filename = prompt("Please enter a filename:","search_results.csv");
   if (filename.substring(filename.length-4) != ".csv")
     filename += ".csv";

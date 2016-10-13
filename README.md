@@ -284,6 +284,11 @@ Restart the apache server
 - 0.1 Core Functionality
 
 - 0.2 [7/24/2016] Bulk Upload Added
+ 
+- 0.3 [8/13/2016] Edit Sample Fixed
+
+- 0.3 [8/24/2016] Edit Subsample Fixed, Bulk Upload Styled
+
 	
 	
 	
