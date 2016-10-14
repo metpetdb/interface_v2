@@ -337,7 +337,6 @@ def edit_subsample(id):
     if new:
         sample = get(env("API_HOST")+"samples/"+request.args.get("sample_id")+"/", params = {"fields": "id,number,owner"}, headers = headers).json()
     subsample = dict(request.form)
-    print subsample
     if subsample:
         for key in subsample.keys():
             if subsample[key] and subsample[key][0]:
