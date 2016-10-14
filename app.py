@@ -337,6 +337,7 @@ def edit_subsample(id):
     if new:
         sample = get(env("API_HOST")+"samples/"+request.args.get("sample_id")+"/", params = {"fields": "id,number,owner"}, headers = headers).json()
     subsample = dict(request.form)
+    print subsample
     if subsample:
         for key in subsample.keys():
             if subsample[key] and subsample[key][0]:
@@ -353,7 +354,6 @@ def edit_subsample(id):
             response = put(env("API_HOST")+"subsamples/"+id+"/", json = subsample, headers = headers)
         if response.status_code < 300:
             return redirect(url_for("subsample", id = response.json()["id"]))
-        
         try:
             errors = response.json()
         except:
