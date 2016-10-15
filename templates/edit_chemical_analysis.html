@@ -153,7 +153,7 @@
               <tbody>
               {% if analysis.elements %}{% for e in analysis.elements %}
                 <tr id="{{ e.name }}">
-                  <td><a href="#elements" onclick="document.getElementsByName('elements').deleteRow(document.getEl[0]ementsByName('{{ e.name }}').rowIndex)">x</a></td>
+                  <td><a href="#elements" onclick="document.getElementById('elements').deleteRow(document.getElementById('{{ e.name }}').rowIndex)">x</a></td>
                   <td>&nbsp&nbsp{{ e.name }}&nbsp&nbsp</td>
                   <td><input type="text" name="elements_{{ e.id }}" value="{{ e.amount }}" style="text-align:right;width:65px"></td>
                   <td><input type="text" name="elements_{{ e.id }}" value="{{ e.precision }}" style="text-align:right;width:65px"></td>
@@ -194,7 +194,7 @@
               <tbody>
               {% if analysis.oxides %}{% for o in analysis.oxides %}
                 <tr id="{{ o.species }}">
-                  <td><a href="#oxides" onclick="document.getElementsByName('oxides').deleteRow(document.getElement[0]sByName('{{ o.species }}').rowIndex)">x</a></td>
+                  <td><a href="#oxides" onclick="document.getElementById('oxides').deleteRow(document.getElementById('{{ o.species }}').rowIndex)">x</a></td>
                   <td>&nbsp&nbsp{{ o.species }}&nbsp&nbsp</td>
                   <td><input type="text" name="oxides_{{ o.id }}" value="{{ o.amount }}" style="text-align:right;width:65px"></td>
                   <td><input type="text" name="oxides_{{ o.id }}" value="{{ o.precision }}" style="text-align:right;width:65px"></td>
@@ -263,7 +263,7 @@ function update(type) {
 
   var remove = row.insertCell(-1);
   var name = row.insertCell(-1);
-  remove.innerHTML = '<a href="#'+type+'s" onclick="document.getElementsByName(\''+type+'s\').deleteRow(document[0].getElementsByName(\''+n+'\').rowIndex)">x</a>'
+  remove.innerHTML = '<a href="#'+type+'s" onclick="document.getElementById(\''+type+'s\').deleteRow(document.getElementById(\''+n+'\').rowIndex)">x</a>'
   name.innerHTML = '&nbsp&nbsp'+n+'&nbsp&nbsp';
 
   for (var i = 0; i < 6; i++ )
