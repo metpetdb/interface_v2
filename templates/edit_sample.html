@@ -16,7 +16,8 @@
     <table id="sampleview_table" class="table">
       <tbody>
         <tr>
-			{% if response_code %}{{ response_code }}{% endif %}
+			<!--   Print out error response if the user is trying to modify a sample that does not belong to them -->
+			{% if response_code %}{{ response_code }}{% endif %} 
           <td class="sample_label">Number*</td>
           <td class="sample_value">
             <input type="text" name="number" value="{% if sample.number %}{{sample.number}}{% endif %}" style="width:85%">
