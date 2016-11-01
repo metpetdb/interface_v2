@@ -5,7 +5,7 @@
   <a href="{{ url_for('sample', id=analysis.subsample.sample) }}">Sample {{ analysis.sample.number }}</a> / 
   <a href="{{ url_for('subsample', id=analysis.subsample.id) }}">Subsample {{ analysis.subsample.name }}</a> / 
   Chemical Analysis Point {{ analysis.spot_id }}
-  {% if auth_token %}<span style="float:right"><a href="{{ url_for('edit_chemical_analysis', id=analysis.id) }}">Edit Chemical Analysis</a></span>{% endif %}
+  {% if auth_token %}<span style="float:right"><a href="{{ url_for('edit_chemical_analysis', id=analysis.id, subsample_id=analysis['subsample']['id']) }}">Edit Chemical Analysis</a></span>{% endif %}
 </h4>
 {% endblock %}
 
