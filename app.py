@@ -219,6 +219,7 @@ def edit_sample(id):
 
     #edit_sample.html is a form with mostly the right input names
     sample = dict(request.form)
+    response_text = ""
     if sample:
         #minerals are named by id, make it into a nested list of dictionaries
         sample["minerals"] = []
@@ -245,6 +246,7 @@ def edit_sample(id):
         #        errors = {"name": "Error: cannot have multiple samples with the same number"}
         errors = {}
         #send data to API with PUT call and display error message if any
+        
         if errors:
             print errors
         if not errors:
@@ -261,6 +263,8 @@ def edit_sample(id):
             print "edit-sample response:",response.json()
             if response.status_code < 300:
                 return redirect(url_for("sample", id = response.json()["id"]))
+            if response.status_code == 403:
+                response_text = response.json()['detail']
             errors = response.json()
 
     #get sample data and split point into lat/long
@@ -294,7 +298,8 @@ def edit_sample(id):
         errors = errors,
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),
-        name = session.get("name",None)
+        name = session.get("name",None),
+        response_code = response_text
     )
 
 
@@ -324,7 +329,7 @@ def subsample(id):
     )
 
 
-@metpet_ui.route("/edit-subsample/<string:id>", methods = ["GET", "PUT", "POST"])
+@metpet_ui.route("/edit-subsample/<string:id>", methods = ["GET", "POST"])
 def edit_subsample(id):
     #similar to but much simpler than edit sample
     headers = None
@@ -344,11 +349,10 @@ def edit_subsample(id):
 
         #subsample["sample_id"] = sample_id
         #subsample["owner_id"] = sample["owner"]["id"]
+        print subsample
 
         if new:
-            print subsample
-            response = post(env("API_HOST")+"subsamples/", data = subsample, headers = headers)
-            print response
+            response = post(env("API_HOST")+"subsamples/", json = subsample, headers = headers)
         else:
             response = put(env("API_HOST")+"subsamples/"+id+"/", json = subsample, headers = headers)
         if response.status_code < 300:
@@ -357,7 +361,6 @@ def edit_subsample(id):
             errors = response.json()
         except:
             errors = []
-        errors = response.json()
     else:
         errors = []
 
@@ -457,8 +460,8 @@ def chemical_analysis(id):
     )
 
 
-@metpet_ui.route("/edit-chemical-analysis/<string:id>", methods = ["GET", "POST"])
-def edit_chemical_analysis(id):
+@metpet_ui.route("/edit-chemical-analysis/<string:id>,<string:subsample_id>", methods = ["GET", "POST"])
+def edit_chemical_analysis(id, subsample_id):
     #again, similar to edit sample and edit subsample
     headers = None
     if session.get("auth_token", None):
@@ -505,14 +508,14 @@ def edit_chemical_analysis(id):
             del analysis["reference_x"]
         if analysis["reference_y"] == '':
             del analysis["reference_y"]
-
+        #analysis = json.dumps(analysis)
+        print analysis
         if new:
             analysis["subsample_id"] = request.args.get("subsample_id")
             response = post(env("API_HOST")+"chemical_analyses/", data = analysis, headers = headers)
+            print response.url
         else:
-            print "here????"
             response = put(env("API_HOST")+"chemical_analyses/"+id+"/", data = analysis, headers = headers)
-            print response
         if response.status_code < 300:
             return redirect(url_for("chemical_analysis", id = response.json()["id"]))
         errors = response.json()
