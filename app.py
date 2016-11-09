@@ -349,10 +349,11 @@ def edit_subsample(id):
 
         #subsample["sample_id"] = sample_id
         #subsample["owner_id"] = sample["owner"]["id"]
-        print subsample
+        subsample = json.dumps(subsample)
 
         if new:
             response = post(env("API_HOST")+"subsamples/", json = subsample, headers = headers)
+            print response.status_code
         else:
             response = put(env("API_HOST")+"subsamples/"+id+"/", json = subsample, headers = headers)
         if response.status_code < 300:
@@ -508,14 +509,12 @@ def edit_chemical_analysis(id, subsample_id):
             del analysis["reference_x"]
         if analysis["reference_y"] == '':
             del analysis["reference_y"]
-        #analysis = json.dumps(analysis)
-        print analysis
+
         if new:
             analysis["subsample_id"] = request.args.get("subsample_id")
-            response = post(env("API_HOST")+"chemical_analyses/", data = analysis, headers = headers)
-            print response.url
+            response = post(env("API_HOST")+"chemical_analyses/", json = analysis, headers = headers)
         else:
-            response = put(env("API_HOST")+"chemical_analyses/"+id+"/", data = analysis, headers = headers)
+            response = put(env("API_HOST")+"chemical_analyses/"+id+"/", json = analysis, headers = headers)
         if response.status_code < 300:
             return redirect(url_for("chemical_analysis", id = response.json()["id"]))
         errors = response.json()
