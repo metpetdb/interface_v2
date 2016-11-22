@@ -105,28 +105,32 @@ def samples():
     #only return public data samples if not logged in
     filters = dict(request.args)
     tmp_var = 0
+    print("Pre-processing filters")
+    print(filters)
 
     for key in filters.keys():
+        # Key is a map polygon
         if key == "polygon_coords" and filters[key][0]:
-            coords = filters[key][0][1:-1].strip().split("],[")
+            # List of coordinate point strings; remove trailing comma, starting/trailing bracket,
+            #   and split into coordinate points
+            coords = filters[key][0].strip(',').strip('[').strip(']').split('],[')
+            # Tack the first coordinate on to the end of the list so that the coordinates
+            #   form a closed loop
             coords.append(coords[0])
-            filters[key] = ["[["+("],[").join(coords)+"]]"]
-        filters[key] = (',').join([e for e in filters[key] if e and e[0]])
-
-        if not filters[key]:
-            filters.pop(key, None)
-        elif filters[key] == "":
+            # Reassemble coordinates to be a list of two-element lists
+            coords = '[[' + ('],[').join(coords) + ']]'
+            filters[key] = coords
+            print(filters[key])
+        # Unnecessary, empty, or blank key
+        elif key == "polygon_coord" or not filters[key] or filters[key] == '' or filters[key][0] == '':
             del filters[key]
+        # Any other key
         else:
-            print tmp_var, filters[key], "\n"
-            tmp_var += 1
+            # Turn list into a comma-separated string
+            filters[key] = (',').join([e for e in filters[key] if e and e[0]])
 
-    try:
-        filters.pop("polygon_coord", None)
-    except:
-        pass
-    print "size:", len(filters)
-        
+    print("Post-processing filters:")
+    print(filters)
     filters["format"] = "json"
 
 
