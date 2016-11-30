@@ -287,9 +287,9 @@ Restart the apache server
  
 - 0.3 [8/13/2016] Edit Sample Fixed
 
-- 0.3 [8/24/2016] Edit Subsample Fixed, Bulk Upload Styled
+- 0.4 [8/24/2016] Edit Subsample Fixed, Bulk Upload Styled
 
-	
+- 0.5 [11/29/2016] Location search fixed, chemical analysis editing fixed	
 	
 	
 	
