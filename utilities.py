@@ -20,3 +20,15 @@ def paginate_model(model_name, data, filters):
     last = url_for(model_name)+'?page='+str(count/size+1)+'&'+urlencode(filters)
 
     return (next, previous, last, count)
+
+def combine_identical_parameters(paramsIn):
+    paramsOut = {}
+    for param in paramsIn:
+        if param[0] == 'rock_types' or param[0] == 'metamorphic_grades' or param[0] == 'minerals':
+            if param[0] in paramsOut:
+                paramsOut[param[0]] += ',' + param[1]
+            else:
+                paramsOut[param[0]] = param[1]
+        else:
+            paramsOut[param[0]] = param[1]
+    return paramsOut
