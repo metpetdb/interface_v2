@@ -14,7 +14,7 @@ from flask import (
     session
 )
 from flask_mail import Mail, Message
-from utilities import paginate_model, multi_args_to_list
+from utilities import paginate_model, combine_identical_parameters
 
 mail = Mail()
 metpet_ui = Flask(__name__)
@@ -38,7 +38,7 @@ def search():
     #get all filter options from API, use format = json and minimum page sizes to speed it up
     if request.args.get("resource") == "samples":
         #resource value set in search_form.html, appends samples.html to bottom of page
-        fixedListArgs = multi_args_to_list(request.args.iteritems(multi=True))
+        fixedListArgs = combine_identical_parameters(request.args.iteritems(multi=True))
         return redirect(url_for("samples")+"?"+urlencode(fixedListArgs))
 
     if request.args.get("resource") == "chemical_analyses":
@@ -84,7 +84,7 @@ def search_chemistry():
         return redirect(url_for("chemical_analyses")+"?"+urlencode(request.args))
 
     if request.args.get("resource") == "sample":
-        fixedListArgs = multi_args_to_list(request.args.iteritems(multi=True))
+        fixedListArgs = combine_identical_parameters(request.args.iteritems(multi=True))
         return redirect(url_for("samples")+"?"+urlencode(fixedListArgs)+"&chemical_analyses_filters=True")
 
     oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"}).json()["results"]
