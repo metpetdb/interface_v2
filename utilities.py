@@ -28,7 +28,7 @@ def paginate_model(model_name, data, filters):
 def multi_args_to_list(argsIn):
     argsOut = {}
     for arg in argsIn:
-        if arg[0] == 'rock_types' or arg[0] == 'metamorphic_grades':
+        if arg[0] == 'rock_types' or arg[0] == 'metamorphic_grades' or arg[0] == 'minerals':
             if arg[0] in argsOut:
                 argsOut[arg[0]] += ',' + arg[1]
             else:
