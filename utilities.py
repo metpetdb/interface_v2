@@ -23,8 +23,9 @@ def paginate_model(model_name, data, filters):
 
 def combine_identical_parameters(paramsIn):
     paramsOut = {}
+    listParams = ['rock_types', 'metamorphic_grades', 'minerals', 'elements', 'oxides', 'countries', 'metamorphic_regions', 'regions']
     for param in paramsIn:
-        if param[0] == 'rock_types' or param[0] == 'metamorphic_grades' or param[0] == 'minerals':
+        if param[0] in listParams:
             if param[0] in paramsOut:
                 paramsOut[param[0]] += ',' + param[1]
             else:
