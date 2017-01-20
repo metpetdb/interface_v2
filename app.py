@@ -348,18 +348,17 @@ def edit_subsample(id):
     if new:
         sample = get(env("API_HOST")+"samples/"+request.args.get("sample_id")+"/", params = {"fields": "id,number,owner"}, headers = headers).json()
     subsample = dict(request.form)
+    print subsample
     if subsample:
         for key in subsample.keys():
             if subsample[key] and subsample[key][0]:
                 subsample[key] = subsample[key][0]
 
-        #subsample["sample_id"] = sample_id
-        #subsample["owner_id"] = sample["owner"]["id"]
-        subsample = json.dumps(subsample)
 
         if new:
+            subsample["owner"] = get(env("API_HOST")+"users/", params = {"email": session.get("email")}, headers = headers).json()
+            subsample["sample"] = sample["id"]
             response = post(env("API_HOST")+"subsamples/", json = subsample, headers = headers)
-            print response.status_code
         else:
             response = put(env("API_HOST")+"subsamples/"+id+"/", json = subsample, headers = headers)
         if response.status_code < 300:
@@ -372,7 +371,7 @@ def edit_subsample(id):
         errors = []
 
     if new:
-        subsample = {"owner": sample["owner"], "sample": sample}
+        subsample = {"owner": sample["owner"], "sample": subsample}
     else:
         subsample = get(env("API_HOST")+"subsamples/"+id+"/", params = {"format": "json"}, headers = headers).json()
         subsample["owner"] = get(env("API_HOST")+"users/"+subsample["owner"]["id"], params = {"format": "json"}, headers = headers).json()
@@ -526,7 +525,7 @@ def edit_chemical_analysis(id, subsample_id):
         errors = response.json()
 
     if new:
-        subsample = get(env("API_HOST")+"subsamples/"+subsample_id+"/", params = {"fields": "id,name,owner,sample"}).json()
+        subsample = get(env("API_HOST")+"subsamples/"+subsample_id+"/", params = {"fields": "id,name,owner,sample"},headers = headers).json()
         subsample["sample"] = subsample["sample"]["id"]
         analysis = {"owner": subsample["owner"], "sample": subsample["sample"], "subsample": subsample}
     else:

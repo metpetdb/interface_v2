@@ -40,11 +40,27 @@ function ValidateURL(fileSelectURL) {
 
 //Format object for table display
 function formatForTable(entry) {
-    console.log("entry", entry.type,entry);
-    for( key in entry) {
-        console.log(key);
-        // key = key.replace("_", " ");
-        entry[key] = JSON.stringify(entry[key]);
+    //console.log("entry", entry.type,entry);
+    for( key in entry) {		
+		var allmin = []
+		if ( key == "minerals" )	{
+			for ( k in entry[key] )	{
+				allmin.push(entry[key][k]["id"])
+			}
+			entry[key] = allmin;
+		}
+		else if ( key == "location_coords" )	{
+			var point= entry[key].substr(entry[key].indexOf('('), (entry[key]).length);
+			//console.log(point)
+			entry[key] = point;
+		}
+		else if ( key == "collection_date" )	{
+			var d = new Date(entry[key]);
+			entry[key] = d.toDateString();
+		}
+		else {
+			entry[key] = entry[key];
+		}
     }
     return entry
 }
@@ -72,9 +88,7 @@ function ParseFileForUpload() {
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "/test", false);
     xhr.setRequestHeader("Content-type", "application/json");
-    console.log(JSON.stringify(data));
     xhr.send(JSON.stringify(data));
-    console.log(xhr.responseText);
     var a = JSON.parse(xhr.responseText);
     //document.getElementById('content').innerHTML = JSON.stringify(a);
     document.getElementById('content').innerHTML = "";
@@ -98,7 +112,7 @@ function ParseFileForUpload() {
         //Speed boost but no treeGrid, subGrid, or afterInsertRow
         gridview: true,
         // autowidth: true,
-        cmTemplate: {sortable: true, resizable: true, editable: true,
+        cmTemplate: {sortable: false, resizable: true, editable: true,
                      title: false},
         colModel: colArray,
         pager:'#pager',
