@@ -45,7 +45,8 @@ def search():
         #minerals_and option not valid parameter for analyses
         #sets sample_filters b/c search samples only has sample filters
         #appends chemical_analyses.html to bottom of page
-        return redirect(url_for("chemical_analyses")+"?"+urlencode(request.args)+"&sample_filters=True")
+        fixedListArgs = combine_identical_parameters(request.args.iteritems(multi=True))
+        return redirect(url_for("chemical_analyses")+"?"+urlencode(fixedListArgs)+"&sample_filters=True")
 
     #get all filter options from API, use format = json and minimum page sizes to speed it up
     regions = get(env("API_HOST")+"regions/", params = {"fields": "name", "page_size": 2000, "format": "json"}).json()["results"]
@@ -81,7 +82,8 @@ def search():
 def search_chemistry():
     #basically the same as search samples but with analysis filter options
     if request.args.get("resource") == "chemical_analyses":
-        return redirect(url_for("chemical_analyses")+"?"+urlencode(request.args))
+        fixedListArgs = combine_identical_parameters(request.args.iteritems(multi=True))
+        return redirect(url_for("chemical_analyses")+"?"+urlencode(fixedListArgs))
 
     if request.args.get("resource") == "sample":
         fixedListArgs = combine_identical_parameters(request.args.iteritems(multi=True))
