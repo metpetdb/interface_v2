@@ -35,6 +35,8 @@ def index():
 
 @metpet_ui.route("/search/")
 def search():
+    print "search Arguments: ",request.args
+    print "session data: ", session
     #get all filter options from API, use format = json and minimum page sizes to speed it up
     if request.args.get("resource") == "samples":
         #resource value set in search_form.html, appends samples.html to bottom of page
@@ -109,6 +111,8 @@ def samples():
     #only return public data samples if not logged in
     filters = dict(request.args)
     tmp_var = 0
+    print("tokens")
+    print(session)
     print("Pre-processing filters")
     print(filters)
 
@@ -136,14 +140,17 @@ def samples():
     print("Post-processing filters:")
     print(filters)
     filters["format"] = "json"
+    samples = {}
+    try:   
+        headers = {"Authorization":"Token "+session["auth_token"]} 
+        samples = get(env("API_HOST")+"samples/", params = filters,headers= headers).json()
+    except KeyError:
+	samples = get(env("API_HOST")+"samples/",params = filters).json()
 
-
-    #get sample data and use meta data to get pagination urls
-    samples = get(env("API_HOST")+"samples/", params = filters).json()
     # print samples
     try:
         sample_results = samples["results"]
-    except: 
+    except:
         try:
             error = samples["error"]
             print error
