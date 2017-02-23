@@ -90,10 +90,20 @@ def search_chemistry():
     if request.args.get("resource") == "sample":
         fixedListArgs = combine_identical_parameters(request.args.iteritems(multi=True))
         return redirect(url_for("samples")+"?"+urlencode(fixedListArgs)+"&chemical_analyses_filters=True")
-
-    oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"}).json()["results"]
-    elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"}).json()["results"]
-    minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
+    #Add headers for authentication of 
+    oxides = {}
+    elements = {}
+    minerals = {}
+    try:
+	headers = {"Authorization":"Token "+session["auth_token"]}
+        oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"},headers = headers).json()["results"]
+        elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"},headers=headers).json()["results"]
+        minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"},headers = headers).json()["results"]
+    except:
+	headers = {}
+	oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"}).json()["results"]
+        elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"}).json()["results"]
+        minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
 
     return render_template("chemical_search_form.html",
         oxides = oxides,
@@ -109,6 +119,11 @@ def search_chemistry():
 def samples():
     #filters sent as parameters to API calls
     #only return public data samples if not logged in
+    # put header data here
+    headers = None
+    #this ideally should do nothing if passed to the metpetdb api
+
+
     filters = dict(request.args)
     tmp_var = 0
     print("tokens")
