@@ -279,7 +279,7 @@ def edit_sample(id):
         del sample["location_coords0"]
         del sample["location_coords1"]
 
-        samples = get(env("API_HOST")+"samples/", params = {"fields": "number", "emails": session.get("email")}).json()["results"]
+        samples = get(env("API_HOST")+"samples/", params = {"fields": "number", "emails": session.get("email")},headers=headers).json()["results"]
         #for s in samples:
         #    if s["number"] == sample["number"] and not new:
         #        errors = {"name": "Error: cannot have multiple samples with the same number"}
@@ -357,7 +357,7 @@ def subsample(id):
     #get sample and analysis info
     subsample["sample"]["number"] = get(env("API_HOST")+"samples/"+subsample["sample"]["id"],
         params = {"fields": "number", "format": "json"}, headers = headers).json()["number"]
-    chemical_analyses = get(env("API_HOST")+"chemical_analyses/", params = {"subsample_ids": subsample["id"], "format": "json"}).json()["results"]
+    chemical_analyses = get(env("API_HOST")+"chemical_analyses/", params = {"subsample_ids": subsample["id"], "format": "json"},headers=headers).json()["results"]
 
     return render_template("subsample.html",
         subsample = subsample,
