@@ -253,6 +253,7 @@ def edit_sample(id):
         headers = {"Authorization": "Token "+session.get("auth_token")}
     else:
         return redirect(url_for("sample", id = id))
+    print "edit sample:",headers
     errors = []
     new = (id.lower() == "new")
 
