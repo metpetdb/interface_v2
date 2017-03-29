@@ -104,9 +104,16 @@ function populateTable(data) {
             var newCell = newRow.insertCell(-1);
             if (tableLabels[j] === "minerals") {
                 newCell.innerHTML = "<b>Under construction</b>";
+            } else if (tableLabels[j] === "collection_date") {
+                newCell.innerHTML = moment(tableData[i][tableLabels[j]]).format("MM-DD-YYYY h:mm A ZZ");
+            } else if (tableLabels[j] === "location_coords") {
+                coordString = tableData[i][tableLabels[j]];
+                coordString = coordString.split(" (")[1].slice(0, -1);
+                newCell.innerHTML = coordString.replace(" ", ", ");
             } else {
                 newCell.innerHTML = tableData[i][tableLabels[j]];
             }
+            newCell.contentEditable = true;
         }
     }
     createGridSubmitButton();
