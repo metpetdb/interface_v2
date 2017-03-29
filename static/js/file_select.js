@@ -105,11 +105,15 @@ function populateTable(data) {
             if (tableLabels[j] === "minerals") {
                 newCell.innerHTML = "<b>Under construction</b>";
             } else if (tableLabels[j] === "collection_date") {
-                newCell.innerHTML = moment(tableData[i][tableLabels[j]]).format("MM-DD-YYYY h:mm A ZZ");
+                newCell.innerHTML = moment(tableData[i][tableLabels[j]]).format("DD-MM-YYYY");
             } else if (tableLabels[j] === "location_coords") {
-                coordString = tableData[i][tableLabels[j]];
+                var coordString = tableData[i][tableLabels[j]];
                 coordString = coordString.split(" (")[1].slice(0, -1);
-                newCell.innerHTML = coordString.replace(" ", ", ");
+                var coords = coordString.split(" ");
+                console.log(coords);
+                coords[0] = parseFloat(coords[0]);
+                coords[1] = parseFloat(coords[1]);
+                newCell.innerHTML = coords[0].toFixed(5) + ", " +coords[1].toFixed(5);
             } else {
                 newCell.innerHTML = tableData[i][tableLabels[j]];
             }
