@@ -118,6 +118,9 @@ function populateTable(data) {
                 newCell.innerHTML = tableData[i][tableLabels[j]];
             }
             newCell.contentEditable = true;
+            newCell.addEventListener("input", function() {
+                console.log("Data was changed, will re-parse data to be safe");
+            });
         }
     }
     createGridSubmitButton();
