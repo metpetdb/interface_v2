@@ -91,20 +91,26 @@ def search_chemistry():
         fixedListArgs = combine_identical_parameters(request.args.iteritems(multi=True))
         return redirect(url_for("samples")+"?"+urlencode(fixedListArgs)+"&chemical_analyses_filters=True")
     #Add headers for authentication of 
+
+
     oxides = {}
     elements = {}
     minerals = {}
     try:
-	headers = {"Authorization":"Token "+session["auth_token"]}
+        headers = {"Authorization":"Token "+session["auth_token"]}
+        print "private search chemistry"
+        print "HEADER:",headers
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"},headers = headers).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"},headers=headers).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"},headers = headers).json()["results"]
     except:
-	headers = {}
-	oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"}).json()["results"]
+        print "public search chemistry"
+        headers = {}
+        oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"}).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"}).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
 
+    print 'len',len(oxides),len(elements),len(minerals)
     return render_template("chemical_search_form.html",
         oxides = oxides,
         elements = elements,
@@ -157,8 +163,11 @@ def samples():
     filters["format"] = "json"
     samples = {}
     try:   
+
         headers = {"Authorization":"Token "+session["auth_token"]} 
+        print "HEADER:",headers
         samples = get(env("API_HOST")+"samples/", params = filters,headers= headers).json()
+        print "URL: ",get(env("API_HOST")+"samples/", params = filters,headers= headers)
     except KeyError:
 	samples = get(env("API_HOST")+"samples/",params = filters).json()
 
@@ -244,6 +253,7 @@ def edit_sample(id):
         headers = {"Authorization": "Token "+session.get("auth_token")}
     else:
         return redirect(url_for("sample", id = id))
+    print "edit sample:",headers
     errors = []
     new = (id.lower() == "new")
 
@@ -270,7 +280,7 @@ def edit_sample(id):
         del sample["location_coords0"]
         del sample["location_coords1"]
 
-        samples = get(env("API_HOST")+"samples/", params = {"fields": "number", "emails": session.get("email")}).json()["results"]
+        samples = get(env("API_HOST")+"samples/", params = {"fields": "number", "emails": session.get("email")},headers=headers).json()["results"]
         #for s in samples:
         #    if s["number"] == sample["number"] and not new:
         #        errors = {"name": "Error: cannot have multiple samples with the same number"}
@@ -348,7 +358,7 @@ def subsample(id):
     #get sample and analysis info
     subsample["sample"]["number"] = get(env("API_HOST")+"samples/"+subsample["sample"]["id"],
         params = {"fields": "number", "format": "json"}, headers = headers).json()["number"]
-    chemical_analyses = get(env("API_HOST")+"chemical_analyses/", params = {"subsample_ids": subsample["id"], "format": "json"}).json()["results"]
+    chemical_analyses = get(env("API_HOST")+"chemical_analyses/", params = {"subsample_ids": subsample["id"], "format": "json"},headers=headers).json()["results"]
 
     return render_template("subsample.html",
         subsample = subsample,
@@ -434,7 +444,8 @@ def chemical_analyses():
     else:
         filters["public_data"] = True
 
-    chemicals = get(env("API_HOST")+"chemical_analyses/", params = filters).json()
+    ##MAKES Chemicals private visible to uploaders
+    chemicals = get(env("API_HOST")+"chemical_analyses/", params = filters,headers=headers).json()
     chem_results = chemicals["results"]
     next_url, prev_url, last_page, total = paginate_model("chemical_analyses", chemicals, filters)
 
