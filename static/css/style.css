@@ -3,17 +3,29 @@ p, a, tr, td, div, small, h1, h2, h3, h4, h5, h6
     font-family: 'Source Sans Pro', sans-serif;             
 }
 
+table {
+    border-collapse: collapse;
+}
+
+#parsedgrid table, #parsedgrid th, #parsedgrid td {
+    border: 1px solid black;
+}
+
+th, td {
+    padding: 5px;
+}
+
 body
 {
     background-color: #e4e6e5;
 }
 
 hr {
-clear: both;
-margin-bottom: 25px;
-border: none;
-border-top: 1px solid #B6B8B7;
-border-bottom: 1px solid white;
+    clear: both;
+    margin-bottom: 25px;
+    border: none;
+    border-top: 1px solid #B6B8B7;
+    border-bottom: 1px solid white;
 }
 
 .dataTables_info
@@ -113,6 +125,10 @@ border-bottom: 1px solid white;
     margin-bottom: 8px;
     font-weight: 400;
     text-align: center;
+}
+
+#errorbanner {
+    color: red;
 }
 
 #gridData_wrapper
