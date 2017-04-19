@@ -11,7 +11,9 @@
   <table id="samplelist" class="table">
     <caption>
       <span style="float:left">Total: {{ total }}</span>
-      <span style="float:right"><a href="#collapseOne" onclick="exportToCsv()">Export data to CSV file</a></span>
+      
+      <span style="float:right"><a href="#collapseOne" onclick="exportToCsv()">Export data to CSV files</a></span>
+      <span style="float:right; margin-right:20px;"><a href="{{ url_for('edit_sample', id='new') }}">Add Sample</a></span>
     </caption>
     <thead>
       <tr>
