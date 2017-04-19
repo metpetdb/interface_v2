@@ -7,7 +7,7 @@ table {
     border-collapse: collapse;
 }
 
-table, th, td {
+#parsedgrid table, #parsedgrid th, #parsedgrid td {
     border: 1px solid black;
 }
 
@@ -125,6 +125,10 @@ hr {
     margin-bottom: 8px;
     font-weight: 400;
     text-align: center;
+}
+
+#errorbanner {
+    color: red;
 }
 
 #gridData_wrapper

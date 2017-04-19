@@ -40,6 +40,7 @@ function GetFileURL() {
 
 //Submit the URL
 function ParseFileForUpload() {
+    document.getElementById('errorbanner').innerHTML = "";
     var Checked = null;
     if (document.getElementById('Samples').checked) {
         Checked = "SampleTemplate";
@@ -62,7 +63,13 @@ function ParseFileForUpload() {
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.onload = function (err) {
         if (xhr.readyState === 4 && xhr.status === 200) {
-            populateTable(JSON.parse(xhr.responseText));
+            responseData = JSON.parse(xhr.responseText);
+            if (responseData['results']['error']) {
+                errorResponse = JSON.parse(xhr.responseText);
+                document.getElementById('errorbanner').innerHTML = "<p>Error! " + errorResponse['results']['error'] + "<br>Please try again.</p>";
+            } else {
+                populateTable(responseData);
+            }
         }
     }
     xhr.send(JSON.stringify(data));
@@ -89,7 +96,7 @@ function populateTable(data) {
     console.log(tableLabels);
     console.log("Table data:");
     console.log(tableData);
-    var tableElement = document.getElementById("jqGrid");
+    var tableElement = document.getElementById("parsedgrid");
     // Create header row of table
     var headerRow = tableElement.tHead.insertRow();
     for (var i = 0; i < tableLabels.length; i++) {
