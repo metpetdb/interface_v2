@@ -158,10 +158,16 @@ function populateTable(data) {
         for (var j = 0; j < tableLabels.length; j++) {
             var newCell = newRow.insertCell(-1);
             if (Object.keys(tableData[i]['errors']).includes(tableLabels[j])) {
-                newCell.style.backgroundColor = 'red';
+                newCell.style.backgroundColor = '#ff5151';
+                newCell.title = tableData[i]['errors'][tableLabels[j]];
             }
             if (tableLabels[j] === "minerals") {
-                newCell.innerHTML = "<b>Under construction</b>";
+                //newCell.innerHTML = "<b>Under construction</b>";
+                var minerals = [];
+                for (var min = 0; min < tableData[i]["mineral"].length; min++) {
+                    minerals.push(tableData[i]["mineral"][min].name);
+                }
+                newCell.innerHTML = minerals.join();
             } else if (tableLabels[j] === "collection_date") {
                 newCell.innerHTML = moment(tableData[i][tableLabels[j]]).format("DD-MM-YYYY");
             } else if (tableLabels[j] === "location_coords") {
@@ -171,8 +177,16 @@ function populateTable(data) {
                     var latitude = tableData[i]['latitude'];
                     var longitude = tableData[i]['longitude'];
                     newCell.innerHTML = latitude + ", " + longitude;
-                    if (Object.keys(tableData[i]['errors']).includes("longitude") || Object.keys(tableData[i]['errors']).includes("latitude")) {
-                        newCell.style.backgroundColor = 'red';
+                    var latitudeError = Object.keys(tableData[i]['errors']).includes("latitude");
+                    var longitudeError = Object.keys(tableData[i]['errors']).includes("longitude");
+                    if (latitudeError || longitudeError) {
+                        newCell.style.backgroundColor = '#ff9999';
+                        if (latitudeError) {
+                            newCell.title = tableData[i]['errors']['latitude'];
+                        }
+                        if (longitudeError) {
+                            newCell.title += "; " + tableData[i]['errors']['longitude'];
+                        }
                     }
                 } else {
                     var coordString = tableData[i][tableLabels[j]];
@@ -187,7 +201,7 @@ function populateTable(data) {
             }
             newCell.contentEditable = true;
             newCell.addEventListener("input", function() {
-                console.log("Data was changed, will re-parse data to be safe");
+                this.style.backgroundColor = '#99b9ff';
             });
         }
     }
