@@ -35,8 +35,8 @@ def index():
 
 @metpet_ui.route("/search/")
 def search():
-    print "search Arguments: ",request.args
-    print "session data: ", session
+    print("search Arguments: ",request.args)
+    print("session data: ", session)
     #get all filter options from API, use format = json and minimum page sizes to speed it up
     if request.args.get("resource") == "samples":
         #resource value set in search_form.html, appends samples.html to bottom of page
@@ -132,10 +132,6 @@ def samples():
 
     filters = dict(request.args)
     tmp_var = 0
-    print("tokens")
-    print(session)
-    print("Pre-processing filters")
-    print(filters)
 
     for key in filters.keys():
         # Key is a map polygon
@@ -158,8 +154,7 @@ def samples():
             # Turn list into a comma-separated string
             filters[key] = (',').join([e for e in filters[key] if e and e[0]])
 
-    print("Post-processing filters:")
-    print(filters)
+
     filters["format"] = "json"
     samples = {}
     try:   
@@ -768,6 +763,52 @@ def test():
     )
     '''
     return jsonify(results=response.json())
+
+
+@metpet_ui.route("/sampleimages/<string:id>")
+def sample(id):
+    #headers! to authenticate user during API calls (for private data and to add/edit their samples)
+    headers = None
+    if session.get("auth_token", None):
+        headers = {"Authorization": "Token "+session.get("auth_token")}
+
+    #get the sample the usual way and return error message if something went wrong
+    sample = get(env("API_HOST")+"samples/"+id+"/", params = {"format": "json"}, headers = headers).json()
+    if "detail" in sample:
+        flash(sample["detail"])
+        return redirect(url_for("search"))
+
+    #make lat/long and date nice
+    pos = sample["location_coords"].split(" ")
+    sample["location_coords"] = [round(float(pos[2].replace(")","")),5), round(float(pos[1].replace("(","")),5)]
+    if sample["collection_date"]:
+        sample["collection_date"] = sample["collection_date"][:-10]
+
+    #get subsample and analysis data for tables
+    subsamples = []
+    for s in sample["subsample_ids"]:
+        subsamples.append(get(env("API_HOST")+"subsamples/"+s,
+            params = {"fields": "subsample_type,name,id,public_data,owner", "format": "json"}, headers = headers).json())
+    for s in subsamples:
+        s["chemical_analyses"] = get(env("API_HOST")+"chemical_analyses/",
+            params = {"subsample_ids": s["id"], "fields": "id", "format": "json"}, headers = headers).json()["results"]
+
+
+    images = {
+    
+
+    }
+    sample["image"] = image
+
+
+    return render_template("sample.html",
+        sample = sample,
+        subsamples = subsamples,
+        auth_token = session.get("auth_token",None),
+        email = session.get("email",None),
+        name = session.get("name",None)
+    )
+
 
 if __name__ == "__main__":
     dotenv.read_dotenv("../app_variables.env")
