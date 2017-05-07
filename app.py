@@ -606,22 +606,23 @@ def login():
         auth_token = {}
         if register:
             auth_token = post(env("API_HOST")+"auth/register/", data = login).json()
+            flash("Activation email sent to: {}".format(login['email']))
         else:
             auth_token = post(env("API_HOST")+"auth/login/", data = login).json()
 
         #http://45.55.207.138/api/users/9fc3b7ab-cec5-450a-9b33-b3200a5eaca5/
 
-        if not auth_token or "auth_token" not in auth_token:
-            flash((',').join(auth_token.values()[0]))
-        else:
-            flash("Login successful!")
-            session["auth_token"] = auth_token["auth_token"]
-            session["email"] = login["email"]
-            session["id"] = auth_token["user_id"]
-            session["name"] = get(env("API_HOST")+"users/"+session["id"],
-                params = {"fields": "name"}, headers = {"Authorization": "Token "+session["auth_token"]}).json()["name"]
+            if not auth_token or "auth_token" not in auth_token:
+                flash((',').join(auth_token.values()[0]))
+            else:
+                flash("Login successful!")
+                session["auth_token"] = auth_token["auth_token"]
+                session["email"] = login["email"]
+                session["id"] = auth_token["user_id"]
+                session["name"] = get(env("API_HOST")+"users/"+session["id"],
+                    params = {"fields": "name"}, headers = {"Authorization": "Token "+session["auth_token"]}).json()["name"]
 
-            return redirect(url_for("index"))
+                return redirect(url_for("index"))
 
     return render_template("login.html",
         auth_token = session.get("auth_token",None),
@@ -640,6 +641,14 @@ def logout():
     flash("Logout successful.")
     return redirect(url_for("index"))
 
+@metpet_ui.route("/activate", methods = ["POST"])
+def activate_account():
+    # send request for account activation
+    form = dict(request.form)
+    # try to activate the account
+    response = post(env("API_HOST") + "auth/activate/", data=form)
+    success =(response.status_code == 200)
+    return jsonify({'success' : success})
 
 @metpet_ui.route("/request-password-reset", methods = ["GET", "POST"])
 def request_password_reset():
@@ -647,15 +656,10 @@ def request_password_reset():
     form = dict(request.form)
     if form:
         #get email data
-        email_data = post(env("API_HOST")+"auth/password/reset/", data = form).json()
-        if not email_data or "detail" in email_data:
+        response = post(env("API_HOST")+"auth/password/reset/", data = form)
+        if response.status_code != 200:
             flash("Invalid email. Please try again.")
         else:
-            #send email
-            message = Message("Metpetdb: Reset Password", sender = env("DEFAULT_MAIL_SENDER"), recipients = [form["email"]])
-            reset_url = url_for("reset_password", token = email_data["link"], _external = True)
-            message.body = render_template("reset_password_email.html", reset_url = reset_url)
-            mail.send(message)
             flash("Please check your email for a link to reset your password")
             return redirect(url_for("login"))
 
@@ -666,20 +670,21 @@ def request_password_reset():
     )
 
 
-@metpet_ui.route("/reset-password/<string:token>", methods = ["GET", "POST"])
-def reset_password(token):
+@metpet_ui.route("/reset-password", methods = ["GET", "POST"])
+def reset_password():
     #get password data
-    password = request.form.get("password",None)
+    form = dict(request.form)
+    print form
+    password = request.form.get("new_password",None)
     if password:
         #send new password to API
-        reset_data = post(env("API_HOST")+"auth/password/reset/confirm/", data = {"token": token, "password": password}).json()
-        if not reset_data or "detail" in reset_data:
+        response = post(env("API_HOST")+"auth/password/reset/confirm/", data = form)
+        if response.status_code != 200:
             flash("Password reset failed. Please try again.")
             return redirect(url_for("request_password_reset"))
         else:
-            session["auth_token"] = reset_data["auth_token"]
-            flash("Password reset successful! You are now logged in.")
-            return redirect(url_for("index"))
+            flash("Password reset successful!")
+            return redirect(url_for("login"))
 
     return render_template("reset_password.html",
         auth_token = session.get("auth_token",None),
