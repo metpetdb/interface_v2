@@ -766,7 +766,7 @@ def test():
 
 
 @metpet_ui.route("/sampleimages/<string:id>")
-def sample(id):
+def sampleimages(id):
     #headers! to authenticate user during API calls (for private data and to add/edit their samples)
     headers = None
     if session.get("auth_token", None):
@@ -794,14 +794,17 @@ def sample(id):
             params = {"subsample_ids": s["id"], "fields": "id", "format": "json"}, headers = headers).json()["results"]
 
 
-    images = {
+    images = [{"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1B-1%20pts.jpg"},
+                {"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1C-1%20pts.jpg"},
+                {"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A1-1%20pts.jpg"}]
+
+
     
+    sample["images"] = images
 
-    }
-    sample["image"] = image
+    print sample
 
-
-    return render_template("sample.html",
+    return render_template("sampleimages.html",
         sample = sample,
         subsamples = subsamples,
         auth_token = session.get("auth_token",None),
