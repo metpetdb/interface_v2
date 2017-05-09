@@ -127,8 +127,8 @@ hr {
     text-align: center;
 }
 
-#errorbanner {
-    color: red;
+#msgbanner {
+    font: bold;
 }
 
 #gridData_wrapper

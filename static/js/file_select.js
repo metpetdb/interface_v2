@@ -73,7 +73,7 @@ function formatForTable(entry) {
 
 //Submit the URL
 function ParseFileForUpload() {
-    document.getElementById('errorbanner').innerHTML = "";
+    document.getElementById('msgbanner').innerHTML = "";
     var Checked = null;
     if (document.getElementById('Samples').checked) {
         Checked = "SampleTemplate";
@@ -99,7 +99,9 @@ function ParseFileForUpload() {
             responseData = JSON.parse(xhr.responseText);
             if (responseData['results']['error']) {
                 errorResponse = JSON.parse(xhr.responseText);
-                document.getElementById('errorbanner').innerHTML = "<p>Error! " + errorResponse['results']['error'] + "<br>Please try again.</p>";
+                var banner = document.getElementById("msgbanner");
+                banner.style.color = 'red';
+                banner.innerHTML = "<p>Error! " + errorResponse['results']['error'] + "<br>Please try again.</p>";
             } else {
                 populateTable(responseData);
             }
@@ -136,34 +138,76 @@ function populateTable(data) {
         var cell = headerRow.insertCell(-1);
         cell.outerHTML = "<th>" + tableLabels[i] + "</th>";
     }
+    var areErrors = false;
+    for (var i = 0; i < tableData.length; i++) {
+        if (Object.keys(tableData[i]['errors']).length !== 0) {
+            areErrors = true;
+            break;
+        }
+    }
+    if (!areErrors) {
+        var banner = document.getElementById("msgbanner");
+        banner.style.color = 'green';
+        banner.innerHTML = "No errors found!  Rows displayed below have been inserted into the database."
+    }
+    console.log("Errors present in returned data: " + areErrors);
     // Create data rows for table and fill them in
     var tableBody = tableElement.getElementsByTagName("tbody")[0];
     for (var i = 0; i < tableData.length; i++) {
         var newRow = tableBody.insertRow();
         for (var j = 0; j < tableLabels.length; j++) {
             var newCell = newRow.insertCell(-1);
+            if (Object.keys(tableData[i]['errors']).includes(tableLabels[j])) {
+                newCell.style.backgroundColor = '#ff5151';
+                newCell.title = tableData[i]['errors'][tableLabels[j]];
+            }
             if (tableLabels[j] === "minerals") {
-                newCell.innerHTML = "<b>Under construction</b>";
+                //newCell.innerHTML = "<b>Under construction</b>";
+                var minerals = [];
+                for (var min = 0; min < tableData[i]["mineral"].length; min++) {
+                    minerals.push(tableData[i]["mineral"][min].name);
+                }
+                newCell.innerHTML = minerals.join();
             } else if (tableLabels[j] === "collection_date") {
                 newCell.innerHTML = moment(tableData[i][tableLabels[j]]).format("DD-MM-YYYY");
             } else if (tableLabels[j] === "location_coords") {
-                var coordString = tableData[i][tableLabels[j]];
-                coordString = coordString.split(" (")[1].slice(0, -1);
-                var coords = coordString.split(" ");
-                console.log(coords);
-                coords[0] = parseFloat(coords[0]);
-                coords[1] = parseFloat(coords[1]);
-                newCell.innerHTML = coords[0].toFixed(5) + ", " +coords[1].toFixed(5);
+                console.log("Errors for row "+i);
+                console.log(tableData[i]['errors']);
+                if (areErrors) {
+                    var latitude = tableData[i]['latitude'];
+                    var longitude = tableData[i]['longitude'];
+                    newCell.innerHTML = latitude + ", " + longitude;
+                    var latitudeError = Object.keys(tableData[i]['errors']).includes("latitude");
+                    var longitudeError = Object.keys(tableData[i]['errors']).includes("longitude");
+                    if (latitudeError || longitudeError) {
+                        newCell.style.backgroundColor = '#ff9999';
+                        if (latitudeError) {
+                            newCell.title = tableData[i]['errors']['latitude'];
+                        }
+                        if (longitudeError) {
+                            newCell.title += "; " + tableData[i]['errors']['longitude'];
+                        }
+                    }
+                } else {
+                    var coordString = tableData[i][tableLabels[j]];
+                    coordString = coordString.split(" (")[1].slice(0, -1);
+                    var coords = coordString.split(" ");
+                    coords[0] = parseFloat(coords[0]);
+                    coords[1] = parseFloat(coords[1]);
+                    newCell.innerHTML = coords[0].toFixed(5) + ", " +coords[1].toFixed(5);
+                }
             } else {
                 newCell.innerHTML = tableData[i][tableLabels[j]];
             }
             newCell.contentEditable = true;
             newCell.addEventListener("input", function() {
-                console.log("Data was changed, will re-parse data to be safe");
+                this.style.backgroundColor = '#99b9ff';
             });
         }
     }
-    createGridSubmitButton();
+    if (areErrors) {
+        createGridSubmitButton();
+    }
 }
 
 function createGridSubmitButton() {
