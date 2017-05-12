@@ -765,6 +765,12 @@ def test():
     return jsonify(results=response.json())
 
 
+##This function is a copy of "/sample/<string:id>" , where we send images to a new front-end template sampleimages.html
+##Ideally this will replace the old /sample/ endpoint when the images it sends back are consistent with the data in the production
+##database, or images stored in a new part of the django app in api_v2
+
+#TODO: Improve this function to grab data from production database and inject it into the images variable.
+#TODO: Figure out how to get the checksum data into the images item data.
 @metpet_ui.route("/sampleimages/<string:id>")
 def sampleimages(id):
     #headers! to authenticate user during API calls (for private data and to add/edit their samples)
@@ -793,16 +799,13 @@ def sampleimages(id):
         s["chemical_analyses"] = get(env("API_HOST")+"chemical_analyses/",
             params = {"subsample_ids": s["id"], "fields": "id", "format": "json"}, headers = headers).json()["results"]
 
+    ##Injection of images into every returned template. 
 
     images = [{"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1B-1%20pts.jpg"},
                 {"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1C-1%20pts.jpg"},
                 {"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A1-1%20pts.jpg"}]
-
-
     
     sample["images"] = images
-
-    print sample
 
     return render_template("sampleimages.html",
         sample = sample,
