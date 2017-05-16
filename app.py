@@ -34,8 +34,7 @@ def index():
 
 @metpet_ui.route("/search/")
 def search():
-    print "search Arguments: ",request.args
-    print "session data: ", session
+
     #get all filter options from API, use format = json and minimum page sizes to speed it up
     if request.args.get("resource") == "samples":
         #resource value set in search_form.html, appends samples.html to bottom of page
@@ -97,19 +96,15 @@ def search_chemistry():
     minerals = {}
     try:
         headers = {"Authorization":"Token "+session["auth_token"]}
-        print "private search chemistry"
-        print "HEADER:",headers
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"},headers = headers).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"},headers=headers).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"},headers = headers).json()["results"]
     except:
-        print "public search chemistry"
         headers = {}
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"}).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"}).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
 
-    print 'len',len(oxides),len(elements),len(minerals)
     return render_template("chemical_search_form.html",
         oxides = oxides,
         elements = elements,
@@ -131,10 +126,6 @@ def samples():
 
     filters = dict(request.args)
     tmp_var = 0
-    print("tokens")
-    print(session)
-    print("Pre-processing filters")
-    print(filters)
 
     for key in filters.keys():
         # Key is a map polygon
@@ -148,7 +139,6 @@ def samples():
             # Reassemble coordinates to be a list of two-element lists
             coords = '[[' + ('],[').join(coords) + ']]'
             filters[key] = coords
-            print(filters[key])
         # Unnecessary, empty, or blank key
         elif key == "polygon_coord" or not filters[key] or filters[key] == '' or filters[key][0] == '':
             del filters[key]
@@ -157,16 +147,13 @@ def samples():
             # Turn list into a comma-separated string
             filters[key] = (',').join([e for e in filters[key] if e and e[0]])
 
-    print("Post-processing filters:")
-    print(filters)
+
     filters["format"] = "json"
     samples = {}
     try:   
 
         headers = {"Authorization":"Token "+session["auth_token"]} 
-        print "HEADER:",headers
         samples = get(env("API_HOST")+"samples/", params = filters,headers= headers).json()
-        print "URL: ",get(env("API_HOST")+"samples/", params = filters,headers= headers)
     except KeyError:
 	samples = get(env("API_HOST")+"samples/",params = filters).json()
 
@@ -252,7 +239,6 @@ def edit_sample(id):
         headers = {"Authorization": "Token "+session.get("auth_token")}
     else:
         return redirect(url_for("sample", id = id))
-    print "edit sample:",headers
     errors = []
     new = (id.lower() == "new")
 
@@ -772,6 +758,58 @@ def test():
     )
     '''
     return jsonify(results=response.json())
+
+
+##This function is a copy of "/sample/<string:id>" , where we send images to a new front-end template sampleimages.html
+##Ideally this will replace the old /sample/ endpoint when the images it sends back are consistent with the data in the production
+##database, or images stored in a new part of the django app in api_v2
+
+#TODO: Improve this function to grab data from production database and inject it into the images variable.
+#TODO: Figure out how to get the checksum data into the images item data.
+@metpet_ui.route("/sampleimages/<string:id>")
+def sampleimages(id):
+    #headers! to authenticate user during API calls (for private data and to add/edit their samples)
+    headers = None
+    if session.get("auth_token", None):
+        headers = {"Authorization": "Token "+session.get("auth_token")}
+
+    #get the sample the usual way and return error message if something went wrong
+    sample = get(env("API_HOST")+"samples/"+id+"/", params = {"format": "json"}, headers = headers).json()
+    if "detail" in sample:
+        flash(sample["detail"])
+        return redirect(url_for("search"))
+
+    #make lat/long and date nice
+    pos = sample["location_coords"].split(" ")
+    sample["location_coords"] = [round(float(pos[2].replace(")","")),5), round(float(pos[1].replace("(","")),5)]
+    if sample["collection_date"]:
+        sample["collection_date"] = sample["collection_date"][:-10]
+
+    #get subsample and analysis data for tables
+    subsamples = []
+    for s in sample["subsample_ids"]:
+        subsamples.append(get(env("API_HOST")+"subsamples/"+s,
+            params = {"fields": "subsample_type,name,id,public_data,owner", "format": "json"}, headers = headers).json())
+    for s in subsamples:
+        s["chemical_analyses"] = get(env("API_HOST")+"chemical_analyses/",
+            params = {"subsample_ids": s["id"], "fields": "id", "format": "json"}, headers = headers).json()["results"]
+
+    ##Injection of images into every returned template. 
+
+    images = [{"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1B-1%20pts.jpg"},
+                {"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1C-1%20pts.jpg"},
+                {"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A1-1%20pts.jpg"}]
+    
+    sample["images"] = images
+
+    return render_template("sampleimages.html",
+        sample = sample,
+        subsamples = subsamples,
+        auth_token = session.get("auth_token",None),
+        email = session.get("email",None),
+        name = session.get("name",None)
+    )
+
 
 if __name__ == "__main__":
     dotenv.read_dotenv("../app_variables.env")
