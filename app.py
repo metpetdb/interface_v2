@@ -35,8 +35,7 @@ def index():
 
 @metpet_ui.route("/search/")
 def search():
-    print("search Arguments: ",request.args)
-    print("session data: ", session)
+
     #get all filter options from API, use format = json and minimum page sizes to speed it up
     if request.args.get("resource") == "samples":
         #resource value set in search_form.html, appends samples.html to bottom of page
@@ -98,19 +97,15 @@ def search_chemistry():
     minerals = {}
     try:
         headers = {"Authorization":"Token "+session["auth_token"]}
-        print "private search chemistry"
-        print "HEADER:",headers
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"},headers = headers).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"},headers=headers).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"},headers = headers).json()["results"]
     except:
-        print "public search chemistry"
         headers = {}
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"}).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"}).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
 
-    print 'len',len(oxides),len(elements),len(minerals)
     return render_template("chemical_search_form.html",
         oxides = oxides,
         elements = elements,
@@ -145,7 +140,6 @@ def samples():
             # Reassemble coordinates to be a list of two-element lists
             coords = '[[' + ('],[').join(coords) + ']]'
             filters[key] = coords
-            print(filters[key])
         # Unnecessary, empty, or blank key
         elif key == "polygon_coord" or not filters[key] or filters[key] == '' or filters[key][0] == '':
             del filters[key]
@@ -160,9 +154,7 @@ def samples():
     try:   
 
         headers = {"Authorization":"Token "+session["auth_token"]} 
-        print "HEADER:",headers
         samples = get(env("API_HOST")+"samples/", params = filters,headers= headers).json()
-        print "URL: ",get(env("API_HOST")+"samples/", params = filters,headers= headers)
     except KeyError:
 	samples = get(env("API_HOST")+"samples/",params = filters).json()
 
@@ -248,7 +240,6 @@ def edit_sample(id):
         headers = {"Authorization": "Token "+session.get("auth_token")}
     else:
         return redirect(url_for("sample", id = id))
-    print "edit sample:",headers
     errors = []
     new = (id.lower() == "new")
 
