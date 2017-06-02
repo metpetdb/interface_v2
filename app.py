@@ -775,4 +775,9 @@ def test():
 
 if __name__ == "__main__":
     dotenv.read_dotenv("../app_variables.env")
-    metpet_ui.run(debug = True)
+    if (env('TEST_DEPLOYMENT')):
+        print("Test deployment, running on port 5001...")
+        metpet_ui.run(debug = True, port = 5001)
+    else:
+        print("Dev or prod deployment, running on port 5000...")
+        metpet_ui.run(debug = True, port = 5000)
