@@ -1,6 +1,8 @@
 //Global variables
 var fileSelectURL = null;
-
+var tableData;
+var tableLabels;
+var template;
 //Validate a URL using regex
 function ValidateURL(url) {
     var Regex = /^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})).?)(?::\d{2,5})?(?:[/?#]\S*)?$/;
@@ -13,7 +15,7 @@ function GetFileURL() {
     //Check if an X or check mark already exist. If one does, remove it.
     var OldImage = document.getElementById('symbol');
     if (OldImage) {
-        OldImage.parentNode.removeChild(OldImage); 
+        OldImage.parentNode.removeChild(OldImage);
     }
     //Create the new image (either X or check)
     var img = document.createElement("img");
@@ -26,7 +28,7 @@ function GetFileURL() {
             img.width="20";
             img.src = "../static/images/x.jpg";
             fileSelectURL = null;
-            
+
         }
         else {
             img.height="24";
@@ -44,59 +46,36 @@ function ValidateURL(fileSelectURL) {
     return Regex.test(fileSelectURL);
 }
 
-//Format object for table display
-function formatForTable(entry) {
-    //console.log("entry", entry.type,entry);
-    for( key in entry) {		
-		var allmin = []
-		if ( key == "minerals" )	{
-			for ( k in entry[key] )	{
-				allmin.push(entry[key][k]["id"])
-			}
-			entry[key] = allmin;
-		}
-		else if ( key == "location_coords" )	{
-			var point= entry[key].substr(entry[key].indexOf('('), (entry[key]).length);
-			//console.log(point)
-			entry[key] = point;
-		}
-		else if ( key == "collection_date" )	{
-			var d = new Date(entry[key]);
-			entry[key] = d.toDateString();
-		}
-		else {
-			entry[key] = entry[key];
-		}
-    }
-    return entry
-}
-
 //Submit the URL
 function ParseFileForUpload() {
     document.getElementById('msgbanner').innerHTML = "";
-    var Checked = null;
+    template = null;
     if (document.getElementById('Samples').checked) {
-        Checked = "SampleTemplate";
+        template = "SampleTemplate";
     }
     else if (document.getElementById('ChemicalAnalyses').checked) {
-        Checked = "ChemicalAnalysesTemplate";
+        template = "ChemicalAnalysesTemplate";
     }
     else if (document.getElementById('Images').checked) {
-        Checked = "Images";
+        template = "Images";
     }
-    if (fileSelectURL == null || Checked == null) {
+    if (fileSelectURL == null || template == null) {
         return;
     }
     //Send Checked and URL as JSON using POST
     var data = {};
     data["url"] = fileSelectURL;
-    data["template"] = Checked;
+    data["template"] = template;
+    sendTopython(data);
+}
+
+function sendTopython(data) {
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "/test", true);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.onload = function (err) {
         if (xhr.readyState === 4 && xhr.status === 200) {
-            responseData = JSON.parse(xhr.responseText);
+            var responseData = JSON.parse(xhr.responseText);
             if (responseData['results']['error']) {
                 errorResponse = JSON.parse(xhr.responseText);
                 var banner = document.getElementById("msgbanner");
@@ -112,25 +91,21 @@ function ParseFileForUpload() {
 
 function populateTable(data) {
     document.getElementById('content').innerHTML = "";
-    var tableData = data["results"];
+    tableData = data["results"];
     // Time to separate out the metadata
+    console.log(tableData);
     var metadata = [];
     for (var i = 0; i < tableData.length; i++) {
         if (tableData[i].meta_header) {
             metadata = tableData[i].meta_header;
-            tableData.splice(i, 1);
         }
     }
-    var tableLabels = [];
+
+    tableLabels = [];
     for (var i = 0; i < metadata.length; i++) {
         tableLabels.push(metadata[i][1]);
     }
-    console.log("Metadata:")
-    console.log(metadata);
-    console.log("Table labels:");
-    console.log(tableLabels);
-    console.log("Table data:");
-    console.log(tableData);
+
     var tableElement = document.getElementById("parsedgrid");
     // Create header row of table
     var headerRow = tableElement.tHead.insertRow();
@@ -138,41 +113,40 @@ function populateTable(data) {
         var cell = headerRow.insertCell(-1);
         cell.outerHTML = "<th>" + tableLabels[i] + "</th>";
     }
-    var areErrors = false;
-    for (var i = 0; i < tableData.length; i++) {
-        if (Object.keys(tableData[i]['errors']).length !== 0) {
-            areErrors = true;
-            break;
-        }
-    }
-    if (!areErrors) {
-        var banner = document.getElementById("msgbanner");
-        banner.style.color = 'green';
-        banner.innerHTML = "No errors found!  Rows displayed below have been inserted into the database."
-    }
-    console.log("Errors present in returned data: " + areErrors);
+
+    var areErrors = createBanner(data['status']);
+
     // Create data rows for table and fill them in
     var tableBody = tableElement.getElementsByTagName("tbody")[0];
     for (var i = 0; i < tableData.length; i++) {
         var newRow = tableBody.insertRow();
         for (var j = 0; j < tableLabels.length; j++) {
+            if (tableData[i].meta_header) { continue; }
             var newCell = newRow.insertCell(-1);
+            newCell.className= i+','+j; //row, column
             if (Object.keys(tableData[i]['errors']).includes(tableLabels[j])) {
                 newCell.style.backgroundColor = '#ff5151';
                 newCell.title = tableData[i]['errors'][tableLabels[j]];
             }
-            if (tableLabels[j] === "minerals") {
-                //newCell.innerHTML = "<b>Under construction</b>";
-                var minerals = [];
-                for (var min = 0; min < tableData[i]["mineral"].length; min++) {
-                    minerals.push(tableData[i]["mineral"][min].name);
+            if (tableLabels[j].includes ("mineral")|| tableLabels[j] ==="element" ||tableLabels[j] ==="oxide") {
+                var cellText = [];
+                var tmp = [];
+                if(tableLabels[j].includes ("mineral")){
+                    tmp = tableData[i].hasOwnProperty('mineral') ? tableData[i]["mineral"] : tableData[i]["minerals"];
                 }
-                newCell.innerHTML = minerals.join();
-            } else if (tableLabels[j] === "collection_date") {
+                else {
+                    tmp = tableData[i][tableLabels[j]];
+                }
+                for (var k = 0; k < tmp.length; k++) {
+                    cellText.push(tmp[k].name);
+                }
+                newCell.innerHTML = cellText.join();
+            }
+            else if (tableLabels[j] === "amount"){
+                newCell.innerHTML = tableData[i][tableLabels[j-1]][0]["amount"];
+            }else if (tableLabels[j] === "collection_date") {
                 newCell.innerHTML = moment(tableData[i][tableLabels[j]]).format("DD-MM-YYYY");
             } else if (tableLabels[j] === "location_coords") {
-                console.log("Errors for row "+i);
-                console.log(tableData[i]['errors']);
                 if (areErrors) {
                     var latitude = tableData[i]['latitude'];
                     var longitude = tableData[i]['longitude'];
@@ -202,6 +176,7 @@ function populateTable(data) {
             newCell.contentEditable = true;
             newCell.addEventListener("input", function() {
                 this.style.backgroundColor = '#99b9ff';
+                updateData(this.className,this.innerHTML);
             });
         }
     }
@@ -210,15 +185,61 @@ function populateTable(data) {
     }
 }
 
+
+function updateData(coords, change){
+    var infos = coords.split(',');
+    var field = tableLabels[infos[1]];
+    var entry = tableData[infos[0]];
+
+    if(field.includes("mineral")){
+        field = entry.hasOwnProperty('mineral') ? 'mineral' : 'minerals';
+    }
+    console.log("field, ", field);
+    if(field==="location_coords"){
+        var changes = change.split(',');
+        entry['latitude'] = parseFloat(changes[0]);
+        entry['longitude'] = parseFloat(changes[1]);
+    }else if(field==="amount"){
+        field = tableLabels[parseInt(infos[1])-1];
+        entry[field]["amount"] = change;
+    }else if(Array.isArray(entry[field])){
+        updateArray(entry,field,change);
+    }else {
+        entry[field] = change;
+    }
+}
+
+function updateArray(entry, field, change) {
+    var arr = change.split(',');
+    for(var i =0; i < arr.length;i++){
+            arr[i] = {"amount": 0, "name": arr[i]};
+    }
+}
+
+function createBanner(statusCode){
+    if (statusCode >=200 && statusCode < 300 ) {
+        var banner = document.getElementById("msgbanner");
+        banner.style.color = 'green';
+        banner.innerHTML = "No errors found!  Rows displayed below have been inserted into the database."
+        return false;
+    }
+    var banner = document.getElementById("msgbanner");
+    banner.style.color = 'red';
+    banner.innerHTML = "Please fix the highlighted area and resubmit."
+    return true;
+}
+
+
 function createGridSubmitButton() {
     var element = document.createElement("input");
     element.setAttribute("type", "button");
     element.setAttribute("value", "Submit");
-    element.setAttribute("onclick", "submitGrid();");
-    var foo = document.getElementById("gridSubmit");
-    foo.appendChild(element);
+    element.setAttribute("onclick", "submitJson();");
+    document.getElementById("gridSubmit").appendChild(element);
 }
 
-function submitGrid() {
-
+function submitJson(){
+    var data = {'template': template, 'json': JSON.stringify(tableData)};
+    console.log(data);
+    sendTopython(data);
 }

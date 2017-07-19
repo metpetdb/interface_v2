@@ -1,4 +1,4 @@
-import dotenv, commands, json, os 
+import dotenv, commands, json, os
 from getenv import env
 from requests import get, put, post, codes
 from urllib import urlencode, urlopen
@@ -61,7 +61,7 @@ def search():
     countries = get(env("API_HOST")+"country_names/", params = {"format": "json"}).json()["country_names"]
     numbers = get(env("API_HOST")+"sample_numbers/", params = {"format": "json"}).json()["sample_numbers"]
     owners = get(env("API_HOST")+"sample_owner_names/", params = {"format": "json"}).json()["sample_owner_names"]
- 
+
     return render_template("search_form.html",
         regions = regions,
         minerals = minerals,
@@ -89,7 +89,7 @@ def search_chemistry():
     if request.args.get("resource") == "sample":
         fixedListArgs = combine_identical_parameters(request.args.iteritems(multi=True))
         return redirect(url_for("samples")+"?"+urlencode(fixedListArgs)+"&chemical_analyses_filters=True")
-    #Add headers for authentication of 
+    #Add headers for authentication of
 
 
     oxides = {}
@@ -161,9 +161,9 @@ def samples():
     print(filters)
     filters["format"] = "json"
     samples = {}
-    try:   
+    try:
 
-        headers = {"Authorization":"Token "+session["auth_token"]} 
+        headers = {"Authorization":"Token "+session["auth_token"]}
         print "HEADER:",headers
         samples = get(env("API_HOST")+"samples/", params = filters,headers= headers).json()
         print "URL: ",get(env("API_HOST")+"samples/", params = filters,headers= headers)
@@ -178,7 +178,7 @@ def samples():
             error = samples["error"]
             print error
             samples = {}
-        except: 
+        except:
             samples = {}
 
     next_url, prev_url, last_page, total = paginate_model("samples", samples, filters)
@@ -285,7 +285,7 @@ def edit_sample(id):
         #        errors = {"name": "Error: cannot have multiple samples with the same number"}
         errors = {}
         #send data to API with PUT call and display error message if any
-        
+
         if errors:
             print errors
         if not errors:
@@ -729,21 +729,23 @@ def test():
     #auth_token = session.get("auth_token",None),
     UserInput = request.json
     response = None
-    print "Type received from user input: ", type(UserInput)
+
     if (UserInput != None):
         UserInput = dict([(str(k), str(v)) for k, v in UserInput.items()])
         headers = None
         # if session.get("auth_token", None):
-        print "User auth_token:",session.get("auth_token")
-        print "User id:",session.get("user_id")
-        print "UserInput:",UserInput
+        # print "User auth_token:",session.get("auth_token")
+        # print "User id:",session.get("user_id")
+        # print "UserInput:",UserInput
         headers = {"Authorization": "Token "+session.get("auth_token")}
         UserInput["owner"]=session.get("id")
 
-        
-        # print response.json()
+        print UserInput
 
-        # print "Owner:",UserInput["owner"]
+        for key in UserInput :
+            print key
+            if(key== 'json'):
+                print UserInput[key]
 
         # else:
             # pass
@@ -754,15 +756,14 @@ def test():
         # for key in response_dict:
         #     # new_key = key.replace('_', " ")
         #     new_key = key
-        #     new_response[new_key] = response_dict[key] 
+        #     new_response[new_key] = response_dict[key]
         #     print key, new_key, len(new_response)
         # # print "new response:", new_response
         # json_response = jsonify(new_response)
-        print response
+        # print response
         # print "Keys:", new_response.keys()
-        print "Response status code:",response.status_code
-        print "Response:",response
-        print "Response content (json):",response.json()
+        print "Response:", response
+
     '''
     return render_template('bulk_upload_results.html',
         bulk_upload_output = response.json(),
@@ -771,7 +772,24 @@ def test():
         name = session.get("name",None)
     )
     '''
-    return jsonify(results=response.json())
+
+    # if (response.status_code < 400):
+    #     return render_template("samples.html",
+    #         samples = response.json(),
+    #         showmap = "showmap" in filters,
+    #         extends = "render" in filters,
+    #         total = total,
+    #         next_url = next_url,
+    #         prev_url = prev_url,
+    #         first_page = url_for("samples")+"?"+urlencode(filters),
+    #         last_page = last_page,
+    #         auth_token = session.get("auth_token",None),
+    #         email = session.get("email",None),
+    #         name = session.get("name",None)
+    #     )
+
+
+    return jsonify(results=response.json(), status = response.status_code)
 
 if __name__ == "__main__":
     dotenv.read_dotenv("../app_variables.env")
