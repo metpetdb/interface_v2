@@ -192,6 +192,7 @@ def samples():
         if s["collection_date"]:
             s["collection_date"] = s["collection_date"][:-10]
 
+    print(sample_results[0])
     return render_template("samples.html",
         samples = sample_results,
         showmap = "showmap" in filters,
@@ -740,12 +741,10 @@ def test():
         headers = {"Authorization": "Token "+session.get("auth_token")}
         UserInput["owner"]=session.get("id")
 
-        print UserInput
-
         for key in UserInput :
             print key
-            if(key== 'json'):
-                print UserInput[key]
+            if(key == 'json'):
+                UserInput[key] = json.loads(UserInput[key])
 
         # else:
             # pass

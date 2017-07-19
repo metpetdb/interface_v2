@@ -204,6 +204,7 @@ function updateData(coords, change){
         entry[field]["amount"] = change;
     }else if(Array.isArray(entry[field])){
         updateArray(entry,field,change);
+        console.log(tableData);
     }else {
         entry[field] = change;
     }
@@ -212,8 +213,9 @@ function updateData(coords, change){
 function updateArray(entry, field, change) {
     var arr = change.split(',');
     for(var i =0; i < arr.length;i++){
-            arr[i] = {"amount": 0, "name": arr[i]};
+        arr[i] = {"amount": 0, "name": arr[i]};
     }
+    entry[field] = arr;
 }
 
 function createBanner(statusCode){
@@ -242,4 +244,17 @@ function submitJson(){
     var data = {'template': template, 'json': JSON.stringify(tableData)};
     console.log(data);
     sendTopython(data);
+    removeTableContent();
+}
+
+function removeTableContent() {
+    tableData = null, tableLabels= null;
+    var table = document.getElementById("parsedgrid");
+    table.deleteTHead();
+    table.createTHead();
+    var tableBody = table.getElementsByTagName("tbody")[0];
+
+    while(tableBody.rows.length>0){
+        tableBody.deleteRow(tableBody.rows.length - 1);
+    }
 }
