@@ -28,13 +28,13 @@
         <input type="radio" name="filetype" id="Samples" checked>Samples<br>
         <input type="radio" name="filetype" id="ChemicalAnalyses">Chemical Analyses<br>
         <input type="radio" name="filetype" id="Images">Images<br>
-        <input type="button" value="Upload File" onclick="ParseFileForUpload();">
+        <input type="button" id ="uploadButton" value="Upload File" onclick="ParseFileForUpload();">
     </form>
 </div>
 
 <table id="parsedgrid">
     <thead></thead>
-    <tbody></tbody>
+    <tbody style="white-space: nowrap;"></tbody>
 </table>
 <div id="gridSubmit"></div>
 {% endblock %}

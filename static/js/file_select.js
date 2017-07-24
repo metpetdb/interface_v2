@@ -103,7 +103,14 @@ function populateTable(data) {
 
     tableLabels = [];
     for (var i = 0; i < metadata.length; i++) {
-        tableLabels.push(metadata[i][1]);
+        if( i >0 ) {
+            if(metadata[i][1]===metadata[i-1][1] ){
+                continue;
+            }
+        }
+        if (metadata[i][1]!="amount") {
+            tableLabels.push(metadata[i][1]);
+        }
     }
 
     var tableElement = document.getElementById("parsedgrid");
@@ -141,10 +148,11 @@ function populateTable(data) {
                     cellText.push(tmp[k].name);
                 }
                 newCell.innerHTML = cellText.join();
+                if(tmp.length===1 && tmp[0]["amount"]){
+                    newCell.innerHTML =newCell.innerHTML+", "+tmp[0]["amount"];
+                }
             }
-            else if (tableLabels[j] === "amount"){
-                newCell.innerHTML = tableData[i][tableLabels[j-1]][0]["amount"];
-            }else if (tableLabels[j] === "collection_date") {
+            else if (tableLabels[j].includes ("date")) {
                 newCell.innerHTML = moment(tableData[i][tableLabels[j]]).format("DD-MM-YYYY");
             } else if (tableLabels[j] === "location_coords") {
                 if (areErrors) {
@@ -173,11 +181,18 @@ function populateTable(data) {
             } else {
                 newCell.innerHTML = tableData[i][tableLabels[j]];
             }
-            newCell.contentEditable = true;
-            newCell.addEventListener("input", function() {
-                this.style.backgroundColor = '#99b9ff';
-                updateData(this.className,this.innerHTML);
-            });
+
+            if(tableLabels[j]==="comment"){
+                CreateCommentSection(newCell,tableData[i][tableLabels[j]]);
+            }
+            else{
+                newCell.contentEditable = true;
+                newCell.addEventListener("input", function() {
+                    this.style.backgroundColor = '#99b9ff';
+                    updateData(this.className,this.innerHTML);
+                });
+            }
+
         }
     }
     if (areErrors) {
@@ -185,6 +200,21 @@ function populateTable(data) {
     }
 }
 
+function CreateCommentSection(cell, comments) {
+    cell.innerHTML = "";
+    for (var i = 0; i < comments.length; i++) {
+        var div = document.createElement("div");
+        div.innerHTML = comments[i];
+        div.contentEditable = true;
+        div.id = i;
+        cell.appendChild(div);
+        div.addEventListener("input", function() {
+            this.style.backgroundColor = '#99b9ff';
+            comments[parseInt(this.id)] = this.innerHTML;
+            console.log(tableData);
+        });
+    }
+}
 
 function updateData(coords, change){
     var infos = coords.split(',');
@@ -194,7 +224,6 @@ function updateData(coords, change){
     if(field.includes("mineral")){
         field = entry.hasOwnProperty('mineral') ? 'mineral' : 'minerals';
     }
-    console.log("field, ", field);
     if(field==="location_coords"){
         var changes = change.split(',');
         entry['latitude'] = parseFloat(changes[0]);
@@ -203,17 +232,35 @@ function updateData(coords, change){
         field = tableLabels[parseInt(infos[1])-1];
         entry[field]["amount"] = change;
     }else if(Array.isArray(entry[field])){
-        updateArray(entry,field,change);
+        if(field.includes("mineral")){
+            updateMArray(entry,field,change);
+        } else {
+            updateObject(entry,field,change);
+        }
         console.log(tableData);
     }else {
         entry[field] = change;
     }
 }
 
-function updateArray(entry, field, change) {
+function UpdateComment() {
+
+}
+
+
+function updateObject(entry, field, change) {
     var arr = change.split(',');
-    for(var i =0; i < arr.length;i++){
-        arr[i] = {"amount": 0, "name": arr[i]};
+    arr[i] = {"amount": parseInt(arr[1]), "name": arr[0]};
+    entry[field] = arr;
+}
+
+//temporary code to accommodate a bug on the backend
+function updateMArray(entry, field, change) {
+    var arr = change.split(',');
+    if (field != "comment"){
+        for (var i =0; i < arr.length;i++){
+            arr[i] = {"amount": 0, "name": arr[i]};
+        }
     }
     entry[field] = arr;
 }
@@ -235,7 +282,7 @@ function createBanner(statusCode){
 function createGridSubmitButton() {
     var element = document.createElement("input");
     element.setAttribute("type", "button");
-    element.setAttribute("value", "Submit");
+    element.setAttribute("value", "Submit fixed form");
     element.setAttribute("onclick", "submitJson();");
     document.getElementById("gridSubmit").appendChild(element);
 }

@@ -88,8 +88,7 @@
     {% endblock %}
 
     <hr>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
+    {% with messages = get_flashed_messages() %} {% if messages %}
       <ul>
         {% for message in messages %}
         <p style="color: red;">{{ message }}</p>
