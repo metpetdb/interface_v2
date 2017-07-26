@@ -772,24 +772,15 @@ def test():
     )
     '''
 
-    # if (response.status_code < 400):
-    #     return render_template("samples.html",
-    #         samples = response.json(),
-    #         showmap = "showmap" in filters,
-    #         extends = "render" in filters,
-    #         total = total,
-    #         next_url = next_url,
-    #         prev_url = prev_url,
-    #         first_page = url_for("samples")+"?"+urlencode(filters),
-    #         last_page = last_page,
-    #         auth_token = session.get("auth_token",None),
-    #         email = session.get("email",None),
-    #         name = session.get("name",None)
-    #     )
-
-
     return jsonify(results=response.json(), status = response.status_code)
 
 if __name__ == "__main__":
     dotenv.read_dotenv("../app_variables.env")
-    metpet_ui.run(debug = True)
+
+    if (env('TEST_DEPLOYMENT')):
+        print("Test deployment, running on port 5001...")
+        metpet_ui.run(debug = True, port = 5001)
+    else:
+        print("Dev or prod deployment, running on port 5000...")
+        metpet_ui.run(debug = True, port = 5000)
+
