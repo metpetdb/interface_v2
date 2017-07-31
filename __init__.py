@@ -856,11 +856,12 @@ def sampleimages(id):
 
     ##Injection of images into every returned template. 
 
-    images = [{"url":"/static/images/BingWallpaper-2017-07-12.jpg", "caption": "This is the caption for this rock"},
-                {"url":"/static/images/BingWallpaper-2017-07-13.jpg", "caption": "This is the caption for another rock"},
-                {"url":"/static/images/BingWallpaper-2017-07-16.jpg", "caption": "This is the third caption"},
-                {"url":"/static/images/BingWallpaper-2017-07-17.jpg", "caption": "This is the fourth caption"},
-                {"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1C-1%20pts.jpg", "caption": "this is the final caption"}]
+    images = [{"url":"/static/images/BingWallpaper-2017-07-26.jpg", "caption": "This is the caption for this rock", "full": "/static/images/BingWallpaper-2017-07-31.jpg"},
+                {"url":"/static/images/BingWallpaper-2017-07-27.jpg", "caption": "This is the caption for another rock", "full": "/static/images/BingWallpaper-2017-07-31.jpg"},
+                {"url":"/static/images/BingWallpaper-2017-07-29.jpg", "caption": "This is the third caption", "full": "/static/images/BingWallpaper-2017-07-31.jpg"},
+                {"url":"/static/images/BingWallpaper-2017-07-30.jpg", "caption": "This is the fourth caption", "full": "/static/images/BingWallpaper-2017-07-31.jpg"},
+
+                {"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1C-1%20pts.jpg", "caption": "this is the final caption", "full": "/static/images/BingWallpaper-2017-07-31.jpg"}]
     
     sample["images"] = images
 
