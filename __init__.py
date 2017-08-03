@@ -251,7 +251,7 @@ def sample(id):
     
     sample["images"] = images
 
-    return render_template("valeriesampleimages.html",
+    return render_template("sample.html",
         sample = sample,
         subsamples = subsamples,
         auth_token = session.get("auth_token",None),
