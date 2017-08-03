@@ -3,11 +3,11 @@
 
 {% block head %}
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-  <link rel="stylesheet" href="/static/lightbox2-master/dist/css/lightbox.min.css">
+  <link rel="stylesheet" href="/static/css/lightbox.2.9.0.min.css">
+
 {% endblock %}
 
 {% block title %}
-<h5> IT WORKS</h5>
 <h4>
   Sample {{ sample.number }}
   {% if auth_token %}<span style="float:right"><a href="{{ url_for('edit_sample', id=sample.id) }}">Edit Sample</a></span>{% endif %}
@@ -76,15 +76,16 @@
       </tr>
       <tr>
         <td class="sample_label">Publication References</td>
-        <td class="sample_value">
+        <td id="published" class="sample_value">
         {% if sample.references %}{% for r in sample.references %}
           {{ r.name }}
-          {% if r.title %}&nbsp;&nbsp;<img src="/static/images/icon-info-small.png" onclick="document.getElementById({{ loop.index0 }}).style.opacity=1">
-          <table id="{{ loop.index0 }}" class="table reference_table">
+          {% if r.title %}&nbsp;&nbsp;<button class="btn btn-info published">?</button>
+          <!--<table id="{{ loop.index0 }}" class="table reference_table hidden">-->
+          <table class="table reference_table hidden">
             <tr>
               <td>Title:</td>
               <td>
-                <img src="/static/images/close.png" style="float:right;width:9px" onclick="document.getElementById({{ loop.index0 }}).style.opacity=0">
+                <!--<img src="/static/images/close.png" style="float:right;width:9px" onclick="document.getElementById({{ loop.index0 }}).style.opacity=0">-->
                 {% if r.title %}{{ r.title }}{% endif %}
               </td>
             </tr>
@@ -159,7 +160,6 @@ instead of the small circle things at the bottom of the carousel, replace them w
         {% for image in sample.images %} 
           {% if loop.index == 1 %} <!-- First clone, req: #reset .item clone + number of cols -->
             <li id="reset" class="col-md-4 item clone">
-            <!--<a href="{{image.full}}" data-lightbox="bigCarousel">-->
               <img class="d-block img-fluid" src="{{image.url}}" style="margin: 0 auto; width:50%; height:50%;">
               <div class="caption" style="text-align: center;">
                 {{image.caption}}
@@ -168,7 +168,6 @@ instead of the small circle things at the bottom of the carousel, replace them w
           {% endif %}
           {% if loop.index > 1 and loop.index < 3 %} <!-- all the clones except the first and last one, reqs: .item clone + number of cols -->
             <li class="item clone col-md-4">
-              <!--<a href="{{image.full}}" data-lightbox="bigCarousel">-->
                 <img class="d-block img-fluid" src="{{image.url}}" style="margin: 0 auto; width:50%; height:50%;">
                 <div class="caption" style="text-align: center;">
                   {{image.caption}}
@@ -178,7 +177,6 @@ instead of the small circle things at the bottom of the carousel, replace them w
           {% endif %}
           {% if loop.index == 3 %} <!-- very last clone, reqs: #last .item clone + number of cols -->
             <li id="last" class="item clone col-md-4">
-              <!--<a href="{{image.full}}" data-lightbox="bigCarousel">-->
                 <img class="d-block img-fluid" src="{{image.url}}" style="margin: 0 auto; width:50%; height:50%;">
                 <div class="caption" style="text-align: center;">
                   {{image.caption}}
@@ -243,11 +241,16 @@ instead of the small circle things at the bottom of the carousel, replace them w
 
 <script src="/static/js/carousel.js"></script>
 
-<script src="/static/lightbox2-master/dist/js/lightbox.min.js"></script>
+<script src="/static/js/lightbox.2.9.0.min.js"></script>
 <script>
   lightbox.option({
     'wrapAround': true
   })
+</script>
+<script>
+  $(".published").on('click', function() {
+    $("#published > table").toggleClass("hidden");
+  });
 </script>
 <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCGEQBqKb2zbQdXuO8c9QNkvvkoL20eNw4"></script>
 <script type="text/javascript" src="/static/js/jquery.dataTables.min.js"></script>
