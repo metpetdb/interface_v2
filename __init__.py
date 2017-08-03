@@ -209,6 +209,8 @@ def samples():
         name = session.get("name",None)
     )
 
+#TODO: Improve this function to grab data from production database and inject it into the images variable.
+#TODO: Figure out how to get the checksum data into the images item data.
 
 @metpet_ui.route("/sample/<string:id>")
 def sample(id):
@@ -238,7 +240,18 @@ def sample(id):
         s["chemical_analyses"] = get(env("API_HOST")+"chemical_analyses/",
             params = {"subsample_ids": s["id"], "fields": "id", "format": "json"}, headers = headers).json()["results"]
 
-    return render_template("sample.html",
+    ##Injection of images into every returned template. 
+
+    images = [{"url":"/static/images/BingWallpaper-2017-07-26.jpg", "caption": "This is the caption for this rock", "full": "/static/images/BingWallpaper-2017-07-26.jpg"},
+                {"url":"/static/images/BingWallpaper-2017-07-27.jpg", "caption": "This is the caption for another rock", "full": "/static/images/BingWallpaper-2017-07-27.jpg"},
+                {"url":"/static/images/BingWallpaper-2017-07-29.jpg", "caption": "This is the third caption", "full": "/static/images/BingWallpaper-2017-07-29.jpg"},
+                {"url":"/static/images/BingWallpaper-2017-07-30.jpg", "caption": "This is the fourth caption", "full": "/static/images/BingWallpaper-2017-07-30.jpg"},
+
+                {"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1C-1%20pts.jpg", "caption": "this is the final caption", "full": "http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1C-1%20pts.jpg"}]
+    
+    sample["images"] = images
+
+    return render_template("valeriesampleimages.html",
         sample = sample,
         subsamples = subsamples,
         auth_token = session.get("auth_token",None),
@@ -775,103 +788,6 @@ def test():
     )
     '''
     return jsonify(results=response.json())
-
-##This function is a copy of "/sample/<string:id>" , where we send images to a new front-end template sampleimages.html
-##Ideally this will replace the old /sample/ endpoint when the images it sends back are consistent with the data in the production
-##database, or images stored in a new part of the django app in api_v2
-
-#TODO: Improve this function to grab data from production database and inject it into the images variable.
-#TODO: Figure out how to get the checksum data into the images item data.
-"""@metpet_ui.route("/luciensampleimages/<string:id>")
-def sampleimages(id):
-    #headers! to authenticate user during API calls (for private data and to add/edit their samples)
-    headers = None
-    if session.get("auth_token", None):
-        headers = {"Authorization": "Token "+session.get("auth_token")}
-
-    #get the sample the usual way and return error message if something went wrong
-    sample = get(env("API_HOST")+"samples/"+id+"/", params = {"format": "json"}, headers = headers).json()
-    if "detail" in sample:
-        flash(sample["detail"])
-        return redirect(url_for("search"))
-
-    #make lat/long and date nice
-    pos = sample["location_coords"].split(" ")
-    sample["location_coords"] = [round(float(pos[2].replace(")","")),5), round(float(pos[1].replace("(","")),5)]
-    if sample["collection_date"]:
-        sample["collection_date"] = sample["collection_date"][:-10]
-
-    #get subsample and analysis data for tables
-    subsamples = []
-    for s in sample["subsample_ids"]:
-        subsamples.append(get(env("API_HOST")+"subsamples/"+s,
-            params = {"fields": "subsample_type,name,id,public_data,owner", "format": "json"}, headers = headers).json())
-    for s in subsamples:
-        s["chemical_analyses"] = get(env("API_HOST")+"chemical_analyses/",
-            params = {"subsample_ids": s["id"], "fields": "id", "format": "json"}, headers = headers).json()["results"]
-
-    ##Injection of images into every returned template. 
-
-    images = [{"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1B-1%20pts.jpg"},
-                {"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1C-1%20pts.jpg"},
-                {"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A1-1%20pts.jpg"}]
-    
-    sample["images"] = images
-
-    return render_template("sampleimages.html",
-        sample = sample,
-        subsamples = subsamples,
-        auth_token = session.get("auth_token",None),
-        email = session.get("email",None),
-        name = session.get("name",None)
-    )"""
-
-@metpet_ui.route("/valeriesampleimages/<string:id>")
-def sampleimages(id):
-    #headers! to authenticate user during API calls (for private data and to add/edit their samples)
-    headers = None
-    if session.get("auth_token", None):
-        headers = {"Authorization": "Token "+session.get("auth_token")}
-
-    #get the sample the usual way and return error message if something went wrong
-    sample = get(env("API_HOST")+"samples/"+id+"/", params = {"format": "json"}, headers = headers).json()
-    if "detail" in sample:
-        flash(sample["detail"])
-        return redirect(url_for("search"))
-
-    #make lat/long and date nice
-    pos = sample["location_coords"].split(" ")
-    sample["location_coords"] = [round(float(pos[2].replace(")","")),5), round(float(pos[1].replace("(","")),5)]
-    if sample["collection_date"]:
-        sample["collection_date"] = sample["collection_date"][:-10]
-
-    #get subsample and analysis data for tables
-    subsamples = []
-    for s in sample["subsample_ids"]:
-        subsamples.append(get(env("API_HOST")+"subsamples/"+s,
-            params = {"fields": "subsample_type,name,id,public_data,owner", "format": "json"}, headers = headers).json())
-    for s in subsamples:
-        s["chemical_analyses"] = get(env("API_HOST")+"chemical_analyses/",
-            params = {"subsample_ids": s["id"], "fields": "id", "format": "json"}, headers = headers).json()["results"]
-
-    ##Injection of images into every returned template. 
-
-    images = [{"url":"/static/images/BingWallpaper-2017-07-26.jpg", "caption": "This is the caption for this rock", "full": "/static/images/BingWallpaper-2017-07-31.jpg"},
-                {"url":"/static/images/BingWallpaper-2017-07-27.jpg", "caption": "This is the caption for another rock", "full": "/static/images/BingWallpaper-2017-07-31.jpg"},
-                {"url":"/static/images/BingWallpaper-2017-07-29.jpg", "caption": "This is the third caption", "full": "/static/images/BingWallpaper-2017-07-31.jpg"},
-                {"url":"/static/images/BingWallpaper-2017-07-30.jpg", "caption": "This is the fourth caption", "full": "/static/images/BingWallpaper-2017-07-31.jpg"},
-
-                {"url":"http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1C-1%20pts.jpg", "caption": "this is the final caption", "full": "/static/images/BingWallpaper-2017-07-31.jpg"}]
-    
-    sample["images"] = images
-
-    return render_template("valeriesampleimages.html",
-        sample = sample,
-        subsamples = subsamples,
-        auth_token = session.get("auth_token",None),
-        email = session.get("email",None),
-        name = session.get("name",None)
-    )
 
 if __name__ == "__main__":
     dotenv.read_dotenv("../app_variables.env")
