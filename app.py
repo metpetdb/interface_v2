@@ -742,7 +742,6 @@ def test():
         UserInput["owner"]=session.get("id")
 
         for key in UserInput :
-            print key
             if(key == 'json'):
                 UserInput[key] = json.loads(UserInput[key])
 

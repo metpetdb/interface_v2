@@ -49,6 +49,7 @@ function ValidateURL(fileSelectURL) {
 
 //Submit the URL
 function ParseFileForUpload() {
+    document.getElementById('uploadButton').style.visibility='hidden';
     document.getElementById('msgbanner').innerHTML = "";
     template = null;
     if (document.getElementById('Samples').checked) {
@@ -82,6 +83,9 @@ function sendTopython(data) {
                 var banner = document.getElementById("msgbanner");
                 banner.style.color = 'red';
                 banner.innerHTML = "<p>Error! " + errorResponse['results']['error'] + "<br>Please try again.</p>";
+                if(document.getElementById('uploadButton')){
+                    document.getElementById('uploadButton').style.visibility='visible';
+                }
             } else {
                 populateTable(responseData);
             }
@@ -94,7 +98,6 @@ function populateTable(data) {
     document.getElementById('content').innerHTML = "";
     tableData = data["results"];
     // Time to separate out the metadata
-    console.log(tableData);
     var metadata = [];
     for (var i = 0; i < tableData.length; i++) {
         if (tableData[i].meta_header) {
@@ -212,7 +215,6 @@ function CreateCommentSection(cell, comments) {
         div.addEventListener("input", function() {
             this.style.backgroundColor = '#99b9ff';
             comments[parseInt(this.id)] = this.innerHTML;
-            console.log(tableData);
         });
     }
 }
@@ -238,16 +240,10 @@ function updateData(coords, change){
         } else {
             updateObject(entry,field,change);
         }
-        console.log(tableData);
     }else {
         entry[field] = change;
     }
 }
-
-function UpdateComment() {
-
-}
-
 
 function updateObject(entry, field, change) {
     var arr = change.split(',');
@@ -279,18 +275,19 @@ function createBanner(statusCode){
     return true;
 }
 
-
 function createGridSubmitButton() {
     var element = document.createElement("input");
     element.setAttribute("type", "button");
     element.setAttribute("value", "Submit fixed form");
     element.setAttribute("onclick", "submitJson();");
+    element.setAttribute("id","SubmitButton");
     document.getElementById("gridSubmit").appendChild(element);
 }
 
 function submitJson(){
+    var elem = document.getElementById('SubmitButton');
+    document.getElementById("gridSubmit").removeChild(elem);
     var data = {'template': template, 'json': JSON.stringify(tableData)};
-    console.log(data);
     sendTopython(data);
     removeTableContent();
 }
@@ -301,7 +298,6 @@ function removeTableContent() {
     table.deleteTHead();
     table.createTHead();
     var tableBody = table.getElementsByTagName("tbody")[0];
-
     while(tableBody.rows.length>0){
         tableBody.deleteRow(tableBody.rows.length - 1);
     }
