@@ -37,13 +37,11 @@ def search():
     print "session data: ", session
     #get all filter options from API, use format = json and minimum page sizes to speed it up
     if request.args.get("resource") == "samples":
-        print "WHY"
         #resource value set in search_form.html, appends samples.html to bottom of page
         fixedListArgs = combine_identical_parameters(request.args.iteritems(multi=True))
         return redirect(url_for("samples")+"?"+urlencode(fixedListArgs))
 
     if request.args.get("resource") == "chemical_analyses":
-        print "PLS"
         #minerals_and option not valid parameter for analyses
         #sets sample_filters b/c search samples only has sample filters
         #appends chemical_analyses.html to bottom of page
