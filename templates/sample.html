@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">-->
 
 {% block head %}
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -135,7 +134,8 @@ instead of the small circle things at the bottom of the carousel, replace them w
               </a>
             </li>
           {% endif %}
-          {% if loop.index > 1 and loop.index <= 3 %} <!-- Set the rest of the displayed images, .item active + number of cols -->
+          {% if 1 < loop.index <= 3 %} 
+          <!--Set the rest of the displayed images, .item active + number of cols -->
           <li class="item active col-md-4">
             <a href="{{image.full}}" data-lightbox="bigCarousel">
               <img class="d-block img-fluid" src="{{image.url}}" style="margin: 0 auto; width:50%;height:50%;">
@@ -164,7 +164,6 @@ instead of the small circle things at the bottom of the carousel, replace them w
               <div class="caption" style="text-align: center;">
                 {{image.caption}}
               </div>
-            <!--</a>-->
           {% endif %}
           {% if loop.index > 1 and loop.index < 3 %} <!-- all the clones except the first and last one, reqs: .item clone + number of cols -->
             <li class="item clone col-md-4">
