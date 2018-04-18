@@ -155,13 +155,12 @@ function exportToCsv() {
     csvFile += '\n';
   }
 
+  var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
   if (navigator.msSaveBlob) { // IE 10+
-    var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
-
     navigator.msSaveBlob(blob, filename);
   }
   else {
-    var link = document.createElement("a");
+    var link = document.createElement('a');
 
     if (navigator.userAgent.includes('Safari')) {
 
@@ -172,13 +171,16 @@ function exportToCsv() {
       console.log(navigator.userAgent);
       var url = URL.createObjectURL(blob);
       console.log(url);
-      link.setAttribute("href", url);
-      link.setAttribute("download", filename);
-      link.setAttribute('target', '_blank');
+      link.href = url;
+      link.download = filename;
+      link.target = '_blank';
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      setTimeout(function(){
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);  
+      }, 100);  
     }
   }
 }
