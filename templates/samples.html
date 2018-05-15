@@ -133,7 +133,9 @@ $('.samples-pagination').click(function (event)
 // EXPORT DATA TO CSV
 function exportToCsv() {
   if ('{{ auth_token }}' == 'None') {
-    alert("You must be logged in to export data to CSV.")
+    var ans = confirm("You must be logged in to export data to CSV. Redirect to login screen?");
+    if (ans)
+      window.location.href = '{{ url_for('login') }}';
     return;
   }
 
@@ -190,7 +192,9 @@ function exportToCsv() {
 //{{ url_for('edit_sample', id='new') }}
 function addSample() {
   if ('{{ auth_token }}' == 'None') {
-    alert("You must be logged in to add a sample.")
+    var ans = confirm("You must be logged in to add a sample. Redirect to login screen?");
+    if (ans)
+      window.location.href = '{{ url_for('login') }}';
     return;
   }
   window.location.href = '{{ url_for('edit_sample', id='new') }}';
