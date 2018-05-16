@@ -11,9 +11,8 @@
   <table id="samplelist" class="table">
     <caption>
       <span style="float:left">Total: {{ total }}</span>
-      
       <span style="float:right"><a href="#collapseOne" onclick="exportToCsv()">Export data to CSV files</a></span>
-      <span style="float:right; margin-right:20px;"><a href="{{ url_for('edit_sample', id='new') }}">Add Sample</a></span>
+      <span style="float:right; margin-right:20px;"><a onclick="addSample()">Add Sample</a></span>
     </caption>
     <thead>
       <tr>
@@ -133,6 +132,13 @@ $('.samples-pagination').click(function (event)
 
 // EXPORT DATA TO CSV
 function exportToCsv() {
+  if ('{{ auth_token }}' == 'None') {
+    var ans = confirm("You must be logged in to export data to CSV. Redirect to login screen?");
+    if (ans)
+      window.location.href = '{{ url_for('login') }}';
+    return;
+  }
+
   var filename = prompt("Please enter a filename:","search_results.csv");
   if (filename.substring(filename.length-4) != ".csv")
     filename += ".csv";
@@ -163,10 +169,8 @@ function exportToCsv() {
     var link = document.createElement('a');
 
     if (navigator.userAgent.includes('Safari')) {
-
-       window.open('data:attachment/csv;charset=utf-8,' + encodeURI(csvFile));
-
-
+      console.log(navigator.userAgent);
+      window.open('data:attachment/csv;charset=utf-8,' + encodeURI(csvFile));
     } else {
       console.log(navigator.userAgent);
       var url = URL.createObjectURL(blob);
@@ -184,6 +188,18 @@ function exportToCsv() {
     }
   }
 }
+
+//{{ url_for('edit_sample', id='new') }}
+function addSample() {
+  if ('{{ auth_token }}' == 'None') {
+    var ans = confirm("You must be logged in to add a sample. Redirect to login screen?");
+    if (ans)
+      window.location.href = '{{ url_for('login') }}';
+    return;
+  }
+  window.location.href = '{{ url_for('edit_sample', id='new') }}';
+}
+
 </script>
 
 
