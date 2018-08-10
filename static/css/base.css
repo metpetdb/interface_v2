@@ -243,6 +243,12 @@ label[for=bounds]
  width: 220px;
 }
 
+.fieldcheckboxgroup
+{
+ float:left;
+ width: 220px;
+}
+
 .navbar-toggle 
 {
  background-color: rgba(0, 0, 0, 0.19) !important;

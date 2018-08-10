@@ -20,6 +20,7 @@
           <li><a id="location-tab" href="#location">Location</a></li>
           <li><a href="#minerals">Minerals</a></li>
           <li><a href="#provenance">Provenance</a></li>
+          <li><a href="#field">Fields to Show</a></li>
         </ul>
 
         <div class="tab-content">
@@ -31,6 +32,7 @@
                 {% for rock_type in rock_types %}
                 <input type="checkbox" class="rocktype" onchange="updateRockTypes()" name="rock_types" value="{{rock_type.name}}">&nbsp;&nbsp;{{ rock_type.name }}
                 {% endfor %}
+
               </div>
             </ul>
           </div>
@@ -41,11 +43,24 @@
               <h3>Metamorphic Grade</h3>
               <div id="metgrade-checkboxes">
                 {% for mmg in metamorphic_grades %}
-                <input type="checkbox" class="metgrade" onchange="updateMetGrades()" name="metamorphic_grade" value="{{ mmg.name }}">&nbsp;&nbsp;{{ mmg.name }}
+                <input type="checkbox" class="metgrade" onchange="updateMetGrades()" name="metamorphic_grade" value="{{ mmg.name }}"> &nbsp;&nbsp;{{ mmg.name }}
                 {% endfor %}
               </div>
             </ul>
           </div>
+
+          <!-- FIELDS -->
+          <div class="tab-pane" id="field">
+            <ul>
+              <h3>Fields to Show</h3> <a id="toggleSelectAll" onclick="toggleAllFields(this.text)" href="#">Select All</a>
+              <div id="field-checkboxes">
+                {% for f in fields %}
+                <input type="checkbox" class="field" onchange="updateFields()" name="field" value="{{ f }}">
+                {% endfor %}
+              </div>
+            </ul>
+          </div>
+
 
           <!-- LOCATION -->
           <div class="tab-pane" id="location">
@@ -117,6 +132,8 @@
               </label>
             </div>
           </div>
+
+
     
           <!-- PROVENANCE -->
           <div class="tab-pane" id="provenance">
@@ -182,6 +199,8 @@
     </div>
   </div>
 
+
+<!-- SEARCH SUMMARY -->
   <div id="search-summary" class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
@@ -199,6 +218,8 @@
         <div id="search-options-minerals"></div>
         <div id="search-options-chemistry"></div>
         <div id="search-options-provenance"></div>
+        <div id="search-options-fields"></div>
+
         <div id="form-submit" class="text-center">
           <div class="btn-group" data-toggle="buttons" style="margin:0 auto;">
             <label class="btn btn-primary active">
@@ -208,6 +229,13 @@
               <input type="radio" name="resource" value="chemical_analyses"> Chemistry
             </label>
           </div>
+          <br> </br>
+              <select id="selected-ordering" onchange="updateSorting()" name="ordering" class="chosen-select">
+                <option value="" selected>Select order</option>
+                {% for s in sorting_dict %}
+                <option value="{{ s }}">{{ s }}</option>
+                {% endfor %}
+              </select><br>
           <div style="padding:10px 0px;">
             <input type="checkbox" id="showmap" onchange="$('#collapseThree').collapse('toggle');" name="showmap" value="ofcourse">Show samples on map
           </div>
@@ -236,6 +264,15 @@
 <link href="/static/css/bootstrap-switch.min.css" rel="stylesheet">
 
 <script>
+// TOGGLE SELECT ALL FOR FIELDS
+$("#toggleSelectAll").click(function() { 
+    if ($(this).text() == "Select All") { 
+        $(this).text("Clear All"); 
+    } else { 
+        $(this).text("Select All"); 
+    }; 
+});
+
 // TO SWITCH TABS
 $('#searchTab a').click(function (e) {
   e.preventDefault();
@@ -363,9 +400,44 @@ $(function()
   document.getElementById('metgrade-checkboxes').innerHTML='';
   document.getElementById('metgrade-checkboxes').appendChild(metgrades);
 
+
+    // GROUP FIELDS
+  originalHTML=$("#field-checkboxes :input");
+  newInnerHTML='';
+  b=0;
+  var fields=document.createElement('div');
+
+  for (a=0; a < originalHTML.length; a++)
+  {
+    if(b == 0)
+    {
+      div=document.createElement('div');
+      div.className='fieldcheckboxgroup';
+    }
+    var input=document.createElement('input');
+    $(input).className="field";
+    $(input).attr('type','checkbox');
+    $(input).attr('onchange','updateFields()');
+    $(input).attr('name','fields');
+    var val=$(originalHTML[a]).attr('value');
+    $(input).attr('value', val);
+
+    div.appendChild(input);
+    div.innerHTML += val += "<br>";
+    if(b == 4 || a == originalHTML.length - 1)
+    {
+      fields.appendChild(div);
+      b=0;
+    }
+    else
+      b++;
+  }
+  document.getElementById('field-checkboxes').innerHTML='';
+  document.getElementById('field-checkboxes').appendChild(fields);
+
   // GOOGLE MAP RENDERING
   function initialize()
-  {
+  {z
     // CREATE MAP CENTERED ON USER LOCATION (IF GIVEN)
     var map=new google.maps.Map(document.getElementById('map-canvas'), {
       zoom: 5,
@@ -761,6 +833,62 @@ function clearProvenance()
   document.getElementById("search-options-provenance").innerHTML="";
 }
 
+// SORTING
+function updateSorting()
+{
+  if($("#selected-ordering option:selected").length && $("#selected-ordering option:selected").text() != "Select order")
+  {
+    searchOptions.innerHTML += "<div class='summary-title'><h4>Sort by</h4></div>";
+    searchOptions.innerHTML += $("#selected-ordering option:selected").text() + "<br> ";
+  }
+  var s=searchOptions.innerHTML;
+  searchOptions.innerHTML=s.slice(0, -2);
+}
+
+// FIELDS
+function updateFields()
+{
+  var searchOptions=document.getElementById("search-options-fields");
+  searchOptions.innerHTML="";
+
+  var checkBoxes=document.getElementsByName("fields");
+  var checked=false;
+  for(var i=0; i < checkBoxes.length;i++)
+    if(checkBoxes[i].checked)     
+      checked=true;
+
+  if(checked)
+  {
+    searchOptions.innerHTML += "<div class='summary-title'><h4>Fields to Show</h4><a onclick='clearFields()' class='clear-title' href='#'>Clear</a></div>";
+    for(var i=0; i < checkBoxes.length;i++)
+      if(checkBoxes[i].checked)
+      {
+        searchOptions.innerHTML += checkBoxes[i].defaultValue;
+        searchOptions.innerHTML += ', ';
+      }
+    var s=searchOptions.innerHTML;
+    searchOptions.innerHTML=s.slice(0, -2);
+  }
+}
+function clearFields()
+{
+  var checkBoxes=document.getElementsByName("fields");
+  for(var i=0; i < checkBoxes.length;i++)
+    checkBoxes[i].checked=false;
+  document.getElementById("search-options-fields").innerHTML="";
+}
+
+function toggleAllFields(current)
+{
+  var checkBoxes=document.getElementsByName("fields");
+  if(current=="Clear All")
+    clearFields();
+  else
+    for(var i=0; i < checkBoxes.length;i++)
+      checkBoxes[i].checked=true;
+  updateFields();
+}
+
 function clearAll()
 {
   clearRockTypes();
@@ -768,6 +896,7 @@ function clearAll()
   clearLocation();
   clearMineral();
   clearProvenance();
+  clearFields();
 }
 </script>
 {% endblock %}

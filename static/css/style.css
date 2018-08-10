@@ -265,3 +265,7 @@ div.widget-divider div.ui-accordion-content.ui-helper-reset.ui-widget-content.ui
     margin-right: 0.5em;
 }
 
+.fieldcheckboxgroup input
+{
+    margin-right: 0.5em;
+}

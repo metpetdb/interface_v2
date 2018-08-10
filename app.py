@@ -14,7 +14,7 @@ from flask import (
     session
 )
 from flask_mail import Mail, Message
-from utilities import paginate_model, combine_identical_parameters
+from utilities import paginate_model, combine_identical_parameters, handle_fields
 
 mail = Mail()
 metpet_ui = Flask(__name__)
@@ -57,22 +57,28 @@ def search():
     references = get(env("API_HOST")+"references/", params = {"fields": "name", "page_size": 1100, "format": "json"}).json()["results"]
     metamorphic_grades = get(env("API_HOST")+"metamorphic_grades/", params = {"fields": "name", "page_size": 30, "format": "json"}).json()["results"]
     metamorphic_regions = get(env("API_HOST")+"metamorphic_regions/", params = {"fields": "name", "page_size": 240, "format": "json"}).json()["results"]
-
+    fields_dict = {'Subsamples':'subsample_ids', 'Chemical Analyses':'chemical_analysis_ids', 'Images':'images', 'Owner':'owner', 'Regions':'regions', \
+                'Country':'country','Metamorphic Grades':'metamorphic_grades', 'Metamorphic Regions':'metamorphic_regions', 'Minerals':'minerals', \
+                'References':'references','Exact Location':'location_coords', 'Collection Date':'collection_date', 'Rock Type':'rock_type'}
+    sorting_dict = {'Sample Number':'number', 'Collection Date':'collection_date', 'Country':'country', 'Exact Location':'location_coords', 'Metamorphic Grades':'metamorphic_grades', \
+                'Owner':'owner__name', 'References':'references__name', 'Rock Type':'rock_type__name'}
     countries = get(env("API_HOST")+"country_names/", params = {"format": "json"}).json()["country_names"]
     numbers = get(env("API_HOST")+"sample_numbers/", params = {"format": "json"}).json()["sample_numbers"]
     owners = get(env("API_HOST")+"sample_owner_names/", params = {"format": "json"}).json()["sample_owner_names"]
  
     return render_template("search_form.html",
-        regions = regions,
-        minerals = minerals,
-        rock_types = rock_types,
-        collectors = collectors,
-        references = references,
-        metamorphic_grades = metamorphic_grades,
-        metamorphic_regions = metamorphic_regions,
-        countries = countries,
-        numbers = numbers,
-        owners = owners,
+        regions = sorted(regions),
+        minerals = sorted(minerals),
+        rock_types = sorted(rock_types),
+        collectors = sorted(collectors),
+        references = sorted(references),
+        metamorphic_grades = sorted(metamorphic_grades),
+        metamorphic_regions = sorted(metamorphic_regions),
+        sorting_dict = sorted(sorting_dict),
+        fields = sorted(fields_dict.keys()),
+        countries = sorted(countries),
+        numbers = sorted(numbers),
+        owners = sorted(owners),
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),
         name = session.get("name",None)
@@ -102,6 +108,7 @@ def search_chemistry():
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"},headers = headers).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"},headers=headers).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"},headers = headers).json()["results"]
+
     except:
         print "public search chemistry"
         headers = {}
@@ -109,11 +116,12 @@ def search_chemistry():
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"}).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
 
+
     print 'len',len(oxides),len(elements),len(minerals)
     return render_template("chemical_search_form.html",
-        oxides = oxides,
-        elements = elements,
-        minerals = minerals,
+        oxides = sorted(oxides),
+        elements = sorted(elements),
+        minerals = sorted(minerals),
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),
         name = session.get("name",None)
@@ -128,13 +136,31 @@ def samples():
     headers = None
     #this ideally should do nothing if passed to the metpetdb api
 
-
     filters = dict(request.args)
     tmp_var = 0
     print("tokens")
     print(session)
     print("Pre-processing filters")
     print(filters)
+
+    # handle sorting
+    sorting_dict = {'Sample Number':'number','Collection Date':'collection_date', 'Country':'country', 'Exact Location':'location_coords', 'Metamorphic Grades':'metamorphic_grades', \
+                'Owner':'owner__name', 'References':'references__name', 'Rock Type':'rock_type__name'}
+    if 'ordering' in filters and filters['ordering'] != ['']:
+        sorting_name = filters['ordering'][0]
+    else:
+        sorting_name = 'Sample Number' # default
+
+    if sorting_name in sorting_dict: # all but second page
+        filters['ordering'] = [sorting_dict[sorting_name]]
+    else: # second page
+        rev_sorting_dict = dict((v, k) for k, v in sorting_dict.iteritems())
+        sorting_name = rev_sorting_dict[filters['ordering'][0]]
+    print 'SORTING NAME ==>',sorting_name
+
+    # format fields in request and keep list of titles for interface
+    filters['fields'], fields_dict, field_names = handle_fields(filters,True)
+
 
     for key in filters.keys():
         # Key is a map polygon
@@ -150,7 +176,7 @@ def samples():
             filters[key] = coords
             print(filters[key])
         # Unnecessary, empty, or blank key
-        elif key == "polygon_coord" or not filters[key] or filters[key] == '' or filters[key][0] == '':
+        elif key == "polygon_coord": # or not filters[key] or filters[key] == '' or filters[key][0] == '':
             del filters[key]
         # Any other key
         else:
@@ -183,17 +209,41 @@ def samples():
 
     next_url, prev_url, last_page, total = paginate_model("samples", samples, filters)
 
-    #split location into (rounded!) latitude and longitude
-    #make string of minerals for ... look and clean up date
+    # clean up values for samples view
     for s in sample_results:
-        pos = s["location_coords"].split(" ")
-        s["location_coords"] = [round(float(pos[2].replace(")","")),5),round(float(pos[1].replace("(","")),5)]
-        s["minerals"] = (", ").join([m["name"] for m in s["minerals"]])
-        if s["collection_date"]:
+        if "collection_date" in s and s["collection_date"]:
             s["collection_date"] = s["collection_date"][:-10]
+        else:
+            s["collection_date"] = ''
+        # to rounded lat/long
+        if "location_coords" in s:
+            pos = s["location_coords"].split(" ")
+            s["location_coords"] = '(' + str(round(float(pos[2].replace(")","")),5)) + ', ' + str(round(float(pos[1].replace("(","")),5)) + ')'
+        # to sorted lists of names
+        if "metamorphic_grades" in s:
+            s["metamorphic_grades"] = (", ").join([g["name"] for g in sorted(s["metamorphic_grades"], key=lambda x: x['name'])])
+        if "metamorphic_regions" in s:
+            s["metamorphic_regions"] = (", ").join([r["name"] for r in sorted(s["metamorphic_regions"], key=lambda x: x['name'])])
+        if "minerals" in s:
+            s["minerals"] = (", ").join([m["name"] for m in sorted(s["minerals"], key=lambda x: x['name'])])
+        if "references" in s:
+            s["references"] = (", ").join([r["name"] for r in sorted(s["references"], key=lambda x: x['name'])])
+        # to sorted lists
+        if "regions" in s:
+            s["regions"] = (", ").join([m for m in sorted(s["regions"])])        
+        # to single names
+        if "owner" in s:
+            s["owner"] = s["owner"]["name"]
+        if "rock_type" in s:
+            s["rock_type"] = s["rock_type"]["name"]
+
 
     return render_template("samples.html",
         samples = sample_results,
+        field_names = field_names,
+        fields_dict = fields_dict,
+        sorting_dict = sorting_dict,
+        sorting_name = sorting_name,
         showmap = "showmap" in filters,
         extends = "render" in filters,
         total = total,
@@ -424,6 +474,7 @@ def edit_subsample(id):
 def chemical_analyses():
     #similar to samples
     filters = dict(request.args)
+
     for key in filters.keys():
         f = ""
         for i in range(len(filters[key])):
@@ -433,7 +484,9 @@ def chemical_analyses():
             filters[key] = f[:-1]
         else:
             del filters[key]
+
     filters["format"] = "json"
+
     if "minerals_and" in filters:
         del filters["minerals_and"]
 
@@ -460,8 +513,8 @@ def chemical_analyses():
 
     for c in chem_results:
         c["sample"] = numbers[c["subsample"]["sample"]]
-        if c["analysis_date"]:
-            c["analysis_date"] = c["analysis_date"][:-10]
+        if "analysis_date" in c and c['analysis_date']:
+            c["analysis_date"] = c["analysis_date"][:-10] 
 
     return render_template("chemical_analyses.html",
         chemical_analyses = chem_results,
