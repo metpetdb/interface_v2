@@ -6,8 +6,13 @@
     </caption>
     <thead>
       <tr>
-        <th>Sample</th>
+        {% for name in field_names %}
+          <th> {{ name }} </th>
+        {% endfor %}
+      </tr>      
+<!--       <tr>
         <th>Point</th>
+        <th>Sample</th>
         <th>Analysis Method</th>
         <th>Analysis Material</th>
         <th>Elements</th>
@@ -15,13 +20,64 @@
         <th>Analyst</th>
         <th>Analysis Date</th>
         <th>Total</th>
-      </tr>
+      </tr> -->
     </thead>
     <tbody>
       {% for analysis in chemical_analyses %}
+        <tr>
+        {% for n in field_names %}
+
+          {% if n == 'Point' %}
+            <td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{{ analysis.spot_id }}</a></td>
+          {% endif %}          
+
+          {% if n == 'Sample Number' %}
+            <td id="url" class="sample_label"><a href="{{ url_for('sample', id=analysis.sample.id) }}">{{ analysis.sample.number }}</a></td>
+          {% endif %}
+
+          {% if n == 'Elements' %}
+            <td class="sample_mineral sample_value">
+              {% if analysis.elements %}
+              {{ analysis.elements.0.symbol }} {{ analysis.elements.0.amount }} ...
+              <div class="full_list">
+                {% for e in analysis.elements %}
+                {{ e.symbol }} {{ e.amount }}<br>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </td>
+          {% endif %}
+
+          {% if n == 'Minerals' %}
+            <td class="sample_mineral sample_value">
+              {% if analysis.oxides %}
+              {{ analysis.oxides.0.species }} {{ analysis.oxides.0.amount }} ...
+              <div class="full_list">
+                {% for o in analysis.oxides %}
+                {{ o.species }} {{ o.amount }}<br>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </td>
+          {% endif %}
+
+           {% if (n == 'Analysis Material') or (n == 'Analysis Date') or (n == 'Total') or (n == 'Analysis Method') or (n =='Analysis Date') or (n == 'Analyst') or (n == 'Analysis Location') %}
+             <td class="sample_value">{{ analysis[fields_dict[n]] }}</td>
+           {% endif %}
+           
+           {% if ((n == 'X Reference') or (n == 'Y Reference')) %}
+              {% if (not analysis[fields_dict[n]]) %}
+             <td class="sample_value">0</td>
+              {% endif %}
+           {% endif %}
+
+        {% endfor %}
+      </tr>
+      {% endfor %}
+      <!-- {% for analysis in chemical_analyses %}
       <tr>
+        <td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{{ analysis.spot_id }}</a></td>
         <td class="sample_value"><a href="{{ url_for('sample', id=analysis.sample.id) }}">{% if analysis.sample %}{{ analysis.sample.number }}{% endif %}</a></td>
-        <td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{% if analysis.spot_id %}{{ analysis.spot_id }}{% endif %}</a></td>
         <td class="sample_value">{% if analysis.analysis_method %}{{ analysis.analysis_method }}{% endif %}</td>
         <td class="sample_value">{% if analysis.mineral %}{{ analysis.mineral.name }}{% endif %}</td>
         <td class="sample_mineral sample_value">
@@ -48,7 +104,7 @@
         <td class="sample_value">{% if analysis.analysis_date %}{{ analysis.analysis_date }}{% endif %}</td>
         <td class="sample_value">{% if analysis.total != None %}{{ analysis.total }}{% endif %}</td>
       </tr>
-      {%endfor%}
+      {%endfor%} -->
     </tbody>
   </table>
 </div>

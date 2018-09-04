@@ -19,6 +19,7 @@
           <li class="active"><a href="#minerals">Minerals</a></li>
           <li><a href="#elements">Elements</a></li>
           <li><a href="#oxides">Oxides</a></li>
+          <li><a href="#field">Fields to Show</a></li>
         </ul>
 
         <div class="tab-content">
@@ -56,6 +57,19 @@
                 <input type="radio" name="elements_and" value=""> OR
               </label>
             </div>
+          </div>
+
+          <!-- FIELDS -->
+          <div class="tab-pane" id="field">
+            <ul>
+              <h3>Fields to Show</h3>
+              <div id="field-checkboxes">
+                {% for f in fields %}
+                <input type="checkbox" class="field" onchange="updateFields()" name="field" value="{{ f }}">
+                {% endfor %}
+              </div>
+              <a id="toggleSelectAll" style="float:top-right" onclick="toggleAllFields(this.text)" href="#">Select All</a>
+            </ul>
           </div>
 
           <!-- OXIDES -->
@@ -102,6 +116,7 @@
         <div id="search-options-minerals"></div>
         <div id="search-options-elements"></div>
         <div id="search-options-oxides"></div>
+        <div id="search-options-fields"></div>
         <div id="form-submit" class="text-center">
           <div class="btn-group" data-toggle="buttons">
             <label class="btn btn-primary">
@@ -137,6 +152,14 @@
 <link href="/static/css/bootstrap-switch.min.css" rel="stylesheet">
 
 <script>
+// TOGGLE SELECT ALL FOR FIELDS
+$("#toggleSelectAll").click(function() { 
+    if ($(this).text() == "Select All") { 
+        $(this).text("Clear All"); 
+    } else { 
+        $(this).text("Select All"); 
+    }; 
+});
 // TO SWITCH TABS
 $('#chemTab a').click(function (e) {
   e.preventDefault();
@@ -167,6 +190,10 @@ $(function()
     for(var a = 0; a < minerals.length; a++)
       if(minerals[a].selected && minerals[a].value !== "")
         url += "&minerals="+minerals[a].value;
+    var fields = $(document.getElementsByName("fields"));
+    for(var a = 0; a < fields.length; a++)
+      if(fields[a].checked && fields[a].value !== "")
+        url += "&fields="+f[a].defaultValue;
     var oxides = $("#selected-oxide option:selected");
     for(var a = 0; a < oxides.length; a++)
       if(oxides[a].selected && oxides[a].value !== "")
@@ -208,6 +235,40 @@ $(function()
     $(this).find('.btn').toggleClass('btn-default');
   });
 });
+
+// GROUP FIELDS
+  originalHTML=$("#field-checkboxes :input");
+  newInnerHTML='';
+  b=0;
+  var fields=document.createElement('div');
+
+  for (a=0; a < originalHTML.length; a++)
+  {
+    if(b == 0)
+    {
+      div=document.createElement('div');
+      div.className='fieldcheckboxgroup';
+    }
+    var input=document.createElement('input');
+    $(input).className="field";
+    $(input).attr('type','checkbox');
+    $(input).attr('onchange','updateFields()');
+    $(input).attr('name','fields');
+    var val=$(originalHTML[a]).attr('value');
+    $(input).attr('value', val);
+
+    div.appendChild(input);
+    div.innerHTML += val += "<br>";
+    if(b == 4 || a == originalHTML.length - 1)
+    {
+      fields.appendChild(div);
+      b=0;
+    }
+    else
+      b++;
+  }
+  document.getElementById('field-checkboxes').innerHTML='';
+  document.getElementById('field-checkboxes').appendChild(fields);
 
 // MINERALS
 function updateMineral()
@@ -294,11 +355,57 @@ function clearOxide()
   $("#oxide-select .chosen-select").val('').trigger("chosen:updated");
 }
 
+
+// FIELDS
+function updateFields()
+{
+  var searchOptions=document.getElementById("search-options-fields");
+  searchOptions.innerHTML="";
+
+  var checkBoxes=document.getElementsByName("fields");
+  var checked=false;
+  for(var i=0; i < checkBoxes.length;i++)
+    if(checkBoxes[i].checked)     
+      checked=true;
+
+  if(checked)
+  {
+    searchOptions.innerHTML += "<div class='summary-title'><h4>Fields to Show</h4><a onclick='clearFields()' class='clear-title' href='#'>Clear</a></div>";
+    for(var i=0; i < checkBoxes.length;i++)
+      if(checkBoxes[i].checked)
+      {
+        searchOptions.innerHTML += checkBoxes[i].defaultValue;
+        searchOptions.innerHTML += ', ';
+      }
+    var s=searchOptions.innerHTML;
+    searchOptions.innerHTML=s.slice(0, -2);
+  }
+}
+function clearFields()
+{
+  var checkBoxes=document.getElementsByName("fields");
+  for(var i=0; i < checkBoxes.length;i++)
+    checkBoxes[i].checked=false;
+  document.getElementById("search-options-fields").innerHTML="";
+}
+
+function toggleAllFields(current)
+{
+  var checkBoxes=document.getElementsByName("fields");
+  if(current=="Clear All")
+    clearFields();
+  else
+    for(var i=0; i < checkBoxes.length;i++)
+      checkBoxes[i].checked=true;
+  updateFields();
+}
+
 function clearAll()
 {
   clearMineral();
   clearElement();
   clearOxide();
+  clearFields();
 }
 </script>
 {% endblock %}
