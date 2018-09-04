@@ -225,6 +225,7 @@ def samples():
         if "metamorphic_regions" in s:
             s["metamorphic_regions"] = (", ").join([r["name"] for r in sorted(s["metamorphic_regions"], key=lambda x: x['name'])])
         if "minerals" in s:
+            print s["minerals"]
             s["minerals"] = (", ").join([m["name"] for m in sorted(s["minerals"], key=lambda x: x['name'])])
         if "references" in s:
             s["references"] = (", ").join([r["name"] for r in sorted(s["references"], key=lambda x: x['name'])])
@@ -657,10 +658,10 @@ def login():
         #try to login/register
         auth_token = {}
         if register:
-            auth_token = post(env("API_HOST")+"auth/register/", data = login).json()
+            auth_token = post(env("API_HOST")+"auth/users/", data = login).json()
             flash("Activation email sent to: {}".format(login['email']))
         else:
-            auth_token = post(env("API_HOST")+"auth/login/", data = login).json()
+            auth_token = post(env("API_HOST")+"auth/token/login/", data = login).json()
 
         #http://45.55.207.138/api/users/9fc3b7ab-cec5-450a-9b33-b3200a5eaca5/
 
@@ -697,9 +698,10 @@ def logout():
 def activate_account():
     # send request for account activation
     form = dict(request.form)
+    print(request.form)
     # try to activate the account
-    response = post(env("API_HOST") + "auth/activate/", data=form)
-    success =(response.status_code == 200)
+    response = post(env("API_HOST") + "auth/users/activate/", data=form)
+    success =(response.status_code == 204)
     return jsonify({'success' : success})
 
 @metpet_ui.route("/request-password-reset", methods = ["GET", "POST"])
@@ -709,7 +711,7 @@ def request_password_reset():
     if form:
         #get email data
         response = post(env("API_HOST")+"auth/password/reset/", data = form)
-        if response.status_code != 200:
+        if response.status_code != 204:
             flash("Invalid email. Please try again.")
         else:
             flash("Please check your email for a link to reset your password")
@@ -731,7 +733,7 @@ def reset_password():
     if password:
         #send new password to API
         response = post(env("API_HOST")+"auth/password/reset/confirm/", data = form)
-        if response.status_code != 200:
+        if response.status_code != 204:
             flash("Password reset failed. Please try again.")
             return redirect(url_for("request_password_reset"))
         else:
