@@ -211,32 +211,25 @@ def samples():
 
     # clean up values for samples view
     for s in sample_results:
-        if "collection_date" in s and s["collection_date"]:
-            s["collection_date"] = s["collection_date"][:-10]
-        else:
+        if "collection_date" not in s:
             s["collection_date"] = ''
         # to rounded lat/long
-        if "location_coords" in s:
-            pos = s["location_coords"].split(" ")
-            s["location_coords"] = '(' + str(round(float(pos[2].replace(")","")),5)) + ', ' + str(round(float(pos[1].replace("(","")),5)) + ')'
+        if "latitude" in s:
+            pos = [s["latitude"],s["longitude"]]
+            s["latitude,longitude"] = '(' + str(pos[0]) + ', ' + str(pos[1]) + ')'
         # to sorted lists of names
         if "metamorphic_grades" in s:
-            s["metamorphic_grades"] = (", ").join([g["name"] for g in sorted(s["metamorphic_grades"], key=lambda x: x['name'])])
+            s["metamorphic_grades"] = (", ").join(g for g in sorted(s["metamorphic_grades"]))
         if "metamorphic_regions" in s:
-            s["metamorphic_regions"] = (", ").join([r["name"] for r in sorted(s["metamorphic_regions"], key=lambda x: x['name'])])
+            s["metamorphic_regions"] = (", ").join(r for r in sorted(s["metamorphic_regions"]))
         if "minerals" in s:
-            print s["minerals"]
-            s["minerals"] = (", ").join([m["name"] for m in sorted(s["minerals"], key=lambda x: x['name'])])
+            # print s["minerals"]
+            s["minerals"] = (", ").join(m for m in sorted(s["minerals"]))
         if "references" in s:
-            s["references"] = (", ").join([r["name"] for r in sorted(s["references"], key=lambda x: x['name'])])
+            s["references"] = (", ").join(r for r in sorted(s["references"]))
         # to sorted lists
         if "regions" in s:
             s["regions"] = (", ").join([m for m in sorted(s["regions"])])        
-        # to single names
-        if "owner" in s:
-            s["owner"] = s["owner"]["name"]
-        if "rock_type" in s:
-            s["rock_type"] = s["rock_type"]["name"]
 
 
     return render_template("samples.html",
