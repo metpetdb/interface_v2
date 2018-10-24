@@ -23,8 +23,11 @@
       </tr>
       <tr>
         <td> </td>
-        <td><input type="submit" name="login" value="Log In">&nbsp;&nbsp;&nbsp;<a href="{{ url_for('request_password_reset') }}">Reset Password</a></td>
+	<td><input type="submit" name="login" value="Log In">&nbsp;&nbsp;&nbsp;<a href="{{ url_for('request_password_reset') }}">Reset Password</a></td>
       </tr>
+      <tr>
+	<td> </td>
+	<td><a href="{{ url_for('resend_activation') }}">Resend Activation Email</a></tr></td>
     </table>
   </div>
 </form>

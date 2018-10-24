@@ -155,11 +155,25 @@ body
 
 #search-summary
 {
- width:30%;
+ width: 30%;
  float:right;
  margin: 0 auto 0 auto;
+ font-size: 24;
  
- 
+}
+
+@media all and (max-width: 900px){
+    #search-summary
+    {
+        float: none;
+        margin: 0 0 0 0;
+        width: 100%
+    } 
+    #search-options
+    {
+        width:100%;
+        float: none;
+    } 
 }
 
 
@@ -230,6 +244,40 @@ label[for=bounds]
  margin: 0 35px 40px 35px;
  float: left;
 }
+
+#mobilerocktypes
+{
+ display: none;
+}
+
+#mobileMetGrade
+{
+    display: none;
+}
+
+@media (max-width: 900px)
+{
+ #mobilerocktypes
+ {
+    display: block;
+ }
+
+ #rocktypelist
+ {
+    display: none;
+ }
+
+ #mobileMetGrade
+ {
+    display: block;
+ }
+
+ #metgrade-checkboxes
+ {
+    display: none;
+ }
+}
+
 
 .rocktypecheckboxgroup
 {
@@ -718,3 +766,5 @@ background-color: rgb(235, 235, 235);
   height: auto;
  }
 }
+/* Turn form invisible, have rollodex thing enter data into form when used, backend still
+collects data from form
