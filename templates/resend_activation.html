@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}
+<h4>Resend Activation Email</h4>
+{% endblock %}
+
+{% block body %}
+<form action="" method="post" onsubmit="return checkForm(this);">
+	<div class="table-responsive" style="width:45%">
+		<table class="table">
+			<tr>
+				<td>Email*</td>
+				<td><input type="text" name="email" style="width:95%"></td>
+			</tr>
+			<tr>
+				<td> </td>
+				<td><input type="submit" value="Send Activation Email"></td>
+			</tr>
+		</table>
+	</div>
+</form>
+
+<script>
+function checkForm(form)
+{
+  if (form.email.value == "")
+  {
+    alert("Error: Email cannot be blank!");
+    form.email.focus();
+    return false;
+  }
+}
+</script>
+{% endblock %}
