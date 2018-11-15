@@ -50,6 +50,7 @@ def search():
         return redirect(url_for("chemical_analyses")+"?"+urlencode(fixedListArgs)+"&sample_filters=True")
 
     #get all filter options from API, use format = json and minimum page sizes to speed it up
+
     regions = get(env("API_HOST")+"regions/", params = {"fields": "name", "page_size": 2000, "format": "json"}).json()["results"]
     minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
     rock_types = get(env("API_HOST")+"rock_types/", params = {"fields": "name", "page_size": 40, "format": "json"}).json()["results"]
@@ -243,6 +244,10 @@ def sample(id):
         name = session.get("name",None)
     )
 
+
+@metpet_ui.route("/image_test")
+def display():
+    return render_template("delete_test_image.html")
 
 @metpet_ui.route("/edit-sample/<string:id>", methods = ["GET", "POST"])
 def edit_sample(id):

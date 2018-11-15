@@ -1,0 +1,5 @@
+/* Cosmetic only */
+#easyPaginate {width:300px; elementsPerPage:5;}
+#easyPaginate img {display:block;margin-bottom:10px;}
+.easyPaginateNav a {padding:15px;}
+.easyPaginateNav a.current {font-weight:bold;text-decoration:underline;}

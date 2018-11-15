@@ -1,0 +1,329 @@
+/**
+ * http://aeqdev.com/tools/js/abigimage/
+ *
+ * MIT License
+ *
+ * Copyright (c) 2014-2016 Maksim Krylosov <aequiternus@gmail.com>
+ */
+
+/*.abigimage-body {*/
+    /*position: fixed;*/
+    /*width: 100%;*/
+/*}*/
+
+.abigimage-layout {
+    position: fixed;
+    z-index: 100;
+    float: bottom;
+    top: 50px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    /*transition: opacity .2s ease-in-out, height .2s step-end;*/
+    height: 0;
+    opacity: 0;
+    /*display: none;*/
+
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
+    -ms-transform: translate3d(0, 0, 0);
+    -o-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+
+    overflow: hidden;
+    overflow-y: auto;
+}
+
+.abigimage-layout-active {
+    /*transition: opacity .2s ease-in-out, height .2s step-start;*/
+    height: 100%;
+    opacity: 1;
+    /*display: block;*/
+}
+
+.abigimage-layout-fadeout {
+    transition: opacity .2s ease-out;
+    opacity: 0;
+}
+
+/*.abigimage-overscroll {*/
+    /*position: fixed;*/
+    /*z-index: 100;*/
+    /*top: 0;*/
+    /*right: 0;*/
+    /*bottom: 0;*/
+    /*left: 0;*/
+    /*overflow-y: scroll;*/
+    /*transition: height .2s step-end;*/
+    /*height: 0;*/
+/*}*/
+
+/*.abigimage-overscroll-active {*/
+    /*transition: height .2s step-start;*/
+    /*height: 100%;*/
+    /*display: block;*/
+/*}*/
+
+.abigimage-overlay {
+    position: fixed;
+    z-index: 100;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: #fff;
+    background-color: rgba(132,132,132, .9);
+
+    /*transition: opacity .2s ease-in-out, height .2s step-end;*/
+    height: 0;
+    opacity: 0;
+    /*display: none;*/
+
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
+    -ms-transform: translate3d(0, 0, 0);
+    -o-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+}
+
+.abigimage-overlay-active {
+    /*transition: opacity .2s ease-in-out, height .2s step-start;*/
+    height: 100%;
+    opacity: 1;
+    /*display: block;*/
+}
+
+.abigimage-wrapper {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -100px;
+    bottom: 0;
+    overflow: hidden;
+}
+
+.abigimage-box { /*picture*/
+    position: absolute;
+    width: 312.5%;
+    left: -106.25%;
+    top: 15px;
+    /*top: 2.5em;*/
+    bottom: 2.5em;
+}
+
+.abigimage-nextBtnBox,
+.abigimage-prevBtnBox,
+.abigimage-closeBtnBox {
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+}
+
+.abigimage-prevBtnBox {
+    right: 50%;
+    left: 0;
+}
+
+.abigimage-closeBtnBox {
+    right: 0;
+    left: 50%;
+}
+
+.abigimage-prevBtn,
+.abigimage-nextBtn,
+.abigimage-zoomInBtn,
+.abigimage-zoomOutBtn,
+.abigimage-closeBtn {
+    cursor: pointer;
+    color: #fff;
+    background-color: #000;
+    background-color: rgba(0, 0, 0, 0);
+    opacity: .75;
+    padding: 2em;
+    transition: all .2s ease-in-out;
+}
+
+.abigimage-prevBtn,
+.abigimage-nextBtn {
+    float: left;
+/*    position: absolute;
+    top: 300px;*/
+}
+
+/*.abigimage-prevBtn {
+    left: 15%;
+}
+
+.abigimage-nextBtn {
+    left: 85%;
+}*/
+
+.abigimage-zoomInBtn,
+.abigimage-zoomOutBtn,
+.abigimage-closeBtn {
+    float: right;
+}
+
+.abigimage-prevBtn:hover, .abigimage-prevBtn-hover,
+.abigimage-nextBtn:hover, .abigimage-nextBtn-hover,
+.abigimage-closeBtn:hover, .abigimage-closeBtn-hover,
+.abigimage-zoomInBtn:hover, .abigimage-zoomOutBtn:hover {
+    background-color: #000;
+    background-color: rgba(0, 0, 0, 1);
+    opacity: 1;
+}
+
+.abigimage-img,
+.abigimage-imgNext,
+.abigimage-imgPrev {
+    position: absolute;
+    margin: auto;
+    width: auto;
+    top: 0;
+    bottom: 0;
+    display: block;
+    max-width: 32%;
+    max-height: 100%;
+
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
+    -ms-transform: translate3d(0, 0, 0);
+    -o-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+}
+
+.abigimage-img {
+    right: 0;
+    left: 0;
+    cursor: pointer;
+}
+
+.abigimage-imgNext {
+    right: 0;
+    left: 68%;
+    /*opacity: 0;*/
+}
+
+.abigimage-imgPrev {
+    right: 68%;
+    left: 0;
+    /*opacity: 0;*/
+}
+
+/*.abigimage-layout-slide .abigimage-imgNext,*/
+/*.abigimage-layout-slide .abigimage-imgPrev {*/
+    /*opacity: 1;*/
+/*}*/
+
+.abigimage-layout-zoom .abigimage-imgNext,
+.abigimage-layout-zoom .abigimage-imgPrev {
+    display: none !important;
+}
+
+.abigimage-top {
+    position: absolute;
+    top: 22px;
+    left: 27.5%;
+    right: 27.5%;
+    color: #fff;
+    line-height: 2.5;
+    transition: all .2s ease-in-out;
+    background-color: #000;
+    background-color: rgba(0, 0, 0, .5);
+}
+
+.abigimage-counter {
+    text-align: center;
+    opacity: .5;
+    transition: all .2s ease-in-out;
+    float: left;
+    padding: 2em;
+}
+
+.abigimage-counter:hover {
+    opacity: 1;
+}
+
+/*.abigimage-spinner {*/
+    /*float: right;*/
+    /*padding: 0 1em;*/
+    /*opacity: 0;*/
+    /*transition: all .2s ease-in-out;*/
+/*}*/
+
+/*.abigimage-spinner-active {*/
+    /*opacity: .5;*/
+/*}*/
+
+/*.abigimage-spinner-active:hover {*/
+    /*opacity: 1;*/
+/*}*/
+
+/*.abigimage-spinner:after {*/
+    /*content: ' ';*/
+    /*display: inline-block;*/
+    /*vertical-align: middle;*/
+    /*width: 1em;*/
+    /*height: 1em;*/
+    /*border: 1px solid;*/
+    /*border-bottom: 0;*/
+    /*border-radius: 50%;*/
+    /*animation: abigimage-spinner .6s linear infinite;*/
+/*}*/
+
+/*@keyframes abigimage-spinner {*/
+    /*0% { transform: rotate(0deg); }*/
+    /*100% { transform: rotate(360deg); }*/
+/*}*/
+
+.abigimage-bottomBox {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2.5em;
+}
+
+.abigimage-bottom {
+    position: absolute;
+    left: 27.25%;
+    right: 27.25%;
+    top: 727.5px;
+    color: #fff;
+    line-height: 2.5;
+    background-color: #000;
+    opacity: .5;
+    transition: all .2s ease-in-out;
+    text-align: center;
+    padding: 0 0em;
+}
+
+/*.abigimage-bottom:hover {
+    opacity: 1;
+}*/
+
+.abigimage-layout-full .abigimage-bottom,
+.abigimage-layout-full .abigimage-top {
+    opacity: 0;
+}
+
+.abigimage-layout-full .abigimage-box {
+    top: 0;
+    bottom: 0;
+}
+
+.abigimage-top,
+.abigimage-box,
+.abigimage-prevBtn,
+.abigimage-nextBtn,
+.abigimage-zoomInBtn,
+.abigimage-zoomOutBtn,
+.abigimage-closeBtn {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}

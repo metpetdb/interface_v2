@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    <title> Image Display Test </title>
+{% endblock %}
+
+{% block body %}
+<!--         <script src="https://code.jquery.com/jquery-2.0.3.min.js"></script>
+        <link href="https://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+ -->   
+<script type="text/javascript"> </script>
+
+<script src="https://code.jquery.com/jquery-2.0.3.min.js"></script>
+<script src="/static/js/abigimage.jquery.js"></script>
+<link rel="stylesheet" href="/static/css/abigimage.jquery.css">
+
+
+<!-- <script>
+    $(function() {
+        $('a[href$=".jpg"]').abigimage();
+    });
+</script> -->
+    <script>
+        $(function() {
+            $('a[href$=".jpg"]').abigimage({
+                bottomCSS: {
+                    fontSize: '2em',
+                    textAlign: 'center'
+                },
+                onopen: function (target) {
+                    this.bottom.html(
+                        $('img', target).attr('alt')
+                    );
+                }
+            });
+        });
+    </script>
+
+</script>
+
+<link type="text/css" rel="stylesheet" href="/static/css/lightslider.css" />
+<script src="/static/js/lightslider.js"></script>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    $("#lightSlider").lightSlider({
+
+    }); 
+  });
+</script>
+
+<h2>Example</h2>
+<p>
+<div class="fullGallery">
+    <ul id="lightSlider">
+      <li>
+          <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1B-1%20pts.jpg">
+          <img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1B-1%20pts.jpg" width = "150" alt="First image"></a>
+      </li>
+      <li>
+          <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1B-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1B-1%20pts.jpg" width = "150" alt="Second image"></a>
+      </li>
+      <li>
+          <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A1-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A1-1%20pts.jpg"  width = "150" alt="Third image"></a>
+      </li>
+      <li>
+          <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A2-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A2-1%20pts.jpg" width = "150" alt="Fourth image"></a>
+      </li>
+      <li>
+          <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2D-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2D-1%20pts.jpg" width = "150" alt="Fifth image"></a>
+      </li>
+      <li>
+          <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2C-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2C-1%20pts.jpg"  width = "150" alt="Sixth image"></a>
+      </li>
+      <li>
+        <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2D-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2D-1%20pts.jpg" width = "150" alt="Seventh image"></a>
+      </li>
+      <li>
+        <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2C-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2C-1%20pts.jpg"  width = "150" alt="Eighth image"></a>
+      </li>
+     <li>
+        <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2E1-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2E1-1%20pts.jpg" width = "150" alt="Ninth image"></a>
+      </li>  
+
+    </ul>
+</div>
+
+<!-- 
+    <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1B-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1B-1%20pts.jpg" width = "150" alt="First image"></a>
+    <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1C-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon1C-1%20pts.jpg"  width = "150" alt="Second image"></a>
+    <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A1-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A1-1%20pts.jpg"  width = "150" alt="Third image"></a>
+    <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A2-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A2-1%20pts.jpg" width = "150" alt="First image"></a>
+    <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2B-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2B-1%20pts.jpg"  width = "150" alt="Second image"></a>
+    <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2C-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2C-1%20pts.jpg"  width = "150" alt="Third image"></a>
+
+    <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2D-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2D-1%20pts.jpg" width = "150" alt="First image"></a>
+    <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2C-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2C-1%20pts.jpg"  width = "150" alt="Second image"></a>
+   
+
+    <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2E1-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2E1-1%20pts.jpg" width = "150" alt="First image"></a>
+    <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A1-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A1-1%20pts.jpg"  width = "150" alt="Third image"></a>
+
+    <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2E1-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2E1-1%20pts.jpg" width = "150" alt="First image"></a>
+    <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A1-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A1-1%20pts.jpg"  width = "150" alt="Third image"></a>
+
+    <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2E1-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2E1-1%20pts.jpg" width = "150" alt="First image"></a>
+    <a href="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A1-1%20pts.jpg"><img src="http://www.cs.rpi.edu/~sibel/transfer/metpetdb/mon2A1-1%20pts.jpg"  width = "150" alt="Third image"></a> -->
+
+</p>
+{% endblock %}
