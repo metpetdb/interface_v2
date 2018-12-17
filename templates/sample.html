@@ -15,14 +15,14 @@
         <td class="sample_label">Owner</td>
         <td class="sample_value">{% if sample.owner %}{{ sample.owner.name }}{% endif %}</td>
       </tr>
-      <tr>
-        <td class="sample_label">IGSN</td>
+      <!--<tr>
+        <td class="sample_label">IGSN</td>  Nonexistent field  
         <td class="sample_value">{% if sample.sesar_number %}{{ sample.sesar_number }}{% endif %}</td>
-      </tr>
+      </tr> 
       <tr>
-        <td class="sample_label">Aliases</td>
+        <td class="sample_label">Aliases</td>   Nonexistent field  
         <td class="sample_value">{% if sample.aliases %}{% for a in sample.aliases %}{% if loop.index0 > 0 %}, {% endif %}{{ a }}{% endfor %}{% endif %}</td>
-      </tr>
+      </tr> -->
       <tr>
         <td class="sample_label">Date Collected</td>
         <td class="sample_value">{% if sample.collection_date %}{{ sample.collection_date }}{% endif %}</td>
@@ -31,18 +31,19 @@
         <td class="sample_label">Rock Type</td>
         <td class="sample_value">{% if sample.rock_type %}{{ sample.rock_type.name }}{% endif %}</td>
       </tr>
-      <tr>
-        <td class="sample_label">Public</td>
+      <!-- <tr>
+        <td class="sample_label">Public</td>   Nonexistent field  
         <td class="sample_value">{% if sample.public_data %}Yes{% else %}No{% endif %}</td>
-      </tr>
+      </tr> -->
       <tr>
         <td class="sample_label">Latitude</td>
-        <td class="sample_value">{% if sample.location_coords %}{{ sample.location_coords.0 }}{% endif %}</td>
+        <td class="sample_value">{% if sample.latitude %}{{ sample.latitude }}{% endif %}</td>
       </tr>
       <tr>
         <td class="sample_label">Longitude</td>
-        <td class="sample_value">{% if sample.location_coords %}{{ sample.location_coords.1 }}{% endif %}</td>
+        <td class="sample_value">{% if sample.longitude %}{{ sample.longitude }}{% endif %}</td>
       </tr>
+
       <tr>
         <td class="sample_label">Country</td>
         <td class="sample_value">{% if sample.country %}{{ sample.country }}{% endif %}</td>
@@ -68,7 +69,7 @@
         <td class="sample_value">{% if sample.metamorphic_grades %}{% for g in sample.metamorphic_grades %}{% if loop.index0 > 0 %}, {% endif %}{{ g.name }}{% endfor %}{% endif %}</td>
       </tr>
       <tr>
-        <td class="sample_label">Publication References</td>
+        <td class="sample_label">Publication References</td> <!--  New Format  -->
         <td class="sample_value">
         {% if sample.references %}{% for r in sample.references %}
           {{ r.name }}
@@ -117,11 +118,10 @@
       {% if sample.images %}{% for image in sample.images %}
       <tr id="thumb_row">
         <td>
-          <a href="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_half}}" rel="lightbox" title="Image type: {{ image.image_type }} <br> File name: {{ image.filename }} <br> <a href='http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum}}' target='_blank'>View Original</a>">
-            <img src="http://metpetdb.rpi.edu/metpetweb/image/?checksum={{image.checksum_64x64}}"/>
-          </a>
+          <a href = "{{ image.image.full_size }}"><img src="{{ image.image.thumbnail }}" alt="image not loaded"></a>
+
         </td>
-        <td>{{ image.image_type }}</td>
+        <td title="{{ image.image_type.comments }}">{{ image.image_type.image_type }}</td>
       </tr>
       {% endfor %}{% endif %}
     </tbody>
@@ -149,7 +149,7 @@
         <td id="img-popup"><a href="{{ url_for('subsample', id=subsample.id) }}">{{ subsample.name }}</a></td>
         <td>{{ subsample.public_data }}</td>
         <td>{{ subsample.subsample_type.name }}</td>
-        <td>{{ subsample.image_count }}</td>
+        <td>{{ subsample.images }}</td>
         <td>{{ subsample.chemical_analyses|length }}</td>
         <td><a href="{{ url_for('user', email=email) }}" target="_blank">{{ sample.owner.name }}</a></td>
         <td> -- </td>
@@ -170,8 +170,8 @@ $(document).ready(function()
   $('#thumb_row td a').lightbox();
 });
 
-map_lat = {{sample.location_coords.0}};
-map_long = {{sample.location_coords.1}};
+map_lat = {{ sample.latitude }}; 
+map_long = {{ sample.longitude }};  
 
 var myCenter=new google.maps.LatLng(map_lat, map_long);
 function initialize()
