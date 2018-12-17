@@ -13,7 +13,7 @@
     <tbody>
       <tr>
         <td class="sample_label">Owner</td>
-        <td class="sample_value">{% if sample.owner %}{{ sample.owner.name }}{% endif %}</td>
+        <td class="sample_value">{% if sample.owner %}{{ sample.owner }}{% endif %}</td>
       </tr>
       <!--<tr>
         <td class="sample_label">IGSN</td>  Nonexistent field  
@@ -29,7 +29,7 @@
       </tr>
       <tr>
         <td class="sample_label">Rock Type</td>
-        <td class="sample_value">{% if sample.rock_type %}{{ sample.rock_type.name }}{% endif %}</td>
+        <td class="sample_value">{% if sample.rock_type %}{{ sample.rock_type }}{% endif %}</td>
       </tr>
       <!-- <tr>
         <td class="sample_label">Public</td>   Nonexistent field  
@@ -62,17 +62,17 @@
       </tr>
       <tr>
         <td class="sample_label">Metamorphic Regions</td>
-        <td class="sample_value">{% if sample.metamorphic_regions %}{% for r in sample.metamorphic_regions %}{% if loop.index0 > 0 %}, {% endif %}{{ r.name }}{% endfor %}{% endif %}</td>
+        <td class="sample_value">{% if sample.metamorphic_regions %}{% for r in sample.metamorphic_regions %}{% if loop.index0 > 0 %}, {% endif %}{{ r }}{% endfor %}{% endif %}</td>
       </tr>
       <tr>
         <td class="sample_label">Metamorphic Grades</td>
-        <td class="sample_value">{% if sample.metamorphic_grades %}{% for g in sample.metamorphic_grades %}{% if loop.index0 > 0 %}, {% endif %}{{ g.name }}{% endfor %}{% endif %}</td>
+        <td class="sample_value">{% if sample.metamorphic_grades %}{% for g in sample.metamorphic_grades %}{% if loop.index0 > 0 %}, {% endif %}{{ g }}{% endfor %}{% endif %}</td>
       </tr>
       <tr>
         <td class="sample_label">Publication References</td> <!--  New Format  -->
         <td class="sample_value">
         {% if sample.references %}{% for r in sample.references %}
-          {{ r.name }}
+          {{ r }} <!--
           {% if r.title %}&nbsp;&nbsp;<img src="/static/images/icon-info-small.png" onclick="document.getElementById({{ loop.index0 }}).style.opacity=1">
           <table id="{{ loop.index0 }}" class="table reference_table">
             <tr>
@@ -86,7 +86,7 @@
             <tr><td>Journal:</td><td>{% if r.journal_name %}{{ r.journal_name }}{% endif %}</td></tr>
             <tr><td>Text:</td><td>{% if r.full_text %}{{ r.full_text }}{% endif %}</td></tr>
           </table><br>
-          {% endif %}
+          {% endif %} -->
         {% endfor %}{% endif %}
         </td>
       </tr>
@@ -96,7 +96,7 @@
       </tr>
       <tr>
         <td class="sample_label">Minerals</td>
-        <td class="sample_value">{% if sample.minerals %}{% for m in sample.minerals %}{% if loop.index0 > 0 %}, {% endif %}{{ m.name }}{% endfor %}{% endif %}</td>
+        <td class="sample_value">{% if sample.minerals %}{% for m in sample.minerals %}{% if loop.index0 > 0 %}, {% endif %}{{ m }}{% endfor %}{% endif %}</td>
       </tr>
     </tbody>
   </table>
