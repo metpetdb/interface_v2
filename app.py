@@ -302,6 +302,7 @@ def edit_sample(id):
 
     #edit_sample.html is a form with mostly the right input names
     sample = dict(request.form)
+    print(sample)
     response_text = "" # have sample response text in case of a forbidden access (403) error
     if sample:
         #minerals are named by id, make it into a nested list of dictionaries
@@ -320,10 +321,17 @@ def edit_sample(id):
 
         #make lat/long back into a point
         sample["location_coords"] = "SRID=4326;POINT ("+str(sample["location_coords1"])+" "+str(sample["location_coords0"])+")"
+        sample["latitude"] = sample["location_coords0"]
+        sample["longitude"] = sample["location_coords1"]
         del sample["location_coords0"]
         del sample["location_coords1"]
 
-        samples = get(env("API_HOST")+"samples/", params = {"fields": "number", "emails": session.get("email")},headers=headers).json()["results"]
+        print(sample)
+
+        # samples = get(env("API_HOST")+"samples/", params = {"fields": "number", "emails": session.get("email")},headers=headers).json()["results"]
+        samples = get(env("API_HOST")+"samples/", params = {"fields": "number", "emails": session.get("email")},headers=headers).json()
+        print(samples)
+
         #for s in samples:
         #    if s["number"] == sample["number"] and not new:
         #        errors = {"name": "Error: cannot have multiple samples with the same number"}
@@ -651,10 +659,10 @@ def login():
         #try to login/register
         auth_token = {}
         if register:
-            auth_token = post(env("API_HOST")+"auth/users/", data = login).json()
+            auth_token = post(env("API_HOST")+"auth/users/create/", data = login).json()
             flash("Activation email sent to: {}".format(login['email']))
         else:
-            auth_token = post(env("API_HOST")+"auth/token/login/", data = login).json()
+            auth_token = post(env("API_HOST")+"auth/token/create/", data = login).json()
 
         #http://45.55.207.138/api/users/9fc3b7ab-cec5-450a-9b33-b3200a5eaca5/
 
