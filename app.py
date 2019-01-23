@@ -14,7 +14,7 @@ from flask import (
     session
 )
 from flask_mail import Mail, Message
-from utilities import paginate_model, combine_identical_parameters, handle_fields
+from utilities import paginate_model, combine_identical_parameters
 
 mail = Mail()
 metpet_ui = Flask(__name__)
@@ -57,28 +57,22 @@ def search():
     references = get(env("API_HOST")+"references/", params = {"fields": "name", "page_size": 1100, "format": "json"}).json()["results"]
     metamorphic_grades = get(env("API_HOST")+"metamorphic_grades/", params = {"fields": "name", "page_size": 30, "format": "json"}).json()["results"]
     metamorphic_regions = get(env("API_HOST")+"metamorphic_regions/", params = {"fields": "name", "page_size": 240, "format": "json"}).json()["results"]
-    fields_dict = {'Subsamples':'subsample_ids', 'Chemical Analyses':'chemical_analysis_ids', 'Images':'images', 'Owner':'owner', 'Regions':'regions', \
-                'Country':'country','Metamorphic Grades':'metamorphic_grades', 'Metamorphic Regions':'metamorphic_regions', 'Minerals':'minerals', \
-                'References':'references','Exact Location':'location_coords', 'Collection Date':'collection_date', 'Rock Type':'rock_type'}
-    sorting_dict = {'Sample Number':'number', 'Collection Date':'collection_date', 'Country':'country', 'Exact Location':'location_coords', 'Metamorphic Grades':'metamorphic_grades', \
-                'Owner':'owner__name', 'References':'references__name', 'Rock Type':'rock_type__name'}
+
     countries = get(env("API_HOST")+"country_names/", params = {"format": "json"}).json()["country_names"]
     numbers = get(env("API_HOST")+"sample_numbers/", params = {"format": "json"}).json()["sample_numbers"]
     owners = get(env("API_HOST")+"sample_owner_names/", params = {"format": "json"}).json()["sample_owner_names"]
  
     return render_template("search_form.html",
-        regions = sorted(regions),
-        minerals = sorted(minerals),
-        rock_types = sorted(rock_types),
-        collectors = sorted(collectors),
-        references = sorted(references),
-        metamorphic_grades = sorted(metamorphic_grades),
-        metamorphic_regions = sorted(metamorphic_regions),
-        sorting_dict = sorted(sorting_dict),
-        fields = sorted(fields_dict.keys()),
-        countries = sorted(countries),
-        numbers = sorted(numbers),
-        owners = sorted(owners),
+        regions = regions,
+        minerals = minerals,
+        rock_types = rock_types,
+        collectors = collectors,
+        references = references,
+        metamorphic_grades = metamorphic_grades,
+        metamorphic_regions = metamorphic_regions,
+        countries = countries,
+        numbers = numbers,
+        owners = owners,
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),
         name = session.get("name",None)
@@ -108,7 +102,6 @@ def search_chemistry():
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"},headers = headers).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"},headers=headers).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"},headers = headers).json()["results"]
-
     except:
         print "public search chemistry"
         headers = {}
@@ -116,12 +109,11 @@ def search_chemistry():
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"}).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
 
-
     print 'len',len(oxides),len(elements),len(minerals)
     return render_template("chemical_search_form.html",
-        oxides = sorted(oxides),
-        elements = sorted(elements),
-        minerals = sorted(minerals),
+        oxides = oxides,
+        elements = elements,
+        minerals = minerals,
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),
         name = session.get("name",None)
@@ -136,31 +128,13 @@ def samples():
     headers = None
     #this ideally should do nothing if passed to the metpetdb api
 
+
     filters = dict(request.args)
     tmp_var = 0
     print("tokens")
     print(session)
     print("Pre-processing filters")
     print(filters)
-
-    # handle sorting
-    sorting_dict = {'Sample Number':'number','Collection Date':'collection_date', 'Country':'country', 'Exact Location':'location_coords', 'Metamorphic Grades':'metamorphic_grades', \
-                'Owner':'owner__name', 'References':'references__name', 'Rock Type':'rock_type__name'}
-    if 'ordering' in filters and filters['ordering'] != ['']:
-        sorting_name = filters['ordering'][0]
-    else:
-        sorting_name = 'Sample Number' # default
-
-    if sorting_name in sorting_dict: # all but second page
-        filters['ordering'] = [sorting_dict[sorting_name]]
-    else: # second page
-        rev_sorting_dict = dict((v, k) for k, v in sorting_dict.iteritems())
-        sorting_name = rev_sorting_dict[filters['ordering'][0]]
-    print 'SORTING NAME ==>',sorting_name
-
-    # format fields in request and keep list of titles for interface
-    filters['fields'], fields_dict, field_names = handle_fields(filters,True)
-
 
     for key in filters.keys():
         # Key is a map polygon
@@ -176,7 +150,7 @@ def samples():
             filters[key] = coords
             print(filters[key])
         # Unnecessary, empty, or blank key
-        elif key == "polygon_coord": # or not filters[key] or filters[key] == '' or filters[key][0] == '':
+        elif key == "polygon_coord" or not filters[key] or filters[key] == '' or filters[key][0] == '':
             del filters[key]
         # Any other key
         else:
@@ -209,35 +183,17 @@ def samples():
 
     next_url, prev_url, last_page, total = paginate_model("samples", samples, filters)
 
-    # clean up values for samples view
+    #split location into (rounded!) latitude and longitude
+    #make string of minerals for ... look and clean up date
     for s in sample_results:
-        if "collection_date" not in s:
-            s["collection_date"] = ''
-        # to rounded lat/long
-        if "latitude" in s:
-            pos = [s["latitude"],s["longitude"]]
-            s["latitude,longitude"] = '(' + str(pos[0]) + ', ' + str(pos[1]) + ')'
-        # to sorted lists of names
-        if "metamorphic_grades" in s:
-            s["metamorphic_grades"] = (", ").join(g for g in sorted(s["metamorphic_grades"]))
-        if "metamorphic_regions" in s:
-            s["metamorphic_regions"] = (", ").join(r for r in sorted(s["metamorphic_regions"]))
-        if "minerals" in s:
-            # print s["minerals"]
-            s["minerals"] = (", ").join(m for m in sorted(s["minerals"]))
-        if "references" in s:
-            s["references"] = (", ").join(r for r in sorted(s["references"]))
-        # to sorted lists
-        if "regions" in s:
-            s["regions"] = (", ").join([m for m in sorted(s["regions"])])        
-
+        pos = s["location_coords"].split(" ")
+        s["location_coords"] = [round(float(pos[2].replace(")","")),5),round(float(pos[1].replace("(","")),5)]
+        s["minerals"] = (", ").join([m["name"] for m in s["minerals"]])
+        if s["collection_date"]:
+            s["collection_date"] = s["collection_date"][:-10]
 
     return render_template("samples.html",
         samples = sample_results,
-        field_names = field_names,
-        fields_dict = fields_dict,
-        sorting_dict = sorting_dict,
-        sorting_name = sorting_name,
         showmap = "showmap" in filters,
         extends = "render" in filters,
         total = total,
@@ -263,12 +219,6 @@ def sample(id):
     if "detail" in sample:
         flash(sample["detail"])
         return redirect(url_for("search"))
-
-    #make lat/long and date nice
-    pos = sample["location_coords"].split(" ")
-    sample["location_coords"] = [round(float(pos[2].replace(")","")),5), round(float(pos[1].replace("(","")),5)]
-    if sample["collection_date"]:
-        sample["collection_date"] = sample["collection_date"][:-10]
 
     #get subsample and analysis data for tables
     subsamples = []
@@ -302,7 +252,6 @@ def edit_sample(id):
 
     #edit_sample.html is a form with mostly the right input names
     sample = dict(request.form)
-    print(sample)
     response_text = "" # have sample response text in case of a forbidden access (403) error
     if sample:
         #minerals are named by id, make it into a nested list of dictionaries
@@ -321,17 +270,10 @@ def edit_sample(id):
 
         #make lat/long back into a point
         sample["location_coords"] = "SRID=4326;POINT ("+str(sample["location_coords1"])+" "+str(sample["location_coords0"])+")"
-        sample["latitude"] = sample["location_coords0"]
-        sample["longitude"] = sample["location_coords1"]
         del sample["location_coords0"]
         del sample["location_coords1"]
 
-        print(sample)
-
-        # samples = get(env("API_HOST")+"samples/", params = {"fields": "number", "emails": session.get("email")},headers=headers).json()["results"]
-        samples = get(env("API_HOST")+"samples/", params = {"fields": "number", "emails": session.get("email")},headers=headers).json()
-        print(samples)
-
+        samples = get(env("API_HOST")+"samples/", params = {"fields": "number", "emails": session.get("email")},headers=headers).json()["results"]
         #for s in samples:
         #    if s["number"] == sample["number"] and not new:
         #        errors = {"name": "Error: cannot have multiple samples with the same number"}
@@ -476,7 +418,6 @@ def edit_subsample(id):
 def chemical_analyses():
     #similar to samples
     filters = dict(request.args)
-
     for key in filters.keys():
         f = ""
         for i in range(len(filters[key])):
@@ -486,9 +427,7 @@ def chemical_analyses():
             filters[key] = f[:-1]
         else:
             del filters[key]
-
     filters["format"] = "json"
-
     if "minerals_and" in filters:
         del filters["minerals_and"]
 
@@ -504,31 +443,37 @@ def chemical_analyses():
     next_url, prev_url, last_page, total = paginate_model("chemical_analyses", chemicals, filters)
 
     #collect sample ids and corresponding names
+    ##### FIRST EDITS, UNDO TO HERE #####
     samples = set()
     for c in chem_results:
-        samples.add(c["subsample"]["sample"])
+        samples.add(c["sample"])
     samples = get(env("API_HOST")+"samples/", params = {"fields": "number,id",
-        "ids": (",").join(list(samples)), "format": "json"}, headers = headers).json()["results"]
+       "sample_id": (",").join(list(samples)), "format": "json"}, headers = headers).json()["results"]
     numbers = {}
+    print(samples)
+    print("\n\n")
     for s in samples:
-        numbers[s["id"]] = s
+       numbers[s["id"]] = s
+
+    print(numbers)
+    print("\n\n")
 
     for c in chem_results:
-        c["sample"] = numbers[c["subsample"]["sample"]]
-        if "analysis_date" in c and c['analysis_date']:
-            c["analysis_date"] = c["analysis_date"][:-10] 
+        c["sample"] = numbers[c["sample"]]
+        if c["analysis_date"]:
+            c["analysis_date"] = c["analysis_date"][:-10]
 
-    return render_template("chemical_analyses.html",
-        chemical_analyses = chem_results,
-        total = total,
-        next_url = next_url,
-        prev_url = prev_url,
-        first_page = url_for("chemical_analyses")+"?"+urlencode(filters),
-        last_page = last_page,
-        auth_token = session.get("auth_token",None),
-        email = session.get("email",None),
-        name = session.get("name",None)
-    )
+    return render_template("chemical_analyses.html")
+#        chemical_analyses = chem_results,
+#        total = total,
+#        next_url = next_url,
+#        prev_url = prev_url,
+#        first_page = url_for("chemical_analyses")+"?"+urlencode(filters),
+#        last_page = last_page,
+#        auth_token = session.get("auth_token",None),
+#        email = session.get("email",None),
+#       name = session.get("name",None)
+#    )
 
 
 @metpet_ui.route("/chemical-analysis/<string:id>")
@@ -699,10 +644,9 @@ def logout():
 def activate_account():
     # send request for account activation
     form = dict(request.form)
-    print(request.form)
     # try to activate the account
     response = post(env("API_HOST") + "auth/users/activate/", data=form)
-    success =(response.status_code == 204)
+    success =(response.status_code == 200)
     return jsonify({'success' : success})
 
 @metpet_ui.route("/request-password-reset", methods = ["GET", "POST"])
@@ -712,7 +656,7 @@ def request_password_reset():
     if form:
         #get email data
         response = post(env("API_HOST")+"auth/password/reset/", data = form)
-        if response.status_code != 204:
+        if response.status_code != 200:
             flash("Invalid email. Please try again.")
         else:
             flash("Please check your email for a link to reset your password")
@@ -734,7 +678,7 @@ def reset_password():
     if password:
         #send new password to API
         response = post(env("API_HOST")+"auth/password/reset/confirm/", data = form)
-        if response.status_code != 204:
+        if response.status_code != 200:
             flash("Password reset failed. Please try again.")
             return redirect(url_for("request_password_reset"))
         else:
@@ -746,6 +690,28 @@ def reset_password():
         email = session.get("email",None),
         name = session.get("name",None)
     )
+
+
+@metpet_ui.route("/resend-activation", methods = ["GET", "POST"])
+def resend_activation():
+	#get email
+	form = dict(request.form)
+	if form:
+		#get email data
+		response = post(env("API_HOST")+"auth/password/reset/", data = form)
+		if response.status_code != 200:
+			flash("Invalid email. Please try again.")
+		else:
+			flash("Please check your email for a new activation link")
+			return redirect(url_for("login"))
+    
+
+	return render_template("resend_activation.html",
+    	auth_token = session.get("auth_token",None),
+    	email = session.get("email",None),
+    	name = session.get("name",None)
+	)
+
 
 
 @metpet_ui.route("/user")
@@ -831,4 +797,4 @@ def test():
 
 if __name__ == "__main__":
     dotenv.read_dotenv("../app_variables.env")
-    metpet_ui.run(debug = True)
+    metpet_ui.run(debug = True, host = "0.0.0.0") #host='67.240.56.169', port=5010, 
