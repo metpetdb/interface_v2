@@ -186,11 +186,15 @@ def samples():
     #split location into (rounded!) latitude and longitude
     #make string of minerals for ... look and clean up date
     for s in sample_results:
-        pos = s["location_coords"].split(" ")
-        s["location_coords"] = [round(float(pos[2].replace(")","")),5),round(float(pos[1].replace("(","")),5)]
-        s["minerals"] = (", ").join([m["name"] for m in s["minerals"]])
+        # pos = s["location_coords"].split(" ")
+        # s["location_coords"] = [round(float(pos[2].replace(")","")),5),round(float(pos[1].replace("(","")),5)]
+        s["minerals"] = (", ").join([m for m in s["minerals"]])
         if s["collection_date"]:
-            s["collection_date"] = s["collection_date"][:-10]
+            s["collection_date"] = s["collection_date"]#[:-10]
+        print(s)
+
+    csv_url = env("API_HOST") + "samples/?" + urlencode(filters) + "&format=csv"
+    print(csv_url)
 
     return render_template("samples.html",
         samples = sample_results,
@@ -203,7 +207,9 @@ def samples():
         last_page = last_page,
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),
-        name = session.get("name",None)
+        name = session.get("name",None),
+        # field_names = ['Sample Number','Subsamples','Chemical Analyses','Images','Rock Type','Minerals','Latitude','Longitude','Date Collected'],
+        csv_url = csv_url
     )
 
 

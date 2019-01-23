@@ -177,6 +177,9 @@ function exportToCsv() {
     return;
   }
 
+  window.location.href = '{{ csv_url }}';
+
+/*
   var filename = prompt("Please enter a filename:","search_results.csv");
   if (filename.substring(filename.length-4) != ".csv")
     filename += ".csv";
@@ -225,6 +228,7 @@ function exportToCsv() {
       }, 100);  
     }
   }
+  */
 }
 
 //{{ url_for('edit_sample', id='new') }}
