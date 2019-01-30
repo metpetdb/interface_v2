@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-
+<!-- Hello World -->
+<!-- Once more -->
 {% block title %}
 <h4>
   Sample {{ sample.number }}
@@ -45,11 +46,11 @@
       </tr>
       <tr>
         <td class="sample_label">Latitude</td>
-        <td class="sample_value">{% if sample.location_coords %}{{ sample.location_coords.0 }}{% endif %}</td>
+        <td class="sample_value">{% if sample.latitude %}{{ sample.latitude }}{% endif %}</td>
       </tr>
       <tr>
         <td class="sample_label">Longitude</td>
-        <td class="sample_value">{% if sample.location_coords %}{{ sample.location_coords.1 }}{% endif %}</td>
+        <td class="sample_value">{% if sample.longitude %}{{ sample.longitude }}{% endif %}</td>
       </tr>
       <tr>
         <td class="sample_label">Country</td>
@@ -183,8 +184,8 @@ $(document).ready(function()
   $('#thumb_row td a').lightbox();
 });
 
-map_lat = {{sample.location_coords.0}};
-map_long = {{sample.location_coords.1}};
+map_lat = {{sample.latitude}};
+map_long = {{sample.longitude}};
 
 var myCenter=new google.maps.LatLng(map_lat, map_long);
 function initialize()

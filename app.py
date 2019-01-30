@@ -57,11 +57,11 @@ def search():
     references = get(env("API_HOST")+"references/", params = {"fields": "name", "page_size": 1100, "format": "json"}).json()["results"]
     metamorphic_grades = get(env("API_HOST")+"metamorphic_grades/", params = {"fields": "name", "page_size": 30, "format": "json"}).json()["results"]
     metamorphic_regions = get(env("API_HOST")+"metamorphic_regions/", params = {"fields": "name", "page_size": 240, "format": "json"}).json()["results"]
-    fields_dict = {'Sample Number':'number','Subsamples':'subsample_ids', 'Chemical Analyses':'chemical_analysis_ids', 'Images':'images', 'Owner':'owner', 'Regions':'regions', \
+    fields_dict = {'Subsamples':'subsample_ids', 'Chemical Analyses':'chemical_analysis_ids', 'Images':'images', 'Owner':'owner', 'Regions':'regions', \
                 'Country':'country','Metamorphic Grades':'metamorphic_grades', 'Metamorphic Regions':'metamorphic_regions', 'Minerals':'minerals', \
-                'References':'references','Exact Location':'location_coords', 'Collection Date':'collection_date', 'Rock Type':'rock_type'}
-    sorting_dict = {'Sample Number':'number', 'Collection Date':'collection_date', 'Country':'country', 'Exact Location':'location_coords', 'Metamorphic Grades':'metamorphic_grades', \
-                'Owner':'owner__name', 'References':'references__name', 'Rock Type':'rock_type__name'}
+                'References':'references','Latitude':'latitude', 'Longitude':'longitude', 'Collection Date':'collection_date', 'Rock Type':'rock_type'}
+    sorting_dict = {'Sample Number':'number', 'Collection Date':'collection_date', 'Country':'country', \
+                'Metamorphic Grades':'metamorphic_grades','Owner':'owner__name', 'References':'references__name', 'Rock Type':'rock_type__name'}
     countries = get(env("API_HOST")+"country_names/", params = {"format": "json"}).json()["country_names"]
     numbers = get(env("API_HOST")+"sample_numbers/", params = {"format": "json"}).json()["sample_numbers"]
     owners = get(env("API_HOST")+"sample_owner_names/", params = {"format": "json"}).json()["sample_owner_names"]
@@ -78,7 +78,7 @@ def search():
         fields = sorted(fields_dict.keys()),
         countries = sorted(countries),
         numbers = sorted(numbers),
-        owners = sorted(owners),
+        owners = sorted(set(owners)),
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),
         name = session.get("name",None)
@@ -150,8 +150,8 @@ def samples():
     print(filters)
 
     # handle sorting
-    sorting_dict = {'Sample Number':'number','Collection Date':'collection_date', 'Country':'country', 'Exact Location':'location_coords', 'Metamorphic Grades':'metamorphic_grades', \
-                'Owner':'owner__name', 'References':'references__name', 'Rock Type':'rock_type__name'}
+    sorting_dict = {'Sample Number':'number','Collection Date':'collection_date', 'Country':'country', 'Metamorphic Grades':'metamorphic_grades', \
+                    'Owner':'owner', 'References':'references', 'Rock Type':'rock_type'}
     if 'ordering' in filters and filters['ordering'] != ['']:
         sorting_name = filters['ordering'][0]
     else:
@@ -216,31 +216,31 @@ def samples():
 
     # clean up values for samples view
     for s in sample_results:
-        if "collection_date" in s and s["collection_date"]:
-            s["collection_date"] = s["collection_date"][:-10]
-        else:
-            s["collection_date"] = ''
+        # if "collection_date" in s and s["collection_date"]:
+        #     s["collection_date"] = s["collection_date"]
+        # else:
+        #     s["collection_date"] = ''
         # to rounded lat/long
-        if "location_coords" in s:
-            pos = s["location_coords"].split(" ")
-            s["location_coords"] = '(' + str(round(float(pos[2].replace(")","")),5)) + ', ' + str(round(float(pos[1].replace("(","")),5)) + ')'
+        # if "location_coords" in s:
+        #     pos = s["location_coords"].split(" ")
+        #     s["location_coords"] = '(' + str(round(float(pos[2].replace(")","")),5)) + ', ' + str(round(float(pos[1].replace("(","")),5)) + ')'
         # to sorted lists of names
-        if "metamorphic_grades" in s:
-            s["metamorphic_grades"] = (", ").join([g["name"] for g in sorted(s["metamorphic_grades"], key=lambda x: x['name'])])
-        if "metamorphic_regions" in s:
-            s["metamorphic_regions"] = (", ").join([r["name"] for r in sorted(s["metamorphic_regions"], key=lambda x: x['name'])])
-        if "minerals" in s:
-            s["minerals"] = (", ").join([m["name"] for m in sorted(s["minerals"], key=lambda x: x['name'])])
-        if "references" in s:
-            s["references"] = (", ").join([r["name"] for r in sorted(s["references"], key=lambda x: x['name'])])
         # to sorted lists
+        if "metamorphic_grades" in s:
+            s["metamorphic_grades"] = (", ").join([g for g in sorted(s["metamorphic_grades"])])
+        if "metamorphic_regions" in s:
+            s["metamorphic_regions"] = (", ").join([r for r in sorted(s["metamorphic_regions"])])
+        if "minerals" in s:
+            s["minerals"] = (", ").join([m for m in sorted(s["minerals"])])
+        if "references" in s:
+            s["references"] = (", ").join([r for r in sorted(s["references"])])
         if "regions" in s:
             s["regions"] = (", ").join([m for m in sorted(s["regions"])])        
         # to single names
-        if "owner" in s:
-            s["owner"] = s["owner"]["name"]
-        if "rock_type" in s:
-            s["rock_type"] = s["rock_type"]["name"]
+        # if "owner" in s:
+        #     s["owner"] = s["owner"]
+        # if "rock_type" in s:
+        #     s["rock_type"] = s["rock_type"]
 
 
     return render_template("samples.html",
@@ -276,10 +276,10 @@ def sample(id):
         return redirect(url_for("search"))
 
     #make lat/long and date nice
-    pos = sample["location_coords"].split(" ")
-    sample["location_coords"] = [round(float(pos[2].replace(")","")),5), round(float(pos[1].replace("(","")),5)]
-    if sample["collection_date"]:
-        sample["collection_date"] = sample["collection_date"][:-10]
+    # pos = sample["location_coords"].split(" ")
+    # sample["location_coords"] = [round(float(pos[2].replace(")","")),5), round(float(pos[1].replace("(","")),5)]
+    # if sample["collection_date"]:
+    #     sample["collection_date"] = sample["collection_date"][:-10]
 
     #get subsample and analysis data for tables
     subsamples = []
@@ -330,9 +330,9 @@ def edit_sample(id):
             del sample["collection_date"]
 
         #make lat/long back into a point
-        sample["location_coords"] = "SRID=4326;POINT ("+str(sample["location_coords1"])+" "+str(sample["location_coords0"])+")"
-        del sample["location_coords0"]
-        del sample["location_coords1"]
+        # sample["location_coords"] = "SRID=4326;POINT ("+str(sample["location_coords1"])+" "+str(sample["location_coords0"])+")"
+        # del sample["location_coords0"]
+        # del sample["location_coords1"]
 
         samples = get(env("API_HOST")+"samples/", params = {"fields": "number", "emails": session.get("email")},headers=headers).json()["results"]
         #for s in samples:
@@ -366,9 +366,9 @@ def edit_sample(id):
         sample["owner"] = get(env("API_HOST")+"users/"+session.get("id")+"/", headers = headers).json()
     else:
         sample = get(env("API_HOST")+"samples/"+id+"/", params = {"format": "json"}, headers = headers).json()
-        pos = sample["location_coords"].split(" ")
-        sample["location_coords"] = [float(pos[2].replace(")","")), float(pos[1].replace("(",""))]
-        sample["references"] = [r["name"] for r in sample["references"]]
+        # pos = sample["location_coords"].split(" ")
+        # sample["location_coords"] = [float(pos[2].replace(")","")), float(pos[1].replace("(",""))]
+        sample["references"] = [r for r in sample["references"]]
 
     #get all the other data
     regions = get(env("API_HOST")+"regions/", params = {"page_size": 2000, "format": "json"}).json()["results"]

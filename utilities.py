@@ -35,12 +35,12 @@ def combine_identical_parameters(paramsIn):
     return paramsOut
 
 def handle_fields(filters,sample_search):
-    def_sample = 'Subsamples,Chemical Analyses,Minerals,Exact Location,Collection Date'
+    def_sample = 'Subsamples,Chemical Analyses,Images,Minerals,Latitude,Longitude,Collection Date'
     def_chem = 'Point,Analysis Method,Analysis Material,Elements,Oxides,Analyst,Analysis Date,Total'
     if sample_search:
-        fields_dict = {'Sample Number':'number','Subsamples':'subsample_ids', 'Chemical Analyses':'chemical_analysis_ids', 'Images':'images', 'Owner':'owner', 'Regions':'regions', \
+        fields_dict = {'Sample Number':'number','Subsamples':'subsample_ids', 'Chemical Analyses':'chemical_analyses_ids', 'Images':'images', 'Owner':'owner', 'Regions':'regions', \
                     'Country':'country','Metamorphic Grades':'metamorphic_grades', 'Metamorphic Regions':'metamorphic_regions', 'Minerals':'minerals', \
-                    'References':'references','Exact Location':'location_coords', 'Collection Date':'collection_date', 'Rock Type':'rock_type'}
+                    'References':'references', 'Latitude':'latitude', 'Longitude':'longitude', 'Collection Date':'collection_date', 'Rock Type':'rock_type'}
     else: # chemistry search
         fields_dict = {'Sample Number':'subsample','Point':'point','Analysis Method':'analysis_method','Analysis Material':'mineral','Analysis Location':'where_done','Elements':'elements','Oxides':'oxides', \
             'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}

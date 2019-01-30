@@ -43,7 +43,7 @@
               <td id="url" class="sample_label"><a href="{{ url_for('sample', id=sample.id) }}">{{ sample.number }}</td>
             {% endif %}
 
-            {% if (n == 'Chemical Analyses') or (n == 'Images') or (n == 'Subsamples') %}
+            {% if (n == 'Chemical Analyses') or (n == 'Images') or (n == 'Subsamples')  %}
               <td class="sample_value">{{ sample[fields_dict[n]]|length }}</td>
             {% endif %}
 
@@ -55,7 +55,7 @@
               </td>              
             {% endif %}
 
-            {% if (n == 'Country') or (n == 'Rock Type') or (n == 'Owner') or (n == 'Exact Location') or (n == 'Collection Date') or (n == 'Metamorphic Grades') or (n == 'References') %}
+            {% if (n == 'Country') or (n == 'Rock Type') or (n == 'Owner') or (n=='Latitude') or (n =='Longitude') or (n == 'Collection Date') or (n == 'Metamorphic Grades') or (n == 'References') %}
               <td class="sample_value">{{ sample[fields_dict[n]] }}</td>
             {% endif %} 
 
