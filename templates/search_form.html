@@ -34,6 +34,14 @@
                 {% endfor %}
 
               </div>
+
+              <div id="mobilerocktypes">
+                <select multiple onchange="mobileUpdateRock()" id="rocktypeselect">
+                  {% for rock_type in rock_types %}
+                  <option value="{{rock_type.name}}">{{ rock_type.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
             </ul>
           </div>
 
@@ -43,7 +51,7 @@
               <h3>Metamorphic Grade</h3>
               <div id="metgrade-checkboxes">
                 {% for mmg in metamorphic_grades %}
-                <input type="checkbox" class="metgrade" onchange="updateMetGrades()" name="metamorphic_grade" value="{{ mmg.name }}"> &nbsp;&nbsp;{{ mmg.name }}
+                <input type="checkbox" class="metgrade" onchange="updateMetGrades()" name="metamorphic_grade" value="{{ mmg.name }}">&nbsp;&nbsp;{{ mmg.name }}
                 {% endfor %}
               </div>
             </ul>
@@ -58,6 +66,14 @@
                 {% for f in fields %}
                 <input type="checkbox" class="field" onchange="updateFields()" name="field" value="{{ f }}">
                 {% endfor %}
+              </div>
+
+              <div id="mobileMetGrade">
+                <select multiple id="metgradelist" onchange="mobileUpdateMetGrade()">
+                {% for mmg in metamorphic_grades %}
+                <option value="{{ mmg.name }}">{{ mmg.name }}</option>
+                {% endfor %}
+              </select>
               </div>
               <a id="toggleSelectAll" style="float:top-right" onclick="toggleAllFields(this.text)" href="#">Select All</a>
             </ul>
@@ -150,7 +166,7 @@
               </select><br>
 
               <label class="provenance-label" for="collectors">Collector: </label>
-              <select id="selected-collectors" onchange="updateProvenance()" multiple name="collectors" class="chosen-select">
+              <select id="selected-collectors" onchange="updateProvenance()" multiple name="collectors" class="chosen-select" style="max-width: 100%">
                 {% for c in collectors %}
                 <option value="{{ c.name }}">{{ c.name }}</option>
                 {% endfor %}
@@ -443,7 +459,7 @@ $(function()
 
   // GOOGLE MAP RENDERING
   function initialize()
-  {z
+  {
     // CREATE MAP CENTERED ON USER LOCATION (IF GIVEN)
     var map=new google.maps.Map(document.getElementById('map-canvas'), {
       zoom: 5,
@@ -531,6 +547,34 @@ function HomeControl(controlDiv, map) {
 }
 
 // ROCK TYPES
+function mobileUpdateRock(){
+  var rockSelect=  $('#rocktypeselect').val();
+  var checkBoxes=document.getElementsByName("rock_types");
+
+  var n = 0;
+  for(var i=0; i < checkBoxes.length  && n < rockSelect.length; i++){
+    if(checkBoxes[i].value==rockSelect[n]){
+      checkBoxes[i].checked=true;
+      n = n + 1;
+    }
+  }
+
+  updateRockTypes()
+}
+function mobileUpdateMetGrade(){
+  var metGradeSelect= $('#metgradelist').val();
+  var checkBoxes=document.getElementsByName("metamorphic_grades");
+
+  var n = 0;
+  for(var i=0; i < checkBoxes.length && n < metGradeSelect.length;i++){
+    if(checkBoxes[i].value==metGradeSelect[n]){
+      checkBoxes[i].checked=true;
+      n = n + 1;
+    }
+  }
+
+  updateMetGrades()
+}
 function updateRockTypes()
 {
   var searchOptions=document.getElementById("search-options-rock-type");
