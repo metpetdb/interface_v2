@@ -671,12 +671,10 @@ def login():
         #try to login/register
         auth_token = {}
         if register:
-            auth_token = post(env("API_HOST")+"auth/register/", data = login).json()
+            auth_token = post(env("API_HOST")+"auth/users/create/", data = login).json()
             flash("Activation email sent to: {}".format(login['email']))
         else:
-            auth_token = post(env("API_HOST")+"auth/login/", data = login).json()
-
-        #http://45.55.207.138/api/users/9fc3b7ab-cec5-450a-9b33-b3200a5eaca5/
+            auth_token = post(env("API_HOST")+"auth/token/create/", data = login).json()
 
             if not auth_token or "auth_token" not in auth_token:
                 flash((',').join(auth_token.values()[0]))
@@ -712,7 +710,7 @@ def activate_account():
     # send request for account activation
     form = dict(request.form)
     # try to activate the account
-    response = post(env("API_HOST") + "auth/activate/", data=form)
+    response = post(env("API_HOST") + "auth/users/activate/", data=form)
     success =(response.status_code == 200)
     return jsonify({'success' : success})
 
@@ -723,7 +721,7 @@ def request_password_reset():
     if form:
         #get email data
         response = post(env("API_HOST")+"auth/password/reset/", data = form)
-        if response.status_code != 200:
+        if response.status_code != 204:
             flash("Invalid email. Please try again.")
         else:
             flash("Please check your email for a link to reset your password")
@@ -745,7 +743,7 @@ def reset_password():
     if password:
         #send new password to API
         response = post(env("API_HOST")+"auth/password/reset/confirm/", data = form)
-        if response.status_code != 200:
+        if response.status_code != 204:
             flash("Password reset failed. Please try again.")
             return redirect(url_for("request_password_reset"))
         else:
