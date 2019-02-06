@@ -329,37 +329,26 @@ def edit_sample(id):
         if not sample["collection_date"]:
             del sample["collection_date"]
 
-        #make lat/long back into a point
-        # sample["location_coords"] = "SRID=4326;POINT ("+str(sample["location_coords1"])+" "+str(sample["location_coords0"])+")"
-        # del sample["location_coords0"]
-        # del sample["location_coords1"]
+        sample['latitude'] = sample['location_coords1']
+        sample['longitude'] = sample['location_coords0']
+        del sample["location_coords0"]
+        del sample["location_coords1"]
 
-        samples = get(env("API_HOST")+"samples/", params = {"fields": "number", "emails": session.get("email")},headers=headers).json()["results"]
-        #for s in samples:
-        #    if s["number"] == sample["number"] and not new:
-        #        errors = {"name": "Error: cannot have multiple samples with the same number"}
-        errors = {}
-        #send data to API with PUT call and display error message if any
-        
-        if errors:
-            print errors
-        if not errors:
-            if new:
-                sample["owner"] = get(env("API_HOST")+"users/", params = {"email": session.get("email")}, headers = headers).json()
-                print "new edit-sample headers", headers
-                print "new edit-sample sample", sample
-                response = post(env("API_HOST")+"samples/", json = sample, headers = headers)
-            else:
-                response = put(env("API_HOST")+"samples/"+id+"/", json = sample, headers = headers)
-                print "old edit-sample headers", headers
-                print "old edit-sample sample", sample
-            print "edit-sample status code:",response.status_code
-            print "edit-sample response:",response.json()
-            if response.status_code < 300:
-                return redirect(url_for("sample", id = response.json()["id"]))
-            if response.status_code == 403:
-                response_text = response.json()['detail']
-            errors = response.json()
+        if new:
+            print "new edit-sample headers", headers
+            print "new edit-sample sample", sample
+            response = post(env("API_HOST")+"samples/", json = sample, headers = headers)
+        else:
+            response = put(env("API_HOST")+"samples/"+id+"/", json = sample, headers = headers)
+            print "old edit-sample headers", headers
+            print "old edit-sample sample", sample
+        print "edit-sample status code:",response.status_code
+        print "edit-sample response:",response.json()
+        if response.status_code < 300:
+            return redirect(url_for("sample", id = response.json()["id"]))
+        if response.status_code == 403:
+            response_text = response.json()['detail']
+        errors = response.json()
 
     #get sample data and split point into lat/long
     if new:
