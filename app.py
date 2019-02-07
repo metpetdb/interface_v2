@@ -108,7 +108,7 @@ def search_chemistry():
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"},headers = headers).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"},headers=headers).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"},headers = headers).json()["results"]
-        fields_dict = {'Sample Number':'subsample','Subsample':'subsample','Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral', \
+        fields_dict = {'Sample Number':'sample','Subsample':'subsample','Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral', \
                         'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','X Reference':'x_reference','Y Reference':'y_reference', \
                         'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
     except:
@@ -117,7 +117,7 @@ def search_chemistry():
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"}).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"}).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
-        fields_dict = {'Sample Number':'subsample','Subsample':'subsample','Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral', \
+        fields_dict = {'Sample Number':'sample','Subsample':'subsample','Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral', \
                         'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','X Reference':'x_reference','Y Reference':'y_reference', \
                         'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
 
@@ -216,16 +216,6 @@ def samples():
 
     # clean up values for samples view
     for s in sample_results:
-        # if "collection_date" in s and s["collection_date"]:
-        #     s["collection_date"] = s["collection_date"]
-        # else:
-        #     s["collection_date"] = ''
-        # to rounded lat/long
-        # if "location_coords" in s:
-        #     pos = s["location_coords"].split(" ")
-        #     s["location_coords"] = '(' + str(round(float(pos[2].replace(")","")),5)) + ', ' + str(round(float(pos[1].replace("(","")),5)) + ')'
-        # to sorted lists of names
-        # to sorted lists
         if "metamorphic_grades" in s:
             s["metamorphic_grades"] = (", ").join([g for g in sorted(s["metamorphic_grades"])])
         if "metamorphic_regions" in s:
@@ -236,11 +226,6 @@ def samples():
             s["references"] = (", ").join([r for r in sorted(s["references"])])
         if "regions" in s:
             s["regions"] = (", ").join([m for m in sorted(s["regions"])])        
-        # to single names
-        # if "owner" in s:
-        #     s["owner"] = s["owner"]
-        # if "rock_type" in s:
-        #     s["rock_type"] = s["rock_type"]
 
 
     return render_template("samples.html",
@@ -504,16 +489,16 @@ def chemical_analyses():
     print "length is ",len(chem_results)
     #collect sample ids and corresponding names
     samples = set()
-    for c in chem_results:
-        samples.add(c["subsample"]["sample"])
-    samples = get(env("API_HOST")+"samples/", params = {"fields": "number,id",
-        "ids": (",").join(list(samples)), "format": "json"}, headers = headers).json()["results"]
-    numbers = {}
-    for s in samples:
-        numbers[s["id"]] = s
+    # for c in chem_results:
+    #     samples.add(c["sample_id"])
+    # samples = get(env("API_HOST")+"samples/", params = {"fields": "number,id",
+    #     "ids": (",").join(list(samples)), "format": "json"}, headers = headers).json()["results"]
+    # numbers = {}
+    # for s in samples:
+    #     numbers[s["id"]] = s
 
     for c in chem_results:
-        c["sample"] = numbers[c["subsample"]["sample"]]
+        # c["sample"] = numbers[c["subsample"]["sample"]]
         if "analysis_date" in c and c['analysis_date']:
             c["analysis_date"] = c["analysis_date"][:-10] 
 

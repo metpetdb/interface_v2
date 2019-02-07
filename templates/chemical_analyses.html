@@ -32,7 +32,7 @@
           {% endif %}          
 
           {% if n == 'Sample Number' %}
-            <td id="url" class="sample_label"><a href="{{ url_for('sample', id=analysis.sample.id) }}">{{ analysis.sample.number }}</a></td>
+            <td id="url" class="sample_label"><a href="{{ url_for('sample', id=analysis.sample_id) }}">{{ analysis.sample }}</a></td>
           {% endif %}
 
           {% if n == 'Elements' %}
@@ -74,37 +74,7 @@
         {% endfor %}
       </tr>
       {% endfor %}
-      <!-- {% for analysis in chemical_analyses %}
-      <tr>
-        <td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{{ analysis.spot_id }}</a></td>
-        <td class="sample_value"><a href="{{ url_for('sample', id=analysis.sample.id) }}">{% if analysis.sample %}{{ analysis.sample.number }}{% endif %}</a></td>
-        <td class="sample_value">{% if analysis.analysis_method %}{{ analysis.analysis_method }}{% endif %}</td>
-        <td class="sample_value">{% if analysis.mineral %}{{ analysis.mineral.name }}{% endif %}</td>
-        <td class="sample_mineral sample_value">
-          {% if analysis.elements %}
-          {{ analysis.elements.0.symbol }} {{ analysis.elements.0.amount }} ...
-          <div class="full_list">
-            {% for e in analysis.elements %}
-            {{ e.symbol }} {{ e.amount }}<br>
-            {% endfor %}
-          </div>
-          {% endif %}
-        </td>
-        <td class="sample_mineral sample_value">
-          {% if analysis.oxides %}
-          {{ analysis.oxides.0.species }} {{ analysis.oxides.0.amount }} ...
-          <div class="full_list">
-            {% for o in analysis.oxides %}
-            {{ o.species }} {{ o.amount }}<br>
-            {% endfor %}
-          </div>
-          {% endif %}
-        </td>
-        <td class="sample_value">{% if analysis.analyst %}{{ analysis.analyst }}{% endif %}</td>
-        <td class="sample_value">{% if analysis.analysis_date %}{{ analysis.analysis_date }}{% endif %}</td>
-        <td class="sample_value">{% if analysis.total != None %}{{ analysis.total }}{% endif %}</td>
-      </tr>
-      {%endfor%} -->
+     
     </tbody>
   </table>
 </div>
