@@ -544,10 +544,6 @@ def chemical_analysis(id):
         flash(analysis['detail'])
         return redirect(url_for("search_chemistry"))
 
-    #have to get sample number still
-    analysis["sample"] = get(env("API_HOST")+"samples/"+analysis["subsample"]["sample"],
-        params = {"fields": "number", "format": "json"}, headers = headers).json()
-
     return render_template("chemical_analysis.html",
         analysis = analysis,
         auth_token = session.get("auth_token",None),
@@ -605,6 +601,8 @@ def edit_chemical_analysis(id, subsample_id):
         if analysis["reference_y"] == '':
             del analysis["reference_y"]
 
+        print "analysis: ",analysis
+
         if new:
             analysis["subsample_id"] = request.args.get("subsample_id")
             response = post(env("API_HOST")+"chemical_analyses/", json = analysis, headers = headers)
@@ -613,6 +611,7 @@ def edit_chemical_analysis(id, subsample_id):
         if response.status_code < 300:
             return redirect(url_for("chemical_analysis", id = response.json()["id"]))
         errors = response.json()
+        print errors
 
     if new:
         subsample = get(env("API_HOST")+"subsamples/"+subsample_id+"/", params = {"fields": "id,name,owner,sample"},headers = headers).json()
@@ -621,8 +620,6 @@ def edit_chemical_analysis(id, subsample_id):
     else:
         #again, still have to get sample number
         analysis = get(env("API_HOST")+"chemical_analyses/"+id+"/", params = {"format": "json"}, headers = headers).json()
-        analysis["sample"] = get(env("API_HOST")+"samples/"+analysis["subsample"]["sample"],
-            params = {"fields": "number", "format": "json"}, headers = headers).json()
 
     minerals = get(env("API_HOST")+"minerals/", params = {"page_size": 200, "format": "json"}).json()["results"]
     elements = get(env("API_HOST")+"elements/", params = {"page_size": 50, "format": "json"}).json()["results"]
