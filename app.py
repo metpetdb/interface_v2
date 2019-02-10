@@ -57,7 +57,7 @@ def search():
     references = get(env("API_HOST")+"references/", params = {"fields": "name", "page_size": 1100, "format": "json"}).json()["results"]
     metamorphic_grades = get(env("API_HOST")+"metamorphic_grades/", params = {"fields": "name", "page_size": 30, "format": "json"}).json()["results"]
     metamorphic_regions = get(env("API_HOST")+"metamorphic_regions/", params = {"fields": "name", "page_size": 240, "format": "json"}).json()["results"]
-    fields_dict = {'Subsamples':'subsample_ids', 'Chemical Analyses':'chemical_analysis_ids', 'Images':'images', 'Owner':'owner', 'Regions':'regions', \
+    fields_dict = {'Subsamples':'subsample_ids', 'Chemical Analyses':'chemical_analyses_ids', 'Images':'images', 'Owner':'owner', 'Regions':'regions', \
                 'Country':'country','Metamorphic Grades':'metamorphic_grades', 'Metamorphic Regions':'metamorphic_regions', 'Minerals':'minerals', \
                 'References':'references','Latitude':'latitude', 'Longitude':'longitude', 'Collection Date':'collection_date', 'Rock Type':'rock_type'}
     sorting_dict = {'Sample Number':'number', 'Collection Date':'collection_date', 'Country':'country', \
@@ -108,8 +108,8 @@ def search_chemistry():
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"},headers = headers).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"},headers=headers).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"},headers = headers).json()["results"]
-        fields_dict = {'Sample Number':'sample','Subsample':'subsample','Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral', \
-                        'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','X Reference':'x_reference','Y Reference':'y_reference', \
+        fields_dict = {'Subsample':'subsample','Analysis Method':'analysis_method','Analysis Material':'mineral', \
+                        'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides', \
                         'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
     except:
         print "public search chemistry"
@@ -117,8 +117,8 @@ def search_chemistry():
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"}).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"}).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
-        fields_dict = {'Sample Number':'sample','Subsample':'subsample','Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral', \
-                        'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','X Reference':'x_reference','Y Reference':'y_reference', \
+        fields_dict = {'Subsample':'subsample','Analysis Method':'analysis_method','Analysis Material':'mineral', \
+                        'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides', \
                         'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
 
     print 'len',len(oxides),len(elements),len(minerals)
@@ -161,11 +161,12 @@ def samples():
     else: # second page
         rev_sorting_dict = dict((v, k) for k, v in sorting_dict.iteritems())
         sorting_name = rev_sorting_dict[filters['ordering'][0]]
-    print 'SORTING NAME ==>',sorting_name
+    print 'sorting by: ',sorting_name
 
     # format fields in request and keep list of titles for interface
     filters['fields'], fields_dict, field_names = handle_fields(filters,True)
-
+    # print 'filters after handling: ', filters['fields']
+    # print 'field_names after handling: ', field_names
 
     for key in filters.keys():
         # Key is a map polygon
@@ -199,7 +200,7 @@ def samples():
         samples = get(env("API_HOST")+"samples/", params = filters,headers= headers).json()
         print "URL: ",get(env("API_HOST")+"samples/", params = filters,headers= headers)
     except KeyError:
-	samples = get(env("API_HOST")+"samples/",params = filters).json()
+        samples = get(env("API_HOST")+"samples/",params = filters).json()
 
     # print samples
     try:
@@ -209,10 +210,13 @@ def samples():
             error = samples["error"]
             print error
             samples = {}
+            sample_results = {}
         except: 
             samples = {}
+            sample_results = {}
 
-    next_url, prev_url, last_page, total = paginate_model("samples", samples, filters)
+    next_url, prev_url, last_page, total, page_num = paginate_model("samples", samples, filters)
+
 
     # clean up values for samples view
     for s in sample_results:
@@ -454,8 +458,6 @@ def chemical_analyses():
     #similar to samples
     filters = dict(request.args)
 
-    # print 'filters are ',filters['fields']
-
     for key in filters.keys():
         f = ""
         for i in range(len(filters[key])):
@@ -468,12 +470,15 @@ def chemical_analyses():
     filters["format"] = "json"
     if "minerals_and" in filters:
         del filters["minerals_and"]
-    fields_dict = {'Sample Number':'subsample','Point':'point','Analysis Method':'analysis_method','Analysis Material':'mineral','Analysis Location':'where_done','Elements':'elements','Oxides':'oxides', \
-        'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
+
+    # dynamic fields
+    fields_dict = {'Sample Number':'sample','Subsample':'subsample','Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral', \
+                    'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides', \
+                    'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
     fields_list, fields_dict, field_names = handle_fields(filters,False)
     filters['fields'] = fields_list[0]
-    print 'filters after handling: ', filters['fields']
-    print 'field_names after handling: ', field_names
+    # print 'filters after handling: ', filters['fields']
+    # print 'field names after handling: ', field_names
 
     headers = None
     if session.get("auth_token", None):
@@ -484,7 +489,7 @@ def chemical_analyses():
     ##MAKES Chemicals private visible to uploaders
     chemicals = get(env("API_HOST")+"chemical_analyses/", params = filters,headers=headers).json()
     chem_results = chemicals["results"]
-    next_url, prev_url, last_page, total = paginate_model("chemical_analyses", chemicals, filters)
+    next_url, prev_url, last_page, total, page_num = paginate_model("chemical_analyses", chemicals, filters)
 
     print "length is ",len(chem_results)
     #collect sample ids and corresponding names
@@ -510,6 +515,8 @@ def chemical_analyses():
         next_url = next_url,
         prev_url = prev_url,
         first_page = url_for("chemical_analyses")+"?"+urlencode(filters),
+        extends = "render" in filters,
+        page_num = page_num,
         last_page = last_page,
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),

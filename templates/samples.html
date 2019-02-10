@@ -56,7 +56,7 @@
             {% endif %}
 
             {% if (n == 'Country') or (n == 'Rock Type') or (n == 'Owner') or (n=='Latitude') or (n =='Longitude') or (n == 'Collection Date') or (n == 'Metamorphic Grades') or (n == 'References') %}
-              <td class="sample_value">{{ sample[fields_dict[n]] }}</td>
+              <td class="sample_value">{% if sample[fields_dict[n]] %}{{ sample[fields_dict[n]] }}{% endif %}</td>
             {% endif %} 
 
           {% endfor %}

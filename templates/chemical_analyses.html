@@ -1,3 +1,7 @@
+{% if extends %}{% extends "base.html" %}{% endif %}
+
+{% block body %}
+
 <div class="table-responsive">
   <table id="samplelist" class="table">
     <caption>
@@ -27,13 +31,13 @@
         <tr>
         {% for n in field_names %}
 
-          {% if n == 'Point' %}
-            <td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{{ analysis.spot_id }}</a></td>
-          {% endif %}          
-
           {% if n == 'Sample Number' %}
             <td id="url" class="sample_label"><a href="{{ url_for('sample', id=analysis.sample_id) }}">{{ analysis.sample }}</a></td>
           {% endif %}
+
+          {% if n == 'Point' %}
+            <td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{{ analysis.spot_id }}</a></td>
+          {% endif %}          
 
           {% if n == 'Elements' %}
             <td class="sample_mineral sample_value">
@@ -48,7 +52,7 @@
             </td>
           {% endif %}
 
-          {% if n == 'Minerals' %}
+          {% if n == 'Oxides' %}
             <td class="sample_mineral sample_value">
               {% if analysis.oxides %}
               {{ analysis.oxides.0.species }} {{ analysis.oxides.0.amount }} ...
@@ -61,8 +65,10 @@
             </td>
           {% endif %}
 
-           {% if (n == 'Analysis Material') or (n == 'Analysis Date') or (n == 'Total') or (n == 'Analysis Method') or (n =='Analysis Date') or (n == 'Analyst') or (n == 'Analysis Location') %}
-             <td class="sample_value">{{ analysis[fields_dict[n]] }}</td>
+           {% if (n == 'Subsample') or (n == 'Analysis Material') or (n == 'Analysis Date')
+                  or (n == 'Total') or (n == 'Analysis Method') or (n =='Analysis Date')
+                  or (n == 'Analyst') or (n == 'Analysis Location') %}
+             <td class="sample_value">{% if analysis[fields_dict[n]] %}{{ analysis[fields_dict[n]] }}{% endif %}</td>
            {% endif %}
            
            {% if ((n == 'X Reference') or (n == 'Y Reference')) %}
@@ -162,3 +168,4 @@ function exportToCsv() {
   }
 }
 </script>
+{% endblock %}

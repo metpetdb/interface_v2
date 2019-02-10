@@ -190,10 +190,10 @@ $(function()
     for(var a = 0; a < minerals.length; a++)
       if(minerals[a].selected && minerals[a].value !== "")
         url += "&minerals="+minerals[a].value;
-    var fields = $(document.getElementsByName("fields"));
+    var fields = $("#field-checkboxes :input");
     for(var a = 0; a < fields.length; a++)
       if(fields[a].checked && fields[a].value !== "")
-        url += "&fields="+f[a].defaultValue;
+        url += "&fields="+fields[a].value;
     var oxides = $("#selected-oxide option:selected");
     for(var a = 0; a < oxides.length; a++)
       if(oxides[a].selected && oxides[a].value !== "")

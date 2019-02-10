@@ -35,13 +35,13 @@
 
               </div>
 
-              <div id="mobilerocktypes">
+<!--               <div id="mobilerocktypes">
                 <select multiple onchange="mobileUpdateRock()" id="rocktypeselect">
                   {% for rock_type in rock_types %}
                   <option value="{{rock_type.name}}">{{ rock_type.name }}</option>
                   {% endfor %}
                 </select>
-              </div>
+              </div> -->
             </ul>
           </div>
 
@@ -57,7 +57,6 @@
             </ul>
           </div>
 
-<!-- HERE -->
           <!-- FIELDS -->
           <div class="tab-pane" id="field">
             <ul>
@@ -68,13 +67,14 @@
                 {% endfor %}
               </div>
 
-              <div id="mobileMetGrade">
+<!--               <div id="mobileMetGrade">
                 <select multiple id="metgradelist" onchange="mobileUpdateMetGrade()">
                 {% for mmg in metamorphic_grades %}
                 <option value="{{ mmg.name }}">{{ mmg.name }}</option>
                 {% endfor %}
               </select>
-              </div>
+              </div> -->
+              
               <a id="toggleSelectAll" style="float:top-right" onclick="toggleAllFields(this.text)" href="#">Select All</a>
             </ul>
           </div>
