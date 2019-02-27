@@ -180,7 +180,9 @@ def samples():
             # Reassemble coordinates to be a list of two-element lists
             coords = '[[' + ('],[').join(coords) + ']]'
             filters[key] = coords
+            print "FINAL POLY COORDS: "
             print(filters[key])
+            print(key)
         # Unnecessary, empty, or blank key
         elif key == "polygon_coord": # or not filters[key] or filters[key] == '' or filters[key][0] == '':
             del filters[key]
@@ -389,8 +391,9 @@ def subsample(id):
         return redirect(url_for("search"))
 
     #get sample and analysis info
-    subsample["sample"]["number"] = get(env("API_HOST")+"samples/"+subsample["sample"]["id"],
-        params = {"fields": "number", "format": "json"}, headers = headers).json()["number"]
+    # (unnecessary with new serializer)
+    # subsample["sample"]["number"] = get(env("API_HOST")+"samples/"+subsample["sample"]["id"],
+    #     params = {"fields": "number", "format": "json"}, headers = headers).json()["number"]
     chemical_analyses = get(env("API_HOST")+"chemical_analyses/", params = {"subsample_ids": subsample["id"], "format": "json"},headers=headers).json()["results"]
 
     return render_template("subsample.html",
