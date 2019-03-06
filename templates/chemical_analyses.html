@@ -124,6 +124,15 @@ $('.samples-pagination').click(function (event)
 
 // EXPORT DATA TO CSV
 function exportToCsv() {
+  if ('{{ auth_token }}' == 'None') {
+    var ans = confirm("You must be logged in to export data to CSV. Redirect to login screen?");
+    if (ans)
+      window.location.href = '{{ url_for('login') }}';
+    return;
+  }
+
+  window.location.href = '{{ csv_url }}';
+  /*
   var filename = prompt("Please enter a filename:","search_results.csv");
   if (filename.substring(filename.length-4) != ".csv")
     filename += ".csv";
@@ -166,6 +175,7 @@ function exportToCsv() {
       document.body.removeChild(link);
     }
   }
+  */
 }
 </script>
 {% endblock %}
