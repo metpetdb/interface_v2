@@ -1,13 +1,12 @@
 {% extends "base.html" %}
-<!-- Hello World -->
-<!-- Once more -->
+
 {% block title %}
 <h4>
   Sample {{ sample.number }}
   <div style="height:0px;overflow:hidden">
    <input type="file" id="fileInput" name="fileInput" />
   </div>
-  <a id="imgUpload" style="float:right" onclick="chooseFile();" href="#">Add Image</a>
+  {% if sample.public_data %}<a id="imgUpload" style="float:right" onclick="chooseFile();" href="#">Add Image</a>{% endif %}
   <div style='float:right'> &nbsp; &nbsp; &nbsp; </div>
 
 

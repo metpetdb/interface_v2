@@ -35,6 +35,10 @@
             <td id="url" class="sample_label"><a href="{{ url_for('sample', id=analysis.sample_id) }}">{{ analysis.sample }}</a></td>
           {% endif %}
 
+          {% if n == 'Subsample' %}
+            <td id="url" class="sample_label"><a href="{{ url_for('subsample', id=analysis.subsample_id) }}">{{ analysis.subsample }}</a></td>
+          {% endif %}
+
           {% if n == 'Point' %}
             <td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{{ analysis.spot_id }}</a></td>
           {% endif %}          
@@ -65,9 +69,9 @@
             </td>
           {% endif %}
 
-           {% if (n == 'Subsample') or (n == 'Analysis Material') or (n == 'Analysis Date')
+           {% if (n == 'Analysis Material') or (n == 'Analysis Date')
                   or (n == 'Total') or (n == 'Analysis Method') or (n =='Analysis Date')
-                  or (n == 'Analyst') or (n == 'Analysis Location') %}
+                  or (n == 'Analyst') or (n == 'Analysis Location') or (n =='Owner') %}
              <td class="sample_value">{% if analysis[fields_dict[n]] %}{{ analysis[fields_dict[n]] }}{% endif %}</td>
            {% endif %}
            
@@ -85,15 +89,19 @@
   </table>
 </div>
 
+{% if page_num != 1 %}
 &lt;&lt; <a class="samples-pagination" href="{{ first_page }}">First</a>
 {% if prev_url %}
   &nbsp;&nbsp;&lt; <a class="samples-pagination" href="{{ prev_url }}">Prev</a>
 {% endif %}
+{% endif %}
+{% if prev_url and next_url %}
 &nbsp;&nbsp;|
+{% endif %}
 {% if next_url %}
   &nbsp;&nbsp; <a class="samples-pagination" href="{{ next_url }}">Next</a> &gt;
-{% endif %}
 &nbsp;&nbsp; <a class="samples-pagination" href="{{ last_page }}">Last</a> &gt;&gt;
+{% endif %}
 
 <script>
 // AJAX PAGINATION CALLS

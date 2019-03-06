@@ -86,16 +86,19 @@
     </tbody>
   </table>
 </div>
-
+{% if page_num != 1 %}
 &lt;&lt; <a class="samples-pagination" href="{{ first_page }}">First</a>
 {% if prev_url %}
   &nbsp;&nbsp;&lt; <a class="samples-pagination" href="{{ prev_url }}">Prev</a>
 {% endif %}
+{% endif %}
+{% if prev_url and next_url %}
 &nbsp;&nbsp;|
+{% endif %}
 {% if next_url %}
   &nbsp;&nbsp; <a class="samples-pagination" href="{{ next_url }}">Next</a> &gt;
-{% endif %}
 &nbsp;&nbsp; <a class="samples-pagination" href="{{ last_page }}">Last</a> &gt;&gt;
+{% endif %}
 
 {% if showmap %}
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCGEQBqKb2zbQdXuO8c9QNkvvkoL20eNw4"></script>

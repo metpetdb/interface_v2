@@ -65,7 +65,7 @@
     <thead>
       <tr>
         <th>Point Number</th>
-        <th>Public</th>
+        <!-- <th>Public</th> -->
         <th>Analysis Method</th>
         <th>Analysis Material</th>
         <th>Analysis Location</th>
@@ -80,15 +80,15 @@
       {% for analysis in chemical_analyses %}
       <tr>
         <td><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{{ analysis.spot_id }}</td>
-        <td>{{ analysis.public_data }}</td>
-        <td>{{ analysis.analysis_method }}</td>
-        <td>{{ analysis.mineral }}</td>
-        <td>{{ analysis.where_done }}</td>
-        <td>{{ analysis.analyst }}</td>
-        <td>{{ analysis.analysis_date }}</td>
-        <td>{{ analysis.reference_x }}</td>
-        <td>{{ analysis.reference_y }}</td>
-        <td>{{ analysis.total }}</td>
+        <!-- <td>{% if analysis.public_data %} {{ analysis.public_data }} {% endif %} </td> -->
+        <td>{% if analysis.analysis_method %} {{ analysis.analysis_method }} {% endif %} </td>
+        <td>{% if analysis.mineral %} {{ analysis.mineral }} {% endif %} </td>
+        <td>{% if analysis.where_done %} {{ analysis.where_done }} {% endif %} </td>
+        <td>{% if analysis.analyst %} {{ analysis.analyst }} {% endif %} </td>
+        <td>{% if analysis.analysis_date %} {{ analysis.analysis_date[:-10] }} {% endif %} </td>
+        <td>{{ analysis.reference_x }} </td>
+        <td>{{ analysis.reference_y }} </td>
+        <td>{% if analysis.total %} {{ analysis.total }} {% endif %} </td>
       </tr>
       {% endfor %}
     </tbody>

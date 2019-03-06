@@ -14,15 +14,16 @@ def paginate_model(model_name, data, filters):
     if 'page_size' in filters:
         size = int(filters['page_size'])
     previous = None
-    if 'previous' in data:
+    if 'previous' in data and data['previous']:
 	    previous = url_for(model_name)+'?page='+str(page-1)+'&'+urlencode(filters)
-    next = None
-    if 'next' in data:
-	    next = url_for(model_name)+'?page='+str(page+1)+'&'+urlencode(filters)
-    last = url_for(model_name)+'?page='+str(count/size+1)+'&'+urlencode(filters)
+    nextt = None
+    if 'next' in data and data['next']:
+        nextt = url_for(model_name)+'?page='+str(page+1)+'&'+urlencode(filters)
+        print "=== NEXT IN DATA IS TRUE ===="
+    last = url_for(model_name)+'?page='+str((count/size)+bool(count%size))+'&'+urlencode(filters)
 
 
-    return (next, previous, last, count, page)
+    return (nextt, previous, last, count, page)
 
 def combine_identical_parameters(paramsIn):
     paramsOut = {}
@@ -39,14 +40,14 @@ def combine_identical_parameters(paramsIn):
 
 def handle_fields(filters,sample_search):
     def_sample = 'Subsamples,Chemical Analyses,Images,Minerals,Latitude,Longitude'
-    def_chem = 'Subsample,Analysis Method,Analysis Material,Elements,Oxides,Analyst,Analysis Date,Total'
+    def_chem = 'Analysis Method,Analysis Material,Elements,Oxides,Owner,Analysis Date,Total'
     if sample_search:
         fields_dict = {'Sample Number':'number','Subsamples':'subsample_ids', 'Chemical Analyses':'chemical_analyses_ids', 'Images':'images', 'Owner':'owner', 'Regions':'regions', \
                     'Country':'country','Metamorphic Grades':'metamorphic_grades', 'Metamorphic Regions':'metamorphic_regions', 'Minerals':'minerals', \
                     'References':'references', 'Latitude':'latitude', 'Longitude':'longitude', 'Collection Date':'collection_date', 'Rock Type':'rock_type'}
     else: # chemistry search
         fields_dict = {'Sample Number':'sample','Subsample':'subsample','Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral', \
-                        'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides', \
+                        'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','Owner':'owner', \
                         'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
 
     # default values 
@@ -61,16 +62,16 @@ def handle_fields(filters,sample_search):
 
     if (filters['fields'][0].split(',')[0] == 'id') or filters['fields'][0].split(',')[0] == 'sample':
         rev_fields_dict = dict((v, k) for k, v in fields_dict.iteritems())
-        field_vars = filters['fields'][0].split(',')[1:] if (sample_search) else filters['fields'][0].split(',')[2:]
+        field_vars = filters['fields'][0].split(',')[1:] if (sample_search) else filters['fields'][0].split(',')[3:] # skip ids
         field_names = []
         for var in field_vars:
             field_names.append(rev_fields_dict[var])
     else:
         # replace title values with variable names
         print "**** SAMPLE SEARCH: ",sample_search
-        field_names = ['Sample Number'] if (sample_search) else ['Sample Number','Point']
-        field_names += filters['fields'][0].split(',') # always show sample number
-        field_vars = 'id' if sample_search else 'id,sample_id' # need sample id for link
+        field_names = ['Sample Number'] if (sample_search) else ['Sample Number','Subsample','Point']  # always show sample number
+        field_names += filters['fields'][0].split(',')
+        field_vars = 'id' if sample_search else 'id,sample_id,subsample_id' # need sample id for link
         for name in field_names:
             if name in fields_dict:
                 field_vars += ',' + fields_dict[name]
