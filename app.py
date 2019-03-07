@@ -61,7 +61,8 @@ def search():
                 'Country':'country','Metamorphic Grades':'metamorphic_grades', 'Metamorphic Regions':'metamorphic_regions', 'Minerals':'minerals', \
                 'References':'references','Latitude':'latitude', 'Longitude':'longitude', 'Collection Date':'collection_date', 'Rock Type':'rock_type'}
     sorting_dict = {'Sample Number':'number','Subsamples':'subsamples', 'Collection Date':'collection_date','Subsamples':'subsamples', 'Country':'country', \
-                'Images':'images','Metamorphic Grades':'metamorphic_grades','Owner':'owner__name', 'References':'references__name', 'Rock Type':'rock_type__name', \
+                'Images':'images','Metamorphic Grades':'metamorphic_grades','Owner':'owner__name', 'References':'references__name', \
+                'Rock Type':'rock_type__name', \
                 'Chemical Analyses':'chemical_analyses'}
     countries = get(env("API_HOST")+"country_names/", params = {"format": "json"}).json()["country_names"]
     numbers = get(env("API_HOST")+"sample_numbers/", params = {"format": "json"}).json()["sample_numbers"]
