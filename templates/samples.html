@@ -184,50 +184,7 @@ function exportToCsv() {
   if (filename.substring(filename.length-4) != ".csv")
     filename += ".csv";
 
-  var csvFile = '';
-  var table = document.getElementById("samplelist");
-  for (var i = 0, row; row = table.rows[i]; i++) {
-    for (var j = 0, cell; cell = row.cells[j]; j++) {
-      //var innerdata = cell.innerText.toString();
-      var innerdata = cell.textContent.toString();
-      var k = innerdata.indexOf("...");
-      if (k >= 0)
-        innerdata = innerdata.substring(k+4);
-      if (innerdata.search(/("|,|\n)/g) >= 0)
-        innerdata = '"' + innerdata + '"';
-      if (j > 0)
-        csvFile += ',';
-      csvFile += innerdata;
-    }
-    csvFile += '\n';
-  }
-
-  var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
-  if (navigator.msSaveBlob) { // IE 10+
-    navigator.msSaveBlob(blob, filename);
-  }
-  else {
-    var link = document.createElement('a');
-
-    if (navigator.userAgent.includes('Safari')) {
-      console.log(navigator.userAgent);
-      window.open('data:attachment/csv;charset=utf-8,' + encodeURI(csvFile));
-    } else {
-      console.log(navigator.userAgent);
-      var url = URL.createObjectURL(blob);
-      console.log(url);
-      link.href = url;
-      link.download = filename;
-      link.target = '_blank';
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      setTimeout(function(){
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);  
-      }, 100);  
-    }
-  }
+  window.location.href = '{{ csv_url }}' + '&filename=' + filename;
 }
 
 //{{ url_for('edit_sample', id='new') }}

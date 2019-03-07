@@ -235,6 +235,8 @@ def samples():
         if "regions" in s:
             s["regions"] = (", ").join([m for m in sorted(s["regions"])])
 
+    csv_url = env("API_HOST") + "samples/?" + urlencode(filters) + "&format=csv"        
+
 
     return render_template("samples.html",
         samples = sample_results,
@@ -252,7 +254,8 @@ def samples():
         last_page = last_page,
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),
-        name = session.get("name",None)
+        name = session.get("name",None),
+        csv_url = csv_url
     )
 
 
@@ -516,6 +519,8 @@ def chemical_analyses():
         if "analysis_date" in c and c['analysis_date']:
             c["analysis_date"] = c["analysis_date"][:-10]
 
+    csv_url = env("API_HOST") + "chemical_analyses/?" + urlencode(filters) + "&format=csv"
+
     return render_template("chemical_analyses.html",
         chemical_analyses = chem_results,
         field_names = field_names,
@@ -529,7 +534,8 @@ def chemical_analyses():
         last_page = last_page,
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),
-        name = session.get("name",None)
+        name = session.get("name",None),
+        csv_url = csv_url
     )
 
 
