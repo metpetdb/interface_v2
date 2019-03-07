@@ -60,8 +60,9 @@ def search():
     fields_dict = {'Subsamples':'subsample_ids', 'Chemical Analyses':'chemical_analyses_ids', 'Images':'images', 'Owner':'owner', 'Regions':'regions', \
                 'Country':'country','Metamorphic Grades':'metamorphic_grades', 'Metamorphic Regions':'metamorphic_regions', 'Minerals':'minerals', \
                 'References':'references','Latitude':'latitude', 'Longitude':'longitude', 'Collection Date':'collection_date', 'Rock Type':'rock_type'}
-    sorting_dict = {'Sample Number':'number', 'Collection Date':'collection_date', 'Country':'country', \
-                'Images':'images','Metamorphic Grades':'metamorphic_grades','Owner':'owner__name', 'References':'references__name', 'Rock Type':'rock_type__name'}
+    sorting_dict = {'Sample Number':'number','Subsamples':'subsamples', 'Collection Date':'collection_date','Subsamples':'subsamples', 'Country':'country', \
+                'Images':'images','Metamorphic Grades':'metamorphic_grades','Owner':'owner__name', 'References':'references__name', 'Rock Type':'rock_type__name', \
+                'Chemical Analyses':'chemical_analyses'}
     countries = get(env("API_HOST")+"country_names/", params = {"format": "json"}).json()["country_names"]
     numbers = get(env("API_HOST")+"sample_numbers/", params = {"format": "json"}).json()["sample_numbers"]
     owners = get(env("API_HOST")+"sample_owner_names/", params = {"format": "json"}).json()["sample_owner_names"]
@@ -150,8 +151,9 @@ def samples():
     print(filters)
 
     # handle sorting
-    sorting_dict = {'Sample Number':'number','Collection Date':'collection_date', 'Country':'country', 'Metamorphic Grades':'metamorphic_grades', \
-                    'Images':'images', 'Owner':'owner', 'References':'references', 'Rock Type':'rock_type'}
+    sorting_dict = {'Sample Number':'number','Subsample Count':'subsamples', 'Collection Date':'collection_date','Subsamples':'subsamples', 'Country':'country', \
+                'Images':'images','Metamorphic Grades':'metamorphic_grades','Owner':'owner__name', 'References':'references__name', 'Rock Type':'rock_type__name', \
+                'Chemical Analyses':'chemical_analyses'}
     if 'ordering' in filters and filters['ordering'] != ['']:
         sorting_name = filters['ordering'][0]
     else:
