@@ -172,8 +172,8 @@
                 {% endfor %}
               </select><br>
 
-              <label class="provenance-label" for="georeferences">Reference: </label>
-              <select id="selected-references" onchange="updateProvenance()" multiple name="georeferences" class="chosen-select">
+              <label class="provenance-label" for="references">Reference: </label>
+              <select id="selected-references" onchange="updateProvenance()" multiple name="references" class="chosen-select">
                 {% for r in references %}
                 <option value="{{ r.name }}">{{ r.name }}</option>
                 {% endfor %}
