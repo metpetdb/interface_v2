@@ -69,16 +69,16 @@ def search():
     owners = get(env("API_HOST")+"sample_owner_names/", params = {"format": "json"}).json()["sample_owner_names"]
  
     return render_template("search_form.html",
-        regions = sorted(regions),
-        minerals = sorted(minerals),
-        rock_types = sorted(rock_types),
-        collectors = sorted(collectors),
-        references = sorted(references),
-        metamorphic_grades = sorted(metamorphic_grades),
-        metamorphic_regions = sorted(metamorphic_regions),
+        regions = regions,
+        minerals = minerals,
+        rock_types = rock_types,
+        collectors = collectors,
+        references = references,
+        metamorphic_grades = metamorphic_grades,
+        metamorphic_regions = metamorphic_regions,
         sorting_dict = sorted(sorting_dict),
         fields = sorted(fields_dict.keys()),
-        countries = sorted(countries),
+        countries = countries,
         numbers = sorted(numbers),
         owners = sorted(set(owners)),
         auth_token = session.get("auth_token",None),
@@ -125,9 +125,9 @@ def search_chemistry():
 
     print 'len',len(oxides),len(elements),len(minerals)
     return render_template("chemical_search_form.html",
-        oxides = sorted(oxides),
-        elements = sorted(elements),
-        minerals = sorted(minerals),
+        oxides = oxides,
+        elements = elements,
+        minerals = minerals,
         fields_dict = sorted(fields_dict),
         fields = sorted(fields_dict.keys()),
         auth_token = session.get("auth_token",None),
@@ -509,15 +509,6 @@ def chemical_analyses():
     next_url, prev_url, last_page, total, page_num = paginate_model("chemical_analyses", chemicals, filters)
 
     print "length is ",len(chem_results)
-    #collect sample ids and corresponding names
-    samples = set()
-    # for c in chem_results:
-    #     samples.add(c["sample_id"])
-    # samples = get(env("API_HOST")+"samples/", params = {"fields": "number,id",
-    #     "ids": (",").join(list(samples)), "format": "json"}, headers = headers).json()["results"]
-    # numbers = {}
-    # for s in samples:
-    #     numbers[s["id"]] = s
 
     for c in chem_results:
         # c["sample"] = numbers[c["subsample"]["sample"]]
