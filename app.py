@@ -69,7 +69,7 @@ def search():
     owners = get(env("API_HOST")+"sample_owner_names/", params = {"format": "json"}).json()["sample_owner_names"]
  
     return render_template("search_form.html",
-        regions = regions),
+        regions = regions,
         minerals = minerals,
         rock_types = rock_types,
         collectors = collectors,
