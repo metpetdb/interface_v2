@@ -852,7 +852,7 @@ function updateStartDate(input)
  var year=input.value.substr(-4);
  var date=input.value.substr(3, 2);
  var month=input.value.substr(0, 2);
- var timestamp=year + "-" + month + "-" + date + " 00:00:00"; 
+ var timestamp=year + "-" + month + "-" + date; 
  $('#startdatevalue').attr('value', timestamp);
  console.log($('#startdatevalue').val());
  updateProvenance();
@@ -862,7 +862,7 @@ function updateEndDate(input)
  var year=input.value.substr(-4);
  var date=input.value.substr(3, 2);
  var month=input.value.substr(0, 2);
- var timestamp=year + "-" + month + "-" + date + " 00:00:00"; 
+ var timestamp=year + "-" + month + "-" + date; 
  $('#enddatevalue').attr('value', timestamp);
  console.log($('#enddatevalue').val());
  updateProvenance();
