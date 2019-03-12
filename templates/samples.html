@@ -6,15 +6,14 @@
   <div id="res-map-canvas" style='width:600px;height:500px;margin:15px'></div>
 </div>
 {% endif %}
-
+<div class="header-buttons">
+      <span style="float:left; color:gray">Total: {{ total }}</span>
+      <span style="float:right"><a href="#collapseOne" onclick="exportToCsv()">Export data to CSV files</a></span>
+      <span style="float:right; margin-right:20px"><a onclick="addSample()">Add Sample</a></span>
+      <br> <br>
+</div>
 <div class="table-responsive">
   <table id="samplelist" class="table">
-    <caption>
-      <span style="float:left">Total: {{ total }}</span>
-      <span style="float:left; margin-left:838px;"><a onclick="addSample()">Add Sample</a></span>
-      <span style="float:left; margin-left:20px"><a href="#collapseOne" onclick="exportToCsv()">Export data to CSV files</a></span>
-
-    </caption>
     <thead>
       <tr>
         {% for name in field_names %}

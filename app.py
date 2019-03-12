@@ -69,16 +69,16 @@ def search():
     owners = get(env("API_HOST")+"sample_owner_names/", params = {"format": "json"}).json()["sample_owner_names"]
  
     return render_template("search_form.html",
-        regions = sorted(regions),
-        minerals = sorted(minerals),
-        rock_types = sorted(rock_types),
-        collectors = sorted(collectors),
-        references = sorted(references),
-        metamorphic_grades = sorted(metamorphic_grades),
-        metamorphic_regions = sorted(metamorphic_regions),
+        regions = regions),
+        minerals = minerals,
+        rock_types = rock_types,
+        collectors = collectors,
+        references = references,
+        metamorphic_grades = metamorphic_grades,
+        metamorphic_regions = metamorphic_regions,
         sorting_dict = sorted(sorting_dict),
         fields = sorted(fields_dict.keys()),
-        countries = sorted(countries),
+        countries = countries,
         numbers = sorted(numbers),
         owners = sorted(set(owners)),
         auth_token = session.get("auth_token",None),
@@ -110,7 +110,8 @@ def search_chemistry():
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"},headers = headers).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"},headers=headers).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"},headers = headers).json()["results"]
-        fields_dict = {'Subsample':'subsample','Analysis Method':'analysis_method','Analysis Material':'mineral', \
+        fields_dict = {'Analysis Method':'analysis_method','Analysis Material':'mineral','Subsample Type':'subsample_type', \
+                        'Stage X':'stage_x','Stage Y':'stage_y','Reference X':'reference_x','Reference Y':'reference_y', \
                         'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','Owner':'owner', \
                         'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
     except:
@@ -119,15 +120,16 @@ def search_chemistry():
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"}).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"}).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
-        fields_dict = {'Subsample':'subsample','Analysis Method':'analysis_method','Analysis Material':'mineral', \
+        fields_dict = {'Analysis Method':'analysis_method','Analysis Material':'mineral','Subsample Type':'subsample_type', \
+                        'Stage X':'stage_x','Stage Y':'stage_y','Reference X':'reference_x','Reference Y':'reference_y', \
                         'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','Owner':'owner', \
                         'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
 
     print 'len',len(oxides),len(elements),len(minerals)
     return render_template("chemical_search_form.html",
-        oxides = sorted(oxides),
-        elements = sorted(elements),
-        minerals = sorted(minerals),
+        oxides = oxides,
+        elements = elements,
+        minerals = minerals,
         fields_dict = sorted(fields_dict),
         fields = sorted(fields_dict.keys()),
         auth_token = session.get("auth_token",None),
@@ -186,6 +188,9 @@ def samples():
             print "FINAL POLY COORDS: "
             print(filters[key])
             print(key)
+        # Strip unused time values for start & end date queries
+        if (key == "start_date" or key == "end_date") and filters[key]:
+            filters[key] = filters[key][0][0:10]
         # Unnecessary, empty, or blank key
         elif key == "polygon_coord": # or not filters[key] or filters[key] == '' or filters[key][0] == '':
             del filters[key]
@@ -364,7 +369,6 @@ def edit_sample(id):
     references = get(env("API_HOST")+"references/", params = {"page_size": 2000, "format": "json"}).json()["results"]
     metamorphic_grades = get(env("API_HOST")+"metamorphic_grades/", params = {"page_size": 30, "format": "json"}).json()["results"]
     metamorphic_regions = get(env("API_HOST")+"metamorphic_regions/", params = {"page_size": 240, "format": "json"}).json()["results"]
-
     countries = get(env("API_HOST")+"country_names/").json()["country_names"]
 
     return render_template("edit_sample.html",
@@ -483,12 +487,13 @@ def chemical_analyses():
 
     # dynamic fields
     fields_dict = {'Sample Number':'sample','Subsample':'subsample','Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral', \
+                    'Stage X':'stage_x','Stage Y':'stage_y','Reference X':'reference_x','Reference Y':'reference_y','Subsample Type':'subsample_type', \
                     'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','Owner':'owner', \
                     'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
     fields_list, fields_dict, field_names = handle_fields(filters,False)
     filters['fields'] = fields_list[0]
-    # print 'filters after handling: ', filters['fields']
-    # print 'field names after handling: ', field_names
+    print 'filters after handling: ', filters['fields']
+    print 'field names after handling: ', field_names
 
     headers = None
     if session.get("auth_token", None):
@@ -505,15 +510,6 @@ def chemical_analyses():
     next_url, prev_url, last_page, total, page_num = paginate_model("chemical_analyses", chemicals, filters)
 
     print "length is ",len(chem_results)
-    #collect sample ids and corresponding names
-    samples = set()
-    # for c in chem_results:
-    #     samples.add(c["sample_id"])
-    # samples = get(env("API_HOST")+"samples/", params = {"fields": "number,id",
-    #     "ids": (",").join(list(samples)), "format": "json"}, headers = headers).json()["results"]
-    # numbers = {}
-    # for s in samples:
-    #     numbers[s["id"]] = s
 
     for c in chem_results:
         # c["sample"] = numbers[c["subsample"]["sample"]]

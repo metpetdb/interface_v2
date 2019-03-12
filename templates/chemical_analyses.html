@@ -1,13 +1,13 @@
 {% if extends %}{% extends "base.html" %}{% endif %}
 
 {% block body %}
-
+<div class="header-buttons">
+      <span style="float:left; color:gray">Total: {{ total }}</span>
+      <span style="float:right"><a href="#collapseOne" onclick="exportToCsv()">Export data to CSV file</a></span>
+      <br>
+</div>
 <div class="table-responsive">
   <table id="samplelist" class="table">
-    <caption>
-      <span style="float:left">Total: {{ total }}</span>
-      <span style="float:right"><a href="#collapseOne" onclick="exportToCsv()">Export data to CSV file</a></span>
-    </caption>
     <thead>
       <tr>
         {% for name in field_names %}
@@ -71,7 +71,8 @@
 
            {% if (n == 'Analysis Material') or (n == 'Analysis Date')
                   or (n == 'Total') or (n == 'Analysis Method') or (n =='Analysis Date')
-                  or (n == 'Analyst') or (n == 'Analysis Location') or (n =='Owner') %}
+                  or (n == 'Analyst') or (n == 'Analysis Location') or (n =='Owner')
+                  or (n == 'Subsample Type') %}
              <td class="sample_value">{% if analysis[fields_dict[n]] %}{{ analysis[fields_dict[n]] }}{% endif %}</td>
            {% endif %}
            
