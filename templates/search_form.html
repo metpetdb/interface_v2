@@ -35,7 +35,7 @@
 
               </div>
 
-<!--               <div id="mobilerocktypes">
+<!--               <div id="mobilerocktypes">or
                 <select multiple onchange="mobileUpdateRock()" id="rocktypeselect">
                   {% for rock_type in rock_types %}
                   <option value="{{rock_type.name}}">{{ rock_type.name }}</option>
@@ -131,7 +131,7 @@
           <!-- MINERALS -->
           <div class="tab-pane" id="minerals"><br>
             <label for="mineral-tree">Mineral: </label>
-            <div id="mineral-select">
+            <div id="mineral-select">or
               <select multiple id="selected-mineral" name="minerals" onchange="updateMineral()" class="chosen-select">
                 <option></option>
                 {% for m in minerals %}
@@ -172,8 +172,8 @@
                 {% endfor %}
               </select><br>
 
-              <label class="provenance-label" for="georeferences">Reference: </label>
-              <select id="selected-references" onchange="updateProvenance()" multiple name="georeferences" class="chosen-select">
+              <label class="provenance-label" for="references">Reference: </label>
+              <select id="selected-references" onchange="updateProvenance()" multiple name="references" class="chosen-select">
                 {% for r in references %}
                 <option value="{{ r.name }}">{{ r.name }}</option>
                 {% endfor %}
