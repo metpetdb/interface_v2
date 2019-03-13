@@ -105,7 +105,7 @@
     <thead>
       <tr>
         <th>Point Number</th>
-        <th>Public</th>
+        <!-- <th>Public</th> -->
         <th>Analysis Method</th>
         <th>Analysis Material</th>
         <th>Analysis Location</th>
@@ -120,7 +120,7 @@
       {% for analysis in chemical_analyses %}
       <tr>
         <td><a href="{{ url_for('chemical_analysis', id=analysis.id) }}">{{ analysis.spot_id }}</td>
-        <td>{% if analysis.public_data %} {{ analysis.public_data }} {% endif %} </td>
+        <!-- <td>{% if analysis.public_data %} {{ analysis.public_data }} {% endif %} </td> -->
         <td>{% if analysis.analysis_method %} {{ analysis.analysis_method }} {% endif %} </td>
         <td>{% if analysis.mineral %} {{ analysis.mineral }} {% endif %} </td>
         <td>{% if analysis.where_done %} {{ analysis.where_done }} {% endif %} </td>

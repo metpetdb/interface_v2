@@ -17,10 +17,10 @@
         <td class="sample_label">Owner</td>
         <td class="sample_value">{% if analysis.owner %}{{ analysis.owner }}{% endif %}</td>
       </tr>      
-      <tr>
+<!--       <tr>
         <td class="sample_label">Public</td>
         <td class="sample_value">{% if analysis.public_data %}Yes{% else %}No{% endif %}</td>
-      </tr>          
+      </tr>  -->         
       <tr>
         <td class="sample_label">Image</td>
         {% if analysis.reference_image and analysis.reference_image.public_data %}<td><img id="reference_image" src={{ analysis.reference_image.image }} title="Click to expand" style="height: 100px;" onclick="expandImage();">
@@ -106,7 +106,7 @@
       {% if analysis.oxides %}{% for oxide in analysis.oxides %}
       <tr>
         <td>{{ oxide.species }}</td>
-        <td>{{ oxide.amount }}</td>
+        <td>{{ oxide.amount|round(4) }}</td>
       </tr>
       {% endfor %}{% endif %}
     </tbody>

@@ -27,7 +27,7 @@ def paginate_model(model_name, data, filters):
 
 def combine_identical_parameters(paramsIn):
     paramsOut = {}
-    listParams = ['rock_types', 'metamorphic_grades', 'minerals', 'fields', 'ordering', 'elements', 'oxides', 'countries', 'metamorphic_regions', 'regions']
+    listParams = ['rock_types', 'metamorphic_grades', 'minerals', 'fields', 'ordering', 'elements', 'references','oxides', 'countries', 'metamorphic_regions', 'regions']
     for param in paramsIn:
         if param[0] in listParams:
             if param[0] in paramsOut:
@@ -47,6 +47,7 @@ def handle_fields(filters,sample_search):
                     'References':'references', 'Latitude':'latitude', 'Longitude':'longitude', 'Collection Date':'collection_date', 'Rock Type':'rock_type'}
     else: # chemistry search
         fields_dict = {'Sample Number':'sample','Subsample':'subsample','Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral', \
+                        'Stage X':'stage_x','Stage Y':'stage_y','Reference X':'reference_x','Reference Y':'reference_y','Subsample Type':'subsample_type', \
                         'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','Owner':'owner', \
                         'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
 
@@ -68,7 +69,6 @@ def handle_fields(filters,sample_search):
             field_names.append(rev_fields_dict[var])
     else:
         # replace title values with variable names
-        print "**** SAMPLE SEARCH: ",sample_search
         field_names = ['Sample Number'] if (sample_search) else ['Sample Number','Subsample','Point']  # always show sample number
         field_names += filters['fields'][0].split(',')
         field_vars = 'id' if sample_search else 'id,sample_id,subsample_id' # need sample id for link

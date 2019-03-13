@@ -35,7 +35,7 @@
 
               </div>
 
-<!--               <div id="mobilerocktypes">
+<!--               <div id="mobilerocktypes">or
                 <select multiple onchange="mobileUpdateRock()" id="rocktypeselect">
                   {% for rock_type in rock_types %}
                   <option value="{{rock_type.name}}">{{ rock_type.name }}</option>
@@ -132,7 +132,7 @@
           <div class="tab-pane" id="minerals"><br>
             <label for="mineral-tree">Mineral: </label>
             <div id="mineral-select">
-              <select multiple id="selected-mineral" name="minerals" onchange="updateMineral()" class="chosen-select">
+              <select multiple id="selected-mineral" autocomplete="off" name="minerals" onchange="updateMineral()" class="chosen-select">
                 <option></option>
                 {% for m in minerals %}
                 <option value="{{ m.name }}">{{ m.name }}</option>
@@ -158,7 +158,7 @@
             <ul id="provenance">
               <h3>Provenance</h3>
               <label class="provenance-label" for="owners">Owner: </label>
-              <select id="selected-owner" onchange="updateProvenance()" name="owners" class="chosen-select">
+              <select id="selected-owner" autocomplete="off" onchange="updateProvenance()" name="owners" class="chosen-select">
                 <option value="" selected>Select owner</option>
                 {% for o in owners %}
                 <option value="{{ o }}">{{ o }}</option>
@@ -172,16 +172,16 @@
                 {% endfor %}
               </select><br>
 
-              <label class="provenance-label" for="georeferences">Reference: </label>
-              <select id="selected-references" onchange="updateProvenance()" multiple name="georeferences" class="chosen-select">
+              <label class="provenance-label" for="references">Reference: </label>
+              <select id="selected-references" onchange="updateProvenance()" multiple name="references" class="chosen-select">
                 {% for r in references %}
                 <option value="{{ r.name }}">{{ r.name }}</option>
                 {% endfor %}
               </select><br>
 
-              <label class="provenance-label" for="numbers">Number: </label>
-              <select id="selected-number" onchange="updateProvenance()" name="numbers">
-                <option value="" selected>Select sample number</option>
+              <label class="provenance-label" for="numbers">Sample Number: </label>
+              <select id="selected-number" onchange="updateProvenance()" name="numbers" class="chosen-select" style="max-width: 100%">
+                <option value="" selected>Select sample numbers</option>
                 {% for n in numbers %}
                 <option value="{{ n }}">{{ n }}</option>
                 {% endfor %}
@@ -195,11 +195,12 @@
                 {% endfor %}
               </select><br> -->
 
-              <input type="hidden" id="startdatevalue" name="start_date" value="">
-              <input type="hidden" id="enddatevalue" name="end_date" value="">
               <label class="provenance-label" for="dates" >Date Range: </label>
-              <input type="text" onchange="updateStartDate(this)" id="date-start"> to 
-              <input type="text" onchange="updateEndDate(this)" id="date-end"><br>
+              <input type="date" onchange="updateStartDate(this)" id="date-start"> to 
+              <input type="date" onchange="updateEndDate(this)" id="date-end"><br>
+
+<!--               <input type="text" onchange="updateStartDate(this)" id="date-start" placeholder="Start date (MM/DD/YYYY)"> to  -->
+<!--               <input type="text" onchange="updateEndDate(this)" id="date-end" placeholder="End date (MM/DD/YYYY)"><br> -->
 
               <label class="provenance-label" for="access">Access: </label><br>
               <div style="padding-left: 30px;" id="access-buttons">
@@ -336,8 +337,8 @@ $(function()
   });
 
   // DATE PICKER
-  $("#date-start").datepicker();
-  $("#date-end").datepicker();
+  // $("#date-start").datepicker();
+  // $("#date-end").datepicker();
 
   // ACTIVATE CHOSEN-SELECT PLUGIN
   $(".chosen-select").chosen({
@@ -820,7 +821,7 @@ function updateProvenance()
     searchOptions.innerHTML += "<br>";
   }
 
-  if($("#selected-number option:selected").length && $("#selected-number option:selected").text() != "Select sample number")
+  if($("#selected-number option:selected").length && $("#selected-number option:selected").text() != "Select sample numbers")
   {
     searchOptions.innerHTML += "<b>Number:</b> " + $("#selected-number option:selected").text() + "<br> ";
   }
@@ -852,7 +853,7 @@ function updateStartDate(input)
  var year=input.value.substr(-4);
  var date=input.value.substr(3, 2);
  var month=input.value.substr(0, 2);
- var timestamp=year + "-" + month + "-" + date + " 00:00:00"; 
+ var timestamp=year + "-" + month + "-" + date; 
  $('#startdatevalue').attr('value', timestamp);
  console.log($('#startdatevalue').val());
  updateProvenance();
@@ -862,7 +863,7 @@ function updateEndDate(input)
  var year=input.value.substr(-4);
  var date=input.value.substr(3, 2);
  var month=input.value.substr(0, 2);
- var timestamp=year + "-" + month + "-" + date + " 00:00:00"; 
+ var timestamp=year + "-" + month + "-" + date; 
  $('#enddatevalue').attr('value', timestamp);
  console.log($('#enddatevalue').val());
  updateProvenance();
