@@ -76,10 +76,8 @@
              <td class="sample_value">{% if analysis[fields_dict[n]] %}{{ analysis[fields_dict[n]] }}{% endif %}</td>
            {% endif %}
            
-           {% if ((n == 'X Reference') or (n == 'Y Reference')) %}
-              {% if (not analysis[fields_dict[n]]) %}
-             <td class="sample_value">0</td>
-              {% endif %}
+           {% if (n == 'Reference X') or (n == 'Reference Y') or (n == 'Stage X') or (n == 'Stage Y') %}
+              <td class="sample-value">{% if analysis[fields_dict[n]] != None %}{{ analysis[fields_dict[n]] }}{% endif %}</td>
            {% endif %}
 
         {% endfor %}

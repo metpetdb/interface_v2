@@ -492,8 +492,8 @@ def chemical_analyses():
                     'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
     fields_list, fields_dict, field_names = handle_fields(filters,False)
     filters['fields'] = fields_list[0]
-    print 'filters after handling: ', filters['fields']
-    print 'field names after handling: ', field_names
+    print '*** filters after handling: ', filters['fields']
+    print '*** field names after handling: ', field_names
 
     headers = None
     if session.get("auth_token", None):
@@ -596,14 +596,14 @@ def edit_chemical_analysis(id, subsample_id):
 
         if analysis["total"] == '':
             del analysis["total"]
-        if analysis["stage_x"] == '':
-            del analysis["stage_x"]
-        if analysis["stage_y"] == '':
-            del analysis["stage_y"]
-        if analysis["reference_x"] == '':
-            del analysis["reference_x"]
-        if analysis["reference_y"] == '':
-            del analysis["reference_y"]
+        # if analysis["stage_x"] == '':
+        #     del analysis["stage_x"]
+        # if analysis["stage_y"] == '':
+        #     del analysis["stage_y"]
+        # if analysis["reference_x"] == '':
+        #     del analysis["reference_x"]
+        # if analysis["reference_y"] == '':
+        #     del analysis["reference_y"]
 
         print "analysis: ",analysis
 
