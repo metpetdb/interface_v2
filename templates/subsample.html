@@ -30,6 +30,45 @@
 
 <hr>
 <h4>Subsample Images</h4>
+{% if subsample.images %}
+<div id="subsampleImageCarousel" class="carousel slide" data-ride="carousel">
+  <ol class="carousel-indicators">
+    <li data-target="#subsampleImageCarousel" data-slide-to="0" class="active"></li>
+    {% for i in range(subsample.images|length) %}
+    <li data-target="#subsampleImageCarousel" data-slide-to="{{ i + 1 }}"></li>
+    {% endfor %}
+  </ol>
+
+  <div class="carousel-inner">
+    <div class="item active">
+      <img src="{{ subsample.images[0].image.full_size }}" style="max-height: 700px;">
+    </div>
+    {% if subsample.images|length > 1 %}
+    {% for image in subsample.images %}
+    <div class ="item">
+      <img src="{{ image.image.full_size }}" style="max-height: 700px;">
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+  <a class="left carousel-control" href="#subsampleImageCarousel" data-slide="prev">
+    <span class="glyphicon glyphicon-chevron-left"></span>
+    <span class="sr-only">Previous</span>
+  </a>
+  <a class="right carousel-control" href="#subsampleImageCarousel" data-slide="next">
+    <span class="glyphicon glyphicon-chevron-right"></span>
+    <span class="sr-only">Next</span>
+  </a>
+
+</div>
+
+{% endif %}
+
+
+<!--
+
+
 <div class="table-responsive">
   <table id="subsampleviewimg_canvas">
     <thead>
@@ -57,6 +96,7 @@
   </table>
 </div>
 
+-->
 <hr>
 <!-- Pass in the ID of the current subsample to the new chemical analysis so that there is a subsample owner for each analysis -->
 <h4>Chemical Analyses{% if auth_token %}<span style="float:right"><a href="{{ url_for('edit_chemical_analysis', id='new', subsample_id = subsample['id'] )}}?subsample_id={{ subsample.id }}">Add Chemical Analysis</a></span>{% endif %}</h4>
