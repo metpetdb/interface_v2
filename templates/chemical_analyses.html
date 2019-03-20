@@ -72,7 +72,7 @@
            {% if (n == 'Analysis Material') or (n == 'Analysis Date')
                   or (n == 'Total') or (n == 'Analysis Method') or (n =='Analysis Date')
                   or (n == 'Analyst') or (n == 'Analysis Location') or (n =='Owner')
-                  or (n == 'Subsample Type') %}
+                  or (n == 'Subsample Type') or (n == 'Reference') %}
              <td class="sample_value">{% if analysis[fields_dict[n]] %}{{ analysis[fields_dict[n]] }}{% endif %}</td>
            {% endif %}
            

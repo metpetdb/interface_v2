@@ -111,9 +111,11 @@ def search_chemistry():
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"},headers=headers).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"},headers = headers).json()["results"]
         fields_dict = {'Analysis Method':'analysis_method','Analysis Material':'mineral','Subsample Type':'subsample_type', \
-                        'Stage X':'stage_x','Stage Y':'stage_y','Reference X':'reference_x','Reference Y':'reference_y', \
+                        'Stage X':'stage_x','Stage Y':'stage_y','Reference':'reference','Reference X':'reference_x','Reference Y':'reference_y', \
                         'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','Owner':'owner', \
                         'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
+        sorting_dict = {'Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral','Subsample Type':'subsample_type', \
+                    'Analysis Location':'where_done','Reference':'reference','Owner':'owner','Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
     except:
         print "public search chemistry"
         headers = {}
@@ -121,9 +123,11 @@ def search_chemistry():
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"}).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
         fields_dict = {'Analysis Method':'analysis_method','Analysis Material':'mineral','Subsample Type':'subsample_type', \
-                        'Stage X':'stage_x','Stage Y':'stage_y','Reference X':'reference_x','Reference Y':'reference_y', \
+                        'Stage X':'stage_x','Stage Y':'stage_y','Reference':'reference','Reference X':'reference_x','Reference Y':'reference_y', \
                         'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','Owner':'owner', \
                         'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
+        sorting_dict = {'Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral','Subsample Type':'subsample_type', \
+                    'Analysis Location':'where_done','Reference':'reference','Owner':'owner','Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
 
     print 'len',len(oxides),len(elements),len(minerals)
     return render_template("chemical_search_form.html",
@@ -132,6 +136,7 @@ def search_chemistry():
         minerals = minerals,
         fields_dict = sorted(fields_dict),
         fields = sorted(fields_dict.keys()),
+        sorting_dict = sorted(sorting_dict),
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),
         name = session.get("name",None)
@@ -190,6 +195,7 @@ def samples():
             print(key)
         # Strip unused time values for start & end date queries
         if (key == "start_date" or key == "end_date") and filters[key]:
+            print "DATE REGISTERED ~~~~~~~~~~~~~~~~~~~~~~~~"
             filters[key] = filters[key][0][0:10]
         # Unnecessary, empty, or blank key
         elif key == "polygon_coord": # or not filters[key] or filters[key] == '' or filters[key][0] == '':
@@ -485,15 +491,28 @@ def chemical_analyses():
     if "minerals_and" in filters:
         del filters["minerals_and"]
 
+    # handle sorting
+    sorting_dict = {'Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral','Subsample Type':'subsample_type', \
+                    'Analysis Location':'where_done','Owner':'owner','Reference':'reference','Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
+    if 'ordering' in filters and filters['ordering'] != ['']:
+        sorting_name = filters['ordering']
+    else:
+        sorting_name = 'Point' # default
+    if sorting_name in sorting_dict: # all but second page
+        filters['ordering'] = sorting_dict[sorting_name]
+    else: # second page
+        rev_sorting_dict = dict((v, k) for k, v in sorting_dict.iteritems())
+        sorting_name = rev_sorting_dict[filters['ordering'].strip("'").strip('[').strip(']')]
+    print 'sorting by: ',sorting_name
+
     # dynamic fields
     fields_dict = {'Sample Number':'sample','Subsample':'subsample','Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral', \
-                    'Stage X':'stage_x','Stage Y':'stage_y','Reference X':'reference_x','Reference Y':'reference_y','Subsample Type':'subsample_type', \
+                    'Stage X':'stage_x','Stage Y':'stage_y','Reference':'reference','Reference X':'reference_x','Reference Y':'reference_y','Subsample Type':'subsample_type', \
                     'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','Owner':'owner', \
                     'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
     fields_list, fields_dict, field_names = handle_fields(filters,False)
     filters['fields'] = fields_list[0]
     print '*** filters after handling: ', filters['fields']
-    print '*** field names after handling: ', field_names
 
     headers = None
     if session.get("auth_token", None):
@@ -522,6 +541,7 @@ def chemical_analyses():
         chemical_analyses = chem_results,
         field_names = field_names,
         fields_dict = fields_dict,
+        sorting_dict = sorted(sorting_dict),
         total = total,
         page_num = page_num,
         next_url = next_url,

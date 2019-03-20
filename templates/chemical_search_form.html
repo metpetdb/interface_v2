@@ -126,9 +126,17 @@
               <input type="radio" name="resource" value="chemical_analyses" checked="checked"> Chemistry
             </label>
           </div>
-          <div style="padding:10px 0px;">
+          <br> </br>
+              <select id="selected-ordering" onchange="updateSorting()" name="ordering" class="chosen-select">
+                <option value="" selected>Select order</option>
+                {% for s in sorting_dict %}
+                <option value="{{ s }}">{{ s }}</option>
+                {% endfor %}
+              </select><br><br>
+<!--           <div style="padding:10px 0px;">
             <input type="checkbox" id="showmap" onchange="$('#collapseThree').collapse('toggle');" name="showmap" value="ofcourse">Show samples on map
-          </div>
+          </div> -->
+
           Display <input type="text" style="width:11%;text-align:right" name="page_size" value="20"> results &nbsp;&nbsp;&nbsp;&nbsp;
           <input type="submit" style="font-size:16px" value="Search">
         </div>
@@ -194,6 +202,10 @@ $(function()
     for(var a = 0; a < fields.length; a++)
       if(fields[a].checked && fields[a].value !== "")
         url += "&fields="+fields[a].value;
+    var ordering = $("#selected-ordering option:selected");
+    for(var a = 0; a < ordering.length; a++)
+      if(ordering[a].selected && ordering[a].value !== "")
+        url += "&ordering="+ordering[a].value
     var oxides = $("#selected-oxide option:selected");
     for(var a = 0; a < oxides.length; a++)
       if(oxides[a].selected && oxides[a].value !== "")
@@ -355,6 +367,17 @@ function clearOxide()
   $("#oxide-select .chosen-select").val('').trigger("chosen:updated");
 }
 
+// SORTING
+function updateSorting() 
+{
+  if($("#selected-ordering option:selected").length && $("selected-ordering option:selected").text() != "Select order")
+  {
+    searchOptions.innerHTML += $("#selected-ordering option:selected").text() + "<br> ";
+  }
+  var s=searchOptions.innerHTML;
+  searchOptions.innerHTML = s.slice(0,-2);
+  searchOptions.innerHTML += "<br>";
+}
 
 // FIELDS
 function updateFields()

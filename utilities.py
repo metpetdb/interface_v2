@@ -47,10 +47,9 @@ def handle_fields(filters,sample_search):
                     'References':'references', 'Latitude':'latitude', 'Longitude':'longitude', 'Collection Date':'collection_date', 'Rock Type':'rock_type'}
     else: # chemistry search
         fields_dict = {'Sample Number':'sample','Subsample':'subsample','Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral', \
-                        'Stage X':'stage_x','Stage Y':'stage_y','Reference X':'reference_x','Reference Y':'reference_y','Subsample Type':'subsample_type', \
+                        'Stage X':'stage_x','Stage Y':'stage_y','Reference':'reference','Reference X':'reference_x','Reference Y':'reference_y','Subsample Type':'subsample_type', \
                         'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','Owner':'owner', \
                         'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
-
     # default values 
     if 'fields' not in filters:
         filters['fields'] = [def_sample] if (sample_search) else [def_chem]

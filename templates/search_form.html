@@ -196,6 +196,8 @@
               </select><br> -->
 
               <label class="provenance-label" for="dates" >Date Range: </label>
+              <input type="hidden" id="startdatevalue" name="start_date" value="">
+              <input type="hidden" id="enddatevalue" name="end_date" value="">
               <input type="date" onchange="updateStartDate(this)" id="date-start"> to 
               <input type="date" onchange="updateEndDate(this)" id="date-end"><br>
 
@@ -204,9 +206,9 @@
 
               <label class="provenance-label" for="access">Access: </label><br>
               <div style="padding-left: 30px;" id="access-buttons">
-                <input type="radio" onchange="updateProvenance()" name="public_data" value="">No Preference<br>
-                <input type="radio" onchange="updateProvenance()" name="public_data" value="True">Public Access<br>
-                <input type="radio" onchange="updateProvenance()" name="public_data" value="False">Private Access<br>
+                <input type="radio" onchange="updateProvenance()" name="public_data" value="">All Samples<br>
+                <input type="radio" onchange="updateProvenance()" name="public_data" value="False">My Samples<br>
+                <input type="radio" onchange="updateProvenance()" name="public_data" value="True">Public Samples<br>
               </div>
             </ul>
           </div>
@@ -850,20 +852,14 @@ function updateProvenance()
 }
 function updateStartDate(input)
 {
- var year=input.value.substr(-4);
- var date=input.value.substr(3, 2);
- var month=input.value.substr(0, 2);
- var timestamp=year + "-" + month + "-" + date; 
+ var timestamp= input.value;
  $('#startdatevalue').attr('value', timestamp);
  console.log($('#startdatevalue').val());
  updateProvenance();
 }
 function updateEndDate(input)
 {
- var year=input.value.substr(-4);
- var date=input.value.substr(3, 2);
- var month=input.value.substr(0, 2);
- var timestamp=year + "-" + month + "-" + date; 
+ var timestamp= input.value; 
  $('#enddatevalue').attr('value', timestamp);
  console.log($('#enddatevalue').val());
  updateProvenance();
