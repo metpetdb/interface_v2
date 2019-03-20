@@ -11,7 +11,7 @@
     <thead>
       <tr>
         {% for name in field_names %}
-          <th> {{ name }} </th>
+          <th> {{ name }} {% if name == sorting_name %}▼ {% endif %} </th>
         {% endfor %}
       </tr>      
 <!--       <tr>

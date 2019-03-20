@@ -161,7 +161,7 @@ def samples():
         sorting_name = filters['ordering'][0]
     else:
         sorting_name = 'Sample Number' # default
-    if sorting_name in sorting_dict: # all but second page
+    if sorting_name in sorting_dict: #b all but second page
         filters['ordering'] = [sorting_dict[sorting_name]]
     else: # second page
         rev_sorting_dict = dict((v, k) for k, v in sorting_dict.iteritems())

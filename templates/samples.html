@@ -3,7 +3,7 @@
 {% block body %}
 {% if showmap %}
 <div id="collapseThree" class="panel-collapse collapse in">
-  <div id="res-map-canvas" style='width:600px;height:500px;margin:15px'></div>
+  <div id="res-map-canvas" style='left:25%;width:600px;height:500px;margin-bottom:15px'></div>
 </div>
 {% endif %}
 <div class="header-buttons">
@@ -39,7 +39,7 @@
           {% for n in field_names %}
 
             {% if n == 'Sample Number' %}
-              <td id="url" class="sample_label"><a href="{{ url_for('sample', id=sample.id) }}">{{ sample.number }}</td>
+              <td id="url" class="sample_label"><a href="{{ url_for('sample', id=sample.id) }}" target="_blank">{{ sample.number }}</td>
             {% endif %}
 
             {% if (n == 'Chemical Analyses') or (n == 'Images') or (n == 'Subsamples')  %}
@@ -107,7 +107,7 @@
 function initialize() {
   var mapOptions = {
     center: new google.maps.LatLng(0,0),
-    zoom: 5,
+    zoom: 1,
     mapTypeId: google.maps.MapTypeId.HYBRID
   }
   var map = new google.maps.Map(document.getElementById('res-map-canvas'), mapOptions)
@@ -116,8 +116,8 @@ function initialize() {
   var lat;
   var lon;
   for (var i = 0; i < samples.length; i++) {
-    lat = parseFloat(samples[i]['location_coords'][0]);
-    lon = parseFloat(samples[i]['location_coords'][1]);
+    lat = (samples[i]['latitude']);
+    lon = (samples[i]['longitude']);
     var url = '/sample/'+samples[i]['id'];
     var infowindow = new google.maps.InfoWindow({
       content: "<div>Hello World<br></div>"
