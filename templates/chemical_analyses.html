@@ -14,36 +14,20 @@
           <th> {{ name }} {% if name == sorting_name %}▼ {% endif %} </th>
         {% endfor %}
       </tr>      
-<!--       <tr>
-        <th>Point</th>
-        <th>Sample</th>
-        <th>Analysis Method</th>
-        <th>Analysis Material</th>
-        <th>Elements</th>
-        <th>Oxides</th>
-        <th>Analyst</th>
-        <th>Analysis Date</th>
-        <th>Total</th>
-      </tr> -->
     </thead>
     <tbody>
       {% for analysis in chemical_analyses %}
         <tr>
         {% for n in field_names %}
-
+          <!-- linked -->
           {% if n == 'Sample Number' %}
             <td id="url" class="sample_label"><a href="{{ url_for('sample', id=analysis.sample_id) }}" target="_blank">{{ analysis.sample }}</a></td>
-          {% endif %}
-
-          {% if n == 'Subsample' %}
+          {% elif n == 'Subsample' %}
             <td id="url" class="sample_label"><a href="{{ url_for('subsample', id=analysis.subsample_id) }}" target="_blank">{{ analysis.subsample }}</a></td>
-          {% endif %}
-
-          {% if n == 'Point' %}
+          {% elif n == 'Point' %}
             <td class="sample_value"><a href="{{ url_for('chemical_analysis', id=analysis.id) }}" target="_blank">{{ analysis.spot_id }}</a></td>
-          {% endif %}          
-
-          {% if n == 'Elements' %}
+          <!-- specific lists -->
+          {% elif n == 'Elements' %}
             <td class="sample_mineral sample_value">
               {% if analysis.elements %}
               {{ analysis.elements.0.symbol }} {{ analysis.elements.0.amount }} ...
@@ -54,9 +38,7 @@
               </div>
               {% endif %}
             </td>
-          {% endif %}
-
-          {% if n == 'Oxides' %}
+          {% elif n == 'Oxides' %}
             <td class="sample_mineral sample_value">
               {% if analysis.oxides %}
               {{ analysis.oxides.0.species }} {{ analysis.oxides.0.amount }} ...
@@ -67,19 +49,14 @@
               </div>
               {% endif %}
             </td>
-          {% endif %}
-
-           {% if (n == 'Analysis Material') or (n == 'Analysis Date')
-                  or (n == 'Total') or (n == 'Analysis Method') or (n =='Analysis Date')
-                  or (n == 'Analyst') or (n == 'Analysis Location') or (n =='Owner')
-                  or (n == 'Subsample Type') or (n == 'Reference') %}
+            <!-- need specific 0 and null -->
+           {% elif (n == 'Reference X') or (n == 'Reference Y') or (n == 'Stage X') or (n == 'Stage Y') %}
+              <td class="sample-value">{% if analysis[fields_dict[n]] != None %}{{ analysis[fields_dict[n]] }}{% endif %}</td>
+            <!-- all others -->
+           {% else %}
              <td class="sample_value">{% if analysis[fields_dict[n]] %}{{ analysis[fields_dict[n]] }}{% endif %}</td>
            {% endif %}
            
-           {% if (n == 'Reference X') or (n == 'Reference Y') or (n == 'Stage X') or (n == 'Stage Y') %}
-              <td class="sample-value">{% if analysis[fields_dict[n]] != None %}{{ analysis[fields_dict[n]] }}{% endif %}</td>
-           {% endif %}
-
         {% endfor %}
       </tr>
       {% endfor %}

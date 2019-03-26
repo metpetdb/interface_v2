@@ -27,7 +27,7 @@ def paginate_model(model_name, data, filters):
 
 def combine_identical_parameters(paramsIn):
     paramsOut = {}
-    listParams = ['rock_types', 'metamorphic_grades', 'minerals', 'fields', 'ordering', 'elements', 'references','oxides', 'countries', 'metamorphic_regions', 'regions']
+    listParams = ['rock_types', 'metamorphic_grades', 'minerals', 'fields', 'ordering', 'elements', 'references','oxides', 'countries', 'collectors','metamorphic_regions', 'regions']
     for param in paramsIn:
         if param[0] in listParams:
             if param[0] in paramsOut:
@@ -43,7 +43,7 @@ def handle_fields(filters,sample_search):
     def_chem = 'Analysis Method,Analysis Material,Elements,Oxides,Owner,Analysis Date,Total'
     if sample_search:
         fields_dict = {'Sample Number':'number','Subsamples':'subsample_ids', 'Chemical Analyses':'chemical_analyses_ids', 'Images':'images', 'Owner':'owner', 'Regions':'regions', \
-                    'Country':'country','Metamorphic Grades':'metamorphic_grades', 'Metamorphic Regions':'metamorphic_regions', 'Minerals':'minerals', \
+                    'Collector':'collector_name','Country':'country','Metamorphic Grades':'metamorphic_grades', 'Metamorphic Regions':'metamorphic_regions', 'Minerals':'minerals', \
                     'References':'references', 'Latitude':'latitude', 'Longitude':'longitude', 'Collection Date':'collection_date', 'Rock Type':'rock_type'}
     else: # chemistry search
         fields_dict = {'Sample Number':'sample','Subsample':'subsample','Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral', \

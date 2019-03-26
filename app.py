@@ -57,7 +57,7 @@ def search():
     references = get(env("API_HOST")+"references/", params = {"fields": "name", "page_size": 2000, "format": "json"}).json()["results"]
     metamorphic_grades = get(env("API_HOST")+"metamorphic_grades/", params = {"fields": "name", "page_size": 30, "format": "json"}).json()["results"]
     metamorphic_regions = get(env("API_HOST")+"metamorphic_regions/", params = {"fields": "name", "page_size": 240, "format": "json"}).json()["results"]
-    fields_dict = {'Subsamples':'subsample_ids', 'Chemical Analyses':'chemical_analyses_ids', 'Images':'images', 'Owner':'owner', 'Regions':'regions', \
+    fields_dict = {'Subsamples':'subsample_ids', 'Chemical Analyses':'chemical_analyses_ids', 'Collector':'collector_name', 'Images':'images', 'Owner':'owner', 'Regions':'regions', \
                 'Country':'country','Metamorphic Grades':'metamorphic_grades', 'Metamorphic Regions':'metamorphic_regions', 'Minerals':'minerals', \
                 'References':'references','Latitude':'latitude', 'Longitude':'longitude', 'Collection Date':'collection_date', 'Rock Type':'rock_type'}
     sorting_dict = {'Sample Number':'number','Subsamples':'subsamples', 'Collection Date':'collection_date','Subsamples':'subsamples', 'Country':'country', \
@@ -97,9 +97,16 @@ def search_chemistry():
     if request.args.get("resource") == "sample":
         fixedListArgs = combine_identical_parameters(request.args.iteritems(multi=True))
         return redirect(url_for("samples")+"?"+urlencode(fixedListArgs)+"&chemical_analyses_filters=True")
+
+    # for dynamic field and sorting options
+    fields_dict = {'Analysis Method':'analysis_method','Analysis Material':'mineral','Subsample Type':'subsample_type', \
+                    'Stage X':'stage_x','Stage Y':'stage_y','Reference':'reference','Reference X':'reference_x','Reference Y':'reference_y', \
+                    'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','Owner':'owner', \
+                    'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
+    sorting_dict = {'Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral','Subsample Type':'subsample_type', \
+                    'Analysis Location':'where_done','Reference':'reference','Owner':'owner','Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
+
     #Add headers for authentication of 
-
-
     oxides = {}
     elements = {}
     minerals = {}
@@ -110,24 +117,12 @@ def search_chemistry():
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"},headers = headers).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"},headers=headers).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"},headers = headers).json()["results"]
-        fields_dict = {'Analysis Method':'analysis_method','Analysis Material':'mineral','Subsample Type':'subsample_type', \
-                        'Stage X':'stage_x','Stage Y':'stage_y','Reference':'reference','Reference X':'reference_x','Reference Y':'reference_y', \
-                        'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','Owner':'owner', \
-                        'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
-        sorting_dict = {'Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral','Subsample Type':'subsample_type', \
-                    'Analysis Location':'where_done','Reference':'reference','Owner':'owner','Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
     except:
         print "public search chemistry"
         headers = {}
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"}).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"}).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
-        fields_dict = {'Analysis Method':'analysis_method','Analysis Material':'mineral','Subsample Type':'subsample_type', \
-                        'Stage X':'stage_x','Stage Y':'stage_y','Reference':'reference','Reference X':'reference_x','Reference Y':'reference_y', \
-                        'Analysis Location':'where_done','Elements':'elements','Oxides':'oxides','Owner':'owner', \
-                        'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
-        sorting_dict = {'Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral','Subsample Type':'subsample_type', \
-                    'Analysis Location':'where_done','Reference':'reference','Owner':'owner','Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
 
     print 'len',len(oxides),len(elements),len(minerals)
     return render_template("chemical_search_form.html",
@@ -542,6 +537,7 @@ def chemical_analyses():
         field_names = field_names,
         fields_dict = fields_dict,
         sorting_dict = sorted(sorting_dict),
+        sorting_name = sorting_name,
         total = total,
         page_num = page_num,
         next_url = next_url,
