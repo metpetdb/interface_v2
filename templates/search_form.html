@@ -17,6 +17,7 @@
         <ul class="nav nav-tabs" id="searchTab">
           <li class="active"><a href="#rocktypes">Rock Types</a></li>
           <li><a href="#metgrade">Metamorphic Grade</a></li>
+          <!-- <li><a id="met-region-tab" href="#metregion">Regions</a></li> -->
           <li><a id="location-tab" href="#location">Location</a></li>
           <li><a href="#minerals">Minerals</a></li>
           <li><a href="#provenance">Provenance</a></li>
@@ -79,6 +80,16 @@
             </ul>
           </div>
 
+          <!-- MET REGIONS MAP -->
+          <div class="tab-pane" id="metregion">
+            <ul>
+              <h3>Metamorphic Regions</h3>
+                <div id="map-canvas"></div>
+                <p id="map-instructions">Click points on the map to toggle polygon coordinates.</p><br>
+                <div id="polygon_coord_list"></div>
+                <button type="button" onclick="addCoordinate();">Add Coordinate</button>
+                <input type="hidden" name="polygon_coords" value="">
+              </div>          
 
           <!-- LOCATION -->
           <div class="tab-pane" id="location">
@@ -509,6 +520,70 @@ $(function()
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(homeControlDiv);
   }
 
+  // GOOGLE MET REGION MAP RENDERING
+  function initialize_met_map()
+  {
+    // CREATE MAP CENTERED ON USER LOCATION (IF GIVEN)
+    var map=new google.maps.Map(document.getElementById('map-canvas'), {
+      zoom: 1,
+      center: new google.maps.LatLng(0, 0),
+      mapTypeId: google.maps.MapTypeId.HYBRID
+    });
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function (position) {
+        initialLocation=new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        map.setCenter(initialLocation);
+      });
+    }
+    google.maps.event.addListenerOnce(map, 'idle', function() {
+      google.maps.event.trigger(map, 'resize');
+    });
+
+    // PLOT MET REGIONS
+    var met_polygons = [];
+    // var test_path =
+    var kmlLayer = new google.maps.KmlLayer({ url: 'https://www.dropbox.com/s/twsd0io384kf30l/Global%20Metamorphic%20Regions%20Jun2013.kml?dl=1', preserveViewport: true, map: map });
+    // kmlLayer.addListener('click',function(kmlEvent) { var desc = kmlEvent.featureData.description; var name = kmlEvent.featureData.name;  }
+
+    // var test_poly = new google.maps.Polygon({
+    //   // paths: [[{lat:121.568839816715, lng:15.9113396404408}, {lat:121.160414165641, lng:15.8167262691937}, {lat:121.109303196643, lng:15.4762938533444}, {lat: 121.464437386923, lng:15.2399926362114}, {lat:121.796371426635, lng:15.6309214520757}]],
+    //   paths: [[{lat:121.568839816715, lng:15.9113396404408},{lat:121.160414165641, lng:15.8167262691937},{lat:-40.012587548594,lng:40},{lat:-60.29867388483,lng:50.29867388483},{lat:-80.29867388483,lng:-20}]],
+    //   // paths: [[{lat:30.1275843,lng:30.2348953},{lat:20.012587548594,lng:20.012587548594},{lat:-40.012587548594,lng:40},{lat:-60.29867388483,lng:50.29867388483},{lat:-80.29867388483,lng:-20}]],
+    //   fillColor: '#ff0000'
+    // });
+    // test_poly.setMap(map);
+    // var drawingManager = new google.maps.drawing.DrawingManager({
+    //   drawingMode: google.maps.drawing.OverlayType.POLYGON,
+    //   drawingControl: true,
+    //   drawingControlOptions: {
+    //     position: google.maps.ControlPosition.TOP_CENTER,
+    //     drawingModes: [
+    //       google.maps.drawing.OverlayType.POLYGON
+    //     ]
+    //   },
+    //   polygonOptions: {
+    //     editable: true
+    //   }
+    // });
+    // drawingManager.setMap(map);
+
+    // google.maps.event.addListener(drawingManager, 'polygoncomplete', function (p) {
+    //   poly=p;
+    //   google.maps.event.addListener(poly.getPath(), 'insert_at', function() {updatePolygon();});
+    //   google.maps.event.addListener(poly.getPath(), 'remove_at', function() {updatePolygon();});
+    //   google.maps.event.addListener(poly.getPath(), 'set_at', function() {updatePolygon();});
+    //   drawingManager.setDrawingMode(null);
+    //   updatePolygon();
+    // });
+
+    // // CLEAR MAP BUTTON
+    // var homeControlDiv=document.createElement('div');
+    // var homeControl=new HomeControl(homeControlDiv, map);
+    // homeControlDiv.index=1;
+    // map.controls[google.maps.ControlPosition.TOP_RIGHT].push(homeControlDiv);
+
+  }
+
   function updatePolygon() {
     var vertices=poly.getPath();
     var coords=document.getElementsByName("polygon_coords")[0];
@@ -526,6 +601,7 @@ $(function()
 
   // INITIALIZE MAP LISTENER
   google.maps.event.addDomListener(document.getElementById("location-tab"), 'click', initialize);
+  google.maps.event.addDomListener(document.getElementById("met-region-tab"), 'click', initialize_met_map);
 });
 
 // HOME CONTROL FOR MAP

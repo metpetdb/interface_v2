@@ -97,6 +97,7 @@ function ParseFileForUpload() {
     xhr.onload = function (err) {
         if (xhr.readyState === 4 && xhr.status === 200) {
             responseData = JSON.parse(xhr.responseText);
+            console.log(responseData);
             if (responseData['results']['error']) {
                 errorResponse = JSON.parse(xhr.responseText);
                 var banner = document.getElementById("msgbanner");

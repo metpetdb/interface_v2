@@ -833,8 +833,8 @@ def test():
         print response
         # print "Keys:", new_response.keys()
         print "Response status code:",response.status_code
-        print "Response:",response
-        print "Response content (json):",response.json()
+        # print "Response:",response.json();
+        # print "Response content (json):",response.json()
     '''
     return render_template('bulk_upload_results.html',
         bulk_upload_output = response.json(),

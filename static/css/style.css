@@ -8,7 +8,7 @@ table {
 }
 
 #parsedgrid table, #parsedgrid th, #parsedgrid td {
-    border: 1px solid black;
+    /*border: 10px solid black;*/
 }
 
 th, td {
