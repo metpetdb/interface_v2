@@ -1,11 +1,6 @@
-<a name="logo"/>
-<div align="center">
-<a href="http://metpetdb.rpi.edu/" target="_blank">
-<img src="http://metpetdb.rpi.edu/metpetweb/images/mpdb-logo.gif" alt="mpdb Logo" width="201" height="148"></img>
-</a>
-</div>
+![MPDB Logo](static/images/MPDBlogo_sml.png)
 
-##MetPetDB-interface
+# MetPetDB-interface
 
 Front-end application for the Meptetb system built using Flask.
 (metpetdb.rpi.edu)
@@ -24,11 +19,11 @@ We will now set up the system and virtual environment for a new/clean meachine, 
 Apache Web Server Installation
 ------------------------------
 
-####Install Apache
+#### Install Apache
     $ sudo apt-get install apache2 -y
     $ sudo apt-get install apache2-threaded-dev python2.7-dev -y
 	
-####Install mod_wsgi
+#### Install mod_wsgi
 
 Now we install mod_wsgi by typing the following command
 
@@ -86,7 +81,7 @@ Then, add the folowing lines to ~/.bashrc:
 	
 	$ source ~/.bashrc
 	
-####Starting a New Virtual Environment
+#### Starting a New Virtual Environment
 
 Virtualenvwrapper provides some nice commands we can use to play around with the environments.
 
@@ -188,7 +183,7 @@ Add the following lines of code to the file to configure the virtual host. Be su
 
 Save and close the file.
 
-####Create the .wsgi File
+#### Create the .wsgi File
 
 Make sure you are at `~/metpetdb`. We need to create the .wsgi script file for Apace to uses to serve the Flask app.
 	
@@ -227,7 +222,7 @@ Now your directory structure should look like this:
 	|----------------app_variables.env  
 	|----------------metpetdb.wsgi
 
-####Set Proper Permission
+#### Set Proper Permission
 
 Run the following commands to set permission.
 	
