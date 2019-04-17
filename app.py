@@ -31,6 +31,20 @@ def index():
         name = session.get("name",None)
     )
 
+@metpet_ui.route("/help/")
+def help():
+        links = [('Creating a profile','https://raw.githubusercontent.com/metpetdb/userguide/master/creating-a-profile.html'), \
+                ('Uploading data','https://raw.githubusercontent.com/metpetdb/userguide/master/uploading-data.html'), \
+                ('Viewing your own data','https://raw.githubusercontent.com/metpetdb/userguide/master/viewing-data.html'),\
+                ('Editing your samples','https://raw.githubusercontent.com/metpetdb/userguide/master/editing-samples.html'), \
+                ('Searching the database','https://raw.githubusercontent.com/metpetdb/userguide/master/search_database.html'), \
+                ('Exporting data from the database','https://raw.githubusercontent.com/metpetdb/userguide/master/export-data.html')]
+        return render_template("help.html",
+        links = links,
+        auth_token = session.get("auth_token",None),
+        email = session.get("email",None),
+        name = session.get("name",None)
+    )
 
 @metpet_ui.route("/search/")
 def search():
@@ -190,7 +204,6 @@ def samples():
             print(key)
         # Strip unused time values for start & end date queries
         if (key == "start_date" or key == "end_date") and filters[key]:
-            print "DATE REGISTERED ~~~~~~~~~~~~~~~~~~~~~~~~"
             filters[key] = filters[key][0][0:10]
         # Unnecessary, empty, or blank key
         elif key == "polygon_coord": # or not filters[key] or filters[key] == '' or filters[key][0] == '':
@@ -656,7 +669,6 @@ def edit_chemical_analysis(id, subsample_id):
         name = session.get("name",None)
     )
 
-
 @metpet_ui.route("/login", methods = ["GET", "POST"])
 def login():
     #redirect to index if already logged in
@@ -834,7 +846,7 @@ def test():
         # print "Keys:", new_response.keys()
         print "Response status code:",response.status_code
         print "Response:",response
-        print "Response content (json):",response.json()
+        # print "Response content (json):",response.json()
     '''
     return render_template('bulk_upload_results.html',
         bulk_upload_output = response.json(),

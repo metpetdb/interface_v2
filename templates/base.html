@@ -72,7 +72,7 @@
                 <li><a href="{{ url_for('search') }}?emails={{ email }}&resource=samples&render=True">My Samples</a></li>
                 <li><a href="https://goo.gl/forms/UXvD0f1tsDO0FL5a2">Report a Bug</a></li>
                 {% endif %}
-                <li><a href="{{ url_for('index') }}">Help</a></li>
+                <li><a href="{{ url_for('help') }}">Help</a></li>
                 {% if auth_token %}
                 <li><a href="{{ url_for('logout') }}"><b>Logout</b></a></li>
                 {% else %}

@@ -113,6 +113,16 @@ function ParseFileForUpload() {
 function populateTable(data) {
     document.getElementById('content').innerHTML = "";
     var tableData = data["results"];
+    // Translate from table titles to variables for errors
+    var title_dict = {"Sample":"sample",
+                      "Subsample":"subsample",
+                      "Point":"spot_id",
+                      "Mineral":"mineral_id",
+                      "Method":"analysis_method",
+                      "Subsample Type":"subsample_type",
+                      "Analytical Facility":"where_done",
+                      "Analysis Date":"analysis_date",
+                      "Analyst":"analyst"};
     // Time to separate out the metadata
     var metadata = [];
     for (var i = 0; i < tableData.length; i++) {
@@ -140,34 +150,61 @@ function populateTable(data) {
     }
     var areErrors = false;
     for (var i = 0; i < tableData.length; i++) {
+        console.log("Errors:")
         if (Object.keys(tableData[i]['errors']).length !== 0) {
+            console.log(tableData[i]);
             areErrors = true;
             break;
         }
     }
-    if (!areErrors) {
-        var banner = document.getElementById("msgbanner");
-        banner.style.color = 'green';
-        banner.innerHTML = "No errors found!  Rows displayed below have been inserted into the database."
-    }
+    // if (!areErrors) {
+    //     var banner = document.getElementById("msgbanner");
+    //     banner.style.color = 'green';
+    //     banner.innerHTML = "No errors found!  Rows displayed below have been inserted into the database."
+    // }
     console.log("Errors present in returned data: " + areErrors);
     // Create data rows for table and fill them in
     var tableBody = tableElement.getElementsByTagName("tbody")[0];
     for (var i = 0; i < tableData.length; i++) {
         var newRow = tableBody.insertRow();
+        console.log('Error keys:')
+        console.log(Object.keys(tableData[i]['errors']));
         for (var j = 0; j < tableLabels.length; j++) {
             var newCell = newRow.insertCell(-1);
-            if (Object.keys(tableData[i]['errors']).includes(tableLabels[j])) {
-                newCell.style.backgroundColor = '#ff5151';
-                newCell.title = tableData[i]['errors'][tableLabels[j]];
+            // console.log('Labels:')
+            // console.log(tableLabels[j]);
+            // if (Object.keys(tableData[i]['errors']).includes('spot_id')) {
+            //     if(tableLabels[j] == "Point") {
+            // // if (Object.keys(tableData[i]['errors']).includes(tableLabels[j])) {
+            //     newCell.style.backgroundColor = '#ff8080';
+            //     newCell.title = tableData[i]['errors']['spot_id'];
+            //     }
+            // }
+            console.log('From dictionary');
+            console.log(title_dict[tableLabels[j]]);
+            if (Object.keys(tableData[i]['errors']).includes(title_dict[tableLabels[j]])) {
+                if(tableLabels[j] == tableLabels[j]) {
+            // if (Object.keys(tableData[i]['errors']).includes(tableLabels[j])) {
+                newCell.style.backgroundColor = '#ff8080';
+                newCell.title = tableData[i]['errors']['mineral_id'];
+                }
             }
+            // if (Object.keys(tableData[i]['errors']).includes('sample')) {
+            //     if(tableLabels[j] == "Sample") {
+            // // if (Object.keys(tableData[i]['errors']).includes(tableLabels[j])) {
+            //     newCell.style.backgroundColor = '#ff8080';
+            //     newCell.title = tableData[i]['errors']['sample'];
+            //     }
+            // }
             if (tableLabels[j] === "minerals") {
                 //newCell.innerHTML = "<b>Under construction</b>";
                 var minerals = [];
-                for (var min = 0; min < tableData[i]["mineral"].length; min++) {
-                    minerals.push(tableData[i]["mineral"][min].name);
-                }
-                newCell.innerHTML = minerals.join();
+                if (tableData[i]["mineral"].length) {
+                    for (var min = 0; min < tableData[i]["mineral"].length; min++) {
+                        minerals.push(tableData[i]["mineral"][min].name);
+                    }
+                    newCell.innerHTML = minerals.join();
+                } else newCell.innerHTML = " ";
             } else if (tableLabels[j] === "collection_date") {
                 newCell.innerHTML = moment(tableData[i][tableLabels[j]]).format("DD-MM-YYYY");
             } else if (tableLabels[j] === "location_coords") {
@@ -201,12 +238,19 @@ function populateTable(data) {
             }
             newCell.contentEditable = true;
             newCell.addEventListener("input", function() {
-                this.style.backgroundColor = '#99b9ff';
+                this.style.backgroundColor = '#ffdf99';
             });
         }
     }
     if (areErrors) {
         createGridSubmitButton();
+        var banner = document.getElementById("msgbanner");
+        banner.style.color = 'red';
+        banner.innerHTML = "Errors have been detected in your data. Please review the table below, make corrections, and hit submit."
+    } else {
+        var banner = document.getElementById("msgbanner");
+        banner.style.color = 'green';
+        banner.innerHTML = "No errors found!  Rows displayed below have been inserted into the database."
     }
 }
 
