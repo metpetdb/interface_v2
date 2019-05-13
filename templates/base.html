@@ -69,7 +69,8 @@
                     }}">Bulk Upload</a></li>
                   </ul>
                 </li>
-                <li><a href="{{ url_for('search') }}?emails={{ email }}&resource=samples&render=True">My Samples</a></li>
+                <li><a href="{{ url_for('search') }}?emails={{ email }}&my_samples=True">My Samples</a></li>
+                <!-- <li><a href="{{ url_for('search') }}?emails={{ email }}&resource=samples&render=True">My Samples</a></li> -->
                 <li><a href="https://goo.gl/forms/UXvD0f1tsDO0FL5a2">Report a Bug</a></li>
                 {% endif %}
                 <li><a href="{{ url_for('help') }}">Help</a></li>

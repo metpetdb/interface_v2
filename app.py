@@ -48,6 +48,7 @@ def help():
 
 @metpet_ui.route("/search/")
 def search():
+    filters = dict(request.args)
     print "search Arguments: ",request.args
     print "session data: ", session
     #get all filter options from API, use format = json and minimum page sizes to speed it up
@@ -81,7 +82,7 @@ def search():
     countries = get(env("API_HOST")+"country_names/", params = {"format": "json"}).json()["country_names"]
     numbers = get(env("API_HOST")+"sample_numbers/", params = {"format": "json"}).json()["sample_numbers"]
     owners = get(env("API_HOST")+"sample_owner_names/", params = {"format": "json"}).json()["sample_owner_names"]
- 
+    my_samples = filters['my_samples'] if 'my_samples' in filters else False      
     return render_template("search_form.html",
         regions = regions,
         minerals = minerals,
@@ -94,6 +95,7 @@ def search():
         fields = sorted(fields_dict.keys()),
         countries = countries,
         numbers = sorted(numbers),
+        my_samples = my_samples,
         owners = sorted(set(owners)),
         auth_token = session.get("auth_token",None),
         email = session.get("email",None),

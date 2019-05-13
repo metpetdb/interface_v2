@@ -261,7 +261,11 @@
           <td> </td>
           <td>
             <a href="#"><input type="submit" value="Save Changes"></a>
-            <a href="{{ url_for('sample', id=sample.id) }}"><button type="button">Cancel</button></a>
+            {% if sample.id %}
+              <a href="{{ url_for('sample', id=sample.id) }}"><button type="button">Cancel</button></a>
+            {% else %}
+              <a href="{{ url_for('search') }}"><button type="button">Cancel</button></a>
+            {% endif %}
           </td>
         </tr>
       </tbody>

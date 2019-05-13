@@ -171,17 +171,6 @@ function populateTable(data) {
         console.log(Object.keys(tableData[i]['errors']));
         for (var j = 0; j < tableLabels.length; j++) {
             var newCell = newRow.insertCell(-1);
-            // console.log('Labels:')
-            // console.log(tableLabels[j]);
-            // if (Object.keys(tableData[i]['errors']).includes('spot_id')) {
-            //     if(tableLabels[j] == "Point") {
-            // // if (Object.keys(tableData[i]['errors']).includes(tableLabels[j])) {
-            //     newCell.style.backgroundColor = '#ff8080';
-            //     newCell.title = tableData[i]['errors']['spot_id'];
-            //     }
-            // }
-            console.log('From dictionary');
-            console.log(title_dict[tableLabels[j]]);
             if (Object.keys(tableData[i]['errors']).includes(title_dict[tableLabels[j]])) {
                 if(tableLabels[j] == tableLabels[j]) {
             // if (Object.keys(tableData[i]['errors']).includes(tableLabels[j])) {
@@ -189,13 +178,6 @@ function populateTable(data) {
                 newCell.title = tableData[i]['errors']['mineral_id'];
                 }
             }
-            // if (Object.keys(tableData[i]['errors']).includes('sample')) {
-            //     if(tableLabels[j] == "Sample") {
-            // // if (Object.keys(tableData[i]['errors']).includes(tableLabels[j])) {
-            //     newCell.style.backgroundColor = '#ff8080';
-            //     newCell.title = tableData[i]['errors']['sample'];
-            //     }
-            // }
             if (tableLabels[j] === "minerals") {
                 //newCell.innerHTML = "<b>Under construction</b>";
                 var minerals = [];
