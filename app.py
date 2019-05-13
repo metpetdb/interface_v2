@@ -348,10 +348,10 @@ def edit_sample(id):
         if not sample["collection_date"]:
             del sample["collection_date"]
 
-        sample['latitude'] = sample['location_coords1']
-        sample['longitude'] = sample['location_coords0']
-        del sample["location_coords0"]
-        del sample["location_coords1"]
+        # sample['latitude'] = sample['location_coords1']
+        # sample['longitude'] = sample['location_coords0']
+        # del sample["location_coords0"]
+        # del sample["location_coords1"]
 
         if new:
             print "new edit-sample headers", headers

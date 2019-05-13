@@ -93,19 +93,19 @@
         </tr>
         <tr>
           <td class="sample_label">Latitude*</td>
-          <td class="sample_value" id="location_coords0">
-            <input type="text" name="location_coords0" value="{% if sample.location_coords %}{{sample.location_coords.0}}{% endif %}" style="width:85%">
+          <td class="sample_value" id="latitude">
+            <input type="text" name="latitude" value="{% if sample.latitude %}{{sample.latitude}}{% endif %}" style="width:85%">
           </td>
-          {% if errors and errors.location_coords %}<br>{% for e in errors.location_coords %}{{ e }}{% endfor %}
-          <script>document.getElementsByName("location_coords0")[0].style.borderColor="red";</script>{% endif %}
+          {% if errors and errors.latitude %}<br>{% for e in errors.latitude %}{{ e }}{% endfor %}
+          <script>document.getElementsByName("latitude")[0].style.borderColor="red";</script>{% endif %}
         </tr>
         <tr>
           <td class="sample_label">Longitude*</td>
-          <td class="sample_value" id="location_coords1">
-            <input type="text" name="location_coords1" value="{% if sample.location_coords %}{{sample.location_coords.1}}{% endif %}" style="width:85%">
+          <td class="sample_value" id="longitude">
+            <input type="text" name="longitude" value="{% if sample.longitude %}{{sample.longitude}}{% endif %}" style="width:85%">
           </td>
-          {% if errors and errors.location_coords %}<br>{% for e in errors.location_coords %}{{ e }}{% endfor %}
-          <script>document.getElementsByName("location_coords1")[0].style.borderColor="red";</script>{% endif %}
+          {% if errors and errors.longitude %}<br>{% for e in errors.longitude %}{{ e }}{% endfor %}
+          <script>document.getElementsByName("longitude")[0].style.borderColor="red";</script>{% endif %}
         </tr>
         <tr>
           <td class="sample_label">Country</td>
@@ -296,20 +296,20 @@ $(function()
 
 function checkForm(form) {
   var error=document.createElement("span");
-  var val=form.location_coords0.value;
+  var val=form.latitude.value;
   if (val == "" || parseFloat(val) < -90 || parseFloat(val) > 90) {
     error.innerHTML="<br>Please enter a latitude between -90 and 90!";
-    document.getElementById("location_coords0").appendChild(error);
-    form.location_coords0.style.borderColor="red";
-    form.location_coords0.focus();
+    document.getElementById("latitude").appendChild(error);
+    form.latitude.style.borderColor="red";
+    form.latitude.focus();
     return false;
   }
-  val=form.location_coords1.value;
+  val=form.longitude.value;
   if (val == "" || parseFloat(val) < -180 || parseFloat(val) > 180) {
     error.innerHTML="<br>Please enter a longitude between -180 and 180!";
-    document.getElementById("location_coords1").appendChild(error);
-    form.location_coords1.style.borderColor="red";
-    form.location_coords1.focus();
+    document.getElementById("longitude").appendChild(error);
+    form.longitude.style.borderColor="red";
+    form.longitude.focus();
     return false;
   }
   var d=document.getElementsByName("collection_date")[0];
