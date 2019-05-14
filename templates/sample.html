@@ -23,14 +23,6 @@
         <td class="sample_label">Owner</td>
         <td class="sample_value">{% if sample.owner %}{{ sample.owner }}{% endif %}</td>
       </tr>
-      <!--<tr>
-        <td class="sample_label">IGSN</td>  Nonexistent field  
-        <td class="sample_value">{% if sample.sesar_number %}{{ sample.sesar_number }}{% endif %}</td>
-      </tr> 
-      <tr>
-        <td class="sample_label">Aliases</td>   Nonexistent field  
-        <td class="sample_value">{% if sample.aliases %}{% for a in sample.aliases %}{% if loop.index0 > 0 %}, {% endif %}{{ a }}{% endfor %}{% endif %}</td>
-      </tr> -->
       <tr>
         <td class="sample_label">Date Collected</td>
         <td class="sample_value">{% if sample.collection_date %}{{ sample.collection_date }}{% endif %}</td>
@@ -39,10 +31,6 @@
         <td class="sample_label">Rock Type</td>
         <td class="sample_value">{% if sample.rock_type %}{{ sample.rock_type }}{% endif %}</td>
       </tr>
-      <!-- <tr>
-        <td class="sample_label">Public</td>   Nonexistent field  
-        <td class="sample_value">{% if sample.public_data %}Yes{% else %}No{% endif %}</td>
-      </tr> -->
       <tr>
         <td class="sample_label">Latitude</td>
         <td class="sample_value">{% if sample.latitude %}{{ sample.latitude }}{% endif %}</td>
@@ -80,21 +68,7 @@
         <td class="sample_label">Publication References</td> <!--  New Format  -->
         <td class="sample_value">
         {% if sample.references %}{% for r in sample.references %}
-          {{ r }} <!--
-          {% if r.title %}&nbsp;&nbsp;<img src="/static/images/icon-info-small.png" onclick="document.getElementById({{ loop.index0 }}).style.opacity=1">
-          <table id="{{ loop.index0 }}" class="table reference_table">
-            <tr>
-              <td>Title:</td>
-              <td>
-                <img src="/static/images/close.png" style="float:right;width:9px" onclick="document.getElementById({{ loop.index0 }}).style.opacity=0">
-                {% if r.title %}{{ r.title }}{% endif %}
-              </td>
-            </tr>
-            <tr><td>Authors:</td><td>{% if r.first_author %}{{ r.first_author }}{% endif %}{% if r.second_authors %}, {{ r.second_authors }}{% endif %}</td></tr>
-            <tr><td>Journal:</td><td>{% if r.journal_name %}{{ r.journal_name }}{% endif %}</td></tr>
-            <tr><td>Text:</td><td>{% if r.full_text %}{{ r.full_text }}{% endif %}</td></tr>
-          </table><br>
-          {% endif %} -->
+          {{ r }} 
         {% endfor %}{% endif %}
         </td>
       </tr>

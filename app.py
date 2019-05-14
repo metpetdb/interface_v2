@@ -32,6 +32,7 @@ def index():
     )
 
 @metpet_ui.route("/help/")
+# links to .md files in user guide git
 def help():
         links = [('Creating a profile','https://raw.githubusercontent.com/metpetdb/userguide/master/creating-a-profile.html'), \
                 ('Uploading data','https://raw.githubusercontent.com/metpetdb/userguide/master/uploading-data.html'), \
@@ -49,8 +50,8 @@ def help():
 @metpet_ui.route("/search/")
 def search():
     filters = dict(request.args)
-    print "search Arguments: ",request.args
-    print "session data: ", session
+    print "Search arguments: ",request.args
+    print "Session data: ", session
     #get all filter options from API, use format = json and minimum page sizes to speed it up
     if request.args.get("resource") == "samples":
         #resource value set in search_form.html, appends samples.html to bottom of page
@@ -129,7 +130,7 @@ def search_chemistry():
     try:
         headers = {"Authorization":"Token "+session["auth_token"]}
         print "private search chemistry"
-        print "HEADER:",headers
+        print "header:",headers
         oxides = get(env("API_HOST")+"oxides/", params = {"fields": "species", "page_size": 100, "format": "json"},headers = headers).json()["results"]
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"},headers=headers).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"},headers = headers).json()["results"]
@@ -140,7 +141,6 @@ def search_chemistry():
         elements = get(env("API_HOST")+"elements/", params = {"fields": "name,symbol", "page_size": 120, "format": "json"}).json()["results"]
         minerals = get(env("API_HOST")+"minerals/", params = {"fields": "name", "page_size": 200, "format": "json"}).json()["results"]
 
-    print 'len',len(oxides),len(elements),len(minerals)
     return render_template("chemical_search_form.html",
         oxides = oxides,
         elements = elements,
@@ -164,9 +164,9 @@ def samples():
 
     filters = dict(request.args)
     tmp_var = 0
-    print("tokens")
+    print("Tokens:")
     print(session)
-    print("Pre-processing filters")
+    print("Pre-processing filters:")
     print(filters)
 
     # handle sorting
@@ -182,12 +182,9 @@ def samples():
     else: # second page
         rev_sorting_dict = dict((v, k) for k, v in sorting_dict.iteritems())
         sorting_name = rev_sorting_dict[filters['ordering'][0]]
-    print 'sorting by: ',sorting_name
 
     # format fields in request and keep list of titles for interface
     filters['fields'], fields_dict, field_names = handle_fields(filters,True)
-    # print 'filters after handling: ', filters['fields']
-    # print 'field_names after handling: ', field_names
 
     for key in filters.keys():
         # Key is a map polygon
@@ -201,7 +198,7 @@ def samples():
             # Reassemble coordinates to be a list of two-element lists
             coords = '[[' + ('],[').join(coords) + ']]'
             filters[key] = coords
-            print "FINAL POLY COORDS: "
+            print "Polygon coords after handling: "
             print(filters[key])
             print(key)
         # Strip unused time values for start & end date queries
@@ -228,7 +225,6 @@ def samples():
     except KeyError:
         samples = get(env("API_HOST")+"samples/",params = filters).json()
 
-    # print samples
     try:
         sample_results = samples["results"]
     except:
@@ -294,12 +290,6 @@ def sample(id):
         flash(sample["detail"])
         return redirect(url_for("search"))
 
-    #make lat/long and date nice
-    # pos = sample["location_coords"].split(" ")
-    # sample["location_coords"] = [round(float(pos[2].replace(")","")),5), round(float(pos[1].replace("(","")),5)]
-    # if sample["collection_date"]:
-    #     sample["collection_date"] = sample["collection_date"][:-10]
-
     #get subsample and analysis data for tables
     subsamples = []
     for s in sample["subsample_ids"]:
@@ -326,7 +316,6 @@ def edit_sample(id):
         headers = {"Authorization": "Token "+session.get("auth_token")}
     else:
         return redirect(url_for("sample", id = id))
-    print "edit sample:",headers
     errors = []
     new = (id.lower() == "new")
 
@@ -347,11 +336,6 @@ def edit_sample(id):
 
         if not sample["collection_date"]:
             del sample["collection_date"]
-
-        # sample['latitude'] = sample['location_coords1']
-        # sample['longitude'] = sample['location_coords0']
-        # del sample["location_coords0"]
-        # del sample["location_coords1"]
 
         if new:
             print "new edit-sample headers", headers
@@ -416,10 +400,6 @@ def subsample(id):
         flash(subsample['detail'])
         return redirect(url_for("search"))
 
-    #get sample and analysis info
-    # (unnecessary with new serializer)
-    # subsample["sample"]["number"] = get(env("API_HOST")+"samples/"+subsample["sample"]["id"],
-    #     params = {"fields": "number", "format": "json"}, headers = headers).json()["number"]
     chemical_analyses = get(env("API_HOST")+"chemical_analyses/", params = {"subsample_ids": subsample["id"], "format": "json"},headers=headers).json()["results"]
 
     return render_template("subsample.html",
@@ -513,7 +493,6 @@ def chemical_analyses():
     else: # second page
         rev_sorting_dict = dict((v, k) for k, v in sorting_dict.iteritems())
         sorting_name = rev_sorting_dict[filters['ordering'].strip("'").strip('[').strip(']')]
-    print 'sorting by: ',sorting_name
 
     # dynamic fields
     fields_dict = {'Sample Number':'sample','Subsample':'subsample','Point':'spot_id','Analysis Method':'analysis_method','Analysis Material':'mineral', \
@@ -522,7 +501,6 @@ def chemical_analyses():
                     'Analyst':'analyst','Analysis Date':'analysis_date','Total':'total'}
     fields_list, fields_dict, field_names = handle_fields(filters,False)
     filters['fields'] = fields_list[0]
-    print '*** filters after handling: ', filters['fields']
 
     headers = None
     if session.get("auth_token", None):
@@ -530,18 +508,13 @@ def chemical_analyses():
     else:
         filters["public_data"] = True
 
-    ##MAKES Chemicals private visible to uploaders
+    # Make chemicals private visible to uploaders
     chemicals = get(env("API_HOST")+"chemical_analyses/", params = filters,headers=headers).json()
     chem_results = chemicals["results"]
 
-    # if 'page' in filters:
-    #     page_num = int(filters['page'])
     next_url, prev_url, last_page, total, page_num = paginate_model("chemical_analyses", chemicals, filters)
 
-    print "length is ",len(chem_results)
-
     for c in chem_results:
-        # c["sample"] = numbers[c["subsample"]["sample"]]
         if "analysis_date" in c and c['analysis_date']:
             c["analysis_date"] = c["analysis_date"][:-10]
 
@@ -589,7 +562,7 @@ def chemical_analysis(id):
 
 @metpet_ui.route("/edit-chemical-analysis/<string:id>,<string:subsample_id>", methods = ["GET", "POST"])
 def edit_chemical_analysis(id, subsample_id):
-    #again, similar to edit sample and edit subsample
+    # similar to edit sample and edit subsample
     headers = None
     if session.get("auth_token", None):
         headers = {"Authorization": "Token "+session.get("auth_token")}
@@ -627,14 +600,6 @@ def edit_chemical_analysis(id, subsample_id):
 
         if analysis["total"] == '':
             del analysis["total"]
-        # if analysis["stage_x"] == '':
-        #     del analysis["stage_x"]
-        # if analysis["stage_y"] == '':
-        #     del analysis["stage_y"]
-        # if analysis["reference_x"] == '':
-        #     del analysis["reference_x"]
-        # if analysis["reference_y"] == '':
-        #     del analysis["reference_y"]
 
         print "analysis: ",analysis
 
@@ -810,9 +775,9 @@ def bulk_upload():
 @metpet_ui.route("/test", methods=['POST'])
 
 def test():
-    #Capture bulk upload details inputted by user (url, filetype) formatted as
-    #JSON that was sent from JavaScript
-    #auth_token = session.get("auth_token",None),
+    '''Capture bulk upload details inputted by user (url, filetype) formatted as
+    JSON that was sent from JavaScript '''
+    # auth_token = session.get("auth_token",None),
     UserInput = request.json
     response = None
     print "Type received from user input: ", type(UserInput)
@@ -826,14 +791,6 @@ def test():
         headers = {"Authorization": "Token "+session.get("auth_token")}
         UserInput["owner"]=session.get("id")
 
-        
-        # print response.json()
-
-        # print "Owner:",UserInput["owner"]
-
-        # else:
-            # pass
-            # return render_template('index.html')
         response = post(env("API_HOST")+"bulk_upload/", json = UserInput, headers = headers)
         # response_dict = dict(response.json()[0])
         # new_response = dict()
@@ -845,10 +802,8 @@ def test():
         # # print "new response:", new_response
         # json_response = jsonify(new_response)
         print response
-        # print "Keys:", new_response.keys()
         print "Response status code:",response.status_code
         print "Response:",response
-        # print "Response content (json):",response.json()
     '''
     return render_template('bulk_upload_results.html',
         bulk_upload_output = response.json(),

@@ -35,16 +35,7 @@
                 {% for rock_type in rock_types %}
                 <input type="checkbox" class="rocktype" onchange="updateRockTypes()" name="rock_types" value="{{rock_type.name}}">&nbsp;&nbsp;{{ rock_type.name }}
                 {% endfor %}
-
               </div>
-
-<!--               <div id="mobilerocktypes">or
-                <select multiple onchange="mobileUpdateRock()" id="rocktypeselect">
-                  {% for rock_type in rock_types %}
-                  <option value="{{rock_type.name}}">{{ rock_type.name }}</option>
-                  {% endfor %}
-                </select>
-              </div> -->
             </ul>
           </div>
 
@@ -69,15 +60,6 @@
                 <input type="checkbox" class="field" onchange="updateFields()" name="field" value="{{ f }}">
                 {% endfor %}
               </div>
-
-<!--               <div id="mobileMetGrade">
-                <select multiple id="metgradelist" onchange="mobileUpdateMetGrade()">
-                {% for mmg in metamorphic_grades %}
-                <option value="{{ mmg.name }}">{{ mmg.name }}</option>
-                {% endfor %}
-              </select>
-              </div> -->
-              
               <a id="toggleSelectAll" style="float:top-right" onclick="toggleAllFields(this.text)" href="#">Select All</a>
             </ul>
           </div>
@@ -190,22 +172,11 @@
                 {% endfor %}
               </select><br>
 
-<!--               <label class="provenance-label" for="igsn">IGSN: </label>
-              <select id="selected-igsn" onchange="updateProvenance()" name="igsn" class="chosen-select">
-                <option value="" disabled selected>Select IGSN</option>
-                {% for i in igsns %}
-                <option value="{{ i }}">{{ i }}</option>
-                {% endfor %}
-              </select><br> -->
-
               <label class="provenance-label" for="dates" >Date Range: </label>
               <input type="hidden" id="startdatevalue" name="start_date" value="">
               <input type="hidden" id="enddatevalue" name="end_date" value="">
               <input type="date" onchange="updateStartDate(this)" id="date-start"> to 
               <input type="date" onchange="updateEndDate(this)" id="date-end"><br>
-
-<!--               <input type="text" onchange="updateStartDate(this)" id="date-start" placeholder="Start date (MM/DD/YYYY)"> to  -->
-<!--               <input type="text" onchange="updateEndDate(this)" id="date-end" placeholder="End date (MM/DD/YYYY)"><br> -->
 
               <label class="provenance-label" for="access">Access: </label><br>
               <div style="padding-left: 30px;" id="access-buttons">
@@ -223,7 +194,6 @@
     </div>
   </div>
 
-
 <!-- SEARCH SUMMARY -->
   <div id="search-summary" class="panel panel-default">
     <div class="panel-heading">
@@ -238,7 +208,6 @@
     {% else %}
       <div id="collapseTwo" class="panel-collapse collapse in">
     {% endif %}
-    <!-- <div id="collapseTwo" class="panel-collapse collapse in"> -->
       <div class="panel-body">
         <p id="instructions">Set your search criteria by selecting from the categories on the left.<br></p>
         <div id="search-options-rock-type"></div>
@@ -267,6 +236,7 @@
               </select><br>
           {% if auth_token %}
             <br>
+            <!-- toggle switch option! -->
 <!--             My data &nbsp;
             <label class="switch">
                 <input type="checkbox">
@@ -355,10 +325,6 @@ $("#toggleSelectAll").click(function() {
     }; 
 });
 
-// $('#checkAllFields').click(function(){
-//   $(this).toggleText('Before', 'After');
-// })
-
 // TO SWITCH TABS
 $('#searchTab a').click(function (e) {
   e.preventDefault();
@@ -399,10 +365,6 @@ $(function()
     });
     return false;
   });
-
-  // DATE PICKER
-  // $("#date-start").datepicker();
-  // $("#date-end").datepicker();
 
   // ACTIVATE CHOSEN-SELECT PLUGIN
   $(".chosen-select").chosen({

@@ -55,10 +55,6 @@ def handle_fields(filters,sample_search):
         filters['fields'] = [def_sample] if (sample_search) else [def_chem]
     if type(filters['fields']) is str:
         filters['fields'] = [filters['fields']]
-    # if sorting_name not in filters['fields'][0]:
-    #     filters['fields'][0] += ','
-    #     filters['fields'][0] += sorting_name # always show field used for sort
-    # flip args back for pages
 
     if (filters['fields'][0].split(',')[0] == 'id') or filters['fields'][0].split(',')[0] == 'sample':
         rev_fields_dict = dict((v, k) for k, v in fields_dict.iteritems())
