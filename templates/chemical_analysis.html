@@ -2,10 +2,10 @@
 
 {% block title %}
 <h4>
-  <a href="{{ url_for('sample', id=analysis.subsample.sample) }}">Sample {{ analysis.sample.number }}</a> / 
-  <a href="{{ url_for('subsample', id=analysis.subsample.id) }}">Subsample {{ analysis.subsample.name }}</a> / 
+  <a href="{{ url_for('sample', id=analysis.sample_id) }}">Sample {{ analysis.sample }}</a> / 
+  <a href="{{ url_for('subsample', id=analysis.subsample_id) }}">Subsample {{ analysis.subsample }}</a> / 
   Chemical Analysis Point {{ analysis.spot_id }}
-  {% if auth_token %}<span style="float:right"><a href="{{ url_for('edit_chemical_analysis', id=analysis.id, subsample_id=analysis['subsample']['id']) }}">Edit Chemical Analysis</a></span>{% endif %}
+  {% if auth_token %}<span style="float:right"><a href="{{ url_for('edit_chemical_analysis', id=analysis.id, subsample_id=analysis.subsample_id) }}">Edit Chemical Analysis</a></span>{% endif %}
 </h4>
 {% endblock %}
 
@@ -15,15 +15,15 @@
     <tbody>    
       <tr>
         <td class="sample_label">Owner</td>
-        <td class="sample_value">{% if analysis.owner %}{{ analysis.owner.name }}{% endif %}</td>
-      </tr>      
-      <tr>
-        <td class="sample_label">Public</td>
-        <td class="sample_value">{% if analysis.public_data %}Yes{% else %}No{% endif %}</td>
-      </tr>          
+        <td class="sample_value">{% if analysis.owner %}{{ analysis.owner }}{% endif %}</td>
+      </tr>              
       <tr>
         <td class="sample_label">Image</td>
-        <td class="sample_value">No Image</td>
+        {% if analysis.reference_image and analysis.reference_image.public_data %}<td><img id="reference_image" src={{ analysis.reference_image.image }} title="Click to expand" style="height: 100px;" onclick="expandImage();">
+
+          {% else %}
+        <td class="sample_value">No Public Image</td>
+        {% endif %}
       </tr>
       <tr>
         <td class="sample_label">Analysis Method</td>
@@ -43,7 +43,7 @@
       </tr>          
       <tr>
         <td class="sample_label">Analysis Material</td>
-        <td class="sample_value">{% if analysis.mineral %}{{ analysis.mineral.name }}{% endif %}</td>
+        <td class="sample_value">{% if analysis.mineral %}{{ analysis.mineral }}{% endif %}</td>
       </tr>          
       <tr>
         <td class="sample_label">Total</td>
@@ -102,7 +102,7 @@
       {% if analysis.oxides %}{% for oxide in analysis.oxides %}
       <tr>
         <td>{{ oxide.species }}</td>
-        <td>{{ oxide.amount }}</td>
+        <td>{{ oxide.amount|round(4) }}</td>
       </tr>
       {% endfor %}{% endif %}
     </tbody>
@@ -115,5 +115,26 @@ $(document).ready(function()
   $('#chem_elements').dataTable();
   $('#chem_oxides').dataTable();
 });
+
+function expandImage(){
+  var size = "100%";
+  var tooltip = "Click to shrink";
+  var image = document.getElementById("reference_image");
+  if(image.style.height !== "100px"){
+    size = "100px";
+    tooltip = "Click to expand";
+  }
+  image.style = "height: " + size + ";";
+  image.title = tooltip;
+
+  var width = image.clientWidth;
+  if(width > 640){
+  	image.style = "width: 640px;";
+  }
+  if(image.clientHeight > 500){
+  	image.style = "height: 500px;";
+  }
+
+}
 </script>
 {% endblock %}

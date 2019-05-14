@@ -11,8 +11,11 @@
         <a class='accordion-toggle' data-toggle="collapse" data-parent="#accordion" href="#">Search Options</a>
       </h4>
     </div>
-
-    <div id="collapseOne" class="panel-collapse collapse in">
+    {% if my_samples %}
+      <div id="collapseOne" class="panel-collapse collapse">
+    {% else %}
+      <div id="collapseOne" class="panel-collapse collapse in">
+    {% endif %}
       <div class="panel-body">
         <ul class="nav nav-tabs" id="searchTab">
           <li class="active"><a href="#rocktypes">Rock Types</a></li>
@@ -20,6 +23,7 @@
           <li><a id="location-tab" href="#location">Location</a></li>
           <li><a href="#minerals">Minerals</a></li>
           <li><a href="#provenance">Provenance</a></li>
+          <li><a href="#field">Fields to Show</a></li>
         </ul>
 
         <div class="tab-content">
@@ -46,6 +50,20 @@
               </div>
             </ul>
           </div>
+
+          <!-- FIELDS -->
+          <div class="tab-pane" id="field">
+            <ul>
+              <h3>Fields to Show</h3>
+              <div id="field-checkboxes">
+                {% for f in fields %}
+                <input type="checkbox" class="field" onchange="updateFields()" name="field" value="{{ f }}">
+                {% endfor %}
+              </div>
+              <a id="toggleSelectAll" style="float:top-right" onclick="toggleAllFields(this.text)" href="#">Select All</a>
+            </ul>
+          </div>
+
 
           <!-- LOCATION -->
           <div class="tab-pane" id="location">
@@ -99,7 +117,7 @@
           <div class="tab-pane" id="minerals"><br>
             <label for="mineral-tree">Mineral: </label>
             <div id="mineral-select">
-              <select multiple id="selected-mineral" name="minerals" onchange="updateMineral()" class="chosen-select">
+              <select multiple id="selected-mineral" autocomplete="off" name="minerals" onchange="updateMineral()" class="chosen-select">
                 <option></option>
                 {% for m in minerals %}
                 <option value="{{ m.name }}">{{ m.name }}</option>
@@ -117,13 +135,15 @@
               </label>
             </div>
           </div>
+
+
     
           <!-- PROVENANCE -->
           <div class="tab-pane" id="provenance">
             <ul id="provenance">
               <h3>Provenance</h3>
               <label class="provenance-label" for="owners">Owner: </label>
-              <select id="selected-owner" onchange="updateProvenance()" name="owners" class="chosen-select">
+              <select id="selected-owner" autocomplete="off" onchange="updateProvenance()" name="owners" class="chosen-select">
                 <option value="" selected>Select owner</option>
                 {% for o in owners %}
                 <option value="{{ o }}">{{ o }}</option>
@@ -131,46 +151,38 @@
               </select><br>
 
               <label class="provenance-label" for="collectors">Collector: </label>
-              <select id="selected-collectors" onchange="updateProvenance()" multiple name="collectors" class="chosen-select">
+              <select id="selected-collectors" onchange="updateProvenance()" multiple name="collectors" class="chosen-select" style="max-width: 100%">
                 {% for c in collectors %}
                 <option value="{{ c.name }}">{{ c.name }}</option>
                 {% endfor %}
               </select><br>
 
-              <label class="provenance-label" for="georeferences">Reference: </label>
-              <select id="selected-references" onchange="updateProvenance()" multiple name="georeferences" class="chosen-select">
+              <label class="provenance-label" for="references">Reference: </label>
+              <select id="selected-references" onchange="updateProvenance()" multiple name="references" class="chosen-select">
                 {% for r in references %}
                 <option value="{{ r.name }}">{{ r.name }}</option>
                 {% endfor %}
               </select><br>
 
-              <label class="provenance-label" for="numbers">Number: </label>
-              <select id="selected-number" onchange="updateProvenance()" name="numbers">
-                <option value="" selected>Select sample number</option>
+              <label class="provenance-label" for="numbers">Sample Number: </label>
+              <select id="selected-number" onchange="updateProvenance()" name="numbers" class="chosen-select" style="max-width: 100%">
+                <option value="" selected>Select sample numbers</option>
                 {% for n in numbers %}
                 <option value="{{ n }}">{{ n }}</option>
                 {% endfor %}
               </select><br>
 
-<!--               <label class="provenance-label" for="igsn">IGSN: </label>
-              <select id="selected-igsn" onchange="updateProvenance()" name="igsn" class="chosen-select">
-                <option value="" disabled selected>Select IGSN</option>
-                {% for i in igsns %}
-                <option value="{{ i }}">{{ i }}</option>
-                {% endfor %}
-              </select><br> -->
-
+              <label class="provenance-label" for="dates" >Date Range: </label>
               <input type="hidden" id="startdatevalue" name="start_date" value="">
               <input type="hidden" id="enddatevalue" name="end_date" value="">
-              <label class="provenance-label" for="dates" >Date Range: </label>
-              <input type="text" onchange="updateStartDate(this)" id="date-start"> to 
-              <input type="text" onchange="updateEndDate(this)" id="date-end"><br>
+              <input type="date" onchange="updateStartDate(this)" id="date-start"> to 
+              <input type="date" onchange="updateEndDate(this)" id="date-end"><br>
 
               <label class="provenance-label" for="access">Access: </label><br>
               <div style="padding-left: 30px;" id="access-buttons">
-                <input type="radio" onchange="updateProvenance()" name="public_data" value="">No Preference<br>
-                <input type="radio" onchange="updateProvenance()" name="public_data" value="True">Public Access<br>
-                <input type="radio" onchange="updateProvenance()" name="public_data" value="False">Private Access<br>
+                <input type="radio" onchange="updateProvenance()" name="public_data" value="">All Samples<br>
+                <input type="radio" onchange="updateProvenance()" name="public_data" value="False">My Samples<br>
+                <input type="radio" onchange="updateProvenance()" name="public_data" value="True">Public Samples<br>
               </div>
             </ul>
           </div>
@@ -182,6 +194,7 @@
     </div>
   </div>
 
+<!-- SEARCH SUMMARY -->
   <div id="search-summary" class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
@@ -190,7 +203,11 @@
       <a id="clearAll" onclick="clearAll()" href="#">Clear All</a>
     </div>
 
-    <div id="collapseTwo" class="panel-collapse collapse in">
+    {% if my_samples %}
+      <div id="collapseTwo" class="panel-collapse collapse">
+    {% else %}
+      <div id="collapseTwo" class="panel-collapse collapse in">
+    {% endif %}
       <div class="panel-body">
         <p id="instructions">Set your search criteria by selecting from the categories on the left.<br></p>
         <div id="search-options-rock-type"></div>
@@ -199,6 +216,8 @@
         <div id="search-options-minerals"></div>
         <div id="search-options-chemistry"></div>
         <div id="search-options-provenance"></div>
+        <div id="search-options-fields"></div>
+
         <div id="form-submit" class="text-center">
           <div class="btn-group" data-toggle="buttons" style="margin:0 auto;">
             <label class="btn btn-primary active">
@@ -208,10 +227,43 @@
               <input type="radio" name="resource" value="chemical_analyses"> Chemistry
             </label>
           </div>
+          <br> </br>
+              <select id="selected-ordering" onchange="updateSorting()" name="ordering" class="chosen-select">
+                <option value="" selected>Select order</option>
+                {% for s in sorting_dict %}
+                <option value="{{ s }}">{{ s }}</option>
+                {% endfor %}
+              </select><br>
+          {% if auth_token %}
+            <br>
+            <!-- toggle switch option! -->
+<!--             My data &nbsp;
+            <label class="switch">
+                <input type="checkbox">
+              <span class="slider"></span>
+            </label>
+            &nbsp; All data -->
+            <div class="btn-group" data-toggle="buttons" style="margin:0 auto;">
+              {% if my_samples %}
+              <label class="btn btn-primary">
+              {% else %}
+              <label class="btn btn-primary active">
+              {% endif %}
+                <input type="radio" name="emails" value=""> All data
+              </label>
+              {% if my_samples %}
+              <label class="btn btn-primary active">
+              {% else %}
+              <label class="btn btn-primary">
+              {% endif %}
+              <input type="radio" name="emails" value="{{ email }}"> My data
+              </label>
+            </div>
+          {% endif %}
           <div style="padding:10px 0px;">
             <input type="checkbox" id="showmap" onchange="$('#collapseThree').collapse('toggle');" name="showmap" value="ofcourse">Show samples on map
           </div>
-          Display <input type="text" style="width:11%;text-align:right" id="page_size" name="page_size" value="20"> results &nbsp;&nbsp;&nbsp;&nbsp;
+          Display <input type="text" style="width:13%;text-align:right" id="page_size" name="page_size" value="100"> results &nbsp;&nbsp;&nbsp;&nbsp;<br></br>
           <input type="submit" style="font-size:16px" value="Search">
         </div>
       </div>
@@ -234,8 +286,45 @@
 <link href="/static/css/style.min.css" rel="stylesheet">
 <!-- <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet"> -->
 <link href="/static/css/bootstrap-switch.min.css" rel="stylesheet">
+{% if my_samples %}
+  <script>
+  // SUBMIT SEARCH ON LOAD IF MY SAMPLES 
+  $(document).ready(function() {
+      $('#collapseOne').collapse('toggle');
+      $('#collapseTwo').collapse('toggle');
+      $('#spinner').show();
+      $.ajax({
+        type: $('#content').attr('method'),
+        url: $('#content').attr('action'),
+        data: $('#content').serialize(),
+        success: function (data) {
+          $("#results").html("");
+          $("#results").html(data);
+          $('#spinner').hide();
+          //clearAll();
+          if(document.getElementsByTagName("header")[1])
+            document.getElementsByTagName("header")[1].innerHTML="";
+        },
+        error: function(data) {
+          $("#results").html("Error");
+          $('#spinner').hide();
+        }
+      });
+      return false;
+  });
+</script>
+{% endif %}
 
 <script>
+// TOGGLE SELECT ALL FOR FIELDS
+$("#toggleSelectAll").click(function() { 
+    if ($(this).text() == "Select All") { 
+        $(this).text("Clear All"); 
+    } else { 
+        $(this).text("Select All"); 
+    }; 
+});
+
 // TO SWITCH TABS
 $('#searchTab a').click(function (e) {
   e.preventDefault();
@@ -248,6 +337,7 @@ $('#location-tab a').click(function (e) {
 });
 
 var poly=null;
+
 //ON READY FUNCTION
 $(function()
 {
@@ -275,10 +365,6 @@ $(function()
     });
     return false;
   });
-
-  // DATE PICKER
-  $("#date-start").datepicker();
-  $("#date-end").datepicker();
 
   // ACTIVATE CHOSEN-SELECT PLUGIN
   $(".chosen-select").chosen({
@@ -362,6 +448,41 @@ $(function()
   }
   document.getElementById('metgrade-checkboxes').innerHTML='';
   document.getElementById('metgrade-checkboxes').appendChild(metgrades);
+
+
+    // GROUP FIELDS
+  originalHTML=$("#field-checkboxes :input");
+  newInnerHTML='';
+  b=0;
+  var fields=document.createElement('div');
+
+  for (a=0; a < originalHTML.length; a++)
+  {
+    if(b == 0)
+    {
+      div=document.createElement('div');
+      div.className='fieldcheckboxgroup';
+    }
+    var input=document.createElement('input');
+    $(input).className="field";
+    $(input).attr('type','checkbox');
+    $(input).attr('onchange','updateFields()');
+    $(input).attr('name','fields');
+    var val=$(originalHTML[a]).attr('value');
+    $(input).attr('value', val);
+
+    div.appendChild(input);
+    div.innerHTML += val += "<br>";
+    if(b == 4 || a == originalHTML.length - 1)
+    {
+      fields.appendChild(div);
+      b=0;
+    }
+    else
+      b++;
+  }
+  document.getElementById('field-checkboxes').innerHTML='';
+  document.getElementById('field-checkboxes').appendChild(fields);
 
   // GOOGLE MAP RENDERING
   function initialize()
@@ -453,6 +574,34 @@ function HomeControl(controlDiv, map) {
 }
 
 // ROCK TYPES
+function mobileUpdateRock(){
+  var rockSelect=  $('#rocktypeselect').val();
+  var checkBoxes=document.getElementsByName("rock_types");
+
+  var n = 0;
+  for(var i=0; i < checkBoxes.length  && n < rockSelect.length; i++){
+    if(checkBoxes[i].value==rockSelect[n]){
+      checkBoxes[i].checked=true;
+      n = n + 1;
+    }
+  }
+
+  updateRockTypes()
+}
+function mobileUpdateMetGrade(){
+  var metGradeSelect= $('#metgradelist').val();
+  var checkBoxes=document.getElementsByName("metamorphic_grades");
+
+  var n = 0;
+  for(var i=0; i < checkBoxes.length && n < metGradeSelect.length;i++){
+    if(checkBoxes[i].value==metGradeSelect[n]){
+      checkBoxes[i].checked=true;
+      n = n + 1;
+    }
+  }
+
+  updateMetGrades()
+}
 function updateRockTypes()
 {
   var searchOptions=document.getElementById("search-options-rock-type");
@@ -698,7 +847,7 @@ function updateProvenance()
     searchOptions.innerHTML += "<br>";
   }
 
-  if($("#selected-number option:selected").length && $("#selected-number option:selected").text() != "Select sample number")
+  if($("#selected-number option:selected").length && $("#selected-number option:selected").text() != "Select sample numbers")
   {
     searchOptions.innerHTML += "<b>Number:</b> " + $("#selected-number option:selected").text() + "<br> ";
   }
@@ -727,20 +876,14 @@ function updateProvenance()
 }
 function updateStartDate(input)
 {
- var year=input.value.substr(-4);
- var date=input.value.substr(3, 2);
- var month=input.value.substr(0, 2);
- var timestamp=year + "-" + month + "-" + date + " 00:00:00"; 
+ var timestamp= input.value;
  $('#startdatevalue').attr('value', timestamp);
  console.log($('#startdatevalue').val());
  updateProvenance();
 }
 function updateEndDate(input)
 {
- var year=input.value.substr(-4);
- var date=input.value.substr(3, 2);
- var month=input.value.substr(0, 2);
- var timestamp=year + "-" + month + "-" + date + " 00:00:00"; 
+ var timestamp= input.value; 
  $('#enddatevalue').attr('value', timestamp);
  console.log($('#enddatevalue').val());
  updateProvenance();
@@ -761,6 +904,62 @@ function clearProvenance()
   document.getElementById("search-options-provenance").innerHTML="";
 }
 
+// SORTING
+function updateSorting()
+{
+  if($("#selected-ordering option:selected").length && $("#selected-ordering option:selected").text() != "Select order")
+  {
+    searchOptions.innerHTML += "<div class='summary-title'><h4>Sort by</h4></div>";
+    searchOptions.innerHTML += $("#selected-ordering option:selected").text() + "<br> ";
+  }
+  var s=searchOptions.innerHTML;
+  searchOptions.innerHTML=s.slice(0, -2);
+}
+
+// FIELDS
+function updateFields()
+{
+  var searchOptions=document.getElementById("search-options-fields");
+  searchOptions.innerHTML="";
+
+  var checkBoxes=document.getElementsByName("fields");
+  var checked=false;
+  for(var i=0; i < checkBoxes.length;i++)
+    if(checkBoxes[i].checked)     
+      checked=true;
+
+  if(checked)
+  {
+    searchOptions.innerHTML += "<div class='summary-title'><h4>Fields to Show</h4><a onclick='clearFields()' class='clear-title' href='#'>Clear</a></div>";
+    for(var i=0; i < checkBoxes.length;i++)
+      if(checkBoxes[i].checked)
+      {
+        searchOptions.innerHTML += checkBoxes[i].defaultValue;
+        searchOptions.innerHTML += ', ';
+      }
+    var s=searchOptions.innerHTML;
+    searchOptions.innerHTML=s.slice(0, -2);
+  }
+}
+function clearFields()
+{
+  var checkBoxes=document.getElementsByName("fields");
+  for(var i=0; i < checkBoxes.length;i++)
+    checkBoxes[i].checked=false;
+  document.getElementById("search-options-fields").innerHTML="";
+}
+
+function toggleAllFields(current)
+{
+  var checkBoxes=document.getElementsByName("fields");
+  if(current=="Clear All")
+    clearFields();
+  else
+    for(var i=0; i < checkBoxes.length;i++)
+      checkBoxes[i].checked=true;
+  updateFields();
+}
+
 function clearAll()
 {
   clearRockTypes();
@@ -768,6 +967,7 @@ function clearAll()
   clearLocation();
   clearMineral();
   clearProvenance();
+  clearFields();
 }
 </script>
 {% endblock %}
