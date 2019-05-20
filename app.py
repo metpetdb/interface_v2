@@ -322,17 +322,16 @@ def edit_sample(id):
     #edit_sample.html is a form with mostly the right input names
     sample = dict(request.form)
     response_text = "" # have sample response text in case of a forbidden access (403) error
+    print "--- sample to add", sample
+    print "--------------------"
     if sample:
-        #minerals are named by id, make it into a nested list of dictionaries
-        sample["minerals"] = []
+        # Fields are given as lists, we parse the dictionary keys to remove strings out of lists
+        # fields that end in _ are kept as lists, e.g., minerals_
         for key in sample.keys():
-            if key[:9] == "minerals_":
-                sample["minerals"].append({"id": key[9:], "amount": sample[key][0]})
-                del sample[key]
-            elif key[-1] != "s" and sample[key]:
+            if key[-1] != "_":
                 sample[key] = sample[key][0]
-            elif key[-1] == "s":
-                sample[key] = filter(lambda k: k != "", sample[key])
+            if key == "public_data":
+                sample.pop("public_data", None)
 
         if not sample["collection_date"]:
             del sample["collection_date"]
@@ -345,8 +344,8 @@ def edit_sample(id):
             response = put(env("API_HOST")+"samples/"+id+"/", json = sample, headers = headers)
             print "old edit-sample headers", headers
             print "old edit-sample sample", sample
-        print "edit-sample status code:",response.status_code
-        print "edit-sample response:",response.json()
+        print "edit-sample status code:", response.status_code
+        print "edit-sample response:", response.json()
         if response.status_code < 300:
             return redirect(url_for("sample", id = response.json()["id"]))
         if response.status_code == 403:
@@ -370,6 +369,8 @@ def edit_sample(id):
     metamorphic_grades = get(env("API_HOST")+"metamorphic_grades/", params = {"page_size": 30, "format": "json"}).json()["results"]
     metamorphic_regions = get(env("API_HOST")+"metamorphic_regions/", params = {"page_size": 240, "format": "json"}).json()["results"]
     countries = get(env("API_HOST")+"country_names/").json()["country_names"]
+
+    print ">>>>>>>>>>>>>>>>>>>>>" , sample
 
     return render_template("edit_sample.html",
         sample = sample,

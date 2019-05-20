@@ -66,8 +66,8 @@
             <select name="rock_type_id" class="chosen-select" style="width:85%">
               <option></option>
               {% for r in rock_types %}
-                {% if sample.rock_type and r.name == sample.rock_type.name %}
-                <option value="{{ r.id }}" selected="selected">{{ r.name }}</option>
+                {% if sample.rock_type and r.name == sample.rock_type %}
+                <option value="{{ r.id }}" selected="selected">{{ sample.rock_type }}</option>
                 {% else %}
                 <option value="{{ r.id }}">{{ r.name }}</option>
                 {% endif %}
@@ -143,7 +143,7 @@
         <tr>
           <td class="sample_label">Region</td>
           <td class="sample_value">
-            <select multiple id="regions" name="regions" class="chosen-select" style="width:85%">
+            <select multiple id="regions" name="regions_" class="chosen-select" style="width:85%">
               <option hidden selected="selected"></option>
               {% for r in regions %}
                 {% if r.name in sample.regions %}
@@ -163,7 +163,7 @@
         <tr>
           <td class="sample_label">Metamorphic Regions</td>
           <td class="sample_value">
-            <select multiple name="metamorphic_region_ids" class="chosen-select" style="width:85%">
+            <select multiple name="metamorphic_region_ids_" class="chosen-select" style="width:85%">
               <option hidden selected="selected"></option>
               {% for m in metamorphic_regions %}
                 {% if m in sample.metamorphic_regions %}
@@ -180,7 +180,7 @@
         <tr>
           <td class="sample_label">Metamorphic Grades</td>
           <td class="sample_value">
-            <select multiple name="metamorphic_grade_ids" class="chosen-select" style="width:85%">
+            <select multiple name="metamorphic_grade_ids_" class="chosen-select" style="width:85%">
               <option hidden selected="selected"></option>
               {% for m in metamorphic_grades %}
                 {% if m in sample.metamorphic_grades %}
@@ -197,7 +197,7 @@
         <tr>
           <td class="sample_label">Publication References</td>
           <td class="sample_value">
-            <select multiple id="references" name="references" class="chosen-select" style="width:85%">
+            <select multiple id="references" name="references_" class="chosen-select" style="width:85%">
               <option></option>
               {% for r in references %}
                 {% if r.name in sample.references %}
@@ -230,19 +230,11 @@
           <td class="sample_label">Minerals</td>
           <td class="sample_value">
             <table id="minerals">
-              <thead>
-                <tr>
-                  <th> </th>
-                  <th> </th>
-                  <th>Amount</th>
-                </tr>
-              </thead>
               <tbody>
               {% if sample.minerals %}{% for m in sample.minerals %}
-                <tr id="{{ m.name }}">
-                  <td><a href="#minerals" onclick="document.getElementById('minerals').deleteRow(document.getElementById('{{ m.name }}').rowIndex)">x</a></td>
-                  <td>&nbsp&nbsp{{ m.name }}&nbsp&nbsp</td>
-                  <td><input type="text" name="minerals_{{ m.id }}" value="{{ m.amount }}" style="text-align:right;width:65px"></td>
+                <tr id="{{ m }}">
+                  <td><a href="#minerals" onclick="document.getElementById('minerals').deleteRow(document.getElementById('{{ m }}').rowIndex)">x</a></td>
+                  <td>&nbsp&nbsp<input type="text" name="mineral_" value="{{ m }}">&nbsp&nbsp</td>
                 </tr>
               {% endfor %}{% endif %}
               </tbody>
