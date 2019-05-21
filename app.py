@@ -325,6 +325,7 @@ def edit_sample(id):
     print "--- sample to add", sample
     print "--------------------"
     if sample:
+
         # Fields are given as lists, we parse the dictionary keys to remove strings out of lists
         # fields that end in _ are kept as lists, e.g., minerals_
         for key in sample.keys():
@@ -335,6 +336,17 @@ def edit_sample(id):
                 sample[key[:-1]] = [s for s in sample[key] if s != ""]
                 sample.pop(key, None)
 
+        # Handle list of minerals
+        if "minerals" in sample:
+            # For minerals, we need a dictionary with "id" key
+            # key[:-1] to remove the underscore _ at the end
+            # for m_id in sample[key]:
+            #     sample[key[:-1]] = {"id": m_id}
+            sample["minerals"] = [{"id": m_id, "amount": 1} for m_id in sample["minerals"]]
+        else:
+            sample["minerals"] = dict()  # make list of minerals empty
+
+        # Remove empty date
         if not sample["collection_date"]:
             del sample["collection_date"]
 
@@ -370,7 +382,7 @@ def edit_sample(id):
     metamorphic_regions = get(env("API_HOST")+"metamorphic_regions/", params = {"page_size": 240, "format": "json"}).json()["results"]
     countries = get(env("API_HOST")+"country_names/").json()["country_names"]
 
-    print ">>>>>>>>>>>>>>>>>>>>>" , sample
+    print ">>>>>>>>>>>>>>>>>>>>>" , get(env("API_HOST")+"samples/"+id+"/", params={"format": "json"}, headers = headers).json()
 
     return render_template("edit_sample.html",
         sample = sample,

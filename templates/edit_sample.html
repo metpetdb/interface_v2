@@ -236,12 +236,15 @@
           <td class="sample_value">
             <table id="minerals">
               <tbody>
-              {% if sample.minerals %}{% for m in sample.minerals %}
-                <tr id="{{ m }}">
-                  <td><a href="#minerals" onclick="document.getElementById('minerals').deleteRow(document.getElementById('{{ m }}').rowIndex)">x</a></td>
-                  <td>&nbsp&nbsp<input type="text" name="mineral_" value="{{ m }}">&nbsp&nbsp</td>
+              {% for m in minerals %}
+              {% if m.name in sample.minerals %}
+                <tr id="{{ m.id }}">
+                  <td><a href="#minerals" onclick="document.getElementById('minerals').deleteRow(document.getElementById('{{ m.id }}').rowIndex)">x</a></td>
+                  <td><input type="text" disabled name="mineral_name" value="{{ m.name }}" style="width:85%"></td>
+                  <td><input type="hidden" readonly name="minerals_" value="{{ m.id }}"></td>
                 </tr>
-              {% endfor %}{% endif %}
+              {% endif %}
+              {% endfor %}
               </tbody>
             </table>
             <select class="chosen-select" id="mineral_names" onchange="updateMinerals()">
@@ -349,15 +352,21 @@ function updateMinerals() {
   var remove=row.insertCell(-1);
   var name=row.insertCell(-1);
   remove.innerHTML='<a href="#minerals" onclick="document.getElementById(\'minerals\').deleteRow(document.getElementById(\''+n+'\').rowIndex)">x</a>'
-  name.innerHTML='&nbsp&nbsp'+n+'&nbsp&nbsp';
 
-  var cell=row.insertCell(-1);
   var input=document.createElement("input");
   input.type="text";
-  input.name="minerals_"+id;
-  input.style.textAlign="right";
-  input.style.width="65px";
-  cell.appendChild(input);
+  input.name="mineral_name";
+  input.style.textAlign="left";
+  input.style.width="85%";
+  input.value=n;
+  input.disabled="True";
+  name.appendChild(input);
+
+  var hidden=document.createElement("input");
+  hidden.type="hidden";
+  hidden.name="minerals_";
+  hidden.value=id;
+  name.appendChild(hidden);
 
   mineral.selectedIndex=0;
 }
