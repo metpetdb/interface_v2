@@ -240,7 +240,7 @@
               {% if m.name in sample.minerals %}
                 <tr id="{{ m.id }}">
                   <td><a href="#minerals" onclick="document.getElementById('minerals').deleteRow(document.getElementById('{{ m.id }}').rowIndex)">x</a></td>
-                  <td><input type="text" disabled name="mineral_name" value="{{ m.name }}" style="width:85%"></td>
+                  <td><input type="text" disabled name="mineral_name" value="{{ m.name }}" style="width:85%; padding-left: 4px;"></td>
                   <td><input type="hidden" readonly name="minerals_" value="{{ m.id }}"></td>
                 </tr>
               {% endif %}
@@ -358,6 +358,8 @@ function updateMinerals() {
   input.name="mineral_name";
   input.style.textAlign="left";
   input.style.width="85%";
+  input.style.paddingLeft="4px";
+  input.style.backgroundColor="#55BB45";
   input.value=n;
   input.disabled="True";
   name.appendChild(input);

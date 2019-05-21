@@ -346,8 +346,12 @@ def edit_sample(id):
         else:
             sample["minerals"] = dict()  # make list of minerals empty
 
+        # Javascript toISOStrings sends a date as YYYY-MM-DDTHH:mm:ss.sssZ
+        # We grab only the date, leaving time out
+        if "collection_date" in sample:
+            sample["collection_date"] = sample["collection_date"].split("T")[0]  # split at the T and get the first part
         # Remove empty date
-        if not sample["collection_date"]:
+        else:
             del sample["collection_date"]
 
         if new:
