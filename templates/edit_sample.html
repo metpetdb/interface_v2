@@ -28,7 +28,12 @@
         <tr>
           <td class="sample_label">Owner*</td>
           <td class="sample_value">
-            {% if sample.owner %}{{sample.owner.name}}{% endif %}
+            {% if sample.owner %}
+              {% if sample.owner.name %} {{sample.owner.name}}
+              {% else %}
+              {{sample.owner}}
+              {% endif %}
+            {% endif %}
           </td>
         </tr>
         <tr>
@@ -166,7 +171,7 @@
             <select multiple name="metamorphic_region_ids_" class="chosen-select" style="width:85%">
               <option hidden selected="selected"></option>
               {% for m in metamorphic_regions %}
-                {% if m in sample.metamorphic_regions %}
+                {% if m.name in sample.metamorphic_regions %}
                 <option value="{{ m.id }}" selected="selected">{{ m.name }}</option>
                 {% else %}
                 <option value="{{ m.id }}">{{ m.name }}</option>
@@ -183,7 +188,7 @@
             <select multiple name="metamorphic_grade_ids_" class="chosen-select" style="width:85%">
               <option hidden selected="selected"></option>
               {% for m in metamorphic_grades %}
-                {% if m in sample.metamorphic_grades %}
+                {% if m.name in sample.metamorphic_grades %}
                 <option value="{{ m.id }}" selected="selected">{{ m.name }}</option>
                 {% else %}
                 <option value="{{ m.id }}">{{ m.name }}</option>

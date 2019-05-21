@@ -330,8 +330,10 @@ def edit_sample(id):
         for key in sample.keys():
             if key[-1] != "_":
                 sample[key] = sample[key][0]
-            if key == "public_data":
-                sample.pop("public_data", None)
+            else:
+                # removes the last _ from list fields, removes empty fields, if any
+                sample[key[:-1]] = [s for s in sample[key] if s != ""]
+                sample.pop(key, None)
 
         if not sample["collection_date"]:
             del sample["collection_date"]
@@ -352,16 +354,14 @@ def edit_sample(id):
             response_text = response.json()['detail']
         errors = response.json()
 
-    #get sample data and split point into lat/long
+    # get sample data and split point into lat/long
     if new:
         sample["owner"] = get(env("API_HOST")+"users/"+session.get("id")+"/", headers = headers).json()
     else:
-        sample = get(env("API_HOST")+"samples/"+id+"/", params = {"format": "json"}, headers = headers).json()
-        # pos = sample["location_coords"].split(" ")
-        # sample["location_coords"] = [float(pos[2].replace(")","")), float(pos[1].replace("(",""))]
+        sample = get(env("API_HOST")+"samples/"+id+"/", params={"format": "json"}, headers = headers).json()
         sample["references"] = [r for r in sample["references"]]
 
-    #get all the other data
+    # get all the other data
     regions = get(env("API_HOST")+"regions/", params = {"page_size": 2000, "format": "json"}).json()["results"]
     minerals = get(env("API_HOST")+"minerals/", params = {"page_size": 200, "format": "json"}).json()["results"]
     rock_types = get(env("API_HOST")+"rock_types/", params = {"page_size": 40, "format": "json"}).json()["results"]
