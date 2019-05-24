@@ -319,11 +319,9 @@ def edit_sample(id):
     errors = []
     new = (id.lower() == "new")
 
-    #edit_sample.html is a form with mostly the right input names
+    # edit_sample.html is a form with mostly the right input names
     sample = dict(request.form)
     response_text = "" # have sample response text in case of a forbidden access (403) error
-    print "--- sample to add", sample
-    print "--------------------"
     if sample:
 
         # Fields are given as lists, we parse the dictionary keys to remove strings out of lists
@@ -340,8 +338,6 @@ def edit_sample(id):
         if "minerals" in sample:
             # For minerals, we need a dictionary with "id" key
             # key[:-1] to remove the underscore _ at the end
-            # for m_id in sample[key]:
-            #     sample[key[:-1]] = {"id": m_id}
             sample["minerals"] = [{"id": m_id, "amount": 1} for m_id in sample["minerals"]]
         else:
             sample["minerals"] = dict()  # make list of minerals empty
@@ -385,8 +381,6 @@ def edit_sample(id):
     metamorphic_grades = get(env("API_HOST")+"metamorphic_grades/", params = {"page_size": 30, "format": "json"}).json()["results"]
     metamorphic_regions = get(env("API_HOST")+"metamorphic_regions/", params = {"page_size": 240, "format": "json"}).json()["results"]
     countries = get(env("API_HOST")+"country_names/").json()["country_names"]
-
-    print ">>>>>>>>>>>>>>>>>>>>>" , get(env("API_HOST")+"samples/"+id+"/", params={"format": "json"}, headers = headers).json()
 
     return render_template("edit_sample.html",
         sample = sample,
