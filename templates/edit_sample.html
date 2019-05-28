@@ -28,7 +28,12 @@
         <tr>
           <td class="sample_label">Owner*</td>
           <td class="sample_value">
-            {% if sample.owner %}{{sample.owner.name}}{% endif %}
+            {% if sample.owner %}
+              {% if sample.owner.name %} {{sample.owner.name}}
+              {% else %}
+              {{sample.owner}}
+              {% endif %}
+            {% endif %}
           </td>
         </tr>
         <tr>
@@ -66,8 +71,8 @@
             <select name="rock_type_id" class="chosen-select" style="width:85%">
               <option></option>
               {% for r in rock_types %}
-                {% if sample.rock_type and r.name == sample.rock_type.name %}
-                <option value="{{ r.id }}" selected="selected">{{ r.name }}</option>
+                {% if sample.rock_type and r.name == sample.rock_type %}
+                <option value="{{ r.id }}" selected="selected">{{ sample.rock_type }}</option>
                 {% else %}
                 <option value="{{ r.id }}">{{ r.name }}</option>
                 {% endif %}
@@ -143,7 +148,7 @@
         <tr>
           <td class="sample_label">Region</td>
           <td class="sample_value">
-            <select multiple id="regions" name="regions" class="chosen-select" style="width:85%">
+            <select multiple id="regions" name="regions_" class="chosen-select" style="width:85%">
               <option hidden selected="selected"></option>
               {% for r in regions %}
                 {% if r.name in sample.regions %}
@@ -163,10 +168,10 @@
         <tr>
           <td class="sample_label">Metamorphic Regions</td>
           <td class="sample_value">
-            <select multiple name="metamorphic_region_ids" class="chosen-select" style="width:85%">
+            <select multiple name="metamorphic_region_ids_" class="chosen-select" style="width:85%">
               <option hidden selected="selected"></option>
               {% for m in metamorphic_regions %}
-                {% if m in sample.metamorphic_regions %}
+                {% if m.name in sample.metamorphic_regions %}
                 <option value="{{ m.id }}" selected="selected">{{ m.name }}</option>
                 {% else %}
                 <option value="{{ m.id }}">{{ m.name }}</option>
@@ -180,10 +185,10 @@
         <tr>
           <td class="sample_label">Metamorphic Grades</td>
           <td class="sample_value">
-            <select multiple name="metamorphic_grade_ids" class="chosen-select" style="width:85%">
+            <select multiple name="metamorphic_grade_ids_" class="chosen-select" style="width:85%">
               <option hidden selected="selected"></option>
               {% for m in metamorphic_grades %}
-                {% if m in sample.metamorphic_grades %}
+                {% if m.name in sample.metamorphic_grades %}
                 <option value="{{ m.id }}" selected="selected">{{ m.name }}</option>
                 {% else %}
                 <option value="{{ m.id }}">{{ m.name }}</option>
@@ -197,7 +202,7 @@
         <tr>
           <td class="sample_label">Publication References</td>
           <td class="sample_value">
-            <select multiple id="references" name="references" class="chosen-select" style="width:85%">
+            <select multiple id="references" name="references_" class="chosen-select" style="width:85%">
               <option></option>
               {% for r in references %}
                 {% if r.name in sample.references %}
@@ -230,21 +235,16 @@
           <td class="sample_label">Minerals</td>
           <td class="sample_value">
             <table id="minerals">
-              <thead>
-                <tr>
-                  <th> </th>
-                  <th> </th>
-                  <th>Amount</th>
-                </tr>
-              </thead>
               <tbody>
-              {% if sample.minerals %}{% for m in sample.minerals %}
-                <tr id="{{ m.name }}">
-                  <td><a href="#minerals" onclick="document.getElementById('minerals').deleteRow(document.getElementById('{{ m.name }}').rowIndex)">x</a></td>
-                  <td>&nbsp&nbsp{{ m.name }}&nbsp&nbsp</td>
-                  <td><input type="text" name="minerals_{{ m.id }}" value="{{ m.amount }}" style="text-align:right;width:65px"></td>
+              {% for m in minerals %}
+              {% if m.name in sample.minerals %}
+                <tr id="{{ m.id }}">
+                  <td><a href="#minerals" onclick="document.getElementById('minerals').deleteRow(document.getElementById('{{ m.id }}').rowIndex)">x</a></td>
+                  <td><input type="text" disabled name="mineral_name" value="{{ m.name }}" style="width:85%; padding-left: 4px;"></td>
+                  <td><input type="hidden" readonly name="minerals_" value="{{ m.id }}"></td>
                 </tr>
-              {% endfor %}{% endif %}
+              {% endif %}
+              {% endfor %}
               </tbody>
             </table>
             <select class="chosen-select" id="mineral_names" onchange="updateMinerals()">
@@ -352,15 +352,23 @@ function updateMinerals() {
   var remove=row.insertCell(-1);
   var name=row.insertCell(-1);
   remove.innerHTML='<a href="#minerals" onclick="document.getElementById(\'minerals\').deleteRow(document.getElementById(\''+n+'\').rowIndex)">x</a>'
-  name.innerHTML='&nbsp&nbsp'+n+'&nbsp&nbsp';
 
-  var cell=row.insertCell(-1);
   var input=document.createElement("input");
   input.type="text";
-  input.name="minerals_"+id;
-  input.style.textAlign="right";
-  input.style.width="65px";
-  cell.appendChild(input);
+  input.name="mineral_name";
+  input.style.textAlign="left";
+  input.style.width="85%";
+  input.style.paddingLeft="4px";
+  input.style.backgroundColor="#55BB45";
+  input.value=n;
+  input.disabled="True";
+  name.appendChild(input);
+
+  var hidden=document.createElement("input");
+  hidden.type="hidden";
+  hidden.name="minerals_";
+  hidden.value=id;
+  name.appendChild(hidden);
 
   mineral.selectedIndex=0;
 }

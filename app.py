@@ -319,22 +319,35 @@ def edit_sample(id):
     errors = []
     new = (id.lower() == "new")
 
-    #edit_sample.html is a form with mostly the right input names
+    # edit_sample.html is a form with mostly the right input names
     sample = dict(request.form)
     response_text = "" # have sample response text in case of a forbidden access (403) error
     if sample:
-        #minerals are named by id, make it into a nested list of dictionaries
-        sample["minerals"] = []
-        for key in sample.keys():
-            if key[:9] == "minerals_":
-                sample["minerals"].append({"id": key[9:], "amount": sample[key][0]})
-                del sample[key]
-            elif key[-1] != "s" and sample[key]:
-                sample[key] = sample[key][0]
-            elif key[-1] == "s":
-                sample[key] = filter(lambda k: k != "", sample[key])
 
-        if not sample["collection_date"]:
+        # Fields are given as lists, we parse the dictionary keys to remove strings out of lists
+        # fields that end in _ are kept as lists, e.g., minerals_
+        for key in sample.keys():
+            if key[-1] != "_":
+                sample[key] = sample[key][0]
+            else:
+                # removes the last _ from list fields, removes empty fields, if any
+                sample[key[:-1]] = [s for s in sample[key] if s != ""]
+                sample.pop(key, None)
+
+        # Handle list of minerals
+        if "minerals" in sample:
+            # For minerals, we need a dictionary with "id" key
+            # key[:-1] to remove the underscore _ at the end
+            sample["minerals"] = [{"id": m_id, "amount": 1} for m_id in sample["minerals"]]
+        else:
+            sample["minerals"] = dict()  # make list of minerals empty
+
+        # Javascript toISOStrings sends a date as YYYY-MM-DDTHH:mm:ss.sssZ
+        # We grab only the date, leaving time out
+        if "collection_date" in sample:
+            sample["collection_date"] = sample["collection_date"].split("T")[0]  # split at the T and get the first part
+        # Remove empty date
+        else:
             del sample["collection_date"]
 
         if new:
@@ -345,24 +358,22 @@ def edit_sample(id):
             response = put(env("API_HOST")+"samples/"+id+"/", json = sample, headers = headers)
             print "old edit-sample headers", headers
             print "old edit-sample sample", sample
-        print "edit-sample status code:",response.status_code
-        print "edit-sample response:",response.json()
+        print "edit-sample status code:", response.status_code
+        print "edit-sample response:", response.json()
         if response.status_code < 300:
             return redirect(url_for("sample", id = response.json()["id"]))
         if response.status_code == 403:
             response_text = response.json()['detail']
         errors = response.json()
 
-    #get sample data and split point into lat/long
+    # get sample data and split point into lat/long
     if new:
         sample["owner"] = get(env("API_HOST")+"users/"+session.get("id")+"/", headers = headers).json()
     else:
-        sample = get(env("API_HOST")+"samples/"+id+"/", params = {"format": "json"}, headers = headers).json()
-        # pos = sample["location_coords"].split(" ")
-        # sample["location_coords"] = [float(pos[2].replace(")","")), float(pos[1].replace("(",""))]
+        sample = get(env("API_HOST")+"samples/"+id+"/", params={"format": "json"}, headers = headers).json()
         sample["references"] = [r for r in sample["references"]]
 
-    #get all the other data
+    # get all the other data
     regions = get(env("API_HOST")+"regions/", params = {"page_size": 2000, "format": "json"}).json()["results"]
     minerals = get(env("API_HOST")+"minerals/", params = {"page_size": 200, "format": "json"}).json()["results"]
     rock_types = get(env("API_HOST")+"rock_types/", params = {"page_size": 40, "format": "json"}).json()["results"]
