@@ -87,27 +87,42 @@
 </div>
 
 <hr>
-<div class="table-responsive">
+<div class="container">
   <h4>Sample Images</h4>
-  <table id="image_canvas" class="table">
-    <thead>
-      <tr>
-        <th>Thumbnail</td>
-        <th>Type</td>
-      </tr>
-    </thead>
-    <tbody>
-      {% if sample.images %}{% for image in sample.images %}
-      <tr id="thumb_row">
-        <td>
-          <a href = "{{ image.image.full_size }}"><img src="{{ image.image.thumbnail }}" alt="image not loaded"></a>
+    <div class = "row">
 
-        </td>
-        <td title="{{ image.image_type.comments }}">{{ image.image_type.image_type }}</td>
-      </tr>
+      {% if sample.images %} {%for image in sample.images %}
+      <div class="col-sm-2" style="width:20%;">
+        <div class="thumbnail">
+          <img src = "{{image.image.full_size}}" style="width:100%; height:200px">
+        </div>
+      </div>
       {% endfor %}{% endif %}
-    </tbody>
-  </table>
+
+    </div>
+
+
+<!--  <table id="image_canvas" class="table">-->
+<!--    <thead>-->
+<!--      <tr>-->
+<!--        <th>Thumbnail</td>-->
+<!--        <th>Type</td>-->
+<!--      </tr>-->
+<!--    </thead>-->
+<!--    <tbody>-->
+<!--    <tr id="thumb_cell">-->
+<!--      {% if sample.images %}{% for image in sample.images %}-->
+
+<!--        <td>-->
+<!--          <a href = "{{ image.image.full_size }}"><img src="{{ image.image.thumbnail }}" alt="image not loaded"></a>-->
+
+<!--        </td>-->
+<!--&lt;!&ndash;        <td title="{{ image.image_type.comments }}">{{ image.image_type.image_type }}</td>&ndash;&gt;-->
+
+<!--      {% endfor %}{% endif %}-->
+<!--      </tr>-->
+<!--    </tbody>-->
+<!--  </table>-->
 </div>
 
 <hr>
@@ -154,7 +169,7 @@ function chooseFile() {
 $(document).ready(function()
 {
   $('#subsampletable_canvas').dataTable();
-  $('#thumb_row td a').lightbox();
+  $('#thumb_cell td a').lightbox();
 });
 
 var map_lat = {{ sample.latitude }}; 

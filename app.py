@@ -321,7 +321,7 @@ def edit_sample(id):
 
     # edit_sample.html is a form with mostly the right input names
     sample = dict(request.form)
-    response_text = "" # have sample response text in case of a forbidden access (403) error
+    response_text = ""  # have sample response text in case of a forbidden access (403) error
     if sample:
 
         # Fields are given as lists, we parse the dictionary keys to remove strings out of lists
