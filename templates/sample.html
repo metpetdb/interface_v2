@@ -86,43 +86,94 @@
 
 </div>
 
+
 <hr>
 <div class="container">
   <h4>Sample Images</h4>
     <div class = "row">
-
+      <script>
+        var currentImage = 0;
+        var images = {};
+      </script>
       {% if sample.images %} {%for image in sample.images %}
-      <div class="col-sm-2" style="width:20%;">
-        <div class="thumbnail">
-          <img src = "{{image.image.full_size}}" style="width:100%; height:200px">
+      <script>
+        images[{{ loop.index }}] = {"url":"{{ image.image.full_size }}", "description": "{{ image.image_type.comments }}",
+        "type": "{{ image.image_type.image_type }}" };
+      </script>
+      <div class="col-sm-2" style="width:20%; ; height:250px; max-height:250px">
+        <div class="thumbnail" id="{{ loop.index }}">
+          <img src = "{{ image.image.full_size }}" style="width:100%; height:200px" class="sampleimg"
+               onclick="overlay_on({{loop.index}})">
+          <div class="caption" id="caption">
+            {{ image.image_type.image_type }}
+          </div>
         </div>
       </div>
-      {% endfor %}{% endif %}
+      {% endfor %}
+      {% endif %}
 
+</div>
+
+
+<style>
+.modal {
+  position: fixed; /* Sit on top of the page content */
+  display: none; /* Hidden by default */
+  width: 100%; /* Full width (cover the whole page) */
+  height: 100%; /* Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  cursor: pointer; /* Add a pointer on hover */
+}
+
+.disp-img{
+text-align: center;
+border-style: solid;
+border-width: thin;
+background-color: #e4e6e5;
+width: 100%;
+height: 100%;
+max-height: 100%;
+}
+
+.disp-img img
+{
+  width: auto;
+  height: 100%;
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.img-panel{
+position: fixed;
+text-align: center;
+top: 33%;
+left: 50%;
+margin-top: -15%;
+margin-left: -38%;
+width: 75%;
+height: 85%;
+max-height: 85%;
+background-color: #FFFFFF;
+}
+
+</style>
+
+<div class="modal" id="overlay" onclick="overlay_off()">
+
+    <div class="img-panel">
+      <div class="disp-img">
+        <img src = "" id="displayImage" >
+      </div>
     </div>
 
+</div>
 
-<!--  <table id="image_canvas" class="table">-->
-<!--    <thead>-->
-<!--      <tr>-->
-<!--        <th>Thumbnail</td>-->
-<!--        <th>Type</td>-->
-<!--      </tr>-->
-<!--    </thead>-->
-<!--    <tbody>-->
-<!--    <tr id="thumb_cell">-->
-<!--      {% if sample.images %}{% for image in sample.images %}-->
-
-<!--        <td>-->
-<!--          <a href = "{{ image.image.full_size }}"><img src="{{ image.image.thumbnail }}" alt="image not loaded"></a>-->
-
-<!--        </td>-->
-<!--&lt;!&ndash;        <td title="{{ image.image_type.comments }}">{{ image.image_type.image_type }}</td>&ndash;&gt;-->
-
-<!--      {% endfor %}{% endif %}-->
-<!--      </tr>-->
-<!--    </tbody>-->
-<!--  </table>-->
 </div>
 
 <hr>
@@ -161,15 +212,30 @@
 <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCGEQBqKb2zbQdXuO8c9QNkvvkoL20eNw4"></script>
 
 <script>
+
+//Image overlay functions
+function overlay_on(e){
+  document.getElementById("overlay").style.display = "block";
+  currentImage = images[e];
+  document.getElementById("displayImage").src = currentImage["url"];
+}
+
+function overlay_off(){
+  document.getElementById("overlay").style.display = "none";
+}
+
+
+//$('.thumbnail').click(overlay_on);
+
+
 function chooseFile() {
       $("#fileInput").click();
 }
 
-
 $(document).ready(function()
 {
-  $('#subsampletable_canvas').dataTable();
-  $('#thumb_cell td a').lightbox();
+ // $('#subsampletable_canvas').dataTable();
+ //  $('#thumb_cell td a').lightbox();
 });
 
 var map_lat = {{ sample.latitude }}; 
