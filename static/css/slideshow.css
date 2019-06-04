@@ -1,0 +1,165 @@
+.modal {
+  position: fixed; /* Sit on top of the page content */
+  display: none; /* Hidden by default */
+  width: 100%; /* Full width (cover the whole page) */
+  height: 100%; /* Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+}
+
+.top-box {
+  background-color: #e4e6e5;
+  width: 100%;
+  height: 75%;
+  max-height: 75%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.bottom-box {
+  display: flex;
+  flex-direction: row;
+  padding: 5px;
+  background-color: #EAEAEA;
+  height:25%;
+  justify-content: space-around;
+}
+.img-info {
+    display: flex;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+.img-panel{
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 33%;
+  left: 50%;
+  margin-top: -15%;
+  margin-left: -45%;
+  width: 90%;
+  height: 90%;
+  max-height: 90%;
+  background-color: #FFFFFF;
+  border-width: thin;
+  border-style: groove;
+}
+
+
+.top-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  background-color:  #EAEAEA;
+  padding-right: 10px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+
+}
+
+.top-row i{
+  font-size: 25px;
+}
+
+.top-row i:hover{
+  filter: invert(100%);
+}
+
+
+.img-container{
+  max-width: 90%;
+  max-height: 90%;
+  width: 80%;
+  min-width: 25%;
+  min-height: 25%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content:center;
+}
+
+.img-container img {
+  display: block;
+  object-fit: fill;
+  width: auto;
+  height: auto;
+
+  border-style: groove;
+  border-width: thin;
+
+  max-width: 80%;
+  margin-left: 2%;
+  margin-right: 2%;
+  background-color:  #696969;
+}
+
+.arrow-box {
+  width: 40px;
+  height: 50px;
+  background-color: #C0C0C0;
+  border-style: groove;
+  border-width: thin;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+.arrow-box p {
+  font-size: 150%;
+  font-family: "Arial";
+  font-weight: bold;
+}
+
+.arrow-box:hover{
+  transform: scale(1.1);
+  background-color: #404040;
+  border-width: 0;
+}
+
+.img-grid {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-center: stretch;
+}
+
+
+.img-card {
+  width: 20%;
+  height: 240px;
+  max-height: 240px;
+}
+
+
+.thumbnail {
+    width: 20%;
+    cursor: pointer;
+    transition: all .2s;
+    margin: 0 auto;
+    background-color: #EAEAEA;
+}
+
+
+.thumbnail img {
+  display: block;
+  object-fit: fill;
+
+}
+
+.thumbnail:hover{
+  transform: scale(1.25);
+}
+
+
+.info-box{
+
+}

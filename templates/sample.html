@@ -88,31 +88,6 @@
 
 
 <hr>
-<div class="container">
-  <h4>Sample Images</h4>
-    <div class = "row">
-      <script>
-        var currentImage = 0;
-        var images = {};
-      </script>
-      {% if sample.images %} {%for image in sample.images %}
-      <script>
-        images[{{ loop.index }}] = {"url":"{{ image.image.full_size }}", "description": "{{ image.image_type.comments }}",
-        "type": "{{ image.image_type.image_type }}" };
-      </script>
-      <div class="col-sm-2" style="width:20%; ; height:250px; max-height:250px">
-        <div class="thumbnail" id="{{ loop.index }}">
-          <img src = "{{ image.image.full_size }}" style="width:100%; height:200px" class="sampleimg"
-               onclick="overlay_on({{loop.index}})">
-          <div class="caption" id="caption">
-            {{ image.image_type.image_type }}
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-      {% endif %}
-
-</div>
 
 
 <style>
@@ -127,54 +102,219 @@
   bottom: 0;
   background-color: rgba(0,0,0,0.5); /* Black background with opacity */
   z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
-  cursor: pointer; /* Add a pointer on hover */
 }
 
-.disp-img{
-text-align: center;
-border-style: solid;
-border-width: thin;
-background-color: #e4e6e5;
-width: 100%;
-height: 100%;
-max-height: 100%;
+.top-box {
+  background-color: #e4e6e5;
+  width: 100%;
+  height: 75%;
+  max-height: 75%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-.disp-img img
-{
-  width: auto;
-  height: 100%;
-  max-height: 100%;
-  max-width: 100%;
-  object-fit: contain;
+.bottom-box {
+  display: flex;
+  flex-direction: row;
+  padding: 5px;
+  background-color: #EAEAEA;
+  height:25%;
+  justify-content: space-around;
+}
+.img-info {
+    display: flex;
+    justify-content: flex-start;
+    align-items: stretch;
 }
 
 .img-panel{
-position: fixed;
-text-align: center;
-top: 33%;
-left: 50%;
-margin-top: -15%;
-margin-left: -38%;
-width: 75%;
-height: 85%;
-max-height: 85%;
-background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 33%;
+  left: 50%;
+  margin-top: -15%;
+  margin-left: -45%;
+  width: 90%;
+  height: 90%;
+  max-height: 90%;
+  background-color: #FFFFFF;
+  border-width: thin;
+  border-style: groove;
+}
+
+
+.top-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  background-color:  #EAEAEA;
+  padding-right: 10px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+
+}
+
+.top-row i{
+  font-size: 25px;
+}
+
+.top-row i:hover{
+  filter: invert(100%);
+}
+
+
+.img-container{
+  max-width: 90%;
+  max-height: 90%;
+  width: 80%;
+  min-width: 25%;
+  min-height: 25%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content:center;
+}
+
+.img-container img {
+  display: block;
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+
+  border-style: groove;
+  border-width: thin;
+
+  max-width: 80%;
+  margin-left: 2%;
+  margin-right: 2%;
+  background-color:  #696969;
+}
+
+.arrow-box {
+  width: 40px;
+  height: 50px;
+  background-color: #C0C0C0;
+  border-style: groove;
+  border-width: thin;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+.arrow-box p {
+  font-size: 150%;
+  font-family: "Arial";
+  font-weight: bold;
+}
+
+.arrow-box:hover{
+  transform: scale(1.1);
+  background-color: #404040;
+  border-width: 0;
+}
+
+.img-grid {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-center: stretch;
+}
+
+
+.img-card {
+  width: 20%;
+  height: 240px;
+  max-height: 240px;
+}
+
+
+.thumbnail {
+    width: 20%;
+    cursor: pointer;
+    transition: all .2s;
+    margin: 0 auto;
+    background-color: #EAEAEA;
+}
+
+
+.thumbnail img {
+  display: block;
+  object-fit: fill;
+
+}
+
+.thumbnail:hover{
+  transform: scale(1.25);
+}
+
+
+.info-box{
+
 }
 
 </style>
 
-<div class="modal" id="overlay" onclick="overlay_off()">
-
-    <div class="img-panel">
-      <div class="disp-img">
-        <img src = "" id="displayImage" >
+<div class="container">
+  <h4>Sample Images</h4>
+    <div class="img-grid">
+      <script>
+        var currentImage = 0;
+        var images = new Array();
+      </script>
+      {% if sample.images %} {%for image in sample.images %}
+      <script>
+        images.push({"url":"{{ image.image.full_size }}", "description": "{{ image.image_type.comments }}",
+        "type": "{{ image.image_type.image_type }}" });
+      </script>
+        <div class="thumbnail" id="{{ loop.index-1 }}">
+          <img src = "{{ image.image.full_size }}" style="width:100%; height:200px" class="sampleimg"
+               onclick="overlay_on({{loop.index-1}})">
       </div>
+      {% endfor %}
+      {% endif %}
+
+  </div>
+</div>
+
+
+<div class="modal" id="overlay" >
+    <div class="img-panel" id="imagePanel">
+      <div class="top-row">
+        <i class="fa fa-window-close" onclick="overlay_off()"></i>
+      </div>
+      <div class="top-box">
+
+        <div class="img-container" >
+            <div class="arrow-box" id="btnPrevImage" onclick="previousImage()">
+              <i class="fa fa-angle-left"></i>
+            </div>
+
+            <img src = "" id="displayImage">
+
+            <div class="arrow-box" onclick="nextImage()">
+              <i class="fa fa-angle-right" id="btnNextImage"></i>
+            </div>
+
+        </div>
+        <div id="imageTypeContent">
+          <p id="imageTypeText">Image Type</p>
+        </div>
+
+      </div>
+      <div class="bottom-box">
+        <div class="img-info">
+          <b>Comments</b>
+        </div>
+      </div>
+
     </div>
-
 </div>
 
-</div>
 
 <hr>
 <h4>Subsamples{% if auth_token %}<span style="float:right"><a href="{{ url_for('edit_subsample', id='new')}}?sample_id={{ sample.id }}">Add Subsample</a></span>{% endif %}</h4>
@@ -215,17 +355,41 @@ background-color: #FFFFFF;
 
 //Image overlay functions
 function overlay_on(e){
-  document.getElementById("overlay").style.display = "block";
-  currentImage = images[e];
-  document.getElementById("displayImage").src = currentImage["url"];
+  var overlay = document.getElementById("overlay").style.display = "block";
+  currentImage = e;
+  setCurrentImage(currentImage);
 }
+
+
+function setCurrentImage(currentImage){
+  document.getElementById("displayImage").src = images[currentImage]["url"];
+  document.getElementById("imageTypeText").innerHTML = images[currentImage]["type"];
+}
+
+function nextImage(){
+  currentImage = (currentImage+1) % images.length;
+  setCurrentImage(currentImage);
+}
+
+function previousImage(){
+  currentImage = currentImage - 1;
+  if (currentImage < 0){
+    currentImage = images.length-1;
+  }
+  setCurrentImage(currentImage);
+}
+
 
 function overlay_off(){
   document.getElementById("overlay").style.display = "none";
 }
 
 
-//$('.thumbnail').click(overlay_on);
+function handleKey(e)
+{
+  alert("what");
+  alert(e.which);
+}
 
 
 function chooseFile() {
@@ -234,8 +398,7 @@ function chooseFile() {
 
 $(document).ready(function()
 {
- // $('#subsampletable_canvas').dataTable();
- //  $('#thumb_cell td a').lightbox();
+
 });
 
 var map_lat = {{ sample.latitude }}; 
@@ -271,5 +434,7 @@ function initialize()
 }
 google.maps.event.addDomListener(window, 'load', initialize);
 </script>
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
 
 {% endblock %}
