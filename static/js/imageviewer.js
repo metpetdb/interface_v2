@@ -1,9 +1,5 @@
 var currentImage = 0;
 var images = new Array();
-var overlay = document.getElementById('overlay');
-var imagePanel = document.getElementById('imagePanel');
-var topBox = document.getElementById("topBox");
-var imageContainer = document.getElementById("imageContainer");
 
 // =========================================
 //Image overlay functions
@@ -46,6 +42,13 @@ window.onclick = function(event)
     overlay_off();
   }
 }
+
+$(document).ready(function() {
+    var overlay = document.getElementById('overlay');
+    var imagePanel = document.getElementById('imagePanel');
+    var topBox = document.getElementById("topBox");
+    var imageContainer = document.getElementById("imageContainer");
+});
 
 
 // END OF OVERLAY FUNCTIONS
