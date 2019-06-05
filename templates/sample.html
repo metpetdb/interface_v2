@@ -118,29 +118,28 @@
     <div class="img-panel" id="imagePanel">
 
 
+        <div class="arrow-box" id="btnPrevImage" onclick="previousImage()">
+              <i class="fa fa-angle-left"></i>
+        </div>
       <div class="top-box" id="topBox">
+
         <div class="top-row">
           <i class="fa fa-window-close" onclick="overlay_off()"></i>
-
         </div>
 
         <div id="imageTypeContent" class="imageTypeContainer">
             <p id="imageTypeText">Image Type</p>
         </div>
 
+
         <div class="img-container" id="imageContainer">
-            <div class="arrow-box" id="btnPrevImage" onclick="previousImage()">
-              <i class="fa fa-angle-left"></i>
-            </div>
-
             <img src = "" id="displayImage">
-
-            <div class="arrow-box" onclick="nextImage()">
-              <i class="fa fa-angle-right" id="btnNextImage"></i>
-            </div>
-
         </div>
+
       </div>
+          <div class="arrow-box" onclick="nextImage()">
+              <i class="fa fa-angle-right" id="btnNextImage"></i>
+          </div>
 
     </div>
 </div>

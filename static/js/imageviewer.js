@@ -38,7 +38,7 @@ function overlay_off(){
 window.onclick = function(event)
 {
 
-  if (event.target == overlay || event.target == imageContainer){
+  if (event.target == overlay || event.target == imagePanel){
     overlay_off();
   }
 }
