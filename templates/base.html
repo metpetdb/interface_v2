@@ -36,10 +36,7 @@
     </script>
   </head>
 
-  <div id="load-page"></div>
-
   <body class="container">
-
     <header>
       <!-- <a href="http://metpetdb.com" id="test-page-banner">This is a test version </br> To use the live version, Click Here!</a> -->
       {% if auth_token %}<span style="float:right">Logged in as {{ name }}</span>{% endif %}
@@ -163,7 +160,7 @@
       // Wait for page to load before showing it
 
       $(window).load(function() {
-        $("#load-page").fadeOut(100);
+        $("body").fadeIn(100);
       });
 
     </script>
