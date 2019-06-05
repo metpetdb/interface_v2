@@ -387,9 +387,10 @@ input:checked + .slider:before {
 
 body
 {
+    display: none;
     font-family: 'Source Sans Pro', sans-serif;
     background-color: #e4e6e5;
-        padding-bottom: 40px;
+    padding-bottom: 40px;
 }
 
 #page_title
