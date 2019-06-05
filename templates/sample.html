@@ -225,8 +225,9 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: flex-start;
-    align-content: center;
+    justify-content:flex-start;
+    align-content:flex-start;
+    align-items:flex-start;
 }
 
 
@@ -240,7 +241,7 @@
 .thumbnail {
     width: 20%;
     cursor: pointer;
-    transition: transform 500ms ease-out 1s;
+    transition: transform 500ms;
     margin: 0 auto;
     background-color: #EAEAEA;
 }
@@ -295,14 +296,18 @@
 
 <div class="modal" id="overlay" >
     <div class="img-panel" id="imagePanel">
-      <div class="top-row">
-        <i class="fa fa-window-close" onclick="overlay_off()"></i>
-      </div>
 
-      <div class="top-box">
-      <div id="imageTypeContent" class="imageTypeContainer">
-          <p id="imageTypeText">Image Type</p>
-      </div>
+
+      <div class="top-box" id="topBox">
+        <div class="top-row">
+          <i class="fa fa-window-close" onclick="overlay_off()"></i>
+
+        </div>
+
+        <div id="imageTypeContent" class="imageTypeContainer">
+            <p id="imageTypeText">Image Type</p>
+        </div>
+
         <div class="img-container" >
             <div class="arrow-box" id="btnPrevImage" onclick="previousImage()">
               <i class="fa fa-angle-left"></i>
@@ -358,7 +363,9 @@
 
 <script>
 
+// =========================================
 //Image overlay functions
+
 function overlay_on(e){
   var overlay = document.getElementById("overlay").style.display = "block";
   currentImage = e;
@@ -393,10 +400,17 @@ function overlay_off(){
 window.onclick = function(event)
 {
   var overlay = document.getElementById('overlay');
-  if (event.target == overlay){
+  var imagePanel = document.getElementById('imagePanel');
+  var topBox = document.getElementById("topBox");
+  if (event.target == overlay || event.target == imagePanel || event.target == topBox){
     overlay_off();
   }
 }
+
+
+// END OF OVERLAY FUNCTIONS
+// ===========================================
+
 
 function chooseFile() {
       $("#fileInput").click();
