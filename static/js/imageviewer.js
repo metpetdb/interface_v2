@@ -1,6 +1,5 @@
 var currentImage = 0;
 var images = new Array();
-
 // =========================================
 //Image overlay functions
 
@@ -41,6 +40,15 @@ window.onclick = function(event)
   if (event.target == overlay || event.target == imagePanel){
     overlay_off();
   }
+}
+
+window.onkeydown = keyDownHandler;
+
+function keyDownHandler(e){
+    var keycode = e.keyCode;
+    if (keycode == 27) overlay_off();
+    else if (overlay.style.display != "none" && keycode == 37)  previousImage();
+    else if (overlay.style.display != "none" && keycode == 39)  nextImage();
 }
 
 $(document).ready(function() {
