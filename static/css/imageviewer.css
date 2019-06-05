@@ -40,10 +40,7 @@
 
 .img-panel{
   display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  align-content: center;
+  flex-direction: column;
   position: fixed;
   width: 95%;
   height: 95%;

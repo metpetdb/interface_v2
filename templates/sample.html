@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 
+
+
 {% block title %}
+
+<script src="/static/js/jquery-2.1.1.min.js"></script>
+<script src="/static/js/imageviewer.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/css/imageviewer.css">
+
+
 <h4>
   Sample {{ sample.number }}
   <div style="height:0px;overflow:hidden">
@@ -14,6 +22,7 @@
 
 </h4>
 {% endblock %}
+
 
 {% block body %}
 <div class="table-responsive">
@@ -90,193 +99,10 @@
 <hr>
 
 
-<style>
-.modal {
-  position: fixed; /* Sit on top of the page content */
-  display: none; /* Hidden by default */
-  width: 100%; /* Full width (cover the whole page) */
-  height: 100%; /* Full height (cover the whole page) */
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0,0,0,0.75); /* Black background with opacity */
-  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
-}
-
-.top-box {
-  width: 100%;
-  height: 100%;
-  max-height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.bottom-box {
-  display: flex;
-  flex-direction: row;
-  padding: 5px;
-  background-color: #EAEAEA;
-  height:25%;
-  justify-content: space-around;
-}
-.img-info {
-    display: flex;
-    justify-content: flex-start;
-    align-items: stretch;
-}
-
-.img-panel{
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  top: 33%;
-  left: 50%;
-  margin-top: -15%;
-  margin-left: -45%;
-  width: 90%;
-  height: 90%;
-  max-height: 90%;
-}
-
-
-.top-row {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  max-width:100%;
-  width: 100%;
-
-}
-
-.top-row p{
-  color: #EAEAEA;
-  font-size: 25px;
-}
-
-.top-row i{
-  color: #C0C0C0;
-  font-size: 35px;
-}
-
-.top-row i:hover{
-  filter: invert(100%);
-  cursor: pointer;
-}
-
-
-.img-container{
-  max-width: 100%;
-  max-height: 90%;
-  width: 100%;
-  height: 100%;
-  min-width: 25%;
-  min-height: 25%;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content:center;
-  margin 0 auto;
-
-}
-
-.img-container img {
-  display: block;
-  object-fit: contain;
-  width: 100%;
-  height: 100%;
-
-  border-style: groove;
-  border-width: thin;
-
-  max-width: 80%;
-  margin-left: 2%;
-  margin-right: 2%;
-  background-color: 	#404040;
-
-}
-
-.arrow-box {
-  width: 40px;
-  height: 50px;
-  background-color: #C0C0C0;
-  border-style: groove;
-  border-width: thin;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-}
-
-.arrow-box:hover{
-  transform: scale(1.1);
-  background-color: #404040;
-  border-width: 0;
-  cursor: pointer;
-
-  i{
-    color: #EAEAEA;
-  }
-}
-
-.img-grid {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-content: center;
-}
-
-
-.img-card {
-  width: 20%;
-  height: 240px;
-  max-height: 240px;
-}
-
-
-.thumbnail {
-    width: 20%;
-    cursor: pointer;
-    transition: transform 500ms ease-out 1s;
-    margin: 0 auto;
-    background-color: #EAEAEA;
-}
-
-
-.thumbnail img {
-  display: block;
-  object-fit: fill;
-
-}
-
-.thumbnail:hover{
-  transform: scale(1.25);
-}
-
-
-.info-box{
-
-}
-
-.imageTypeContainer p{
-  font-size: 20px;
-  color: #EAEAEA;
-  background-color: #404040;
-  padding: 2px;
-}
-
-</style>
-
 <div class="container">
   <h4>Sample Images</h4>
     <div class="img-grid">
-      <script>
-        var currentImage = 0;
-        var images = new Array();
-      </script>
+
       {% if sample.images %} {%for image in sample.images %}
       <script>
         images.push({"url":"{{ image.image.full_size }}", "description": "{{ image.image_type.comments }}",
@@ -295,26 +121,48 @@
 
 <div class="modal" id="overlay" >
     <div class="img-panel" id="imagePanel">
-      <div class="top-row">
-        <i class="fa fa-window-close" onclick="overlay_off()"></i>
-      </div>
 
-      <div class="top-box">
-      <div id="imageTypeContent" class="imageTypeContainer">
-          <p id="imageTypeText">Image Type</p>
-      </div>
-        <div class="img-container" >
-            <div class="arrow-box" id="btnPrevImage" onclick="previousImage()">
+
+      <div class="top-box" id="topBox">
+
+
+        <div class="img-container" id="imageContainer">
+
+          <div class="arrow-box" id="btnPrevImage" onclick="previousImage()" style="left:0;">
               <i class="fa fa-angle-left"></i>
-            </div>
+          </div>
+
+          <div class="img-holder">
 
             <img src = "" id="displayImage">
 
-            <div class="arrow-box" onclick="nextImage()">
-              <i class="fa fa-angle-right" id="btnNextImage"></i>
+            <div class="arrow-box" onclick="nextImage()" style="right:0;">
+                <i class="fa fa-angle-right" id="btnNextImage"></i>
             </div>
 
+          </div>
+
+
+            <div class="img-info-container">
+
+              <div class="top-row">
+                <i class="fa fa-window-close" onclick="overlay_off()"></i>
+              </div>
+
+              <div id="imageTypeContent" class="imageTypeContainer">
+                  <h4>Image Type </h4>
+                  <p id="imageTypeText">Image Type</p>
+              </div>
+
+              <hr>
+
+              <div class="img-info-comments-container" id="imgComments">
+                <h4>Comments</h4>
+              </div>
+
+            </div>
         </div>
+
       </div>
 
     </div>
@@ -358,52 +206,17 @@
 
 <script>
 
-//Image overlay functions
-function overlay_on(e){
-  var overlay = document.getElementById("overlay").style.display = "block";
-  currentImage = e;
-  setCurrentImage(currentImage);
-}
-
-
-function setCurrentImage(currentImage){
-  document.getElementById("displayImage").src = images[currentImage]["url"];
-  document.getElementById("imageTypeText").innerHTML = images[currentImage]["type"];
-}
-
-function nextImage(){
-  currentImage = (currentImage+1) % images.length;
-  setCurrentImage(currentImage);
-}
-
-function previousImage(){
-  currentImage = currentImage - 1;
-  if (currentImage < 0){
-    currentImage = images.length-1;
-  }
-  setCurrentImage(currentImage);
-}
-
-
-function overlay_off(){
-  document.getElementById("overlay").style.display = "none";
-}
-
-
-window.onclick = function(event)
-{
-  var overlay = document.getElementById('overlay');
-  if (event.target == overlay){
-    overlay_off();
-  }
-}
-
 function chooseFile() {
       $("#fileInput").click();
 }
 
 $(document).ready(function()
 {
+
+});
+
+$(window).load( function() {
+
 
 });
 
