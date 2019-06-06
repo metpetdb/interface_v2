@@ -37,6 +37,10 @@
         <td class="sample_value">{% if sample.collection_date %}{{ sample.collection_date }}{% endif %}</td>
       </tr>
       <tr>
+        <td class="sample_label">Public Data</td>
+        <td class="sample_value">{% if sample.public_data %}Yes{% else %}No{% endif %}</td>
+      </tr>
+      <tr>
         <td class="sample_label">Rock Type</td>
         <td class="sample_value">{% if sample.rock_type %}{{ sample.rock_type }}{% endif %}</td>
       </tr>
