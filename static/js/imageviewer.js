@@ -4,7 +4,7 @@ var images = new Array();
 //Image overlay functions
 
 function overlay_on(e){
-  overlay.style.display = "block";
+  overlay.style.display = "flex";
   currentImage = e;
   setCurrentImage(currentImage);
 }
