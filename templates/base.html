@@ -36,6 +36,8 @@
     </script>
   </head>
 
+  <div id="load-page"></div>
+
   <body class="container">
     <header>
       <!-- <a href="http://metpetdb.com" id="test-page-banner">This is a test version </br> To use the live version, Click Here!</a> -->
@@ -160,7 +162,7 @@
       // Wait for page to load before showing it
 
       $(window).load(function() {
-        $("body").fadeIn(100);
+        $("#load-page").fadeOut(100);
       });
 
     </script>
