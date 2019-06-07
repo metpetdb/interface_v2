@@ -5,6 +5,7 @@
 {% block title %}
 
 <script src="/static/js/jquery-2.1.1.min.js"></script>
+<script src="/static/js/imagegrid.js"></script>
 <script src="/static/js/imageviewer.js"></script>
 <link rel="stylesheet" type="text/css" href="/static/css/imageviewer.css">
 
@@ -122,55 +123,8 @@
   </div>
 </div>
 
+<div id="includeImageViewer"></div>
 
-<div class="modal" id="overlay" >
-    <div class="img-panel" id="imagePanel">
-
-
-      <div class="top-box" id="topBox">
-
-
-        <div class="img-container" id="imageContainer">
-
-          <div class="arrow-box" id="btnPrevImage" onclick="previousImage()" style="left:0;">
-              <i class="fa fa-angle-left"></i>
-          </div>
-
-          <div class="img-holder">
-
-            <img src = "" id="displayImage">
-
-            <div class="arrow-box" onclick="nextImage()" style="right:0;">
-                <i class="fa fa-angle-right" id="btnNextImage"></i>
-            </div>
-
-          </div>
-
-
-            <div class="img-info-container">
-
-              <div class="top-row">
-                <i class="fa fa-window-close" onclick="overlay_off()"></i>
-              </div>
-
-              <div id="imageTypeContent" class="imageTypeContainer">
-                  <h4>Image Type </h4>
-                  <p id="imageTypeText">Image Type</p>
-              </div>
-
-              <hr>
-
-              <div class="img-info-comments-container" id="imgComments">
-                <h4>Comments</h4>
-              </div>
-
-            </div>
-        </div>
-
-      </div>
-
-    </div>
-</div>
 
 
 <hr>
@@ -209,6 +163,7 @@
 <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCGEQBqKb2zbQdXuO8c9QNkvvkoL20eNw4"></script>
 
 <script>
+
 
 function chooseFile() {
       $("#fileInput").click();

@@ -1,5 +1,4 @@
-var currentImage = 0;
-var images = new Array();
+
 // =========================================
 //Image overlay functions
 
@@ -37,7 +36,7 @@ function overlay_off(){
 window.onclick = function(event)
 {
 
-  if (event.target == overlay || event.target == imagePanel){
+  if (event.target == overlay){
     overlay_off();
   }
 }
@@ -51,12 +50,15 @@ function keyDownHandler(e){
     else if (overlay.style.display != "none" && keycode == 39)  nextImage();
 }
 
+$(function(){
+    $("#includeImageViewer").load("/static/includes/imageviewer.html");
+});
+
+
 $(document).ready(function() {
     var overlay = document.getElementById('overlay');
-    var imagePanel = document.getElementById('imagePanel');
-    var topBox = document.getElementById("topBox");
-    var imageContainer = document.getElementById("imageContainer");
 });
+
 
 
 // END OF OVERLAY FUNCTIONS
