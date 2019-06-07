@@ -7,6 +7,8 @@
 <script src="/static/js/jquery-2.1.1.min.js"></script>
 <script src="/static/js/imageviewer.js"></script>
 <link rel="stylesheet" type="text/css" href="/static/css/imageviewer.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+
 
 
 <h4>
@@ -104,7 +106,7 @@
 
 
 <div class="container">
-  <h4>Sample Images</h4>
+  <h4>Sample Images {% if sample.images %}({{ sample.images|length }}) {% endif %}</h4>
     <div class="img-grid">
 
       {% if sample.images %} {%for image in sample.images %}
@@ -258,6 +260,5 @@ function initialize()
 google.maps.event.addDomListener(window, 'load', initialize);
 </script>
 
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
 
 {% endblock %}
