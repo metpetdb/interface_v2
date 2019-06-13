@@ -58,6 +58,10 @@ $(document).ready(function() {
     var imageContainer = document.getElementById("imageContainer");
 });
 
+$(document).ready(function() {
+    $('#includeImageViewer').load('/static/includes/imageviewer.html');
+});
+
 
 // END OF OVERLAY FUNCTIONS
 // ===========================================
