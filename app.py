@@ -344,7 +344,7 @@ def edit_sample(id):
 
         # Javascript toISOStrings sends a date as YYYY-MM-DDTHH:mm:ss.sssZ
         # We grab only the date, leaving time out
-        if "collection_date" in sample:
+        if "collection_date" in sample and sample["collection_date"] != "":
             sample["collection_date"] = sample["collection_date"].split("T")[0]  # split at the T and get the first part
         # Remove empty date
         else:
