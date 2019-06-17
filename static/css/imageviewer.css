@@ -1,0 +1,182 @@
+.modal {
+  position: fixed; /* Sit on top of the page content */
+  display: none; /* Hidden by default */
+  width: 100%; /* Full width (cover the whole page) */
+  height: 100%; /* Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.75); /* Black background with opacity */
+  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  justify-content: center;
+  align-items: center;
+}
+
+.top-box {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+}
+
+.bottom-box {
+  display: flex;
+  flex-direction: row;
+  padding: 5px;
+  background-color: #EAEAEA;
+  height:25%;
+  justify-content: space-around;
+}
+.img-info {
+    display: flex;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+.img-panel{
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  width: 95%;
+  height: 95%;
+  max-height: 95%;
+}
+
+
+.top-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  max-width:100%;
+  width: 100%;
+
+}
+
+.top-row p{
+  color: #D0D0D0;
+  font-size: 25px;
+}
+
+.top-row i{
+  color: #444444;
+  font-size: 35px;
+}
+
+.top-row i:hover{
+  filter: invert(100%);
+  cursor: pointer;
+}
+
+
+.img-container{
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  min-width: 25%;
+  min-height: 25%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content:center;
+  margin 0 auto;
+  border-style: groove;
+  border-width: thin;
+  position: relative;
+
+}
+
+.img-holder{
+    max-width:80%;
+    width: 80%;
+    height:100%;
+    max-height:100%;
+    display:flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: 	#404040;
+}
+
+.img-holder img {
+  display: block;
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+
+
+}
+
+.arrow-box {
+  position: absolute;
+  z-index: 1;
+  width: 40px;
+  height: 50px;
+  background-color: #444444;
+  border-style: groove;
+  border-width: thin;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+.arrow-box  i{
+    font-size: 35px;
+    color: #EAEAEA;
+  }
+
+.arrow-box:hover{
+  filter: invert(100%);
+  cursor: pointer;
+}
+
+.img-grid {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.img-grid > *{
+    flex: 0 20%;
+}
+
+.thumbnail {
+    width: 18%;
+    max-width: 20%;
+    cursor: pointer;
+    transition: transform 500ms;
+    background-color: #EAEAEA;
+}
+
+
+.thumbnail img {
+  display: block;
+  object-fit: cover;
+
+}
+
+.thumbnail:hover{
+  transform: scale(1.25);
+}
+
+
+.img-info-container{
+    padding: 1%;
+    width: 20%;
+    height: 100%;
+    background-color: #EAEAEA;
+
+}
+
+.img-info-comments-container{
+
+}
+

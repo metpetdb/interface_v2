@@ -321,7 +321,7 @@ def edit_sample(id):
 
     # edit_sample.html is a form with mostly the right input names
     sample = dict(request.form)
-    response_text = "" # have sample response text in case of a forbidden access (403) error
+    response_text = ""  # have sample response text in case of a forbidden access (403) error
     if sample:
 
         # Fields are given as lists, we parse the dictionary keys to remove strings out of lists
@@ -344,7 +344,7 @@ def edit_sample(id):
 
         # Javascript toISOStrings sends a date as YYYY-MM-DDTHH:mm:ss.sssZ
         # We grab only the date, leaving time out
-        if "collection_date" in sample:
+        if "collection_date" in sample and sample["collection_date"] != "":
             sample["collection_date"] = sample["collection_date"].split("T")[0]  # split at the T and get the first part
         # Remove empty date
         else:

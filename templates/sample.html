@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 
+
+
 {% block title %}
+
+<script src="/static/js/jquery-2.1.1.min.js"></script>
+<script src="/static/js/imageviewer.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/css/imageviewer.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+
+
+
 <h4>
   Sample {{ sample.number }}
   <div style="height:0px;overflow:hidden">
@@ -15,6 +25,7 @@
 </h4>
 {% endblock %}
 
+
 {% block body %}
 <div class="table-responsive">
   <table id="sampleview_table" class="table">
@@ -26,6 +37,10 @@
       <tr>
         <td class="sample_label">Date Collected</td>
         <td class="sample_value">{% if sample.collection_date %}{{ sample.collection_date }}{% endif %}</td>
+      </tr>
+      <tr>
+        <td class="sample_label">Public Data</td>
+        <td class="sample_value">{% if sample.public_data %}Yes{% else %}No{% endif %}</td>
       </tr>
       <tr>
         <td class="sample_label">Rock Type</td>
@@ -86,29 +101,30 @@
 
 </div>
 
-<hr>
-<div class="table-responsive">
-  <h4>Sample Images</h4>
-  <table id="image_canvas" class="table">
-    <thead>
-      <tr>
-        <th>Thumbnail</td>
-        <th>Type</td>
-      </tr>
-    </thead>
-    <tbody>
-      {% if sample.images %}{% for image in sample.images %}
-      <tr id="thumb_row">
-        <td>
-          <a href = "{{ image.image.full_size }}"><img src="{{ image.image.thumbnail }}" alt="image not loaded"></a>
 
-        </td>
-        <td title="{{ image.image_type.comments }}">{{ image.image_type.image_type }}</td>
-      </tr>
-      {% endfor %}{% endif %}
-    </tbody>
-  </table>
+<hr>
+
+
+<div class="container">
+  <h4>Sample Images {% if sample.images %}({{ sample.images|length }}) {% endif %}</h4>
+    <div class="img-grid">
+
+      {% if sample.images %} {%for image in sample.images %}
+      <script>
+        images.push({"url":"{{ image.image.full_size }}", "description": "{{ image.image_type.comments }}",
+        "type": "{{ image.image_type.image_type }}" });
+      </script>
+        <div class="thumbnail" id="{{ loop.index-1 }}">
+          <img src = "{{ image.image.full_size }}" style="width:100%; height:200px" class="sampleimg"
+               onclick="overlay_on({{loop.index-1}})">
+      </div>
+      {% endfor %}
+      {% endif %}
+
+  </div>
 </div>
+
+<div id="includeImageViewer"></div>
 
 <hr>
 <h4>Subsamples{% if auth_token %}<span style="float:right"><a href="{{ url_for('edit_subsample', id='new')}}?sample_id={{ sample.id }}">Add Subsample</a></span>{% endif %}</h4>
@@ -146,15 +162,19 @@
 <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCGEQBqKb2zbQdXuO8c9QNkvvkoL20eNw4"></script>
 
 <script>
+
 function chooseFile() {
       $("#fileInput").click();
 }
 
-
 $(document).ready(function()
 {
-  $('#subsampletable_canvas').dataTable();
-  $('#thumb_row td a').lightbox();
+
+});
+
+$(window).load( function() {
+
+
 });
 
 var map_lat = {{ sample.latitude }}; 
@@ -190,5 +210,6 @@ function initialize()
 }
 google.maps.event.addDomListener(window, 'load', initialize);
 </script>
+
 
 {% endblock %}

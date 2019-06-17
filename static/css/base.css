@@ -1,3 +1,14 @@
+#load-page{
+    position: fixed; /* Sit on top of the page content */
+    width: 100%; /* Full width (cover the whole page) */
+    height: 100%; /* Full height (cover the whole page) */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e4e6e5;
+}
+
 #test-page-banner
 {
     display: block;
@@ -389,7 +400,7 @@ body
 {
     font-family: 'Source Sans Pro', sans-serif;
     background-color: #e4e6e5;
-        padding-bottom: 40px;
+    padding-bottom: 40px;
 }
 
 #page_title
